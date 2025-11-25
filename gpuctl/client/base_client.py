@@ -1,0 +1,36 @@
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+import os
+from typing import Optional
+
+
+class KubernetesClient:
+    """Kubernetes客户端基类"""
+
+    def __init__(self):
+        self._load_config()
+        self.core_v1 = client.CoreV1Api()
+        self.batch_v1 = client.BatchV1Api()
+        self.apps_v1 = client.AppsV1Api()
+        self.autoscaling_v1 = client.AutoscalingV1Api()
+
+    def _load_config(self):
+        """加载Kubernetes配置"""
+        try:
+            if os.getenv('KUBERNETES_SERVICE_HOST'):
+                config.load_incluster_config()
+            else:
+                config.load_kube_config()
+        except Exception as e:
+            raise RuntimeError(f"Failed to load Kubernetes config: {e}")
+
+    def handle_api_exception(self, e: ApiException, operation: str) -> None:
+        """处理API异常"""
+        if e.status == 401:
+            raise PermissionError(f"Authentication failed for {operation}")
+        elif e.status == 403:
+            raise PermissionError(f"Permission denied for {operation}")
+        elif e.status == 404:
+            raise FileNotFoundError(f"Resource not found for {operation}")
+        else:
+            raise RuntimeError(f"Kubernetes API error during {operation}: {e}")
