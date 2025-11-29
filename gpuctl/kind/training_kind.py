@@ -22,13 +22,13 @@ class TrainingKind:
 
         return {
             "job_id": result["name"],
-            "name": training_job.spec.job.name,
+            "name": training_job.job.name,
             "status": "created",
             "namespace": namespace,
             "resources": {
-                "gpu": training_job.spec.resources.accelerator_count,
-                "gpu_type": training_job.spec.resources.gpu_type,
-                "pool": training_job.spec.resources.pool
+                "gpu": training_job.resources.gpu,
+                "gpu_type": training_job.resources.gpu_type,
+                "pool": training_job.resources.pool
             }
         }
 

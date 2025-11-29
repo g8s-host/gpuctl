@@ -9,24 +9,22 @@ class NotebookBuilder(BaseBuilder):
     @classmethod
     def build_statefulset(cls, notebook_job: NotebookJob) -> client.V1StatefulSet:
         """构建K8s StatefulSet资源"""
-        spec = notebook_job.spec
-
         # 构建容器
-        container = cls.build_container_spec(spec.environment, spec.resources)
+        container = cls.build_container_spec(notebook_job.environment, notebook_job.resources)
 
         # 添加Notebook特定配置
         container.ports = [client.V1ContainerPort(container_port=8888)]
 
         # 构建Pod模板
         pod_spec_extras = {}
-        if spec.environment.image_pull_secret:
+        if notebook_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
-                client.V1LocalObjectReference(name=spec.environment.image_pull_secret)
+                client.V1LocalObjectReference(name=notebook_job.environment.image_pull_secret)
             ]
 
-        if spec.resources.pool:
+        if notebook_job.resources.pool:
             pod_spec_extras['node_selector'] = {
-                "gpuctl/pool": spec.resources.pool
+                "gpuctl/pool": notebook_job.resources.pool
             }
 
         template = cls.build_pod_template_spec(container, pod_spec_extras)
@@ -36,18 +34,18 @@ class NotebookBuilder(BaseBuilder):
             replicas=1,  # Notebook通常是单实例
             template=template,
             selector=client.V1LabelSelector(
-                match_labels={"app": f"notebook-{spec.job.name}"}
+                match_labels={"app": f"notebook-{notebook_job.job.name}"}
             ),
-            service_name=f"svc-{spec.job.name}"
+            service_name=f"svc-{notebook_job.job.name}"
         )
 
         # 构建StatefulSet元数据
         metadata = client.V1ObjectMeta(
-            name=f"notebook-{spec.job.name}",
+            name=f"notebook-{notebook_job.job.name}",
             labels={
                 "gpuctl/job-type": "notebook",
-                "gpuctl/priority": spec.job.priority,
-                "gpuctl/pool": spec.resources.pool or "default"
+                "gpuctl/priority": notebook_job.job.priority,
+                "gpuctl/pool": notebook_job.resources.pool or "default"
             }
         )
 
@@ -61,10 +59,8 @@ class NotebookBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, notebook_job: NotebookJob) -> client.V1Service:
         """构建K8s Service资源"""
-        spec = notebook_job.spec
-
         service_spec = client.V1ServiceSpec(
-            selector={"app": f"notebook-{spec.job.name}"},
+            selector={"app": f"notebook-{notebook_job.job.name}"},
             ports=[client.V1ServicePort(
                 port=8888,
                 target_port=8888
@@ -73,10 +69,10 @@ class NotebookBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"svc-{spec.job.name}",
+            name=f"svc-{notebook_job.job.name}",
             labels={
                 "gpuctl/job-type": "notebook",
-                "gpuctl/pool": spec.resources.pool or "default"
+                "gpuctl/pool": notebook_job.resources.pool or "default"
             }
         )
 

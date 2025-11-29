@@ -9,41 +9,39 @@ class InferenceBuilder(BaseBuilder):
     @classmethod
     def build_deployment(cls, inference_job: InferenceJob) -> client.V1Deployment:
         """构建K8s Deployment资源"""
-        spec = inference_job.spec
-
         # 构建容器
-        container = cls.build_container_spec(spec.environment, spec.resources)
+        container = cls.build_container_spec(inference_job.environment, inference_job.resources)
 
         # 构建Pod模板
         pod_spec_extras = {}
-        if spec.environment.image_pull_secret:
+        if inference_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
-                client.V1LocalObjectReference(name=spec.environment.image_pull_secret)
+                client.V1LocalObjectReference(name=inference_job.environment.image_pull_secret)
             ]
 
-        if spec.resources.pool:
+        if inference_job.resources.pool:
             pod_spec_extras['node_selector'] = {
-                "gpuctl/pool": spec.resources.pool
+                "gpuctl/pool": inference_job.resources.pool
             }
 
         template = cls.build_pod_template_spec(container, pod_spec_extras)
 
         # 构建Deployment规格
         deployment_spec = client.V1DeploymentSpec(
-            replicas=spec.service.replicas,
+            replicas=inference_job.service.replicas,
             template=template,
             selector=client.V1LabelSelector(
-                match_labels={"app": f"inference-{spec.job.name}"}
+                match_labels={"app": f"inference-{inference_job.job.name}"}
             )
         )
 
         # 构建Deployment元数据
         metadata = client.V1ObjectMeta(
-            name=f"inference-{spec.job.name}",
+            name=f"inference-{inference_job.job.name}",
             labels={
                 "gpuctl/job-type": "inference",
-                "gpuctl/priority": spec.job.priority,
-                "gpuctl/pool": spec.resources.pool or "default"
+                "gpuctl/priority": inference_job.job.priority,
+                "gpuctl/pool": inference_job.resources.pool or "default"
             }
         )
 
@@ -57,22 +55,20 @@ class InferenceBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, inference_job: InferenceJob) -> client.V1Service:
         """构建K8s Service资源"""
-        spec = inference_job.spec
-
         service_spec = client.V1ServiceSpec(
-            selector={"app": f"inference-{spec.job.name}"},
+            selector={"app": f"inference-{inference_job.job.name}"},
             ports=[client.V1ServicePort(
-                port=spec.service.port,
-                target_port=spec.service.port
+                port=inference_job.service.port,
+                target_port=inference_job.service.port
             )],
             type="ClusterIP"  # 可以根据需要调整为NodePort或LoadBalancer
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"svc-{spec.job.name}",
+            name=f"svc-{inference_job.job.name}",
             labels={
                 "gpuctl/job-type": "inference",
-                "gpuctl/pool": spec.resources.pool or "default"
+                "gpuctl/pool": inference_job.resources.pool or "default"
             }
         )
 
@@ -86,24 +82,22 @@ class InferenceBuilder(BaseBuilder):
     @classmethod
     def build_hpa(cls, inference_job: InferenceJob) -> client.V1HorizontalPodAutoscaler:
         """构建水平Pod自动扩缩容资源"""
-        spec = inference_job.spec
-
         hpa_spec = client.V1HorizontalPodAutoscalerSpec(
             scale_target_ref=client.V1CrossVersionObjectReference(
                 kind="Deployment",
-                name=f"inference-{spec.job.name}",
+                name=f"inference-{inference_job.job.name}",
                 api_version="apps/v1"
             ),
-            min_replicas=spec.autoscaling.min_replicas,
-            max_replicas=spec.autoscaling.max_replicas,
-            target_cpu_utilization_percentage=spec.autoscaling.target_gpu_utilization
+            min_replicas=inference_job.autoscaling.min_replicas,
+            max_replicas=inference_job.autoscaling.max_replicas,
+            target_cpu_utilization_percentage=inference_job.autoscaling.target_gpu_utilization
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"hpa-{spec.job.name}",
+            name=f"hpa-{inference_job.job.name}",
             labels={
                 "gpuctl/job-type": "inference",
-                "gpuctl/pool": spec.resources.pool or "default"
+                "gpuctl/pool": inference_job.resources.pool or "default"
             }
         )
 

@@ -7,16 +7,12 @@ class NodeConfig(BaseModel):
     gpu_type: GPUType = Field(..., alias="gpu-type")
 
 
-class PoolSpec(BaseModel):
+class ResourcePool(BaseModel):
+    kind: str = "pool"
+    version: str = "v0.1"
     name: str
     description: Optional[str] = None
     nodes: Dict[str, NodeConfig] = Field(default_factory=dict)
 
     class Config:
         allow_population_by_field_name = True
-
-
-class ResourcePool(BaseModel):
-    kind: str = "pool"
-    version: str = "v0.1"
-    spec: PoolSpec

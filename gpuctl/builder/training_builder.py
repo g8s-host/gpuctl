@@ -9,21 +9,19 @@ class TrainingBuilder(BaseBuilder):
     @classmethod
     def build_job(cls, training_job: TrainingJob) -> client.V1Job:
         """构建K8s Job资源"""
-        spec = training_job.spec
-
         # 构建容器
-        container = cls.build_container_spec(spec.environment, spec.resources)
+        container = cls.build_container_spec(training_job.environment, training_job.resources)
 
         # 构建Pod模板
         pod_spec_extras = {}
-        if spec.environment.image_pull_secret:
+        if training_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
-                client.V1LocalObjectReference(name=spec.environment.image_pull_secret)
+                client.V1LocalObjectReference(name=training_job.environment.image_pull_secret)
             ]
 
-        if spec.resources.pool:
+        if training_job.resources.pool:
             pod_spec_extras['node_selector'] = {
-                "gpuctl/pool": spec.resources.pool
+                "gpuctl/pool": training_job.resources.pool
             }
 
         template = cls.build_pod_template_spec(container, pod_spec_extras)
@@ -37,11 +35,11 @@ class TrainingBuilder(BaseBuilder):
 
         # 构建Job元数据
         metadata = client.V1ObjectMeta(
-            name=f"{spec.job.name}-{spec.job.priority}",
+            name=f"{training_job.job.name}-{training_job.job.priority}",
             labels={
                 "gpuctl/job-type": "training",
-                "gpuctl/priority": spec.job.priority,
-                "gpuctl/pool": spec.resources.pool or "default"
+                "gpuctl/priority": training_job.job.priority,
+                "gpuctl/pool": training_job.resources.pool or "default"
             }
         )
 

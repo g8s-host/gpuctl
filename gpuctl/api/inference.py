@@ -26,7 +26,9 @@ class AutoScalingConfig(BaseModel):
     target_memory_utilization: Optional[int] = Field(default=None, ge=1, le=100, alias="targetMemoryUtilization")
 
 
-class InferenceJobSpec(BaseModel):
+class InferenceJob(BaseModel):
+    kind: str = "inference"
+    version: str = "v0.1"
     job: JobMetadata
     model: Optional[ModelConfig] = None
     environment: EnvironmentConfig
@@ -36,9 +38,3 @@ class InferenceJobSpec(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-
-
-class InferenceJob(BaseModel):
-    kind: str = "inference"
-    version: str = "v0.1"
-    spec: InferenceJobSpec

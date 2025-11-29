@@ -19,7 +19,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
 ]
-
 dependencies = [
     "kubernetes>=24.2.0",
     "PyYAML>=6.0",
@@ -30,14 +29,8 @@ dev = ["pytest", "black", "flake8"]
 api = ["fastapi", "uvicorn"]
 
 [project.scripts]
-# 直接为每个命令创建独立的入口点
-gpuctl-create = "gpuctl.cli.create:main"
-gpuctl-get = "gpuctl.cli.get:main"
-gpuctl-delete = "gpuctl.cli.delete:main"
-gpuctl-logs = "gpuctl.cli.logs:main"
-
-# 主命令（指向create，作为默认命令）
-gpuctl = "gpuctl.cli.create:main"
+# 主命令入口点，指向gpuctl包中的cli模块
+gpuctl = "gpuctl.cli.main:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

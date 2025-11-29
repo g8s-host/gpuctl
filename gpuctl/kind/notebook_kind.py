@@ -24,13 +24,13 @@ class NotebookKind:
 
         return {
             "job_id": statefulset_result["name"],
-            "name": notebook_job.spec.job.name,
+            "name": notebook_job.job.name,
             "status": "created",
             "namespace": namespace,
             "resources": {
-                "gpu": notebook_job.spec.resources.accelerator_count,
-                "gpu_type": notebook_job.spec.resources.gpu_type,
-                "pool": notebook_job.spec.resources.pool,
+                "gpu": notebook_job.resources.gpu,
+                "gpu_type": notebook_job.resources.gpu_type,
+                "pool": notebook_job.resources.pool,
                 "service_port": 8888  # Jupyter默认端口
             },
             "access_url": self._build_access_url(service_result, notebook_job)

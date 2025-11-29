@@ -24,20 +24,20 @@ class InferenceKind:
 
         # 如果启用了自动扩缩容，创建HPA
         hpa_result = None
-        if inference_job.spec.autoscaling.enabled:
+        if inference_job.autoscaling.enabled:
             hpa = self.builder.build_hpa(inference_job)
             hpa_result = self.client.create_hpa(hpa, namespace)
 
         return {
             "job_id": deployment_result["name"],
-            "name": inference_job.spec.job.name,
+            "name": inference_job.job.name,
             "status": "created",
             "namespace": namespace,
             "resources": {
-                "gpu": inference_job.spec.resources.accelerator_count,
-                "gpu_type": inference_job.spec.resources.gpu_type,
-                "pool": inference_job.spec.resources.pool,
-                "service_port": inference_job.spec.service.port
+                "gpu": inference_job.resources.gpu,
+                "gpu_type": inference_job.resources.gpu_type,
+                "pool": inference_job.resources.pool,
+                "service_port": inference_job.service.port
             },
             "k8s_resources": {
                 "deployment": deployment_result["name"],

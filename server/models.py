@@ -1,121 +1,63 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
-from enum import Enum
 
-class JobStatus(str, Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
-    PAUSED = "paused"
-    TERMINATING = "terminating"
 
-class JobKind(str, Enum):
-    TRAINING = "training"
-    INFERENCE = "inference"
-    NOTEBOOK = "notebook"
-
+# API数据模型
 class JobCreateRequest(BaseModel):
     yamlContent: str
     dryRun: bool = False
 
+
 class JobResponse(BaseModel):
     jobId: str
     name: str
-    kind: JobKind
-    status: JobStatus
+    kind: str
+    status: str
     createdAt: Optional[datetime] = None
     message: Optional[str] = None
 
-class JobListItem(BaseModel):
-    jobId: str
-    name: str
-    kind: JobKind
-    pool: str
-    status: JobStatus
-    gpu: int
-    gpuType: Optional[str] = None
-    startedAt: Optional[datetime] = None
-    progress: Optional[float] = None
 
 class JobListResponse(BaseModel):
     total: int
-    items: List[JobListItem]
+    items: List[Dict[str, Any]]
 
-class JobDetailResponse(BaseModel):
-    jobId: str
-    name: str
-    kind: JobKind
-    version: str
-    yamlContent: str
-    status: JobStatus
-    pool: str
-    resources: Dict[str, Any]
-    metrics: Dict[str, Any]
-    createdAt: Optional[datetime] = None
-    startedAt: Optional[datetime] = None
-    k8sResources: Dict[str, Any]
 
 class BatchCreateRequest(BaseModel):
     yamlContents: List[str]
 
-class BatchCreateItem(BaseModel):
-    jobId: str
-    name: str
-
-class BatchCreateFailedItem(BaseModel):
-    index: int
-    error: str
 
 class BatchCreateResponse(BaseModel):
-    success: List[BatchCreateItem]
-    failed: List[BatchCreateFailedItem]
+    success: List[Dict[str, str]]
+    failed: List[Dict[str, str]]
+
 
 class PoolResponse(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: Optional[str]
     gpuTotal: int
     gpuUsed: int
     gpuFree: int
     gpuType: List[str]
     status: str
 
-class PoolDetailResponse(BaseModel):
+
+class PoolCreateRequest(BaseModel):
     name: str
     description: Optional[str] = None
-    nodes: List[str]
-    gpuTotal: int
-    gpuUsed: int
-    gpuFree: int
-    gpuType: Dict[str, int]
-    quota: Dict[str, Any]
-    jobs: List[Dict[str, Any]]
+    nodes: List[str] = []
+    gpuType: Optional[List[str]] = None
+    quota: Optional[Dict[str, Any]] = None
 
-class LogResponse(BaseModel):
-    logs: List[str]
-    lastTimestamp: Optional[datetime] = None
 
-class MetricDataPoint(BaseModel):
-    timestamp: str
-    value: float
+class PoolUpdateRequest(BaseModel):
+    description: Optional[str] = None
+    nodes: Optional[List[str]] = None
+    gpuType: Optional[List[str]] = None
+    quota: Optional[Dict[str, Any]] = None
 
-class JobMetricsResponse(BaseModel):
-    gpuUtilization: List[MetricDataPoint]
-    memoryUsage: List[MetricDataPoint]
-    networkLatency: Optional[List[MetricDataPoint]] = None
-    throughput: Optional[List[MetricDataPoint]] = None
 
-class AuthCheckRequest(BaseModel):
-    resource: str
-    action: str
-    pool: Optional[str] = None
-
-class AuthCheckResponse(BaseModel):
-    allowed: bool
-    message: str
-
-class NodeListItem(BaseModel):
+class NodeResponse(BaseModel):
     nodeName: str
     status: str
     gpuTotal: int
@@ -124,12 +66,9 @@ class NodeListItem(BaseModel):
     boundPools: List[str]
     cpu: str
     memory: str
-    gpuType: str
-    createdAt: str
+    gpuType: Optional[str] = None
+    createdAt: Optional[datetime] = None
 
-class NodeListResponse(BaseModel):
-    total: int
-    items: List[NodeListItem]
 
 class NodeDetailResponse(BaseModel):
     nodeName: str
@@ -140,26 +79,39 @@ class NodeDetailResponse(BaseModel):
     labels: List[Dict[str, str]]
     boundPools: List[str]
     runningJobs: List[Dict[str, Any]]
-    createdAt: str
-    lastUpdatedAt: str
+    createdAt: Optional[datetime] = None
+    lastUpdatedAt: Optional[datetime] = None
 
-class LabelOperationRequest(BaseModel):
+
+class GPUDetailResponse(BaseModel):
+    nodeName: str
+    gpuCount: int
+    gpus: List[Dict[str, Any]]
+
+
+class LabelRequest(BaseModel):
     key: str
     value: str
     overwrite: bool = False
 
-class BatchLabelOperationRequest(BaseModel):
-    nodeNames: List[str]
-    key: str
-    value: str
-    overwrite: bool = False
 
-class LabelOperationResponse(BaseModel):
+class LabelResponse(BaseModel):
     nodeName: str
     label: Dict[str, str]
     message: str
 
-class BatchLabelOperationResponse(BaseModel):
-    success: List[str]
-    failed: List[Dict[str, Any]]
+
+class LogResponse(BaseModel):
+    logs: List[str]
+    lastTimestamp: Optional[datetime] = None
+
+
+class AuthCheckRequest(BaseModel):
+    resource: str
+    action: str
+    pool: Optional[str] = None
+
+
+class AuthCheckResponse(BaseModel):
+    allowed: bool
     message: str
