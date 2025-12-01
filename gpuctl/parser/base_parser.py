@@ -19,7 +19,8 @@ class BaseParser:
         "training": TrainingJob,
         "inference": InferenceJob,
         "notebook": NotebookJob,
-        "pool": ResourcePool
+        "pool": ResourcePool,
+        "resource": ResourcePool
     }
 
     @classmethod

@@ -59,3 +59,46 @@ def delete_pool_command(args):
     except Exception as e:
         print(f"❌ Error deleting pool: {e}")
         return 1
+
+
+def describe_pool_command(args):
+    """描述资源池详情命令"""
+    try:
+        client = PoolClient()
+        pool = client.get_pool(args.pool_name)
+        
+        # 打印资源池详情
+        print(f"📋 Pool Details: {args.pool_name}")
+        print("=" * 60)
+        print(f"📊 Name: {pool.get('name', 'N/A')}")
+        print(f"📝 Description: {pool.get('description', 'N/A')}")
+        print(f"📈 Status: {pool.get('status', 'unknown')}")
+        print(f"🖥️  GPU Total: {pool.get('gpu_total', 'N/A')}")
+        print(f"📊 GPU Used: {pool.get('gpu_used', 'N/A')}")
+        print(f"🆓 GPU Free: {pool.get('gpu_free', 'N/A')}")
+        print(f"🔧 GPU Types: {', '.join(pool.get('gpu_types', []))}")
+        print(f"🖥️  Node Count: {len(pool.get('nodes', []))}")
+        
+        if 'quota' in pool:
+            print("\n📊 Quota:")
+            print("-" * 60)
+            quota = pool['quota']
+            print(f"   Max Jobs: {quota.get('maxJobs', 'N/A')}")
+            print(f"   Max GPU Per Job: {quota.get('maxGpuPerJob', 'N/A')}")
+        
+        if 'nodes' in pool and pool['nodes']:
+            print("\n🖥️  Nodes:")
+            print("-" * 60)
+            for node in pool['nodes']:
+                print(f"   - {node}")
+        
+        if 'jobs' in pool and pool['jobs']:
+            print("\n📋 Running Jobs:")
+            print("-" * 60)
+            for job in pool['jobs']:
+                print(f"   - {job['name']} (GPU: {job.get('gpu', 0)})")
+        
+        return 0
+    except Exception as e:
+        print(f"❌ Error describing pool: {e}")
+        return 1

@@ -224,3 +224,85 @@ class PoolClient(KubernetesClient):
 
         except ApiException:
             return 0
+
+    def list_nodes(self, filters: Dict[str, str] = None) -> List[Dict[str, Any]]:
+        """列出所有节点，支持过滤"""
+        try:
+            # 构建标签选择器
+            label_selector = None
+            if filters:
+                selector_parts = []
+                if filters.get("pool"):
+                    selector_parts.append(f"gpuctl/pool={filters['pool']}")
+                if filters.get("gpu_type"):
+                    selector_parts.append(f"nvidia.com/gpu-type={filters['gpu_type']}")
+                if selector_parts:
+                    label_selector = ",".join(selector_parts)
+
+            # 获取节点列表
+            nodes = self.core_v1.list_node(label_selector=label_selector)
+
+            # 构建节点信息
+            node_list = []
+            for node in nodes.items:
+                node_info = self._build_node_info(node)
+                node_list.append(node_info)
+
+            return node_list
+
+        except ApiException as e:
+            self.handle_api_exception(e, "list nodes")
+
+    def get_node(self, node_name: str) -> Optional[Dict[str, Any]]:
+        """获取特定节点详情"""
+        try:
+            node = self.core_v1.read_node(node_name)
+            return self._build_node_info(node)
+        except ApiException as e:
+            if e.status == 404:
+                return None
+            self.handle_api_exception(e, f"get node {node_name}")
+
+    def _build_node_info(self, node: Any) -> Dict[str, Any]:
+        """构建节点信息"""
+        labels = node.metadata.labels or {}
+        gpu_count = self._get_node_gpu_count(node)
+        gpu_type = self._get_node_gpu_type(node)
+        used_gpus = self._get_used_gpu_count(node.metadata.name)
+
+        return {
+            "name": node.metadata.name,
+            "status": "active" if self._is_node_ready(node) else "not_ready",
+            "k8s_status": node.status.conditions[-1].type if node.status.conditions else "unknown",
+            "labels": labels,
+            "created_at": node.metadata.creation_timestamp.isoformat() if node.metadata.creation_timestamp else None,
+            "last_updated_at": node.status.conditions[-1].last_transition_time.isoformat() if node.status.conditions else None,
+            "resources": {
+                "cpu_total": int(node.status.capacity.get("cpu", "0")),
+                "cpu_used": 0,  # 需要从运行的Pod中统计
+                "memory_total": node.status.capacity.get("memory", "0"),
+                "memory_used": 0,  # 需要从运行的Pod中统计
+                "gpu_total": gpu_count,
+                "gpu_used": used_gpus,
+                "gpu_free": gpu_count - used_gpus
+            },
+            "gpu_detail": [
+                {
+                    "gpuId": f"gpu-{i}",
+                    "type": gpu_type,
+                    "status": "used" if i < used_gpus else "free",
+                    "utilization": 0,  # 需要从监控系统获取
+                    "memoryUsage": "0Gi/0Gi"  # 需要从监控系统获取
+                }
+                for i in range(gpu_count)
+            ],
+            "running_jobs": [],  # 需要从运行的Pod中统计
+            "gpu_types": [gpu_type] if gpu_type else []
+        }
+
+    def _is_node_ready(self, node: Any) -> bool:
+        """检查节点是否就绪"""
+        for condition in node.status.conditions:
+            if condition.type == "Ready":
+                return condition.status == "True"
+        return False

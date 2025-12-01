@@ -22,8 +22,8 @@ def test_create_training_job(mock_training_kind, mock_parse_yaml_file):
     }
     mock_training_kind.return_value = mock_handler
     
-    # 调用命令
-    args = Namespace(file="test.yaml", namespace="default")
+    # 调用命令 - 现在file是列表
+    args = Namespace(file=["test.yaml"], namespace="default")
     result = create_job_command(args)
     
     # 断言结果
@@ -31,6 +31,54 @@ def test_create_training_job(mock_training_kind, mock_parse_yaml_file):
     mock_parse_yaml_file.assert_called_once_with("test.yaml")
     mock_training_kind.assert_called_once()
     mock_handler.create_training_job.assert_called_once()
+
+
+@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.job.InferenceKind')
+def test_create_inference_job(mock_inference_kind, mock_parse_yaml_file):
+    """测试创建推理作业命令"""
+    # 设置模拟返回值
+    mock_parse_yaml_file.return_value.kind = "inference"
+    mock_parse_yaml_file.return_value.job.name = "test-inference-job"
+    
+    mock_handler = MagicMock()
+    mock_handler.create_inference_service.return_value = {
+        "job_id": "test-inference-job",
+        "name": "test-inference-job",
+        "namespace": "default"
+    }
+    mock_inference_kind.return_value = mock_handler
+    
+    # 调用命令 - 现在file是列表
+    args = Namespace(file=["test.yaml"], namespace="default")
+    result = create_job_command(args)
+    
+    # 断言结果
+    assert result == 0
+
+
+@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.job.NotebookKind')
+def test_create_notebook_job(mock_notebook_kind, mock_parse_yaml_file):
+    """测试创建笔记本作业命令"""
+    # 设置模拟返回值
+    mock_parse_yaml_file.return_value.kind = "notebook"
+    mock_parse_yaml_file.return_value.job.name = "test-notebook-job"
+    
+    mock_handler = MagicMock()
+    mock_handler.create_notebook.return_value = {
+        "job_id": "test-notebook-job",
+        "name": "test-notebook-job",
+        "namespace": "default"
+    }
+    mock_notebook_kind.return_value = mock_handler
+    
+    # 调用命令 - 现在file是列表
+    args = Namespace(file=["test.yaml"], namespace="default")
+    result = create_job_command(args)
+    
+    # 断言结果
+    assert result == 0
 
 
 @patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
@@ -119,24 +167,46 @@ def test_get_jobs_command(mock_job_client):
             "name": "test-job-1",
             "namespace": "default",
             "labels": {"gpuctl/job-type": "training"},
-            "creation_timestamp": "2023-01-01T12:00:00Z"
+            "creation_timestamp": "2023-01-01T12:00:00Z",
+            "status": {"succeeded": 0, "failed": 0, "active": 1}
         },
         {
             "name": "test-job-2",
             "namespace": "default",
             "labels": {"gpuctl/job-type": "inference"},
-            "creation_timestamp": "2023-01-02T12:00:00Z"
+            "creation_timestamp": "2023-01-02T12:00:00Z",
+            "status": {"succeeded": 0, "failed": 0, "active": 1}
         }
     ]
     mock_job_client.return_value = mock_instance
     
     # 调用命令
-    args = Namespace(namespace="default")
+    args = Namespace(namespace="default", pool=None, type=None)
     result = get_jobs_command(args)
     
     # 断言结果
     assert result == 0
-    mock_instance.list_jobs.assert_called_once_with("default")
+    mock_instance.list_jobs.assert_called_once_with("default", labels={})
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_get_jobs_command_with_filters(mock_job_client):
+    """测试带过滤条件的作业列表命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.list_jobs.return_value = []
+    mock_job_client.return_value = mock_instance
+    
+    # 调用命令 - 带过滤条件
+    args = Namespace(namespace="default", pool="test-pool", type="training")
+    result = get_jobs_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.list_jobs.assert_called_once_with(
+        "default", 
+        labels={"gpuctl/pool": "test-pool", "gpuctl/job-type": "training"}
+    )
 
 
 @patch('gpuctl.cli.job.JobClient')
@@ -148,12 +218,12 @@ def test_get_jobs_command_empty(mock_job_client):
     mock_job_client.return_value = mock_instance
     
     # 调用命令
-    args = Namespace(namespace="default")
+    args = Namespace(namespace="default", pool=None, type=None)
     result = get_jobs_command(args)
     
     # 断言结果
     assert result == 0
-    mock_instance.list_jobs.assert_called_once_with("default")
+    mock_instance.list_jobs.assert_called_once_with("default", labels={})
 
 
 @patch('gpuctl.cli.job.JobClient')

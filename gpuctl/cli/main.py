@@ -1,8 +1,8 @@
 import argparse
 import sys
-from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command
-from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command
-from gpuctl.cli.node import get_nodes_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command
+from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command
+from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
+from gpuctl.cli.node import get_nodes_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
 
     # create命令
     create_parser = subparsers.add_parser('create', help='Create a job from YAML')
-    create_parser.add_argument('-f', '--file', required=True, help='YAML file path')
+    create_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can be specified multiple times)')
     create_parser.add_argument('-n', '--namespace', default='default',
                                help='Kubernetes namespace')
 
@@ -75,6 +75,23 @@ def main():
     remove_node_parser.add_argument('node_name', nargs='+', help='Node name(s)')
     remove_node_parser.add_argument('--pool', required=True, help='Resource pool name')
 
+    # describe command
+    describe_parser = subparsers.add_parser('describe', help='Describe resource details')
+    describe_subparsers = describe_parser.add_subparsers(dest='resource', help='Resource type')
+
+    # describe job
+    job_describe_parser = describe_subparsers.add_parser('job', help='Describe job details')
+    job_describe_parser.add_argument('job_id', help='Job ID')
+    job_describe_parser.add_argument('-n', '--namespace', default='default', help='Kubernetes namespace')
+
+    # describe pool
+    pool_describe_parser = describe_subparsers.add_parser('pool', help='Describe pool details')
+    pool_describe_parser.add_argument('pool_name', help='Resource pool name')
+
+    # describe node
+    node_describe_parser = describe_subparsers.add_parser('node', help='Describe node details')
+    node_describe_parser.add_argument('node_name', help='Node name')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -104,6 +121,16 @@ def main():
             return add_node_to_pool_command(args)
         elif args.command == 'remove' and args.resource == 'node':
             return remove_node_from_pool_command(args)
+        elif args.command == 'describe':
+            if args.resource == 'job':
+                return describe_job_command(args)
+            elif args.resource == 'pool':
+                return describe_pool_command(args)
+            elif args.resource == 'node':
+                return describe_node_command(args)
+            else:
+                print(f"Unknown resource type: {args.resource}")
+                return 1
         else:
             print(f"Unknown command: {args.command}")
             return 1
