@@ -11,6 +11,7 @@ keywords = ["gpu", "kubernetes", "ai", "scheduling"]
 python = ">=3.8"
 kubernetes = ">=24.2.0"
 PyYAML = ">=6.0"
+pydantic = ">=2.0"
 
 [tool.poetry.extras]
 dev = ["pytest", "black", "flake8"]
