@@ -32,6 +32,18 @@ var/
 *.manifest
 *.spec
 
+# PyInstaller output
+dist/
+build/
+
+# Nuitka output
+*.dist/
+gpuctl.exe
+gpuctl
+
+# main.dist directory
+main.dist/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
