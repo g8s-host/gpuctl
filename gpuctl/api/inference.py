@@ -36,5 +36,6 @@ class InferenceJob(BaseModel):
     service: ServiceConfig = Field(default_factory=ServiceConfig)
     autoscaling: AutoScalingConfig = Field(default_factory=AutoScalingConfig)
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {
+        "populate_by_name": True
+    }

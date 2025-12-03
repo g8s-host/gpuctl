@@ -33,8 +33,9 @@ class ResourceRequest(BaseModel):
     memory: str = Field(..., description="内存需求，如 '32Gi'")
     gpu_share: Optional[str] = Field(default=None, description="GPU共享配置")
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class JobMetadata(BaseModel):

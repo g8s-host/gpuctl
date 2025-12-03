@@ -9,5 +9,6 @@ class NotebookJob(BaseModel):
     resources: ResourceRequest
     storage: StorageConfig = Field(default_factory=StorageConfig)
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {
+        "populate_by_name": True
+    }
