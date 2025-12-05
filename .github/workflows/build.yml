@@ -9,10 +9,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: [3.12]
+        os: [ubuntu-22.04, ubuntu-22.04-arm64]
+        python-version: [3.10]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
@@ -30,24 +31,25 @@ jobs:
 
     - name: Build binary with PyInstaller
       run: |
-        pyinstaller --onefile --name=gpuctl --hidden-import=yaml --hidden-import=PyYAML main.py
+        pyinstaller --onefile --name=gpuctl-linux-${{ matrix.os == 'ubuntu-22.04-arm64' && 'arm64' || 'amd64' }} --hidden-import=yaml --hidden-import=PyYAML main.py
 
     - name: Verify binary
       run: |
-        chmod +x dist/gpuctl
-        ./dist/gpuctl --help
+        BINARY_NAME=gpuctl-linux-${{ matrix.os == 'ubuntu-22.04-arm64' && 'arm64' || 'amd64' }}
+        chmod +x dist/$BINARY_NAME
+        ./dist/$BINARY_NAME --help
 
     - name: Upload binary as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: gpuctl-linux-amd64
-        path: dist/gpuctl
+        name: gpuctl-linux-${{ matrix.os == 'ubuntu-22.04-arm64' && 'arm64' || 'amd64' }}
+        path: dist/gpuctl-linux-${{ matrix.os == 'ubuntu-22.04-arm64' && 'arm64' || 'amd64' }}
 
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
-        files: dist/gpuctl
+        files: dist/gpuctl-linux-${{ matrix.os == 'ubuntu-22.04-arm64' && 'arm64' || 'amd64' }}
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
@@ -55,11 +57,17 @@ jobs:
           ## 🚀 gpuctl ${{ github.ref_name }} 发布
           
           ### 可执行文件
-          - [gpuctl](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl) - Linux 64位二进制包
+          - [gpuctl-linux-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-amd64) - Linux x86_64 二进制包
+          - [gpuctl-linux-arm64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-arm64) - Linux ARM64 二进制包
           
           ### 使用方式
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl -O gpuctl
+          # x86_64架构
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-amd64 -O gpuctl
+          
+          # ARM64架构
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-arm64 -O gpuctl
+          
           chmod +x gpuctl
           sudo mv gpuctl /usr/local/bin/
           gpuctl --help
