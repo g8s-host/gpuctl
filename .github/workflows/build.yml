@@ -85,26 +85,19 @@ jobs:
     
 
     
-    - name: Debug macOS build artifacts
-      if: matrix.os == 'macos-latest'
-      run: |
-        echo "Runner arch: ${{ github.runner.arch }}"
-        echo "Uname -m: $(uname -m)"
-        ls -la dist/
-    
     - name: Upload binary as artifact (macOS)
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: gpuctl-macos-${{ github.runner.arch == 'ARM64' && 'arm64' || 'amd64' }}
-        path: dist/gpuctl-macos-${{ github.runner.arch == 'ARM64' && 'arm64' || 'amd64' }}
+        name: gpuctl-macos-amd64
+        path: dist/gpuctl-macos-amd64
     
     - name: Upload binary as artifact (Windows)
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: gpuctl-windows-${{ github.runner.arch }}
-        path: dist/gpuctl-windows-${{ github.runner.arch }}.exe
+        name: gpuctl-windows-amd64
+        path: dist/gpuctl-windows-amd64.exe
 
   release:
     needs: build
@@ -126,7 +119,6 @@ jobs:
       with:
         files: |
           ./dist/gpuctl-linux-amd64/gpuctl-linux-amd64
-          ./dist/gpuctl-linux-arm64/gpuctl-linux-arm64
           ./dist/gpuctl-macos-amd64/gpuctl-macos-amd64
           ./dist/gpuctl-windows-amd64/gpuctl-windows-amd64.exe
         name: Release ${{ github.ref_name }}
@@ -137,23 +129,16 @@ jobs:
           
           ### 可执行文件
           - [gpuctl-linux-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-amd64) - Linux x86_64 二进制包
-          - [gpuctl-linux-arm64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-arm64) - Linux ARM64 二进制包
           - [gpuctl-macos-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-amd64) - macOS x86_64 二进制包
-          - [gpuctl-macos-arm64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-arm64) - macOS ARM64 二进制包
           - [gpuctl-windows-amd64.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-windows-amd64.exe) - Windows x86_64 二进制包
-          - [gpuctl-windows-arm64.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-windows-arm64.exe) - Windows ARM64 二进制包
           
           ### 使用方式
           ```bash
-          # Linux/macOS x86_64架构
+          # Linux x86_64架构
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-amd64 -O gpuctl
-          # 或
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-amd64 -o gpuctl
           
-          # Linux/macOS ARM64架构
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-arm64 -O gpuctl
-          # 或
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-arm64 -o gpuctl
+          # macOS x86_64架构
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-amd64 -o gpuctl
           
           chmod +x gpuctl
           sudo mv gpuctl /usr/local/bin/
@@ -163,9 +148,6 @@ jobs:
           ```powershell
           # Windows x86_64架构
           Invoke-WebRequest -Uri https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-windows-amd64.exe -OutFile gpuctl.exe
-          
-          # Windows ARM64架构
-          Invoke-WebRequest -Uri https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-windows-arm64.exe -OutFile gpuctl.exe
           
           # 将gpuctl.exe添加到系统PATH中，然后运行
           gpuctl.exe --help
