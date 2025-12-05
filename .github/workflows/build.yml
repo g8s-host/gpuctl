@@ -32,24 +32,46 @@ jobs:
     - name: Build binary with PyInstaller (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        ARCH="amd64"
+        # Determine architecture
         if [ "${{ matrix.os }}" = "ubuntu-22.04-arm64" ]; then
           ARCH="arm64"
-        elif [ "${{ matrix.os }}" = "macos-latest" ] && [ "$(uname -m)" = "arm64" ]; then
-          ARCH="arm64"
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          if [ "$(uname -m)" = "arm64" ]; then
+            ARCH="arm64"
+          else
+            ARCH="amd64"
+          fi
+        else
+          ARCH="amd64"
         fi
         
+        # Build binary
         if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-22.04-arm64" ]; then
-          pyinstaller --onefile --name=gpuctl-linux-$ARCH --hidden-import=yaml --hidden-import=PyYAML main.py
+          OUTPUT_NAME="gpuctl-linux-$ARCH"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          pyinstaller --onefile --name=gpuctl-macos-$ARCH --hidden-import=yaml --hidden-import=PyYAML main.py
+          OUTPUT_NAME="gpuctl-macos-$ARCH"
         fi
+        
+        echo "Building $OUTPUT_NAME for ${{ matrix.os }}"
+        pyinstaller --onefile --name="$OUTPUT_NAME" --hidden-import=yaml --hidden-import=PyYAML main.py
+        
+        # List built files
+        echo "Built files:"
+        ls -la dist/
     
     - name: Build binary with PyInstaller (Windows)
       if: matrix.os == 'windows-latest'
       run: |
+        # Determine architecture
         $ARCH = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'amd64' }
-        pyinstaller --onefile --name=gpuctl-windows-$ARCH.exe --hidden-import=yaml --hidden-import=PyYAML main.py
+        $OUTPUT_NAME = "gpuctl-windows-$ARCH.exe"
+        
+        echo "Building $OUTPUT_NAME for ${{ matrix.os }}"
+        pyinstaller --onefile --name="$OUTPUT_NAME" --hidden-import=yaml --hidden-import=PyYAML main.py
+        
+        # List built files
+        echo "Built files:"
+        dir dist/
 
     - name: Verify binary (Linux/macOS)
       if: matrix.os != 'windows-latest'
@@ -77,11 +99,40 @@ jobs:
         $BINARY_NAME = "gpuctl-windows-$ARCH.exe"
         & dist\$BINARY_NAME --help
 
-    - name: Upload binary as artifact
+    - name: Upload binary as artifact (Linux)
+      if: matrix.os == 'ubuntu-22.04'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.os == 'ubuntu-22.04' && 'gpuctl-linux-amd64' || matrix.os == 'ubuntu-22.04-arm64' && 'gpuctl-linux-arm64' || matrix.os == 'macos-latest' && 'gpuctl-macos-amd64' || matrix.os == 'windows-latest' && 'gpuctl-windows-amd64' }}
-        path: ${{ matrix.os == 'ubuntu-22.04' && 'dist/gpuctl-linux-amd64' || matrix.os == 'ubuntu-22.04-arm64' && 'dist/gpuctl-linux-arm64' || matrix.os == 'macos-latest' && 'dist/gpuctl-macos-amd64' || matrix.os == 'windows-latest' && 'dist/gpuctl-windows-amd64.exe' }}
+        name: gpuctl-linux-amd64
+        path: dist/gpuctl-linux-amd64
+    
+    - name: Upload binary as artifact (Linux ARM64)
+      if: matrix.os == 'ubuntu-22.04-arm64'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gpuctl-linux-arm64
+        path: dist/gpuctl-linux-arm64
+    
+    - name: Debug macOS build artifacts
+      if: matrix.os == 'macos-latest'
+      run: |
+        echo "Runner arch: ${{ github.runner.arch }}"
+        echo "Uname -m: $(uname -m)"
+        ls -la dist/
+    
+    - name: Upload binary as artifact (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gpuctl-macos-${{ github.runner.arch == 'ARM64' && 'arm64' || 'amd64' }}
+        path: dist/gpuctl-macos-${{ github.runner.arch == 'ARM64' && 'arm64' || 'amd64' }}
+    
+    - name: Upload binary as artifact (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gpuctl-windows-${{ github.runner.arch }}
+        path: dist/gpuctl-windows-${{ github.runner.arch }}.exe
 
   release:
     needs: build
