@@ -18,7 +18,6 @@ def get_nodes_command(args):
         
         # 打印节点列表
         print(f"{'NODE NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'POOL':<20}")
-        print("-" * 120)
         
         for node in nodes:
             print(f"{node['name']:<30} {node['status']:<10} {node['gpu_total']:<10} {node['gpu_used']:<10} {node['gpu_free']:<10} {', '.join(node['gpu_types']):<15} {node['labels'].get('gpuctl/pool', 'default'):<20}")
@@ -106,7 +105,6 @@ def describe_node_command(args):
         
         # 打印节点详情
         print(f"📋 Node Details: {args.node_name}")
-        print("=" * 60)
         print(f"📊 Name: {node.get('name', 'N/A')}")
         print(f"📈 Status: {node.get('status', 'unknown')}")
         print(f"🔧 K8s Status: {node.get('k8s_status', 'N/A')}")
@@ -116,7 +114,6 @@ def describe_node_command(args):
         
         if 'resources' in node:
             print("\n💻 Resources:")
-            print("-" * 60)
             resources = node['resources']
             print(f"   CPU Total: {resources.get('cpu_total', 'N/A')}")
             print(f"   CPU Used: {resources.get('cpu_used', 'N/A')}")
@@ -128,7 +125,6 @@ def describe_node_command(args):
         
         if 'gpu_detail' in node:
             print("\n🖥️  GPU Details:")
-            print("-" * 60)
             for gpu in node['gpu_detail']:
                 print(f"   GPU {gpu.get('gpuId', 'N/A')}:")
                 print(f"      Type: {gpu.get('type', 'N/A')}")
@@ -138,13 +134,11 @@ def describe_node_command(args):
         
         if 'labels' in node:
             print("\n🏷️  Labels:")
-            print("-" * 60)
             for key, value in node['labels'].items():
                 print(f"   {key}: {value}")
         
         if 'running_jobs' in node:
             print("\n📋 Running Jobs:")
-            print("-" * 60)
             for job in node['running_jobs']:
                 print(f"   - {job.get('name', 'N/A')} (GPU: {job.get('gpu', 0)})")
         

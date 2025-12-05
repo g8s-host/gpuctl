@@ -13,7 +13,6 @@ def create_job_command(args):
         # 处理多个文件
         for file_path in args.file:
             print(f"\n📝 Processing file: {file_path}")
-            print("-" * 60)
             
             # 解析YAML文件
             parsed_obj = BaseParser.parse_yaml_file(file_path)
@@ -81,7 +80,6 @@ def get_jobs_command(args):
         
         # 打印作业列表
         print(f"{'JOB ID':<30} {'NAME':<20} {'KIND':<15} {'STATUS':<10} {'NAMESPACE':<15} {'CREATED':<20}")
-        print("-" * 120)
         
         for job in jobs:
             # 确定作业状态
@@ -208,7 +206,6 @@ def describe_job_command(args):
         
         # 打印作业详情
         print(f"📋 Job Details: {args.job_id}")
-        print("=" * 60)
         print(f"📊 Name: {job.get('name', 'N/A')}")
         print(f"📦 Namespace: {job.get('namespace', 'default')}")
         print(f"🗂️  Kind: {job.get('labels', {}).get('gpuctl/job-type', 'unknown')}")
@@ -221,7 +218,6 @@ def describe_job_command(args):
         
         if 'resources' in job:
             print("\n💻 Resources:")
-            print("-" * 60)
             resources = job['resources']
             print(f"   GPU: {resources.get('gpu', 'N/A')}")
             print(f"   CPU: {resources.get('cpu', 'N/A')}")
@@ -230,7 +226,6 @@ def describe_job_command(args):
         
         if 'metrics' in job:
             print("\n📊 Metrics:")
-            print("-" * 60)
             metrics = job['metrics']
             print(f"   GPU Utilization: {metrics.get('gpuUtilization', 'N/A')}%")
             print(f"   Memory Usage: {metrics.get('memoryUsage', 'N/A')}")
@@ -238,7 +233,6 @@ def describe_job_command(args):
         
         if 'k8sResources' in job:
             print("\n🔧 Kubernetes Resources:")
-            print("-" * 60)
             k8s_resources = job['k8sResources']
             print(f"   Job Name: {k8s_resources.get('jobName', 'N/A')}")
             print(f"   Pods: {', '.join(k8s_resources.get('pods', []))}")

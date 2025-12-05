@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-latest-arm64, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
         python-version: [3.12]
     runs-on: ${{ matrix.os }}
 
@@ -32,24 +32,11 @@ jobs:
     - name: Build binary with PyInstaller (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        # Determine architecture
-        if [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
-          ARCH="arm64"
+        # Determine architecture and build binary
+        if [ "${{ matrix.os }}" = "ubuntu-22.04" ]; then
+          OUTPUT_NAME="gpuctl-linux-amd64"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          if [ "$(uname -m)" = "arm64" ]; then
-            ARCH="arm64"
-          else
-            ARCH="amd64"
-          fi
-        else
-          ARCH="amd64"
-        fi
-        
-        # Build binary
-        if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
-          OUTPUT_NAME="gpuctl-linux-$ARCH"
-        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          OUTPUT_NAME="gpuctl-macos-$ARCH"
+          OUTPUT_NAME="gpuctl-macos-amd64"
         fi
         
         echo "Building $OUTPUT_NAME for ${{ matrix.os }}"
@@ -62,9 +49,7 @@ jobs:
     - name: Build binary with PyInstaller (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # Determine architecture
-        $ARCH = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'amd64' }
-        $OUTPUT_NAME = "gpuctl-windows-$ARCH.exe"
+        $OUTPUT_NAME = "gpuctl-windows-amd64.exe"
         
         echo "Building $OUTPUT_NAME for ${{ matrix.os }}"
         pyinstaller --onefile --name="$OUTPUT_NAME" --hidden-import=yaml --hidden-import=PyYAML main.py
@@ -76,17 +61,10 @@ jobs:
     - name: Verify binary (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        ARCH="amd64"
-        if [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
-          ARCH="arm64"
-        elif [ "${{ matrix.os }}" = "macos-latest" ] && [ "$(uname -m)" = "arm64" ]; then
-          ARCH="arm64"
-        fi
-        
-        if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
-          BINARY_NAME="gpuctl-linux-$ARCH"
+        if [ "${{ matrix.os }}" = "ubuntu-22.04" ]; then
+          BINARY_NAME="gpuctl-linux-amd64"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          BINARY_NAME="gpuctl-macos-$ARCH"
+          BINARY_NAME="gpuctl-macos-amd64"
         fi
         
         chmod +x dist/$BINARY_NAME
@@ -95,8 +73,7 @@ jobs:
     - name: Verify binary (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        $ARCH = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'amd64' }
-        $BINARY_NAME = "gpuctl-windows-$ARCH.exe"
+        $BINARY_NAME = "gpuctl-windows-amd64.exe"
         & dist\$BINARY_NAME --help
 
     - name: Upload binary as artifact (Linux)
@@ -106,12 +83,7 @@ jobs:
         name: gpuctl-linux-amd64
         path: dist/gpuctl-linux-amd64
     
-    - name: Upload binary as artifact (Linux ARM64)
-      if: matrix.os == 'ubuntu-latest-arm64'
-      uses: actions/upload-artifact@v4
-      with:
-        name: gpuctl-linux-arm64
-        path: dist/gpuctl-linux-arm64
+
     
     - name: Debug macOS build artifacts
       if: matrix.os == 'macos-latest'

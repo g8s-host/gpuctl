@@ -9,7 +9,6 @@ def get_pools_command(args):
         
         # 打印资源池列表
         print(f"{'POOL NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'NODE COUNT':<10}")
-        print("-" * 120)
         
         for pool in pools:
             print(f"{pool['name']:<30} {pool['status']:<10} {pool['gpu_total']:<10} {pool['gpu_used']:<10} {pool['gpu_free']:<10} {', '.join(pool['gpu_types']):<15} {len(pool['nodes']):<10}")
@@ -69,7 +68,6 @@ def describe_pool_command(args):
         
         # 打印资源池详情
         print(f"📋 Pool Details: {args.pool_name}")
-        print("=" * 60)
         print(f"📊 Name: {pool.get('name', 'N/A')}")
         print(f"📝 Description: {pool.get('description', 'N/A')}")
         print(f"📈 Status: {pool.get('status', 'unknown')}")
@@ -81,20 +79,17 @@ def describe_pool_command(args):
         
         if 'quota' in pool:
             print("\n📊 Quota:")
-            print("-" * 60)
             quota = pool['quota']
             print(f"   Max Jobs: {quota.get('maxJobs', 'N/A')}")
             print(f"   Max GPU Per Job: {quota.get('maxGpuPerJob', 'N/A')}")
         
         if 'nodes' in pool and pool['nodes']:
             print("\n🖥️  Nodes:")
-            print("-" * 60)
             for node in pool['nodes']:
                 print(f"   - {node}")
         
         if 'jobs' in pool and pool['jobs']:
             print("\n📋 Running Jobs:")
-            print("-" * 60)
             for job in pool['jobs']:
                 print(f"   - {job['name']} (GPU: {job.get('gpu', 0)})")
         
