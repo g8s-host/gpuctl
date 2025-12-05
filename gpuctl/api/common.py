@@ -28,7 +28,7 @@ class ResourceRequest(BaseModel):
     pool: Optional[str] = Field(default=None, description="资源池名称")
     accelerator_count: int = Field(..., ge=1, description="加速器数量", alias="gpu")
     gpu: int = Field(..., ge=1, description="GPU数量", alias="accelerator_count")
-    gpu_type: Optional[GPUType] = Field(default=None, description="GPU类型")
+    gpu_type: Optional[str] = Field(default=None, description="GPU类型")
     cpu: str = Field(..., description="CPU需求，如 '8' 或 '8000m'")
     memory: str = Field(..., description="内存需求，如 '32Gi'")
     gpu_share: Optional[str] = Field(default=None, description="GPU共享配置")

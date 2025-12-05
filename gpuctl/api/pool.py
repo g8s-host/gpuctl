@@ -1,10 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
-from .common import GPUType
 
 
 class NodeConfig(BaseModel):
-    gpu_type: GPUType = Field(..., alias="gpu-type")
+    gpu_type: str = Field(..., alias="gpu-type")
 
 
 class PoolConfig(BaseModel):
