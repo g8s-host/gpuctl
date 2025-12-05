@@ -20,7 +20,16 @@ def get_nodes_command(args):
         print(f"{'NODE NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'POOL':<20}")
         
         for node in nodes:
-            print(f"{node['name']:<30} {node['status']:<10} {node['gpu_total']:<10} {node['gpu_used']:<10} {node['gpu_free']:<10} {', '.join(node['gpu_types']):<15} {node['labels'].get('gpuctl/pool', 'default'):<20}")
+            # 安全访问字典字段，使用默认值处理缺失情况
+            name = node.get('name', 'N/A')
+            status = node.get('status', 'unknown')
+            gpu_total = node.get('gpu_total', 0)
+            gpu_used = node.get('gpu_used', 0)
+            gpu_free = node.get('gpu_free', 0)
+            gpu_types = ', '.join(node.get('gpu_types', []))
+            pool = node.get('labels', {}).get('gpuctl/pool', 'default')
+            
+            print(f"{name:<30} {status:<10} {gpu_total:<10} {gpu_used:<10} {gpu_free:<10} {gpu_types:<15} {pool:<20}")
         
         return 0
     except Exception as e:
