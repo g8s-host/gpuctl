@@ -31,7 +31,7 @@ jobs:
 
     - name: Build binary with PyInstaller
       run: |
-        pyinstaller --onefile --name=gpuctl main.py
+        pyinstaller --onefile --name=gpuctl --hidden-import=yaml main.py
 
     - name: Verify binary
       run: |
