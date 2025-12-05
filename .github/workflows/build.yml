@@ -75,7 +75,7 @@ jobs:
       run: |
         $ARCH = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'amd64' }
         $BINARY_NAME = "gpuctl-windows-$ARCH.exe"
-        dist\$BINARY_NAME --help
+        & dist\$BINARY_NAME --help
 
     - name: Upload binary as artifact
       uses: actions/upload-artifact@v4
