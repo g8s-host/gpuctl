@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm64, macos-latest, windows-latest]
+        os: [ubuntu-22.04, ubuntu-latest-arm64, macos-latest, windows-latest]
         python-version: [3.12]
     runs-on: ${{ matrix.os }}
 
@@ -33,7 +33,7 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         # Determine architecture
-        if [ "${{ matrix.os }}" = "ubuntu-22.04-arm64" ]; then
+        if [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
           ARCH="arm64"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
           if [ "$(uname -m)" = "arm64" ]; then
@@ -46,7 +46,7 @@ jobs:
         fi
         
         # Build binary
-        if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-22.04-arm64" ]; then
+        if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
           OUTPUT_NAME="gpuctl-linux-$ARCH"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
           OUTPUT_NAME="gpuctl-macos-$ARCH"
@@ -77,13 +77,13 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         ARCH="amd64"
-        if [ "${{ matrix.os }}" = "ubuntu-22.04-arm64" ]; then
+        if [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
           ARCH="arm64"
         elif [ "${{ matrix.os }}" = "macos-latest" ] && [ "$(uname -m)" = "arm64" ]; then
           ARCH="arm64"
         fi
         
-        if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-22.04-arm64" ]; then
+        if [ "${{ matrix.os }}" = "ubuntu-22.04" ] || [ "${{ matrix.os }}" = "ubuntu-latest-arm64" ]; then
           BINARY_NAME="gpuctl-linux-$ARCH"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
           BINARY_NAME="gpuctl-macos-$ARCH"
@@ -107,7 +107,7 @@ jobs:
         path: dist/gpuctl-linux-amd64
     
     - name: Upload binary as artifact (Linux ARM64)
-      if: matrix.os == 'ubuntu-22.04-arm64'
+      if: matrix.os == 'ubuntu-latest-arm64'
       uses: actions/upload-artifact@v4
       with:
         name: gpuctl-linux-arm64
