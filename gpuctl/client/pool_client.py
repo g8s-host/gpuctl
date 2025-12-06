@@ -53,9 +53,13 @@ class PoolClient(KubernetesClient):
         """创建资源池"""
         try:
             pool_name = pool_config["name"]
+            node_names = pool_config.get("nodes", [])
+
+            # 验证所有节点是否存在
+            self._validate_nodes_exist(node_names)
 
             # 为节点添加资源池标签
-            for node_name in pool_config.get("nodes", []):
+            for node_name in node_names:
                 self._label_node(node_name, "gpuctl/pool", pool_name)
 
             return {
@@ -66,6 +70,20 @@ class PoolClient(KubernetesClient):
 
         except ApiException as e:
             self.handle_api_exception(e, "create pool")
+
+    def _validate_nodes_exist(self, node_names: List[str]) -> None:
+        """验证所有节点是否存在"""
+        if not node_names:
+            return
+
+        # 获取所有现有节点
+        all_nodes = self.core_v1.list_node()
+        existing_node_names = {node.metadata.name for node in all_nodes.items}
+
+        # 检查是否有节点不存在
+        invalid_nodes = [node for node in node_names if node not in existing_node_names]
+        if invalid_nodes:
+            raise ValueError(f"节点不存在: {', '.join(invalid_nodes)}")
 
     def delete_pool(self, pool_name: str) -> bool:
         """删除资源池"""
@@ -89,6 +107,9 @@ class PoolClient(KubernetesClient):
     def add_nodes_to_pool(self, pool_name: str, node_names: List[str]) -> Dict[str, Any]:
         """添加节点到资源池"""
         try:
+            # 验证所有节点是否存在
+            self._validate_nodes_exist(node_names)
+            
             success = []
             failed = []
 

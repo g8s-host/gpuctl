@@ -44,12 +44,22 @@ def create_job_command(args):
                     print(f"🖥️  Resources: {result['resources']}")
             elif parsed_obj.kind in ["pool", "resource"]:
                 # 资源池创建逻辑
-                # 目前简化实现，直接返回成功
-                pool_name = parsed_obj.pool.name if hasattr(parsed_obj, 'pool') else parsed_obj.name
-                pool_desc = parsed_obj.pool.description if hasattr(parsed_obj, 'pool') else parsed_obj.description
-                print(f"✅ Successfully created resource pool: {pool_name}")
-                print(f"📊 Description: {pool_desc}")
+                from gpuctl.client.pool_client import PoolClient
+                client = PoolClient()
+                
+                # 构建资源池配置
+                pool_config = {
+                    "name": parsed_obj.pool.name,
+                    "description": parsed_obj.pool.description,
+                    "nodes": list(parsed_obj.nodes.keys())
+                }
+                
+                # 创建资源池
+                result = client.create_pool(pool_config)
+                print(f"✅ Successfully created resource pool: {result['name']}")
+                print(f"📊 Description: {parsed_obj.pool.description}")
                 print(f"📦 Node count: {len(parsed_obj.nodes)}")
+                print(f"📋 Status: {result['status']}")
             else:
                 print(f"❌ Unsupported kind: {parsed_obj.kind}")
                 return 1
