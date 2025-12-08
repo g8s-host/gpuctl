@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 async def get_pools(token: str = Depends(AuthValidator.validate_token)):
     """获取资源池列表"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         pools = client.list_pools()
 
         response = []
@@ -45,7 +45,7 @@ async def get_pools(token: str = Depends(AuthValidator.validate_token)):
 async def get_pool_detail(poolName: str, token: str = Depends(AuthValidator.validate_token)):
     """获取资源池详情"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         pool_info = client.get_pool(poolName)
 
         if not pool_info:
@@ -64,8 +64,7 @@ async def get_pool_detail(poolName: str, token: str = Depends(AuthValidator.vali
 async def create_pool(request: PoolCreateRequest, token: str = Depends(AuthValidator.validate_token)):
     """创建资源池"""
     try:
-        client = PoolClient()
-        
+        client = PoolClient.get_instance()
         # 构建资源池配置
         pool_config = {
             "name": request.name,
@@ -108,7 +107,7 @@ async def update_pool(poolName: str, request: PoolUpdateRequest, token: str = De
 async def delete_pool(poolName: str, token: str = Depends(AuthValidator.validate_token)):
     """删除资源池"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         success = client.delete_pool(poolName)
         
         if not success:

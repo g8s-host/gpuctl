@@ -5,6 +5,15 @@ from typing import List, Dict, Any, Optional
 
 class PoolClient(KubernetesClient):
     """资源池管理客户端"""
+    
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        """获取单例实例"""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 
     def list_pools(self) -> List[Dict[str, Any]]:
         """列出所有资源池"""

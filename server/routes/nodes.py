@@ -24,8 +24,7 @@ async def get_nodes(
 ):
     """获取节点列表"""
     try:
-        client = PoolClient()
-        
+        client = PoolClient.get_instance()
         # 获取所有节点
         nodes = client.list_nodes()
         
@@ -79,11 +78,13 @@ async def get_nodes(
 
 
 @router.get("/{nodeName}", response_model=NodeDetailResponse)
-async def get_node_detail(nodeName: str, token: str = Depends(AuthValidator.validate_token)):
+async def get_node_detail(
+        nodeName: str, 
+        token: str = Depends(AuthValidator.validate_token)
+):
     """获取节点详情"""
     try:
-        client = PoolClient()
-        
+        client = PoolClient.get_instance()
         # 获取节点信息
         node = client.get_node(nodeName)
         
@@ -155,8 +156,7 @@ async def get_nodes_gpu_detail(
 ):
     """获取所有节点的GPU详情"""
     try:
-        client = PoolClient()
-        
+        client = PoolClient.get_instance()
         # 获取所有节点
         nodes = client.list_nodes()
         
@@ -203,12 +203,12 @@ async def add_node_to_pool(
 ):
     """将节点添加到资源池"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         pool = request.get("pool")
         if not pool:
             raise HTTPException(status_code=400, detail="Pool name is required")
         
-        result = client.add_nodes_to_pool([nodeName], pool)
+        result = client.add_nodes_to_pool(pool, [nodeName])
         
         return {
             "node": nodeName,
@@ -231,8 +231,8 @@ async def remove_node_from_pool(
 ):
     """从资源池移除节点"""
     try:
-        client = PoolClient()
-        result = client.remove_nodes_from_pool([nodeName], poolName)
+        client = PoolClient.get_instance()
+        result = client.remove_nodes_from_pool(poolName, [nodeName])
         
         return {
             "node": nodeName,
@@ -252,7 +252,7 @@ async def get_node_labels(
 ):
     """获取节点标签"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         node = client.get_node(nodeName)
         
         if not node:
