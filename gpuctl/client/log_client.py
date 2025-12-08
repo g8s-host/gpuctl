@@ -1,3 +1,4 @@
+from .. import DEFAULT_NAMESPACE
 from .base_client import KubernetesClient
 from kubernetes.client.rest import ApiException
 from kubernetes.stream import stream
@@ -8,7 +9,7 @@ import time
 class LogClient(KubernetesClient):
     """日志管理客户端"""
 
-    def get_job_logs(self, job_name: str, namespace: str = "default",
+    def get_job_logs(self, job_name: str, namespace: str = DEFAULT_NAMESPACE,
                      tail: int = 100, pod_name: Optional[str] = None) -> List[str]:
         """获取任务日志"""
         try:
@@ -34,7 +35,7 @@ class LogClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, f"get logs for job {job_name}")
 
-    def stream_job_logs(self, job_name: str, namespace: str = "default",
+    def stream_job_logs(self, job_name: str, namespace: str = DEFAULT_NAMESPACE,
                         pod_name: Optional[str] = None):
         """流式获取任务日志（生成器）"""
         try:
@@ -66,7 +67,7 @@ class LogClient(KubernetesClient):
         except ApiException as e:
             yield f"Error streaming logs: {e}"
 
-    def get_pod_logs(self, pod_name: str, namespace: str = "default",
+    def get_pod_logs(self, pod_name: str, namespace: str = DEFAULT_NAMESPACE,
                      container: Optional[str] = None, tail: int = 100) -> List[str]:
         """获取特定Pod的日志"""
         try:
@@ -84,7 +85,7 @@ class LogClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, f"get logs for pod {pod_name}")
 
-    def _get_job_pods(self, job_name: str, namespace: str = "default"):
+    def _get_job_pods(self, job_name: str, namespace: str = DEFAULT_NAMESPACE):
         """获取Job关联的所有Pod"""
         try:
             # 通过标签选择器找到Job关联的Pod

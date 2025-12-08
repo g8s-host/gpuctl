@@ -1,5 +1,6 @@
 import argparse
 import sys
+from gpuctl import DEFAULT_NAMESPACE
 from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
@@ -12,7 +13,7 @@ def main():
     # create命令
     create_parser = subparsers.add_parser('create', help='Create a job from YAML')
     create_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can be specified multiple times)')
-    create_parser.add_argument('-n', '--namespace', default='default',
+    create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
 
     # get命令
@@ -21,7 +22,7 @@ def main():
 
     # get jobs
     jobs_parser = get_subparsers.add_parser('jobs', help='Get jobs')
-    jobs_parser.add_argument('-n', '--namespace', default='default',
+    jobs_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                              help='Kubernetes namespace')
     jobs_parser.add_argument('--pool', help='Filter by resource pool')
     jobs_parser.add_argument('--type', choices=['training', 'inference', 'notebook'],
@@ -39,13 +40,13 @@ def main():
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
     delete_parser.add_argument('-f', '--file', help='YAML file path')
     delete_parser.add_argument('resource_name', nargs='?', help='Resource name')
-    delete_parser.add_argument('-n', '--namespace', default='default',
+    delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
 
     # logs命令
     logs_parser = subparsers.add_parser('logs', help='Get job logs')
     logs_parser.add_argument('job_name', help='Job name')
-    logs_parser.add_argument('-n', '--namespace', default='default',
+    logs_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                              help='Kubernetes namespace')
     logs_parser.add_argument('-f', '--follow', action='store_true',
                              help='Follow log output')
@@ -82,7 +83,7 @@ def main():
     # describe job
     job_describe_parser = describe_subparsers.add_parser('job', help='Describe job details')
     job_describe_parser.add_argument('job_id', help='Job ID')
-    job_describe_parser.add_argument('-n', '--namespace', default='default', help='Kubernetes namespace')
+    job_describe_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
 
     # describe pool
     pool_describe_parser = describe_subparsers.add_parser('pool', help='Describe pool details')

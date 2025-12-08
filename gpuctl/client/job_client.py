@@ -1,3 +1,4 @@
+from .. import DEFAULT_NAMESPACE
 from .base_client import KubernetesClient
 from kubernetes import client
 from kubernetes.client.rest import ApiException
@@ -7,7 +8,7 @@ from typing import List, Dict, Any, Optional
 class JobClient(KubernetesClient):
     """任务管理客户端"""
 
-    def create_job(self, job: client.V1Job, namespace: str = "default") -> Dict[str, Any]:
+    def create_job(self, job: client.V1Job, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Job"""
         try:
             response = self.batch_v1.create_namespaced_job(namespace, job)
@@ -19,7 +20,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create job")
 
-    def get_job(self, name: str, namespace: str = "default") -> Optional[Dict[str, Any]]:
+    def get_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> Optional[Dict[str, Any]]:
         """获取Job信息"""
         try:
             job = self.batch_v1.read_namespaced_job(name, namespace)
@@ -29,7 +30,7 @@ class JobClient(KubernetesClient):
                 return None
             self.handle_api_exception(e, f"get job {name}")
 
-    def list_jobs(self, namespace: str = "default",
+    def list_jobs(self, namespace: str = DEFAULT_NAMESPACE,
                   labels: Dict[str, str] = None) -> List[Dict[str, Any]]:
         """列出Jobs"""
         try:
@@ -45,7 +46,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "list jobs")
 
-    def delete_job(self, name: str, namespace: str = "default") -> bool:
+    def delete_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
         """删除Job"""
         try:
             delete_options = client.V1DeleteOptions(propagation_policy="Background")
@@ -70,7 +71,7 @@ class JobClient(KubernetesClient):
             }
         }
 
-    def create_deployment(self, deployment: client.V1Deployment, namespace: str = "default") -> Dict[str, Any]:
+    def create_deployment(self, deployment: client.V1Deployment, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Deployment"""
         try:
             response = self.apps_v1.create_namespaced_deployment(namespace, deployment)
@@ -82,7 +83,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create deployment")
 
-    def create_service(self, service: client.V1Service, namespace: str = "default") -> Dict[str, Any]:
+    def create_service(self, service: client.V1Service, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Service"""
         try:
             response = self.core_v1.create_namespaced_service(namespace, service)
@@ -94,7 +95,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create service")
 
-    def create_hpa(self, hpa: client.V1HorizontalPodAutoscaler, namespace: str = "default") -> Dict[str, Any]:
+    def create_hpa(self, hpa: client.V1HorizontalPodAutoscaler, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建HorizontalPodAutoscaler"""
         try:
             response = self.autoscaling_v1.create_namespaced_horizontal_pod_autoscaler(namespace, hpa)
@@ -106,7 +107,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create hpa")
 
-    def create_statefulset(self, statefulset: client.V1StatefulSet, namespace: str = "default") -> Dict[str, Any]:
+    def create_statefulset(self, statefulset: client.V1StatefulSet, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建StatefulSet"""
         try:
             response = self.apps_v1.create_namespaced_stateful_set(namespace, statefulset)
@@ -118,7 +119,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create statefulset")
 
-    def list_pods(self, namespace: str = "default", labels: Dict[str, str] = None) -> List[Dict[str, Any]]:
+    def list_pods(self, namespace: str = DEFAULT_NAMESPACE, labels: Dict[str, str] = None) -> List[Dict[str, Any]]:
         """列出Pods"""
         try:
             label_selector = None
