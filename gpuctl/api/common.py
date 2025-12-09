@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from enum import Enum
 
 
@@ -29,7 +29,7 @@ class ResourceRequest(BaseModel):
     accelerator_count: int = Field(..., ge=1, description="加速器数量", alias="gpu")
     gpu: int = Field(..., ge=1, description="GPU数量", alias="accelerator_count")
     gpu_type: Optional[str] = Field(default=None, description="GPU类型")
-    cpu: str = Field(..., description="CPU需求，如 '8' 或 '8000m'")
+    cpu: Union[int, str] = Field(..., description="CPU需求，如 8, '8' 或 '8000m'")
     memory: str = Field(..., description="内存需求，如 '32Gi'")
     gpu_share: Optional[str] = Field(default=None, description="GPU共享配置")
 
