@@ -15,7 +15,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # 设置日志
-LOG_DIR = "test_logs"
+LOG_DIR = os.path.join("tests", "test_logs")
 LOG_FILE = os.path.join(LOG_DIR, f"test_gpuctl_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
 # 确保日志目录存在

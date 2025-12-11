@@ -96,7 +96,9 @@ celerybeat-schedule
 
 # test logs
 test_logs/
+tests/test_logs/
 test_kubeconfig
+tests/test_kubeconfig
 
 # virtualenv
 venv/
