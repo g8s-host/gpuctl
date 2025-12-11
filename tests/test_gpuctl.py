@@ -106,8 +106,8 @@ def setup_kubeconfig(config):
 apiVersion: v1
 clusters:
 - cluster:
-    server: https://{config['k8s_master_ip']}:{config['k8s_api_port']}
-    {f'certificate-authority: {config['k8s_ca_cert']}' if config['k8s_ca_cert'] else 'insecure-skip-tls-verify: true'}
+    server: https://{config["k8s_master_ip"]}:{config["k8s_api_port"]}
+    {f'certificate-authority: {config["k8s_ca_cert"]}' if config["k8s_ca_cert"] else 'insecure-skip-tls-verify: true'}
   name: test-cluster
 contexts:
 - context:
@@ -120,7 +120,7 @@ preferences: {{}}
 users:
 - name: test-user
   user:
-    {f'token: {config['k8s_token']}' if config['k8s_token'] else ''}
+    {f'token: {config["k8s_token"]}' if config["k8s_token"] else ''}
 """
     
     # 保存kubeconfig文件
