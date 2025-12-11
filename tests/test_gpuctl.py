@@ -38,13 +38,19 @@ def load_config():
     """加载配置文件"""
     logger.info("开始加载配置文件")
     
-    # 加载.env文件（如果存在）
-    env_path = ".env"
+    # 尝试从tests目录加载.env文件
+    env_path = os.path.join("tests", ".env")
     if os.path.exists(env_path):
         load_dotenv(env_path)
         logger.info(f"配置文件 {env_path} 加载成功")
     else:
-        logger.info("配置文件 .env 不存在，将使用默认配置（本地K8s集群）")
+        # 尝试从当前目录加载.env文件（向后兼容）
+        current_env_path = ".env"
+        if os.path.exists(current_env_path):
+            load_dotenv(current_env_path)
+            logger.info(f"配置文件 {current_env_path} 加载成功")
+        else:
+            logger.info("配置文件 .env 不存在，将使用默认配置（本地K8s集群）")
     
     # 获取配置项，所有配置项都是可选的，默认使用本地K8s环境
     config = {

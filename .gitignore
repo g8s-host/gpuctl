@@ -93,10 +93,21 @@ celerybeat-schedule
 .env
 .env.local
 .env.*.local
+.env.example
+.env.example.local
+.env.example.*.local
+tests/.env
+tests/.env.local
+tests/.env.*.local
+tests/.env.example
+tests/.env.example.local
+tests/.env.example.*.local
 
 # test logs
 test_logs/
 tests/test_logs/
+
+# kubeconfig files
 test_kubeconfig
 tests/test_kubeconfig
 
