@@ -38,31 +38,28 @@ def load_config():
     """加载配置文件"""
     logger.info("开始加载配置文件")
     
-    # 加载.env文件
+    # 加载.env文件（如果存在）
     env_path = ".env"
-    if not os.path.exists(env_path):
-        logger.error(f"配置文件 {env_path} 不存在，请从.env.example复制并填写真实配置")
-        sys.exit(1)
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+        logger.info(f"配置文件 {env_path} 加载成功")
+    else:
+        logger.info("配置文件 .env 不存在，将使用默认配置（本地K8s集群）")
     
-    load_dotenv(env_path)
-    logger.info(f"配置文件 {env_path} 加载成功")
-    
-    # 验证必要的配置项
-    required_configs = ["K8S_MASTER_IP"]
-    for config in required_configs:
-        if not os.getenv(config):
-            logger.error(f"缺少必要的配置项: {config}")
-            sys.exit(1)
-    
-    return {
+    # 获取配置项，所有配置项都是可选的，默认使用本地K8s环境
+    config = {
         "k8s_master_ip": os.getenv("K8S_MASTER_IP"),
         "k8s_api_port": os.getenv("K8S_API_PORT", "6443"),
         "k8s_token": os.getenv("K8S_TOKEN"),
         "k8s_ca_cert": os.getenv("K8S_CA_CERT"),
         "log_level": os.getenv("LOG_LEVEL", "DEBUG"),
         "api_host": os.getenv("API_HOST", "0.0.0.0"),
-        "api_port": os.getenv("API_PORT", "8000")
+        "api_port": os.getenv("API_PORT", "8000"),
+        "default_namespace": os.getenv("DEFAULT_NAMESPACE")
     }
+    
+    logger.info(f"加载的配置信息: {config}")
+    return config
 
 
 def run_command(cmd, cwd=None, env=None):
@@ -92,6 +89,11 @@ def run_command(cmd, cwd=None, env=None):
 
 def setup_kubeconfig(config):
     """设置kubeconfig文件"""
+    # 如果没有提供K8s master IP，使用本地kubeconfig文件
+    if not config['k8s_master_ip']:
+        logger.info("未提供K8s master IP，将使用本地kubeconfig文件")
+        return None
+    
     logger.info("开始设置kubeconfig文件")
     
     kubeconfig_content = f"""
@@ -155,7 +157,13 @@ def test_cli_commands(kubeconfig_path):
     env = os.environ.copy()
     env["PYTHONPATH"] = "."
     env["LOG_LEVEL"] = "DEBUG"
-    env["KUBECONFIG"] = kubeconfig_path
+    
+    # 只有当提供了kubeconfig_path时才设置KUBECONFIG环境变量
+    if kubeconfig_path:
+        env["KUBECONFIG"] = kubeconfig_path
+        logger.info(f"使用kubeconfig文件: {kubeconfig_path}")
+    else:
+        logger.info("使用本地kubeconfig文件")
     
     # 测试命令列表
     test_commands = [
@@ -213,7 +221,13 @@ def start_api_server(config, kubeconfig_path):
     env = os.environ.copy()
     env["PYTHONPATH"] = "."
     env["LOG_LEVEL"] = "DEBUG"
-    env["KUBECONFIG"] = kubeconfig_path
+    
+    # 只有当提供了kubeconfig_path时才设置KUBECONFIG环境变量
+    if kubeconfig_path:
+        env["KUBECONFIG"] = kubeconfig_path
+        logger.info(f"使用kubeconfig文件: {kubeconfig_path}")
+    else:
+        logger.info("使用本地kubeconfig文件")
     
     # 启动API服务器（非阻塞）
     process = subprocess.Popen(
@@ -276,7 +290,7 @@ def main():
                 api_server.wait()
         
         # 7. 清理kubeconfig文件
-        if os.path.exists(kubeconfig_path):
+        if kubeconfig_path and os.path.exists(kubeconfig_path):
             os.remove(kubeconfig_path)
             logger.info(f"清理kubeconfig文件: {kubeconfig_path}")
         

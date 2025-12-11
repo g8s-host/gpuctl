@@ -11,6 +11,8 @@ class JobClient(KubernetesClient):
     def create_job(self, job: client.V1Job, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Job"""
         try:
+            # 确保命名空间存在
+            self.ensure_namespace_exists(namespace)
             response = self.batch_v1.create_namespaced_job(namespace, job)
             return {
                 "name": response.metadata.name,
@@ -74,6 +76,8 @@ class JobClient(KubernetesClient):
     def create_deployment(self, deployment: client.V1Deployment, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Deployment"""
         try:
+            # 确保命名空间存在
+            self.ensure_namespace_exists(namespace)
             response = self.apps_v1.create_namespaced_deployment(namespace, deployment)
             return {
                 "name": response.metadata.name,
@@ -86,6 +90,8 @@ class JobClient(KubernetesClient):
     def create_service(self, service: client.V1Service, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Service"""
         try:
+            # 确保命名空间存在
+            self.ensure_namespace_exists(namespace)
             response = self.core_v1.create_namespaced_service(namespace, service)
             return {
                 "name": response.metadata.name,
@@ -98,6 +104,8 @@ class JobClient(KubernetesClient):
     def create_hpa(self, hpa: client.V1HorizontalPodAutoscaler, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建HorizontalPodAutoscaler"""
         try:
+            # 确保命名空间存在
+            self.ensure_namespace_exists(namespace)
             response = self.autoscaling_v1.create_namespaced_horizontal_pod_autoscaler(namespace, hpa)
             return {
                 "name": response.metadata.name,
@@ -110,6 +118,8 @@ class JobClient(KubernetesClient):
     def create_statefulset(self, statefulset: client.V1StatefulSet, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建StatefulSet"""
         try:
+            # 确保命名空间存在
+            self.ensure_namespace_exists(namespace)
             response = self.apps_v1.create_namespaced_stateful_set(namespace, statefulset)
             return {
                 "name": response.metadata.name,

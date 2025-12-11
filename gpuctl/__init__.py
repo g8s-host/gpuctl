@@ -1,2 +1,3 @@
 # Default Kubernetes namespace for all resources
-DEFAULT_NAMESPACE = "g8s-system"
+import os
+DEFAULT_NAMESPACE = os.getenv("DEFAULT_NAMESPACE", "g8s-system")

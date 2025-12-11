@@ -24,6 +24,24 @@ class KubernetesClient:
         except Exception as e:
             raise RuntimeError(f"Failed to load Kubernetes config: {e}")
 
+    def ensure_namespace_exists(self, namespace: str) -> None:
+        """确保命名空间存在，如果不存在则创建"""
+        try:
+            # 检查命名空间是否存在
+            self.core_v1.read_namespace(namespace)
+        except ApiException as e:
+            if e.status == 404:
+                # 命名空间不存在，创建它
+                try:
+                    body = client.V1Namespace(
+                        metadata=client.V1ObjectMeta(name=namespace)
+                    )
+                    self.core_v1.create_namespace(body)
+                except ApiException as create_e:
+                    raise RuntimeError(f"Failed to create namespace {namespace}: {create_e}")
+            else:
+                raise RuntimeError(f"Failed to check namespace {namespace}: {e}")
+
     def handle_api_exception(self, e: ApiException, operation: str) -> None:
         """处理API异常"""
         if e.status == 401:
