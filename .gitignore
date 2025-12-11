@@ -91,6 +91,12 @@ celerybeat-schedule
 
 # dotenv
 .env
+.env.local
+.env.*.local
+
+# test logs
+test_logs/
+test_kubeconfig
 
 # virtualenv
 venv/

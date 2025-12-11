@@ -32,21 +32,28 @@ active_connections = []
 @router.post("", response_model=JobResponse, status_code=201)
 async def create_job(request: JobCreateRequest, token: str = Depends(AuthValidator.validate_token)):
     """创建任务"""
+    logger.debug(f"开始创建任务，请求内容: {request.yamlContent[:100]}...")
     try:
         # 解析YAML
+        logger.debug("正在解析YAML配置")
         parsed_obj = BaseParser.parse_yaml(request.yamlContent)
+        logger.debug(f"YAML解析成功，任务类型: {parsed_obj.kind}")
 
         # 根据任务类型处理
         if parsed_obj.kind == "training":
+            logger.debug("处理训练任务")
             handler = TrainingKind()
             result = handler.create_training_job(parsed_obj)
         elif parsed_obj.kind == "inference":
+            logger.debug("处理推理服务任务")
             handler = InferenceKind()
             result = handler.create_inference_service(parsed_obj)
         elif parsed_obj.kind == "notebook":
+            logger.debug("处理Notebook任务")
             handler = NotebookKind()
             result = handler.create_notebook(parsed_obj)
         else:
+            logger.error(f"不支持的任务类型: {parsed_obj.kind}")
             raise HTTPException(status_code=400, detail=f"Unsupported job kind: {parsed_obj.kind}")
 
         return JobResponse(

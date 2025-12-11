@@ -17,8 +17,14 @@ from server.routes import (
 )
 
 # 配置日志
-logging.basicConfig(level=logging.INFO)
+import os
+log_level = os.getenv('LOG_LEVEL', 'DEBUG').upper()
+logging.basicConfig(
+    level=getattr(logging, log_level),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
+logger.debug(f"日志级别设置为: {log_level}")
 
 app = FastAPI(
     title="GPU Control API",
