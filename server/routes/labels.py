@@ -29,8 +29,8 @@ async def add_node_label(nodeName: str, request: LabelRequest, token: str = Depe
         client._label_node(nodeName, request.key, request.value)
         
         return {
-            "node": nodeName,
-            "label": f"{request.key}={request.value}",
+            "nodeName": nodeName,
+            "label": {request.key: request.value},
             "message": "标签添加成功"
         }
 
@@ -112,6 +112,30 @@ async def get_node_label(nodeName: str, key: str, token: str = Depends(AuthValid
         raise
     except Exception as e:
         logger.error(f"Failed to get node label: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/{nodeName}/labels", response_model=Dict[str, Any])
+async def get_node_labels(nodeName: str, token: str = Depends(AuthValidator.validate_token)):
+    """查询指定节点的所有Label"""
+    try:
+        client = PoolClient()
+        
+        # 获取节点信息
+        node = client.get_node(nodeName)
+        
+        # 获取所有Label
+        labels = node.get("labels", {})
+        
+        return {
+            "node": nodeName,
+            "labels": labels
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get node labels: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

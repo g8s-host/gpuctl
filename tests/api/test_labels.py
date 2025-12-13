@@ -10,9 +10,8 @@ def client():
     return TestClient(app)
 
 
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-@patch('gpuctl.client.pool_client.PoolClient')
-def test_add_node_label(mock_pool_client, mock_load_config, client):
+@patch('server.routes.labels.PoolClient')
+def test_add_node_label(mock_pool_client, client):
     """测试为节点添加标签API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -30,15 +29,14 @@ def test_add_node_label(mock_pool_client, mock_load_config, client):
     # 断言结果
     assert response.status_code == 200
     assert response.json() == {
-        "node": "node-1",
-        "label": "gpu-type=A100",
+        "nodeName": "node-1",
+        "label": {"gpu-type": "A100"},
         "message": "标签添加成功"
     }
 
 
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-@patch('gpuctl.client.pool_client.PoolClient')
-def test_remove_node_label(mock_pool_client, mock_load_config, client):
+@patch('server.routes.labels.PoolClient')
+def test_remove_node_label(mock_pool_client, client):
     """测试删除节点标签API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -61,9 +59,8 @@ def test_remove_node_label(mock_pool_client, mock_load_config, client):
     }
 
 
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-@patch('gpuctl.client.pool_client.PoolClient')
-def test_update_node_label(mock_pool_client, mock_load_config, client):
+@patch('server.routes.labels.PoolClient')
+def test_update_node_label(mock_pool_client, client):
     """测试更新节点标签API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -87,9 +84,8 @@ def test_update_node_label(mock_pool_client, mock_load_config, client):
     }
 
 
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-@patch('gpuctl.client.pool_client.PoolClient')
-def test_get_node_labels(mock_pool_client, mock_load_config, client):
+@patch('server.routes.labels.PoolClient')
+def test_get_node_labels(mock_pool_client, client):
     """测试获取节点标签API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -121,9 +117,8 @@ def test_get_node_labels(mock_pool_client, mock_load_config, client):
     }
 
 
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-@patch('gpuctl.client.pool_client.PoolClient')
-def test_list_all_node_labels(mock_pool_client, mock_load_config, client):
+@patch('server.routes.labels.PoolClient')
+def test_list_all_node_labels(mock_pool_client, client):
     """测试获取所有节点标签API"""
     # 设置模拟返回值
     mock_instance = MagicMock()

@@ -154,6 +154,31 @@ def test_delete_job(mock_job_client):
 
 
 @patch('server.routes.jobs.JobClient')
+def test_delete_job_force(mock_job_client):
+    """测试强制删除作业API"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.delete_job.return_value = True
+    mock_job_client.return_value = mock_instance
+    
+    # 发送API请求 - 带force参数
+    response = client.delete(
+        "/api/v1/jobs/test-job?force=true",
+        headers={"Authorization": "Bearer test-token"}
+    )
+    
+    # 断言结果
+    assert response.status_code == 200
+    assert response.json() == {
+        "jobId": "test-job",
+        "status": "terminating",
+        "message": "任务删除指令已下发"
+    }
+    # 验证force参数被正确传递
+    mock_instance.delete_job.assert_called_once_with("test-job", force=True)
+
+
+@patch('server.routes.jobs.JobClient')
 def test_pause_job(mock_job_client):
     """测试暂停作业API"""
     # 发送API请求
@@ -215,3 +240,101 @@ def test_get_job_logs(mock_log_client):
         ],
         "lastTimestamp": response.json()["lastTimestamp"]
     }
+
+
+@patch('server.routes.jobs.BaseParser.parse_yaml')
+@patch('server.routes.jobs.TrainingKind')
+def test_batch_create_jobs(mock_training_kind, mock_parse_yaml):
+    """测试批量创建作业API"""
+    # 设置模拟返回值
+    mock_parse_yaml.return_value.kind = "training"
+    mock_parse_yaml.return_value.job.name = "test-job-{}"
+    mock_handler = MagicMock()
+    mock_handler.create_training_job.return_value = {
+        "job_id": "test-job-{}",
+        "name": "test-job-{}",
+        "status": "created"
+    }
+    mock_training_kind.return_value = mock_handler
+    
+    # 发送API请求
+    response = client.post(
+        "/api/v1/jobs/batch",
+        json={
+            "yamlContents": [
+                "kind: training\nversion: v0.1\njob:\n  name: test-job-1",
+                "kind: training\nversion: v0.1\njob:\n  name: test-job-2"
+            ]
+        },
+        headers={"Authorization": "Bearer test-token"}
+    )
+    
+    # 断言结果
+    assert response.status_code == 201
+    response_json = response.json()
+    assert len(response_json["success"]) == 2
+    assert len(response_json["failed"]) == 0
+    assert response_json["success"][0]["jobId"] == "test-job-{}"
+    assert response_json["success"][1]["jobId"] == "test-job-{}"
+
+
+@patch('server.routes.jobs.JobClient')
+def test_get_job_metrics(mock_job_client):
+    """测试获取作业指标API"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_job_client.return_value = mock_instance
+    
+    # 发送API请求
+    response = client.get(
+        "/api/v1/jobs/test-job/metrics",
+        headers={"Authorization": "Bearer test-token"}
+    )
+    
+    # 断言结果
+    assert response.status_code == 200
+    response_json = response.json()
+    assert "gpuUtilization" in response_json
+    assert "memoryUsage" in response_json
+    
+    # 验证指标数据结构
+    for metric_type in ["gpuUtilization", "memoryUsage"]:
+        assert isinstance(response_json[metric_type], list)
+        for metric_item in response_json[metric_type]:
+            assert "timestamp" in metric_item
+            assert "value" in metric_item
+
+
+@patch('server.routes.jobs.BaseParser.parse_yaml')
+@patch('server.routes.jobs.TrainingKind')
+def test_batch_create_jobs(mock_training_kind, mock_parse_yaml):
+    """测试批量创建作业API"""
+    # 设置模拟返回值
+    mock_parse_yaml.return_value.kind = "training"
+    mock_handler = MagicMock()
+    mock_handler.create_training_job.return_value = {
+        "job_id": "test-job-{}",
+        "name": "test-job-{}",
+        "status": "created"
+    }
+    mock_training_kind.return_value = mock_handler
+    
+    # 发送API请求
+    response = client.post(
+        "/api/v1/jobs/batch",
+        json={
+            "yamlContents": [
+                "kind: training\nversion: v0.1\njob:\n  name: test-job-1",
+                "kind: training\nversion: v0.1\njob:\n  name: test-job-2"
+            ]
+        },
+        headers={"Authorization": "Bearer test-token"}
+    )
+    
+    # 断言结果
+    assert response.status_code == 201
+    response_json = response.json()
+    assert len(response_json["success"]) == 2
+    assert len(response_json["failed"]) == 0
+    assert response_json["success"][0]["jobId"] == "test-job-{}"
+    assert response_json["success"][1]["jobId"] == "test-job-{}"

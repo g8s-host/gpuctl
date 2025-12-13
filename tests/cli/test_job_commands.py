@@ -157,6 +157,51 @@ def test_create_job_parser_error(mock_parse_yaml_file):
     assert result == 1
 
 
+@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.job.TrainingKind')
+def test_batch_create_jobs(mock_training_kind, mock_parse_yaml_file):
+    """测试批量创建作业命令"""
+    # 设置模拟返回值
+    mock_parse_yaml_file.return_value.kind = "training"
+    mock_parse_yaml_file.return_value.job.name = "test-job"
+    
+    mock_handler = MagicMock()
+    mock_handler.create_training_job.return_value = {
+        "job_id": "test-training-job",
+        "name": "test-training-job",
+        "namespace": "default",
+        "resources": {"gpu": 1, "cpu": 4}
+    }
+    mock_training_kind.return_value = mock_handler
+    
+    # 调用命令 - 批量创建任务
+    args = Namespace(file=["test1.yaml", "test2.yaml"], namespace="default")
+    result = create_job_command(args)
+    
+    # 断言结果
+    assert result == 0
+    assert mock_parse_yaml_file.call_count == 2
+    mock_training_kind.assert_called()
+    mock_handler.create_training_job.assert_called()
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_with_force_option(mock_job_client):
+    """测试使用--force选项删除作业命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.delete_job.return_value = True
+    mock_job_client.return_value = mock_instance
+    
+    # 调用命令 - 使用--force选项
+    args = Namespace(file=None, resource_name="test-job", namespace="default", force=True)
+    result = delete_job_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.delete_job.assert_called_once_with("test-job", "default", True)
+
+
 @patch('gpuctl.cli.job.JobClient')
 def test_get_jobs_command(mock_job_client):
     """测试获取作业列表命令"""
@@ -240,7 +285,7 @@ def test_delete_job_by_name(mock_job_client):
     
     # 断言结果
     assert result == 0
-    mock_instance.delete_job.assert_called_once_with("test-job", "default")
+    mock_instance.delete_job.assert_called_once_with("test-job", "default", False)
 
 
 @patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
@@ -249,27 +294,27 @@ def test_delete_job_by_file(mock_parse_yaml_file):
     # 设置模拟返回值
     mock_parse_yaml_file.return_value.kind = "training"
     mock_parse_yaml_file.return_value.job.name = "test-job"
-    
+
     # 调用命令
     # 模拟整个KubernetesClient的初始化过程，避免实际加载Kubernetes配置
     with patch('gpuctl.client.base_client.KubernetesClient._load_config') as mock_load_config, \
          patch('gpuctl.cli.job.JobClient') as mock_job_client:
-        
+
         # 模拟_load_config方法，避免实际加载Kubernetes配置
         mock_load_config.return_value = None
-        
+
         # 模拟JobClient
         mock_job_instance = MagicMock()
         mock_job_instance.delete_job.return_value = True
         mock_job_client.return_value = mock_job_instance
-        
-        args = Namespace(file="test.yaml", resource_name=None, namespace="default")
+
+        args = Namespace(file="test.yaml", resource_name=None, namespace="default", force=False)
         result = delete_job_command(args)
-        
+
         # 断言结果
         assert result == 0
         mock_parse_yaml_file.assert_called_once_with("test.yaml")
-        mock_job_instance.delete_job.assert_called_once_with("test-job", "default")
+        mock_job_instance.delete_job.assert_called_once_with("test-job", "default", False)
 
 
 @patch('gpuctl.cli.job.LogClient')
@@ -324,3 +369,48 @@ def test_resume_job_command(mock_job_client):
     # 断言结果
     assert result == 0
     mock_instance.resume_job.assert_called_once_with("test-job", "default")
+
+
+@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.job.TrainingKind')
+def test_create_multiple_jobs(mock_training_kind, mock_parse_yaml_file):
+    """测试批量提交多个作业命令"""
+    # 设置模拟返回值
+    mock_parse_yaml_file.return_value.kind = "training"
+    mock_parse_yaml_file.return_value.job.name = "test-job-{}"
+    
+    mock_handler = MagicMock()
+    mock_handler.create_training_job.return_value = {
+        "job_id": "test-training-job-{}",
+        "name": "test-training-job-{}",
+        "namespace": "default",
+        "resources": {"gpu": 1, "cpu": 4}
+    }
+    mock_training_kind.return_value = mock_handler
+    
+    # 调用命令 - 批量提交
+    args = Namespace(file=["test1.yaml", "test2.yaml"], namespace="default")
+    result = create_job_command(args)
+    
+    # 断言结果
+    assert result == 0
+    assert mock_parse_yaml_file.call_count == 2
+    assert mock_training_kind.call_count == 2
+    assert mock_handler.create_training_job.call_count == 2
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_with_force(mock_job_client):
+    """测试使用--force选项删除作业命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.delete_job.return_value = True
+    mock_job_client.return_value = mock_instance
+    
+    # 调用命令 - 带force参数
+    args = Namespace(file=None, resource_name="test-job", namespace="default", force=True)
+    result = delete_job_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.delete_job.assert_called_once_with("test-job", "default", True)

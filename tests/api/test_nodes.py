@@ -6,9 +6,8 @@ from server.main import app
 client = TestClient(app)
 
 
-@patch('gpuctl.client.pool_client.PoolClient')
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-def test_get_nodes(mock_load_config, mock_pool_client):
+@patch('server.routes.nodes.PoolClient')
+def test_get_nodes(mock_pool_client):
     """测试获取节点列表API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -44,12 +43,11 @@ def test_get_nodes(mock_load_config, mock_pool_client):
     assert response.status_code == 200
     assert response.json()["total"] == 2
     assert len(response.json()["items"]) == 2
-    assert response.json()[0]["name"] == "node-1"
+    assert response.json()["items"][0]["nodeName"] == "node-1"
 
 
-@patch('gpuctl.client.pool_client.PoolClient')
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-def test_get_node_detail(mock_load_config, mock_pool_client):
+@patch('server.routes.nodes.PoolClient')
+def test_get_node_detail(mock_pool_client):
     """测试获取节点详情API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -73,13 +71,12 @@ def test_get_node_detail(mock_load_config, mock_pool_client):
     
     # 断言结果
     assert response.status_code == 200
-    assert response.json()["name"] == "node-1"
-    assert response.json()["gpu_total"] == 4
+    assert response.json()["nodeName"] == "node-1"
+    assert response.json()["resources"]["gpuTotal"] == 4
 
 
-@patch('gpuctl.client.pool_client.PoolClient')
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-def test_add_node_to_pool(mock_load_config, mock_pool_client):
+@patch('server.routes.nodes.PoolClient')
+def test_add_node_to_pool(mock_pool_client):
     """测试将节点添加到资源池API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -106,9 +103,8 @@ def test_add_node_to_pool(mock_load_config, mock_pool_client):
     }
 
 
-@patch('gpuctl.client.pool_client.PoolClient')
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-def test_remove_node_from_pool(mock_load_config, mock_pool_client):
+@patch('server.routes.nodes.PoolClient')
+def test_remove_node_from_pool(mock_pool_client):
     """测试从资源池移除节点API"""
     # 设置模拟返回值
     mock_instance = MagicMock()
@@ -134,9 +130,8 @@ def test_remove_node_from_pool(mock_load_config, mock_pool_client):
     }
 
 
-@patch('gpuctl.client.pool_client.PoolClient')
-@patch('gpuctl.client.base_client.KubernetesClient._load_config')
-def test_get_node_labels(mock_load_config, mock_pool_client):
+@patch('server.routes.labels.PoolClient')
+def test_get_node_labels(mock_pool_client):
     """测试获取节点标签API"""
     # 设置模拟返回值
     mock_instance = MagicMock()

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -18,9 +18,20 @@ class JobResponse(BaseModel):
     message: Optional[str] = None
 
 
+class JobItem(BaseModel):
+    jobId: str
+    name: str
+    kind: str
+    pool: str
+    status: str
+    gpu: int
+    gpuType: str
+    startedAt: Optional[datetime] = None
+
+
 class JobListResponse(BaseModel):
     total: int
-    items: List[Dict[str, Any]]
+    items: List[JobItem]
 
 
 class BatchCreateRequest(BaseModel):
@@ -32,6 +43,46 @@ class BatchCreateResponse(BaseModel):
     failed: List[Dict[str, str]]
 
 
+class ResourceDetail(BaseModel):
+    gpu: int
+    gpuType: str
+    cpu: str
+    memory: str
+
+
+class MetricsDetail(BaseModel):
+    gpuUtilization: float = Field(default=0.0)
+    memoryUsage: str = Field(default="0Gi/0Gi")
+    networkLatency: str = Field(default="0ms")
+    throughput: str = Field(default="0 tokens/sec")
+
+
+class K8sResources(BaseModel):
+    jobName: str
+    pods: List[str]
+
+
+class JobDetailResponse(BaseModel):
+    jobId: str
+    name: str
+    kind: str
+    version: str
+    yamlContent: Optional[str] = None
+    status: str
+    pool: str
+    resources: ResourceDetail
+    metrics: MetricsDetail
+    createdAt: datetime
+    startedAt: Optional[datetime] = None
+    k8sResources: K8sResources
+
+
+class DeleteResponse(BaseModel):
+    jobId: str
+    status: str
+    message: str
+
+
 class PoolResponse(BaseModel):
     name: str
     description: Optional[str]
@@ -40,6 +91,17 @@ class PoolResponse(BaseModel):
     gpuFree: int
     gpuType: List[str]
     status: str
+
+
+class PoolDetailResponse(BaseModel):
+    name: str
+    description: Optional[str]
+    nodes: List[str]
+    gpuTotal: int
+    gpuUsed: int
+    gpuFree: int
+    gpuType: Dict[str, int]
+    jobs: List[Dict[str, Any]]
 
 
 class PoolCreateRequest(BaseModel):
@@ -73,12 +135,9 @@ class NodeResponse(BaseModel):
 class NodeDetailResponse(BaseModel):
     nodeName: str
     status: str
-    k8sStatus: Dict[str, Any]
     resources: Dict[str, Any]
-    gpuDetail: List[Dict[str, Any]]
     labels: List[Dict[str, str]]
     boundPools: List[str]
-    runningJobs: List[Dict[str, Any]]
     createdAt: Optional[datetime] = None
     lastUpdatedAt: Optional[datetime] = None
 

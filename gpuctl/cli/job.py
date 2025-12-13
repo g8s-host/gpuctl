@@ -121,10 +121,23 @@ def delete_job_command(args):
                 parsed_obj = BaseParser.parse_yaml_file(args.file)
                 resource_type = parsed_obj.kind
                 # 处理资源池嵌套结构
-                if resource_type in ["pool", "resource"] and hasattr(parsed_obj, 'pool'):
-                    resource_name = parsed_obj.pool.name
+                if resource_type in ["pool", "resource"]:
+                    # 资源池处理
+                    if hasattr(parsed_obj, 'metadata') and hasattr(parsed_obj.metadata, 'name'):
+                        resource_name = parsed_obj.metadata.name
+                    elif hasattr(parsed_obj, 'pool') and hasattr(parsed_obj.pool, 'name'):
+                        resource_name = parsed_obj.pool.name
+                    else:
+                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
+                elif resource_type in ["training", "inference", "notebook"]:
+                    # 任务处理
+                    if hasattr(parsed_obj, 'job') and hasattr(parsed_obj.job, 'name'):
+                        resource_name = parsed_obj.job.name
+                    else:
+                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
                 else:
-                    resource_name = parsed_obj.name if hasattr(parsed_obj, 'name') else getattr(parsed_obj, 'job', None).name if hasattr(parsed_obj, 'job') else args.file.replace('.yaml', '').replace('.yml', '')
+                    # 其他类型，从文件名推断
+                    resource_name = args.file.replace('.yaml', '').replace('.yml', '')
             except ParserError as e:
                 # 如果解析失败，尝试从文件名推断
                 resource_name = args.file.replace('.yaml', '').replace('.yml', '')
@@ -134,7 +147,7 @@ def delete_job_command(args):
             print("❌ 必须提供YAML文件或资源名称")
             return 1
 
-        if resource_type == "pool" or resource_name.endswith("-pool"):
+        if resource_type == "pool" or resource_type == "resource" or resource_name.endswith("-pool"):
             # 删除资源池
             from gpuctl.client.pool_client import PoolClient
             client = PoolClient()
@@ -148,9 +161,14 @@ def delete_job_command(args):
         else:
             # 删除任务
             client = JobClient()
-            success = client.delete_job(resource_name, args.namespace)
+            # 检查是否有force属性
+            force = getattr(args, 'force', False)
+            success = client.delete_job(resource_name, args.namespace, force)
             if success:
-                print(f"✅ 成功删除任务: {resource_name}")
+                if force:
+                    print(f"✅ 成功强制删除任务: {resource_name}")
+                else:
+                    print(f"✅ 成功删除任务: {resource_name}")
                 return 0
             else:
                 print(f"❌ 任务不存在: {resource_name}")

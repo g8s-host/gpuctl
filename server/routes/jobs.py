@@ -16,6 +16,9 @@ from server.models import (
     JobCreateRequest,
     JobResponse,
     JobListResponse,
+    JobItem,
+    JobDetailResponse,
+    DeleteResponse,
     BatchCreateRequest,
     BatchCreateResponse,
     LogResponse
@@ -164,17 +167,19 @@ async def get_jobs(
             # 从标签中获取信息
             labels = job.get("labels", {})
 
-            items.append({
-                "jobId": job["name"],
-                "name": job["name"].rsplit('-', 1)[0],  # 从名称中提取原始名称
-                "kind": labels.get("gpuctl/job-type", "unknown"),
-                "pool": labels.get("gpuctl/pool", "default"),
-                "status": job_status,
-                "gpu": 1,  # 需要从实际资源中获取
-                "gpuType": "unknown",  # 需要从实际资源中获取
-                "startedAt": job.get("creation_timestamp"),
-                "progress": None  # 需要从监控系统获取
-            })
+            # 创建JobItem对象
+            job_item = JobItem(
+                jobId=job["name"],
+                name=job["name"].rsplit('-', 1)[0],  # 从名称中提取原始名称
+                kind=labels.get("gpuctl/job-type", "unknown"),
+                pool=labels.get("gpuctl/pool", "default"),
+                status=job_status,
+                gpu=1,  # 需要从实际资源中获取
+                gpuType="unknown",  # 需要从实际资源中获取
+                startedAt=job.get("creation_timestamp")
+            )
+
+            items.append(job_item)
 
         return JobListResponse(total=total, items=items)
 
@@ -183,7 +188,7 @@ async def get_jobs(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/{jobId}", response_model=Dict[str, Any])
+@router.get("/{jobId}", response_model=JobDetailResponse)
 async def get_job_detail(jobId: str, token: str = Depends(AuthValidator.validate_token)):
     """获取任务详情"""
     try:
@@ -215,25 +220,32 @@ async def get_job_detail(jobId: str, token: str = Depends(AuthValidator.validate
             "throughput": "0 tokens/sec"
         }
 
-        response = {
-            "jobId": jobId,
-            "name": job_info["name"],
-            "kind": labels.get("gpuctl/job-type", "unknown"),
-            "version": "v0.1",
-            "yamlContent": "",  # 实际需要从存储中获取原始YAML
-            "status": "running",  # 需要根据实际状态判断
-            "pool": labels.get("gpuctl/pool", "default"),
-            "resources": resources,
-            "metrics": metrics,
-            "createdAt": job_info.get("creation_timestamp"),
-            "startedAt": job_info.get("creation_timestamp"),
-            "k8sResources": {
+        # 获取任务状态
+        job_status = "pending"
+        if job_info["status"]["succeeded"] > 0:
+            job_status = "succeeded"
+        elif job_info["status"]["failed"] > 0:
+            job_status = "failed"
+        elif job_info["status"]["active"] > 0:
+            job_status = "running"
+
+        return JobDetailResponse(
+            jobId=jobId,
+            name=job_info["name"],
+            kind=labels.get("gpuctl/job-type", "unknown"),
+            version="v0.1",
+            yamlContent="",  # 实际需要从存储中获取原始YAML
+            status=job_status,
+            pool=labels.get("gpuctl/pool", "default"),
+            resources=resources,
+            metrics=metrics,
+            createdAt=job_info.get("creation_timestamp"),
+            startedAt=job_info.get("creation_timestamp"),
+            k8sResources={
                 "jobName": jobId,
                 "pods": [pod["name"] for pod in pods]
             }
-        }
-
-        return response
+        )
 
     except HTTPException:
         raise
@@ -242,21 +254,21 @@ async def get_job_detail(jobId: str, token: str = Depends(AuthValidator.validate
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.delete("/{jobId}")
-async def delete_job(jobId: str, force: bool = False, token: str = Depends(AuthValidator.validate_token)):
+@router.delete("/{jobId}", response_model=DeleteResponse)
+async def delete_job(jobId: str, force: bool = Query(False, description="是否强制删除"), token: str = Depends(AuthValidator.validate_token)):
     """删除任务"""
     try:
         client = JobClient()
-        success = client.delete_job(jobId)
+        success = client.delete_job(jobId, force=force)
 
         if not success:
             raise HTTPException(status_code=404, detail="Job not found")
 
-        return {
-            "jobId": jobId,
-            "status": "terminating",
-            "message": "任务删除指令已下发"
-        }
+        return DeleteResponse(
+            jobId=jobId,
+            status="terminating",
+            message="任务删除指令已下发"
+        )
 
     except HTTPException:
         raise

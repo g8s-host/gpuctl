@@ -48,10 +48,20 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "list jobs")
 
-    def delete_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+    def delete_job(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
         """删除Job"""
         try:
-            delete_options = client.V1DeleteOptions(propagation_policy="Background")
+            # 配置删除选项
+            if force:
+                # 强制删除：立即终止Pod并删除Job，不等待优雅终止
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                # 正常删除：等待Pod优雅终止
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
+            
             self.batch_v1.delete_namespaced_job(name, namespace, body=delete_options)
             return True
         except ApiException as e:
@@ -154,3 +164,47 @@ class JobClient(KubernetesClient):
             "node_name": pod.spec.node_name if pod.spec else None,
             "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None
         }
+
+    def pause_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """暂停Job"""
+        try:
+            # 获取当前Job
+            job = self.batch_v1.read_namespaced_job(name, namespace)
+            # 保存原始并行度和完成数
+            job.metadata.annotations = job.metadata.annotations or {}
+            job.metadata.annotations["gpuctl/original-parallelism"] = str(job.spec.parallelism or 1)
+            job.metadata.annotations["gpuctl/original-completions"] = str(job.spec.completions or 1)
+            # 设置并行度为0，暂停Job
+            job.spec.parallelism = 0
+            job.spec.completions = 0
+            # 更新Job
+            self.batch_v1.patch_namespaced_job(name, namespace, job)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"pause job {name}")
+
+    def resume_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """恢复Job"""
+        try:
+            # 获取当前Job
+            job = self.batch_v1.read_namespaced_job(name, namespace)
+            # 获取原始并行度和完成数
+            original_parallelism = job.metadata.annotations.get("gpuctl/original-parallelism", "1")
+            original_completions = job.metadata.annotations.get("gpuctl/original-completions", "1")
+            # 恢复并行度和完成数
+            job.spec.parallelism = int(original_parallelism)
+            job.spec.completions = int(original_completions)
+            # 移除注解
+            if "gpuctl/original-parallelism" in job.metadata.annotations:
+                del job.metadata.annotations["gpuctl/original-parallelism"]
+            if "gpuctl/original-completions" in job.metadata.annotations:
+                del job.metadata.annotations["gpuctl/original-completions"]
+            # 更新Job
+            self.batch_v1.patch_namespaced_job(name, namespace, job)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"resume job {name}")
