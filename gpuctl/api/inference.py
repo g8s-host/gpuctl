@@ -1,4 +1,4 @@
-from .common import ResourceRequest, JobMetadata, EnvironmentConfig
+from .common import ResourceRequest, JobMetadata, EnvironmentConfig, ServiceConfig
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -9,13 +9,6 @@ class ModelConfig(BaseModel):
     version: str
     format: str = Field(default="safetensors")
     cache: bool = Field(default=True)
-
-
-class ServiceConfig(BaseModel):
-    replicas: int = Field(default=1, ge=1)
-    port: int = Field(default=8000, ge=1, le=65535)
-    health_check: Optional[str] = Field(default=None, alias="health_check")
-    timeout: Optional[str] = Field(default=None)
 
 
 class InferenceJob(BaseModel):

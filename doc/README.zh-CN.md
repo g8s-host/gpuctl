@@ -423,8 +423,8 @@ gpuctl/
 │   └── pool_parser.py    # 资源池解析
 ├── builder/              # 模型转K8s资源
 │   ├── training_builder.py # 训练任务→K8s Job
-│   ├── inference_builder.py # 推理任务→Deployment+HPA
-│   ├── notebook_builder.py # Notebook→StatefulSet+Service
+│   ├── inference_builder.py # 推理任务→Deployment
+│   ├── notebook_builder.py # Notebook→deployment+Service
 │   └── base_builder.py   # 基础构建逻辑
 ├── client/               # K8s操作封装
 │   ├── base_client.py    # 基础K8s客户端

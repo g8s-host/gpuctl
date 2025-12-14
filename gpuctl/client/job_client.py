@@ -23,28 +23,68 @@ class JobClient(KubernetesClient):
             self.handle_api_exception(e, "create job")
 
     def get_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> Optional[Dict[str, Any]]:
-        """获取Job信息"""
+        """获取作业资源信息，包括Job、Deployment和StatefulSet"""
         try:
+            # 先尝试获取Job资源
             job = self.batch_v1.read_namespaced_job(name, namespace)
             return self._job_to_dict(job)
         except ApiException as e:
-            if e.status == 404:
-                return None
-            self.handle_api_exception(e, f"get job {name}")
+            if e.status != 404:
+                self.handle_api_exception(e, f"get job {name}")
+
+        try:
+            # 再尝试获取Deployment资源
+            deployment = self.apps_v1.read_namespaced_deployment(name, namespace)
+            return self._deployment_to_dict(deployment)
+        except ApiException as e:
+            if e.status != 404:
+                self.handle_api_exception(e, f"get deployment {name}")
+
+        try:
+            # 最后尝试获取StatefulSet资源
+            statefulset = self.apps_v1.read_namespaced_stateful_set(name, namespace)
+            return self._statefulset_to_dict(statefulset)
+        except ApiException as e:
+            if e.status != 404:
+                self.handle_api_exception(e, f"get statefulset {name}")
+
+        # 所有类型都未找到
+        return None
 
     def list_jobs(self, namespace: str = DEFAULT_NAMESPACE,
                   labels: Dict[str, str] = None) -> List[Dict[str, Any]]:
-        """列出Jobs"""
+        """列出所有作业资源，包括Job、Deployment和StatefulSet"""
         try:
             label_selector = None
             if labels:
                 label_selector = ",".join([f"{k}={v}" for k, v in labels.items()])
 
+            all_jobs = []
+
+            # 获取Job资源（Training任务）
             jobs = self.batch_v1.list_namespaced_job(
                 namespace,
                 label_selector=label_selector
             )
-            return [self._job_to_dict(job) for job in jobs.items]
+            all_jobs.extend([self._job_to_dict(job) for job in jobs.items])
+
+            # 获取Deployment资源（Inference服务）
+            deployments = self.apps_v1.list_namespaced_deployment(
+                namespace,
+                label_selector=label_selector
+            )
+            for deployment in deployments.items:
+                all_jobs.append(self._deployment_to_dict(deployment))
+
+            # 获取StatefulSet资源（Notebook服务）
+            statefulsets = self.apps_v1.list_namespaced_stateful_set(
+                namespace,
+                label_selector=label_selector
+            )
+            for statefulset in statefulsets.items:
+                all_jobs.append(self._statefulset_to_dict(statefulset))
+
+            return all_jobs
         except ApiException as e:
             self.handle_api_exception(e, "list jobs")
 
@@ -69,6 +109,59 @@ class JobClient(KubernetesClient):
                 return False
             self.handle_api_exception(e, f"delete job {name}")
 
+    def delete_deployment(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
+        """删除Deployment"""
+        try:
+            # 配置删除选项
+            if force:
+                # 强制删除：立即终止Pod并删除Deployment，不等待优雅终止
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                # 正常删除：等待Pod优雅终止
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
+            
+            self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete deployment {name}")
+
+    def delete_statefulset(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
+        """删除StatefulSet"""
+        try:
+            # 配置删除选项
+            if force:
+                # 强制删除：立即终止Pod并删除StatefulSet，不等待优雅终止
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                # 正常删除：等待Pod优雅终止
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
+            
+            self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete statefulset {name}")
+
+    def delete_service(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """删除Service"""
+        try:
+            delete_options = client.V1DeleteOptions(propagation_policy="Background")
+            self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete service {name}")
+
     def _job_to_dict(self, job: client.V1Job) -> Dict[str, Any]:
         """将Job对象转换为字典"""
         return {
@@ -80,6 +173,36 @@ class JobClient(KubernetesClient):
                 "active": job.status.active or 0,
                 "succeeded": job.status.succeeded or 0,
                 "failed": job.status.failed or 0
+            }
+        }
+
+    def _deployment_to_dict(self, deployment: client.V1Deployment) -> Dict[str, Any]:
+        """将Deployment对象转换为字典"""
+        return {
+            "name": deployment.metadata.name,
+            "namespace": deployment.metadata.namespace,
+            "labels": deployment.metadata.labels or {},
+            "creation_timestamp": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
+            "status": {
+                "active": deployment.status.ready_replicas or 0,
+                "succeeded": 0,
+                "failed": deployment.status.unavailable_replicas or 0
+            }
+        }
+
+    def _statefulset_to_dict(self, statefulset: client.V1StatefulSet) -> Dict[str, Any]:
+        """将StatefulSet对象转换为字典"""
+        replicas = statefulset.status.replicas or 0
+        ready_replicas = statefulset.status.ready_replicas or 0
+        return {
+            "name": statefulset.metadata.name,
+            "namespace": statefulset.metadata.namespace,
+            "labels": statefulset.metadata.labels or {},
+            "creation_timestamp": statefulset.metadata.creation_timestamp.isoformat() if statefulset.metadata.creation_timestamp else None,
+            "status": {
+                "active": ready_replicas,
+                "succeeded": 0,
+                "failed": replicas - ready_replicas
             }
         }
 

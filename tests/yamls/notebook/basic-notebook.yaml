@@ -12,7 +12,7 @@ environment:
 
 resources:
   pool: dev-pool
-  gpu: 0
+  gpu: 1
   cpu: 4
   memory: 16Gi
   gpu-share: 2Gi

@@ -49,6 +49,13 @@ class StorageConfig(BaseModel):
     workdirs: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class ServiceConfig(BaseModel):
+    replicas: int = Field(default=1, ge=1)
+    port: int = Field(default=8000, ge=1, le=65535)
+    health_check: Optional[str] = Field(default=None, alias="health_check")
+    timeout: Optional[str] = Field(default=None)
+
+
 class EnvironmentConfig(BaseModel):
     image: str
     image_pull_secret: Optional[str] = Field(default=None, alias="imagePullSecret")

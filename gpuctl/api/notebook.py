@@ -1,4 +1,4 @@
-from .common import ResourceRequest, JobMetadata, EnvironmentConfig, StorageConfig
+from .common import ResourceRequest, JobMetadata, EnvironmentConfig, StorageConfig, ServiceConfig
 from pydantic import BaseModel, Field
 
 class NotebookJob(BaseModel):
@@ -8,6 +8,7 @@ class NotebookJob(BaseModel):
     environment: EnvironmentConfig
     resources: ResourceRequest
     storage: StorageConfig = Field(default_factory=StorageConfig)
+    service: ServiceConfig = Field(default_factory=ServiceConfig)
 
     model_config = {
         "populate_by_name": True

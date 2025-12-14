@@ -22,12 +22,6 @@ class InferenceKind:
         deployment_result = self.client.create_deployment(deployment, namespace)
         service_result = self.client.create_service(service, namespace)
 
-        # 如果启用了自动扩缩容，创建HPA
-        hpa_result = None
-        if inference_job.autoscaling.enabled:
-            hpa = self.builder.build_hpa(inference_job)
-            hpa_result = self.client.create_hpa(hpa, namespace)
-
         return {
             "job_id": deployment_result["name"],
             "name": inference_job.job.name,
@@ -41,7 +35,6 @@ class InferenceKind:
             },
             "k8s_resources": {
                 "deployment": deployment_result["name"],
-                "service": service_result["name"],
-                "hpa": hpa_result["name"] if hpa_result else None
+                "service": service_result["name"]
             }
         }

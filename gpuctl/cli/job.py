@@ -163,7 +163,50 @@ def delete_job_command(args):
             client = JobClient()
             # 检查是否有force属性
             force = getattr(args, 'force', False)
-            success = client.delete_job(resource_name, args.namespace, force)
+            success = True
+            
+            # 根据任务类型调用相应的删除方法
+            if resource_type == "training":
+                # Training任务：删除Job
+                success = client.delete_job(resource_name, args.namespace, force)
+            elif resource_type == "inference":
+                # Inference任务：删除Deployment和Service
+                # 生成完整资源名称
+                deployment_name = f"inference-{resource_name}"
+                service_name = f"svc-{resource_name}"
+                # 删除Deployment
+                deployment_deleted = client.delete_deployment(deployment_name, args.namespace, force)
+                # 删除Service
+                service_deleted = client.delete_service(service_name, args.namespace)
+                success = deployment_deleted and service_deleted
+            elif resource_type == "notebook":
+                # Notebook任务：删除StatefulSet和Service
+                # 生成完整资源名称
+                statefulset_name = f"notebook-{resource_name}"
+                service_name = f"svc-{resource_name}"
+                # 删除StatefulSet
+                statefulset_deleted = client.delete_statefulset(statefulset_name, args.namespace, force)
+                # 删除Service
+                service_deleted = client.delete_service(service_name, args.namespace)
+                success = statefulset_deleted and service_deleted
+            else:
+                # 尝试使用通用方式删除（先尝试Job，再尝试Deployment，最后尝试StatefulSet）
+                job_deleted = client.delete_job(resource_name, args.namespace, force)
+                if not job_deleted:
+                    deployment_deleted = client.delete_deployment(f"inference-{resource_name}", args.namespace, force)
+                    if deployment_deleted:
+                        client.delete_service(f"svc-{resource_name}", args.namespace)
+                        success = True
+                    else:
+                        statefulset_deleted = client.delete_statefulset(f"notebook-{resource_name}", args.namespace, force)
+                        if statefulset_deleted:
+                            client.delete_service(f"svc-{resource_name}", args.namespace)
+                            success = True
+                        else:
+                            success = False
+                else:
+                    success = True
+            
             if success:
                 if force:
                     print(f"✅ 成功强制删除任务: {resource_name}")
