@@ -115,31 +115,3 @@ class InferenceBuilder(BaseBuilder):
             spec=service_spec
         )
 
-    @classmethod
-    def build_hpa(cls, inference_job: InferenceJob) -> client.V1HorizontalPodAutoscaler:
-        """构建水平Pod自动扩缩容资源"""
-        hpa_spec = client.V1HorizontalPodAutoscalerSpec(
-            scale_target_ref=client.V1CrossVersionObjectReference(
-                kind="Deployment",
-                name=f"inference-{inference_job.job.name}",
-                api_version="apps/v1"
-            ),
-            min_replicas=inference_job.autoscaling.min_replicas,
-            max_replicas=inference_job.autoscaling.max_replicas,
-            target_cpu_utilization_percentage=inference_job.autoscaling.target_gpu_utilization
-        )
-
-        metadata = client.V1ObjectMeta(
-            name=f"hpa-{inference_job.job.name}",
-            labels={
-                "g8s.host/job-type": "inference",
-                "g8s.host/pool": inference_job.resources.pool or "default"
-            }
-        )
-
-        return client.V1HorizontalPodAutoscaler(
-            api_version="autoscaling/v1",
-            kind="HorizontalPodAutoscaler",
-            metadata=metadata,
-            spec=hpa_spec
-        )

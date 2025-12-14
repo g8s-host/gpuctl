@@ -18,14 +18,6 @@ class ServiceConfig(BaseModel):
     timeout: Optional[str] = Field(default=None)
 
 
-class AutoScalingConfig(BaseModel):
-    enabled: bool = Field(default=False)
-    min_replicas: int = Field(default=1, ge=1)
-    max_replicas: int = Field(default=10, ge=1)
-    target_gpu_utilization: int = Field(default=70, ge=1, le=100, alias="targetGPUUtilization")
-    target_memory_utilization: Optional[int] = Field(default=None, ge=1, le=100, alias="targetMemoryUtilization")
-
-
 class InferenceJob(BaseModel):
     kind: str = "inference"
     version: str = "v0.1"
@@ -34,7 +26,6 @@ class InferenceJob(BaseModel):
     environment: EnvironmentConfig
     resources: ResourceRequest
     service: ServiceConfig = Field(default_factory=ServiceConfig)
-    autoscaling: AutoScalingConfig = Field(default_factory=AutoScalingConfig)
 
     model_config = {
         "populate_by_name": True
