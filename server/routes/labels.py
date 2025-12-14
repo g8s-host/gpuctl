@@ -205,8 +205,8 @@ async def get_all_nodes_labels(
                     gpu_labels.append({"key": key, "value": value})
                 
             # 提取绑定的资源池
-            if "gpuctl/pool" in labels:
-                bound_pools.append(labels["gpuctl/pool"])
+            if "g8s.host/pool" in labels:
+                bound_pools.append(labels["g8s.host/pool"])
             
             node_label_list.append({
                 "nodeName": node.metadata.name,

@@ -15,24 +15,35 @@ gpuctl is an AI computing power scheduling platform designed for algorithm engin
 
 ## System Architecture
 
+The platform adopts a layered design, exposing a user-friendly abstraction layer while being built on mature Kubernetes and containerization technologies, with an added resource pool management module to support fine-grained resource scheduling.
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Algorithm Engineer                         │
+│                        Algorithm Engineer                        │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                        gpuctl CLI                               │
+│                        Access Layer                              │
+│                     (gpuctl CLI / REST API)                     │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                        gpuctl API                               │
+│                        Abstraction & Conversion Layer           │
+│  (Parse YAML → Validate → Convert to K8s resources → Encapsulate K8s complexity) │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Kubernetes Cluster                           │
+│                        Scheduling & Execution Layer             │
+│  (Implement resource pooling based on Kubernetes and ecosystem, allocate GPU resources by pool) │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Monitoring & Feedback Layer              │
+│  (Build monitoring system based on Prometheus+Grafana, collect full task runtime data) │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -69,9 +80,26 @@ gpuctl is an AI computing power scheduling platform designed for algorithm engin
 
 - Python 3.8+
 - Kubernetes cluster access permissions
-- Poetry (for dependency management)
 
-### Installation Steps
+### Installation Methods
+
+#### Method 1: Use Binary File (Recommended)
+
+Download the binary file suitable for your system from GitHub Releases:
+
+```bash
+# Linux x86_64 architecture
+wget https://github.com/your-org/gpuctl/releases/latest/download/gpuctl-linux-amd64 -O gpuctl
+
+# macOS x86_64 architecture
+curl -L https://github.com/your-org/gpuctl/releases/latest/download/gpuctl-macos-amd64 -o gpuctl
+
+chmod +x gpuctl
+sudo mv gpuctl /usr/local/bin/
+gpuctl --help
+```
+
+#### Method 2: Install from Source
 
 1. Clone the repository
 
@@ -83,16 +111,26 @@ cd gpuctl
 2. Install dependencies
 
 ```bash
-poetry install
+pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0
 ```
 
-3. Activate the virtual environment
+3. Run gpuctl
 
 ```bash
-poetry shell
+python main.py --help
 ```
 
-4. Configure Kubernetes access
+#### Method 3: Use Poetry for Dependency Management
+
+If you prefer using Poetry for dependency management:
+
+```bash
+poetry install
+poetry shell
+gpuctl --help
+```
+
+### Configure Kubernetes Access
 
 Ensure `kubectl` is properly configured and can access the target Kubernetes cluster.
 
@@ -102,10 +140,10 @@ Ensure `kubectl` is properly configured and can access the target Kubernetes clu
 
 ```yaml
 # train-pool.yaml
-kind: resource
+kind: pool
 version: v0.1
 
-pool:
+metadata:
   name: training-pool
   description: "Resource pool dedicated to training tasks"
 
@@ -127,16 +165,17 @@ gpuctl create -f train-pool.yaml
 kind: training
 version: v0.1
 
+# Task identification and description (Llama Factory fine-tuning scenario)
 job:
   name: qwen2-7b-llamafactory-sft
-  description: llama3 inference task
-  epochs: 3
-  batch_size: 8
-  priority: high
+  priority: "high"
+  description: "llama3 inference task"
 
+# Environment and image - integrated with Llama Factory 0.8.0 + DeepSpeed 0.14.0
 environment:
   image: registry.example.com/llama-factory-deepspeed:v0.8.0
   imagePullSecret: my-secret
+  # Llama Factory fine-tuning core command
   command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft", "--per_device_train_batch_size", "8", "--gradient_accumulation_steps", "4", "--learning_rate", "2e-5", "--deepspeed", "ds_config.json"]
   env:
     - name: NVIDIA_FLASH_ATTENTION
@@ -144,13 +183,16 @@ environment:
     - name: LLAMA_FACTORY_CACHE
       value: "/cache/llama-factory"
 
+# Resource requirements declaration (4x A100 cards)
 resources:
   pool: training-pool
   gpu: 4
+  gpu-type: A100-100G # Optional, if not filled, k8s scheduling is used
   cpu: 32
   memory: 128Gi
-  gpu_share: 2Gi
+  gpu-share: 2Gi
 
+# Data and model configuration
 storage:
   workdirs:
     - path: /datasets/alpaca-qwen.json
@@ -164,13 +206,100 @@ storage:
 gpuctl create -f training-job.yaml
 ```
 
-### 3. Query Task Status
+### 3. Submit an Inference Task
+
+```yaml
+# inference-service.yaml
+kind: inference
+version: v0.1  
+
+# Task identification
+job:
+  name: llama3-8b-inference
+  priority: "medium"
+  description: "llama3 inference task"
+
+# Environment and image (integrated with VLLM 0.5.0+)
+environment:
+  image: vllm/vllm-serving:v0.5.0 # Optimized inference image
+  command: ["python", "-m", "vllm.entrypoints.openai.api_server"] # Start command
+  args:
+    - "--model"
+    - "/home/data/models/llama3-8b"
+    - "--tensor-parallel-size"
+    - "1"
+    - "v2"
+    - "--max-num-seqs"
+    - "256"
+
+# Service configuration
+service:
+  replicas: 2
+  port: 8000
+  health_check: /health
+
+# Resource specifications (added pool field)
+resources:
+  pool: inference-pool # Dedicated inference resource pool, default is default
+  gpu: 1
+  gpu-type: A100-100G # Optional, if not filled, k8s scheduling is used
+  cpu: 8
+  memory: 32Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /home/data/ # Mount local storage directory
+```
+
+```bash
+gpuctl create -f inference-service.yaml
+```
+
+### 4. Submit a Notebook Task
+
+```yaml
+# notebook-job.yaml
+kind: notebook
+version: v0.1
+
+job:
+  name: data-prep-notebook
+  priority: medium
+  description: llama3 inference task
+
+environment:
+  image: registry.example.com/jupyter-ai:v1.0
+  command: ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=ai-gpuctl-2025", "--NotebookApp.password="]
+
+# Service configuration
+service:
+  port: 8888
+
+resources:
+  pool: dev-pool # Default is default
+  gpu: 1
+  gpu-type: a10-24g # Optional, if not filled, k8s scheduling is used
+  cpu: 8
+  memory: 32Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /home/jovyan/work # Code storage directory
+```
+
+```bash
+gpuctl create -f notebook-job.yaml
+```
+
+### 5. Query Task Status
 
 ```bash
 gpuctl get jobs
 ```
 
-### 4. View Task Logs
+### 6. View Task Logs
 
 ```bash
 gpuctl logs qwen2-7b-llamafactory-sft -f
@@ -183,18 +312,20 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | Command Example | Description |
 |---------|---------|
 | `gpuctl create -f train-job.yaml` | Submit a training task |
-| `gpuctl get jobs` | List all tasks and core metrics |
+| `gpuctl create -f task1.yaml -f task2.yaml` | Batch submit multiple tasks |
+| `gpuctl get jobs` | List all tasks (training/inference) and core metrics |
+| `gpuctl get jobs --pool training-pool` | List tasks in a specified resource pool |
 | `gpuctl describe job <job-id>` | View detailed task information and resource usage curves |
-| `gpuctl logs <job-id> -f` | View real-time task logs |
-| `gpuctl delete -f job.yaml` | Delete/stop a task |
-| `gpuctl pause job <job-id>` | Pause a running task |
-| `gpuctl resume job <job-id>` | Resume a paused task |
+| `gpuctl logs <job-id> -f` | View real-time task logs, supports keyword filtering |
+| `gpuctl delete -f job.yaml` | Delete/stop a task, supports --force for forced deletion |
+| `gpuctl pause <job-id>` | Pause a running task |
+| `gpuctl resume <job-id>` | Resume a paused task |
 
 ### Resource Pool Management
 
 | Command Example | Description |
 |---------|---------|
-| `gpuctl get pools` | Query all resource pools and resource usage |
+| `gpuctl get pools` | List all resource pools and basic information |
 | `gpuctl create -f pool.yaml` | Create a new resource pool |
 | `gpuctl delete -f pool.yaml` | Delete a resource pool |
 | `gpuctl describe pool <pool-name>` | View detailed resource pool information |
@@ -205,11 +336,13 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 
 | Command Example | Description |
 |---------|---------|
-| `gpuctl get nodes` | List basic information of all cluster nodes |
+| `gpuctl get nodes` | List basic information of all cluster nodes (name, status, total GPUs, bound resource pools) |
 | `gpuctl get nodes --pool <pool-name>` | Filter nodes bound to a specific resource pool |
 | `gpuctl get nodes --gpu-type <gpu-type>` | Filter nodes with a specific GPU type |
-| `gpuctl describe node <node-name>` | View detailed information of a single node |
-| `gpuctl label node <node-name> <label-key>=<label-value>` | Add a label to a specific node |
+| `gpuctl describe node <node-name>` | View detailed information of a single node (CPU/GPU resources, GPU type/quantity, label list, bound resource pools, K8s node details) |
+| `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | Mark GPU type label for a specific node (default label key) |
+| `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | Mark a label for a specific node, supports overwriting existing labels with the same key |
+| `gpuctl get label <node-name> --key=g8s.host/gpu-type` | Query the value of a specific GPU type label for a node |
 | `gpuctl label node <node-name> <label-key> --delete` | Delete a specific label from a node |
 
 ## API Documentation
@@ -219,18 +352,49 @@ The platform provides RESTful API interfaces that can be used to build third-par
 ### Basic Information
 
 - **Base Path**: `/api/v1`
-- **Data Format**: JSON/YAML
-- **Authentication**: Bearer Token
-- **Version Control**: Version number included in URL path
+- **Data Format**: Requests/responses use JSON format, YAML configuration is transmitted via `application/yaml` media type
+- **Authentication**: Bearer Token authentication, passed through HTTP header `Authorization: Bearer <token>`
+- **Version Control**: URL path includes version (e.g., `v1`), supporting multi-version parallel maintenance
+- **Status Code Specifications**:
+  - 200: Request successful
+  - 201: Resource created successfully
+  - 400: Invalid request parameters (e.g., invalid YAML format)
+  - 401: Unauthenticated (invalid or expired Token)
+  - 403: Insufficient permissions (e.g., non-admin operating resource pools)
+  - 404: Resource not found (e.g., invalid task ID)
+  - 500: Server internal error (e.g., Kubernetes cluster exception)
 
 ### Core API Endpoints
 
-- **Task Management**: `/jobs`
-- **Resource Pool Management**: `/pools`
-- **Node Management**: `/nodes`
-- **Label Management**: `/nodes/labels`
-- **Monitoring Metrics**: `/jobs/{jobId}/metrics`
-- **Log Query**: `/jobs/{jobId}/logs`
+#### Task Management API
+
+| Endpoint | Method | Function |
+|----------|--------|----------|
+| `/jobs` | POST | Create task |
+| `/jobs/batch` | POST | Batch create tasks |
+| `/jobs` | GET | Query task list |
+| `/jobs/{jobId}` | GET | Query task details |
+| `/jobs/{jobId}` | DELETE | Delete task |
+| `/jobs/{jobId}/logs` | GET | Get task real-time logs |
+| `/jobs/{jobId}/metrics` | GET | Get task metric time-series data |
+
+#### Resource Pool Management API
+
+| Endpoint | Method | Function |
+|----------|--------|----------|
+| `/pools` | GET | Query resource pool list |
+| `/pools/{poolName}` | GET | Query resource pool details |
+| `/pools` | POST | Create resource pool |
+
+#### Node Management API
+
+| Endpoint | Method | Function |
+|----------|--------|----------|
+| `/nodes` | GET | Query node list |
+| `/nodes/{nodeName}` | GET | Query node details |
+| `/nodes/{nodeName}/labels` | POST | Add labels to node |
+| `/nodes/labels` | GET | Query node labels |
+| `/nodes/{nodeName}/labels/{key}` | DELETE | Delete node label |
 
 ### Interactive API Documentation
 
@@ -246,17 +410,62 @@ http://localhost:8000/api/v1/docs
 
 ```
 gpuctl/
-├── api/             # API definitions
-├── builder/         # Task builders
-├── cli/             # CLI command implementations
-├── client/          # Client implementations
-├── kind/            # Task type definitions
-├── parser/          # YAML parsers
-├── server/          # Server implementation
-├── tests/           # Test cases
-├── main.py          # Main entry point
-├── poetry.lock      # Dependency lock file
-└── pyproject.toml   # Project configuration
+├── api/                  # API definitions
+│   ├── training.py       # Training task model
+│   ├── inference.py      # Inference task model
+│   ├── notebook.py       # Notebook task model
+│   ├── pool.py           # Resource pool model
+│   └── common.py         # Common data models
+├── parser/               # YAML parsing and validation
+│   ├── base_parser.py    # Basic parsing logic
+│   ├── training_parser.py # Training task parsing
+│   ├── inference_parser.py # Inference task parsing
+│   └── pool_parser.py    # Resource pool parsing
+├── builder/              # Model to K8s resource conversion
+│   ├── training_builder.py # Training task → K8s Job
+│   ├── inference_builder.py # Inference task → Deployment+HPA
+│   ├── notebook_builder.py # Notebook → StatefulSet+Service
+│   └── base_builder.py   # Basic building logic
+├── client/               # K8s operation encapsulation
+│   ├── base_client.py    # Basic K8s client
+│   ├── job_client.py     # Task management
+│   ├── pool_client.py    # Resource pool management
+│   └── log_client.py     # Log retrieval
+├── kind/             # Scenario-specific logic
+│   ├── training_kind.py # Multi-GPU training/distributed scheduling
+│   ├── inference_kind.py # Inference service scaling
+│   └── notebook_kind.py # Notebook lifecycle management
+├── cli/                  # CLI command implementations
+│   ├── main.py           # Main command entry
+│   ├── job.py            # Task-related commands
+│   ├── pool.py           # Resource pool-related commands
+│   └── node.py           # Node-related commands
+├── server/               # API server implementation
+│   ├── main.py           # Server entry point
+│   ├── models.py         # Data models
+│   ├── auth.py           # Authentication and authorization
+│   ├── dependencies.py   # Dependency injection
+│   └── routes/           # API routes
+│       ├── jobs.py        # Task management routes
+│       ├── pools.py       # Resource pool management routes
+│       ├── nodes.py       # Node management routes
+│       ├── labels.py      # Label management routes
+│       └── auth.py        # Authentication routes
+├── tests/                # Test cases
+│   ├── conftest.py       # Test configuration
+│   ├── test_gpuctl.py    # Core functionality tests
+│   ├── api/              # API tests
+│   │   ├── test_jobs.py   # Task API tests
+│   │   ├── test_pools.py  # Resource pool API tests
+│   │   ├── test_nodes.py  # Node API tests
+│   │   └── test_labels.py # Label API tests
+│   └── cli/              # CLI tests
+│       ├── test_job_commands.py   # Task command tests
+│       ├── test_pool_commands.py  # Resource pool command tests
+│       └── test_node_commands.py  # Node command tests
+├── main.py               # Main entry point
+├── poetry.lock           # Dependency lock file
+└── pyproject.toml        # Project configuration
 ```
 
 ### Start Development Server

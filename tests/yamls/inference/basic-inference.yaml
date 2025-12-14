@@ -1,0 +1,33 @@
+kind: inference
+version: v0.1
+
+# 任务标识
+job:
+  name: basic-inference
+  priority: "medium"
+  description: "基础推理任务，用于图像分类服务"
+
+# 环境与镜像
+environment:
+  image: pytorch/torchserve:0.9.0-cuda12.1-cudnn8-runtime
+  command: ["torchserve", "--start", "--ncs", "--model-store", "/models", "--models", "resnet50.mar"]
+
+# 服务配置
+service:
+  replicas: 1
+  port: 8080
+  health_check: /ping
+
+# 资源规格
+resources:
+  pool: inference-pool
+  gpu: 1
+  gpu-type: t4
+  cpu: 4
+  memory: 16Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /models
+    - path: /logs

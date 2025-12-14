@@ -211,14 +211,14 @@ def test_get_jobs_command(mock_job_client):
         {
             "name": "test-job-1",
             "namespace": "default",
-            "labels": {"gpuctl/job-type": "training"},
+            "labels": {"g8s.host/job-type": "training"},
             "creation_timestamp": "2023-01-01T12:00:00Z",
             "status": {"succeeded": 0, "failed": 0, "active": 1}
         },
         {
             "name": "test-job-2",
             "namespace": "default",
-            "labels": {"gpuctl/job-type": "inference"},
+            "labels": {"g8s.host/job-type": "inference"},
             "creation_timestamp": "2023-01-02T12:00:00Z",
             "status": {"succeeded": 0, "failed": 0, "active": 1}
         }
@@ -250,7 +250,7 @@ def test_get_jobs_command_with_filters(mock_job_client):
     assert result == 0
     mock_instance.list_jobs.assert_called_once_with(
         "default", 
-        labels={"gpuctl/pool": "test-pool", "gpuctl/job-type": "training"}
+        labels={"g8s.host/pool": "test-pool", "g8s.host/job-type": "training"}
     )
 
 

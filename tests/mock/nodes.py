@@ -10,7 +10,7 @@ mock_nodes = [
         "gpu_free": 4,
         "gpu_types": ["A100"],
         "labels": {
-            "gpuctl/pool": "training-pool",
+            "g8s.host/pool": "training-pool",
             "nvidia.com/gpu-type": "a100-80g"
         },
         "creation_timestamp": "2023-01-01T12:00:00Z"
@@ -23,7 +23,7 @@ mock_nodes = [
         "gpu_free": 4,
         "gpu_types": ["V100"],
         "labels": {
-            "gpuctl/pool": "inference-pool",
+            "g8s.host/pool": "inference-pool",
             "nvidia.com/gpu-type": "v100-32g"
         },
         "creation_timestamp": "2023-01-02T12:00:00Z"
@@ -36,7 +36,7 @@ mock_nodes = [
         "gpu_free": 6,
         "gpu_types": ["H100"],
         "labels": {
-            "gpuctl/pool": "training-pool",
+            "g8s.host/pool": "training-pool",
             "nvidia.com/gpu-type": "h100-80g"
         },
         "creation_timestamp": "2023-01-03T12:00:00Z"
@@ -76,7 +76,7 @@ mock_node_details = {
         ],
         "labels": [
             {"key": "nvidia.com/gpu-type", "value": "a100-80g"},
-            {"key": "gpuctl/pool", "value": "training-pool"},
+            {"key": "g8s.host/pool", "value": "training-pool"},
             {"key": "kubernetes.io/hostname", "value": "node-1"}
         ],
         "boundPools": ["training-pool"],

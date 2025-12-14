@@ -1,0 +1,18 @@
+kind: pool
+version: v0.1
+
+metadata:
+  name: multi-node-pool
+  description: "带多个节点的资源池，包含不同GPU类型的节点"
+
+nodes: 
+  node1: # 节点主机名
+    gpu-type: a100-80g
+  node2: # 节点主机名
+    gpu-type: a100-40g
+  node3: # 节点主机名
+    gpu-type: a10-24g
+  node4: # 节点主机名
+    gpu-type: t4
+  node5: # 节点主机名
+    gpu-type: v100

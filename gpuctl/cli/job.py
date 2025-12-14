@@ -42,22 +42,22 @@ def create_job_command(args):
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
                     print(f"🖥️  Resources: {result['resources']}")
-            elif parsed_obj.kind in ["pool", "resource"]:
+            elif parsed_obj.kind == "pool" or parsed_obj.kind == "resource":
                 # 资源池创建逻辑
                 from gpuctl.client.pool_client import PoolClient
                 client = PoolClient()
                 
                 # 构建资源池配置
                 pool_config = {
-                    "name": parsed_obj.pool.name,
-                    "description": parsed_obj.pool.description,
+                    "name": parsed_obj.metadata.name,
+                    "description": parsed_obj.metadata.description,
                     "nodes": list(parsed_obj.nodes.keys())
                 }
                 
                 # 创建资源池
                 result = client.create_pool(pool_config)
                 print(f"✅ Successfully created resource pool: {result['name']}")
-                print(f"📊 Description: {parsed_obj.pool.description}")
+                print(f"📊 Description: {parsed_obj.metadata.description}")
                 print(f"📦 Node count: {len(parsed_obj.nodes)}")
                 print(f"📋 Status: {result['status']}")
             else:
@@ -81,9 +81,9 @@ def get_jobs_command(args):
         # 构建标签过滤条件
         labels = {}
         if args.pool:
-            labels["gpuctl/pool"] = args.pool
+            labels["g8s.host/pool"] = args.pool
         if args.type:
-            labels["gpuctl/job-type"] = args.type
+            labels["g8s.host/job-type"] = args.type
         
         # 调用API获取作业列表，传递过滤条件
         jobs = client.list_jobs(args.namespace, labels=labels)
@@ -101,7 +101,7 @@ def get_jobs_command(args):
             elif job["status"]["active"] == 0:
                 status = "pending"
             
-            print(f"{job['name']:<30} {job['name'].split('-')[0]:<20} {job['labels'].get('gpuctl/job-type', 'unknown'):<15} {status:<10} {job['namespace']:<15} {job['creation_timestamp']:<20}")
+            print(f"{job['name']:<30} {job['name'].split('-')[0]:<20} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {job['namespace']:<15} {job['creation_timestamp']:<20}")
         
         return 0
     except Exception as e:
@@ -236,13 +236,13 @@ def describe_job_command(args):
         print(f"📋 Job Details: {args.job_id}")
         print(f"📊 Name: {job.get('name', 'N/A')}")
         print(f"📦 Namespace: {job.get('namespace', 'default')}")
-        print(f"🗂️  Kind: {job.get('labels', {}).get('gpuctl/job-type', 'unknown')}")
+        print(f"🗂️  Kind: {job.get('labels', {}).get('g8s.host/job-type', 'unknown')}")
         print(f"📈 Status: {job.get('status', 'unknown')}")
         print(f"⏰ Created: {job.get('creation_timestamp', 'N/A')}")
         print(f"🔧 Started: {job.get('start_time', 'N/A')}")
         print(f"🏁 Completed: {job.get('completion_time', 'N/A')}")
-        print(f"📋 Priority: {job.get('labels', {}).get('gpuctl/priority', 'medium')}")
-        print(f"🖥️  Pool: {job.get('labels', {}).get('gpuctl/pool', 'default')}")
+        print(f"📋 Priority: {job.get('labels', {}).get('g8s.host/priority', 'medium')}")
+        print(f"🖥️  Pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
         
         if 'resources' in job:
             print("\n💻 Resources:")

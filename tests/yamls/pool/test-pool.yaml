@@ -1,0 +1,10 @@
+kind: pool
+version: v0.1
+
+metadata:
+  name: test-pool
+  description: "测试资源池"
+
+nodes: 
+  vm-0-12-ubuntu: # 节点主机名
+    gpu-type: a100-80g

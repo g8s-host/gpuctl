@@ -9,8 +9,11 @@ class TrainingBuilder(BaseBuilder):
     @classmethod
     def build_job(cls, training_job: TrainingJob) -> client.V1Job:
         """构建K8s Job资源"""
+        # 获取workdirs
+        workdirs = training_job.storage.workdirs if hasattr(training_job.storage, 'workdirs') else []
+        
         # 构建容器
-        container = cls.build_container_spec(training_job.environment, training_job.resources)
+        container = cls.build_container_spec(training_job.environment, training_job.resources, workdirs)
 
         # 构建Pod模板
         pod_spec_extras = {}
@@ -19,12 +22,15 @@ class TrainingBuilder(BaseBuilder):
                 client.V1LocalObjectReference(name=training_job.environment.image_pull_secret)
             ]
 
+        node_selector = {}
         if training_job.resources.pool:
-            pod_spec_extras['node_selector'] = {
-                "gpuctl/pool": training_job.resources.pool
-            }
+            node_selector["g8s.host/pool"] = training_job.resources.pool
+        if training_job.resources.gpu_type:
+            node_selector["g8s.host/gpu-type"] = training_job.resources.gpu_type
+        if node_selector:
+            pod_spec_extras['node_selector'] = node_selector
 
-        template = cls.build_pod_template_spec(container, pod_spec_extras)
+        template = cls.build_pod_template_spec(container, pod_spec_extras, workdirs=workdirs)
 
         # 构建Job规格
         job_spec = client.V1JobSpec(
@@ -35,11 +41,11 @@ class TrainingBuilder(BaseBuilder):
 
         # 构建Job元数据
         metadata = client.V1ObjectMeta(
-            name=f"{training_job.job.name}-{training_job.job.priority}",
+            name=training_job.job.name,
             labels={
-                "gpuctl/job-type": "training",
-                "gpuctl/priority": training_job.job.priority,
-                "gpuctl/pool": training_job.resources.pool or "default"
+                "g8s.host/job-type": "training",
+                "g8s.host/priority": training_job.job.priority,
+                "g8s.host/pool": training_job.resources.pool or "default"
             }
         )
 

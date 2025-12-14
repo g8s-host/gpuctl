@@ -1,0 +1,37 @@
+kind: inference
+version: v0.1
+
+# 任务标识
+job:
+  name: test-inference-job
+  priority: "medium"
+  description: "测试推理任务"
+
+# 环境与镜像
+environment:
+  image: vllm/vllm-serving:v0.5.0
+  command: ["python", "-m", "vllm.entrypoints.openai.api_server"]
+  args:
+    - "--model"
+    - "/home/data/models/llama3-8b"
+    - "--tensor-parallel-size"
+    - "1"
+
+# 服务配置
+service:
+  replicas: 1
+  port: 8000
+  health_check: /health
+
+# 资源规格
+resources:
+  pool: test-pool
+  gpu: 1
+  gpu-type: a100-80g
+  cpu: 8
+  memory: 32Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /home/data/

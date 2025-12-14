@@ -1,0 +1,32 @@
+kind: training
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: test-training-job
+  priority: "high"
+  description: "测试训练任务"
+
+# 环境与镜像
+environment:
+  image: registry.example.com/llama-factory-deepspeed:v0.8.0
+  command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft"]
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
+
+# 资源需求声明
+resources:
+  pool: test-pool
+  gpu: 1
+  gpu-type: a100-80g
+  cpu: 8
+  memory: 32Gi
+  gpu-share: 2Gi
+
+# 数据与模型配置
+storage:
+  workdirs:
+    - path: /datasets/alpaca-qwen.json
+    - path: /models/qwen2-7b    
+    - path: /output/qwen2-sft

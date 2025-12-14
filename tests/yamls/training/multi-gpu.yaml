@@ -1,0 +1,50 @@
+kind: training
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: multi-gpu-training
+  priority: "high"
+  description: "多GPU分布式训练任务，用于大语言模型微调"
+
+# 环境与镜像
+environment:
+  image: nvcr.io/nvidia/pytorch:23.11-py3
+  command: ["python", "-m", "torch.distributed.launch", "--nproc_per_node=4", "-m", "transformers.Trainer"]
+  args:
+    - "--model_name_or_path" 
+    - "meta-llama/Llama-2-7b-hf"
+    - "--dataset_name" 
+    - "alpaca-gpt4"
+    - "--per_device_train_batch_size" 
+    - "4"
+    - "--gradient_accumulation_steps" 
+    - "8"
+    - "--learning_rate" 
+    - "2e-5"
+    - "--num_train_epochs" 
+    - "3"
+    - "--output_dir" 
+    - "/output/llama2-7b-sft"
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
+    - name: TORCH_DISTRIBUTED_DEBUG
+      value: "DETAIL"
+
+# 资源需求声明
+resources:
+  pool: high-performance-pool
+  gpu: 4
+  gpu-type: a100-80g
+  cpu: 32
+  memory: 128Gi
+  gpu-share: 2Gi
+
+# 数据与模型配置
+storage:
+  workdirs:
+    - path: /data/alpaca-gpt4
+    - path: /models/llama2-7b-hf
+    - path: /output
+    - path: /cache/huggingface

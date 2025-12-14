@@ -1,0 +1,27 @@
+kind: notebook
+version: v0.1
+
+job:
+  name: test-notebook-job
+  priority: medium
+  description: "测试Notebook任务"
+
+environment:
+  image: registry.example.com/jupyter-ai:v1.0
+  command: ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+
+# 服务配置
+service:
+  port: 8888
+
+resources:
+  pool: test-pool
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 8
+  memory: 32Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /home/jovyan/work

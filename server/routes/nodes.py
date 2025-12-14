@@ -34,7 +34,7 @@ async def get_nodes(
             # 资源池过滤
             if pool:
                 labels = node.get("labels", {})
-                if labels.get("gpuctl/pool") != pool:
+                if labels.get("g8s.host/pool") != pool:
                     continue
             
             # GPU类型过滤
@@ -45,7 +45,7 @@ async def get_nodes(
             
             # 构建节点信息
             labels = node.get("labels", {})
-            pool_name = labels.get("gpuctl/pool", "default")
+            pool_name = labels.get("g8s.host/pool", "default")
             
             node_info = {
                 "nodeName": node["name"],
@@ -113,8 +113,8 @@ async def get_node_detail(
         
         # 获取资源池信息
         bound_pools = []
-        if node.get("labels", {}).get("gpuctl/pool"):
-            bound_pools.append(node.get("labels", {}).get("gpuctl/pool"))
+        if node.get("labels", {}).get("g8s.host/pool"):
+            bound_pools.append(node.get("labels", {}).get("g8s.host/pool"))
         
         return NodeDetailResponse(
             nodeName=node["name"],

@@ -1,0 +1,44 @@
+kind: training
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: env-vars-training
+  priority: "medium"
+  description: "带环境变量的训练任务，用于测试环境变量配置"
+
+# 环境与镜像
+environment:
+  image: tensorflow/tensorflow:2.15.0-gpu
+  command: ["python", "train.py"]
+  env:
+    - name: TF_ENABLE_ONEDNN_OPTS
+      value: "0"
+    - name: TF_CPP_MIN_LOG_LEVEL
+      value: "1"
+    - name: MODEL_NAME
+      value: "bert-base-uncased"
+    - name: DATASET_NAME
+      value: "imdb"
+    - name: TRAIN_EPOCHS
+      value: "5"
+    - name: BATCH_SIZE
+      value: "16"
+    - name: LEARNING_RATE
+      value: "2e-5"
+
+# 资源需求声明
+resources:
+  pool: training-pool
+  gpu: 2
+  gpu-type: a100-40g
+  cpu: 16
+  memory: 64Gi
+  gpu-share: 2Gi
+
+# 数据与模型配置
+storage:
+  workdirs:
+    - path: /data/imdb
+    - path: /models
+    - path: /output

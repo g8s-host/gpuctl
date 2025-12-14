@@ -122,9 +122,9 @@ async def get_jobs(
         # 构建标签选择器
         labels = {}
         if kind:
-            labels["gpuctl/job-type"] = kind
+            labels["g8s.host/job-type"] = kind
         if pool:
-            labels["gpuctl/pool"] = pool
+            labels["g8s.host/pool"] = pool
 
         jobs = client.list_jobs(labels=labels)
 
@@ -171,8 +171,8 @@ async def get_jobs(
             job_item = JobItem(
                 jobId=job["name"],
                 name=job["name"].rsplit('-', 1)[0],  # 从名称中提取原始名称
-                kind=labels.get("gpuctl/job-type", "unknown"),
-                pool=labels.get("gpuctl/pool", "default"),
+                kind=labels.get("g8s.host/job-type", "unknown"),
+                pool=labels.get("g8s.host/pool", "default"),
                 status=job_status,
                 gpu=1,  # 需要从实际资源中获取
                 gpuType="unknown",  # 需要从实际资源中获取
@@ -232,11 +232,11 @@ async def get_job_detail(jobId: str, token: str = Depends(AuthValidator.validate
         return JobDetailResponse(
             jobId=jobId,
             name=job_info["name"],
-            kind=labels.get("gpuctl/job-type", "unknown"),
+            kind=labels.get("g8s.host/job-type", "unknown"),
             version="v0.1",
             yamlContent="",  # 实际需要从存储中获取原始YAML
             status=job_status,
-            pool=labels.get("gpuctl/pool", "default"),
+            pool=labels.get("g8s.host/pool", "default"),
             resources=resources,
             metrics=metrics,
             createdAt=job_info.get("creation_timestamp"),

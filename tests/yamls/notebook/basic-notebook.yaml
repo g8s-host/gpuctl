@@ -1,0 +1,22 @@
+kind: notebook
+version: v0.1
+
+job:
+  name: basic-notebook
+  priority: medium
+  description: "基础Notebook，用于数据分析和可视化"
+
+environment:
+  image: jupyter/minimal-notebook:latest
+  command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=notebook-token"]
+
+resources:
+  pool: dev-pool
+  gpu: 0
+  cpu: 4
+  memory: 16Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /home/jovyan/work

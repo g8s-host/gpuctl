@@ -1,0 +1,35 @@
+kind: inference
+version: v0.1
+
+# 任务标识
+job:
+  name: health-check-inference
+  priority: "medium"
+  description: "带健康检查的推理任务，用于高可用服务场景"
+
+# 环境与镜像
+environment:
+  image: fastapi-gpu:latest
+  command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# 服务配置
+service:
+  replicas: 3
+  port: 8000
+  health_check: /api/health
+  timeout: 30s
+
+# 资源规格
+resources:
+  pool: inference-pool
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 6
+  memory: 24Gi
+  gpu-share: 2Gi
+
+storage:
+  workdirs:
+    - path: /app
+    - path: /data
+    - path: /logs

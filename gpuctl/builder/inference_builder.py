@@ -9,8 +9,13 @@ class InferenceBuilder(BaseBuilder):
     @classmethod
     def build_deployment(cls, inference_job: InferenceJob) -> client.V1Deployment:
         """构建K8s Deployment资源"""
+        # 获取workdirs
+        workdirs = []
+        if hasattr(inference_job, 'storage') and hasattr(inference_job.storage, 'workdirs'):
+            workdirs = inference_job.storage.workdirs
+        
         # 构建容器
-        container = cls.build_container_spec(inference_job.environment, inference_job.resources)
+        container = cls.build_container_spec(inference_job.environment, inference_job.resources, workdirs)
 
         # 构建Pod模板
         pod_spec_extras = {}
@@ -19,12 +24,43 @@ class InferenceBuilder(BaseBuilder):
                 client.V1LocalObjectReference(name=inference_job.environment.image_pull_secret)
             ]
 
+        node_selector = {}
         if inference_job.resources.pool:
-            pod_spec_extras['node_selector'] = {
-                "gpuctl/pool": inference_job.resources.pool
-            }
+            node_selector["g8s.host/pool"] = inference_job.resources.pool
+        if inference_job.resources.gpu_type:
+            node_selector["g8s.host/gpu-type"] = inference_job.resources.gpu_type
+        if node_selector:
+            pod_spec_extras['node_selector'] = node_selector
 
-        template = cls.build_pod_template_spec(container, pod_spec_extras)
+        # 添加健康检查
+        if inference_job.service.health_check:
+            health_path = inference_job.service.health_check
+            container.liveness_probe = client.V1Probe(
+                http_get=client.V1HTTPGetAction(
+                    path=health_path,
+                    port=inference_job.service.port
+                ),
+                initial_delay_seconds=30,
+                period_seconds=10
+            )
+            container.readiness_probe = client.V1Probe(
+                http_get=client.V1HTTPGetAction(
+                    path=health_path,
+                    port=inference_job.service.port
+                ),
+                initial_delay_seconds=5,
+                period_seconds=10
+            )
+
+        # 为Deployment构建Pod模板，使用与selector匹配的labels和Always重启策略
+        app_label = f"inference-{inference_job.job.name}"
+        template = cls.build_pod_template_spec(
+            container, 
+            pod_spec_extras, 
+            labels={"app": app_label}, 
+            restart_policy="Always",  # Deployment要求使用Always重启策略
+            workdirs=workdirs
+        )
 
         # 构建Deployment规格
         deployment_spec = client.V1DeploymentSpec(
@@ -39,9 +75,9 @@ class InferenceBuilder(BaseBuilder):
         metadata = client.V1ObjectMeta(
             name=f"inference-{inference_job.job.name}",
             labels={
-                "gpuctl/job-type": "inference",
-                "gpuctl/priority": inference_job.job.priority,
-                "gpuctl/pool": inference_job.resources.pool or "default"
+                "g8s.host/job-type": "inference",
+                "g8s.host/priority": inference_job.job.priority,
+                "g8s.host/pool": inference_job.resources.pool or "default"
             }
         )
 
@@ -67,8 +103,8 @@ class InferenceBuilder(BaseBuilder):
         metadata = client.V1ObjectMeta(
             name=f"svc-{inference_job.job.name}",
             labels={
-                "gpuctl/job-type": "inference",
-                "gpuctl/pool": inference_job.resources.pool or "default"
+                "g8s.host/job-type": "inference",
+                "g8s.host/pool": inference_job.resources.pool or "default"
             }
         )
 
@@ -96,8 +132,8 @@ class InferenceBuilder(BaseBuilder):
         metadata = client.V1ObjectMeta(
             name=f"hpa-{inference_job.job.name}",
             labels={
-                "gpuctl/job-type": "inference",
-                "gpuctl/pool": inference_job.resources.pool or "default"
+                "g8s.host/job-type": "inference",
+                "g8s.host/pool": inference_job.resources.pool or "default"
             }
         )
 

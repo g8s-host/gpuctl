@@ -17,7 +17,7 @@ def test_get_nodes_command(mock_pool_client):
             "gpu_used": 4,
             "gpu_free": 4,
             "gpu_types": ["A100"],
-            "labels": {"gpuctl/pool": "training-pool"}
+            "labels": {"g8s.host/pool": "training-pool"}
         },
         {
             "name": "node-2",
@@ -26,7 +26,7 @@ def test_get_nodes_command(mock_pool_client):
             "gpu_used": 0,
             "gpu_free": 4,
             "gpu_types": ["V100"],
-            "labels": {"gpuctl/pool": "inference-pool"}
+            "labels": {"g8s.host/pool": "inference-pool"}
         }
     ]
     mock_pool_client.return_value = mock_instance
