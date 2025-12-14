@@ -89,21 +89,51 @@ class JobClient(KubernetesClient):
             self.handle_api_exception(e, "list jobs")
 
     def delete_job(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
-        """删除Job"""
+        """删除作业资源，包括Job、Deployment、StatefulSet和相关Service"""
         try:
             # 配置删除选项
             if force:
-                # 强制删除：立即终止Pod并删除Job，不等待优雅终止
                 delete_options = client.V1DeleteOptions(
                     propagation_policy="Foreground",
                     grace_period_seconds=0
                 )
             else:
-                # 正常删除：等待Pod优雅终止
                 delete_options = client.V1DeleteOptions(propagation_policy="Background")
             
-            self.batch_v1.delete_namespaced_job(name, namespace, body=delete_options)
-            return True
+            deleted = False
+            
+            # 1. 尝试删除Job资源
+            try:
+                self.batch_v1.delete_namespaced_job(name, namespace, body=delete_options)
+                deleted = True
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete job {name}")
+            
+            # 2. 尝试删除Deployment资源
+            try:
+                self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
+                deleted = True
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete deployment {name}")
+            
+            # 3. 尝试删除StatefulSet资源
+            try:
+                self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
+                deleted = True
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete statefulset {name}")
+            
+            # 4. 尝试删除相关Service（无论前面是否成功删除，都尝试删除Service）
+            try:
+                self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete service {name}")
+            
+            return deleted
         except ApiException as e:
             if e.status == 404:
                 return False

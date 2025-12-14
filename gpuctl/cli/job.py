@@ -275,6 +275,10 @@ def describe_job_command(args):
         client = JobClient()
         job = client.get_job(args.job_id, args.namespace)
         
+        if not job:
+            print(f"❌ 作业不存在: {args.job_id}")
+            return 1
+            
         # 打印作业详情
         print(f"📋 Job Details: {args.job_id}")
         print(f"📊 Name: {job.get('name', 'N/A')}")
