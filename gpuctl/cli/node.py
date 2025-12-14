@@ -37,6 +37,35 @@ def get_nodes_command(args):
         return 1
 
 
+def get_labels_command(args):
+    """获取节点标签命令"""
+    try:
+        client = PoolClient()
+        
+        # 获取节点信息
+        node = client.get_node(args.node_name)
+        
+        # 获取节点标签
+        labels = node.get('labels', {})
+        
+        # 如果指定了key，则只打印该key的标签
+        if args.key:
+            if args.key in labels:
+                print(f"{args.node_name} {args.key}: {labels[args.key]}")
+            else:
+                print(f"❌ Label {args.key} not found on node {args.node_name}")
+        else:
+            # 打印所有标签
+            print(f"🏷️  Labels for node {args.node_name}:")
+            for key, value in labels.items():
+                print(f"   {key}: {value}")
+        
+        return 0
+    except Exception as e:
+        print(f"❌ Error getting labels: {e}")
+        return 1
+
+
 def label_node_command(args):
     """为节点添加标签命令"""
     try:
