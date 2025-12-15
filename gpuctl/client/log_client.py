@@ -88,12 +88,24 @@ class LogClient(KubernetesClient):
     def _get_job_pods(self, job_name: str, namespace: str = DEFAULT_NAMESPACE):
         """获取Job关联的所有Pod"""
         try:
-            # 通过标签选择器找到Job关联的Pod
-            pods = self.core_v1.list_namespaced_pod(
-                namespace=namespace,
-                label_selector=f"job-name={job_name}"
-            )
-            return pods.items
+            # 尝试使用两种标签选择器：job-name和app
+            # 对于inference任务，标签是app={job_id}
+            # 对于其他任务，标签可能是job-name={job_name}
+            selectors = [
+                f"job-name={job_name}",
+                f"app={job_name}"
+            ]
+            
+            for selector in selectors:
+                pods = self.core_v1.list_namespaced_pod(
+                    namespace=namespace,
+                    label_selector=selector
+                )
+                if pods.items:
+                    return pods.items
+            
+            # 如果两种选择器都找不到pods，返回空列表
+            return []
 
         except ApiException as e:
             self.handle_api_exception(e, f"get pods for job {job_name}")

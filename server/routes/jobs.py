@@ -132,17 +132,22 @@ async def get_jobs(
         if status:
             filtered_jobs = []
             for job in jobs:
-                job_status = "unknown"
-                if job["status"]["succeeded"] > 0:
-                    job_status = "succeeded"
-                elif job["status"]["failed"] > 0:
-                    job_status = "failed"
-                elif job["status"]["active"] > 0:
-                    job_status = "running"
+                # 直接使用原始状态进行过滤，不再转换为简化字符串
+                if status:
+                    # 保留原有过滤逻辑，以便兼容现有API
+                    status_flag = "unknown"
+                    if job["status"]["succeeded"] > 0:
+                        status_flag = "succeeded"
+                    elif job["status"]["failed"] > 0:
+                        status_flag = "failed"
+                    elif job["status"]["active"] > 0:
+                        status_flag = "running"
+                    else:
+                        status_flag = "pending"
+                    
+                    if status_flag == status:
+                        filtered_jobs.append(job)
                 else:
-                    job_status = "pending"
-
-                if job_status == status:
                     filtered_jobs.append(job)
             jobs = filtered_jobs
 
@@ -155,25 +160,45 @@ async def get_jobs(
         # 转换为响应格式
         items = []
         for job in paginated_jobs:
-            # 获取任务状态
+            # 获取任务状态，确保与k8s一致
+            status_dict = job["status"]
             job_status = "pending"
-            if job["status"]["succeeded"] > 0:
-                job_status = "succeeded"
-            elif job["status"]["failed"] > 0:
-                job_status = "failed"
-            elif job["status"]["active"] > 0:
-                job_status = "running"
-
+            
             # 从标签中获取信息
             labels = job.get("labels", {})
+            job_type = labels.get("g8s.host/job-type", "unknown")
+            
+            # 对于Job资源（Training任务）
+            if job_type == "training":
+                if status_dict["succeeded"] > 0:
+                    job_status = "succeeded"
+                elif status_dict["failed"] > 0:
+                    job_status = "failed"
+                elif status_dict["active"] > 0:
+                    job_status = "running"
+            # 对于Deployment资源（Inference服务）
+            elif job_type == "inference":
+                # Deployment的状态判断：
+                # - Running: 至少有一个可用副本
+                # - Pending: 没有可用副本（可能是Pending或Failed状态）
+                if status_dict["active"] > 0:
+                    job_status = "running"
+            # 对于其他类型
+            else:
+                if status_dict["succeeded"] > 0:
+                    job_status = "succeeded"
+                elif status_dict["failed"] > 0:
+                    job_status = "failed"
+                elif status_dict["active"] > 0:
+                    job_status = "running"
 
             # 创建JobItem对象
             job_item = JobItem(
                 jobId=job["name"],
                 name=job["name"].rsplit('-', 1)[0],  # 从名称中提取原始名称
-                kind=labels.get("g8s.host/job-type", "unknown"),
+                kind=job_type,
                 pool=labels.get("g8s.host/pool", "default"),
-                status=job_status,
+                status=job_status,  # 使用简洁的状态字符串
                 gpu=1,  # 需要从实际资源中获取
                 gpuType="unknown",  # 需要从实际资源中获取
                 startedAt=job.get("creation_timestamp")

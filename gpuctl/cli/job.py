@@ -92,14 +92,42 @@ def get_jobs_command(args):
         print(f"{'JOB ID':<30} {'NAME':<20} {'KIND':<15} {'STATUS':<10} {'NAMESPACE':<15} {'CREATED':<20}")
         
         for job in jobs:
-            # 确定作业状态
-            status = "running"
-            if job["status"]["succeeded"] > 0:
-                status = "succeeded"
-            elif job["status"]["failed"] > 0:
-                status = "failed"
-            elif job["status"]["active"] == 0:
-                status = "pending"
+            # 根据k8s状态判断，返回与k8s一致的简洁状态字符串
+            status_dict = job["status"]
+            
+            # 对于Job资源（Training任务）
+            if job['labels'].get('g8s.host/job-type') == 'training':
+                if status_dict['succeeded'] > 0:
+                    status = "Succeeded"
+                elif status_dict['failed'] > 0:
+                    status = "Failed"
+                elif status_dict['active'] > 0:
+                    status = "Running"
+                else:
+                    status = "Pending"
+            # 对于Deployment资源（Inference服务）
+            elif job['labels'].get('g8s.host/job-type') == 'inference':
+                # Deployment的状态判断：
+                # - Pending: 还没有可用的副本
+                # - Running: 至少有一个可用副本
+                # - Failed: 所有副本都不可用
+                if status_dict['active'] > 0:
+                    status = "Running"
+                elif status_dict['failed'] > 0:
+                    # 检查是否有pod处于Pending状态
+                    status = "Pending"
+                else:
+                    status = "Pending"
+            # 对于其他类型
+            else:
+                if status_dict['succeeded'] > 0:
+                    status = "Succeeded"
+                elif status_dict['failed'] > 0:
+                    status = "Failed"
+                elif status_dict['active'] > 0:
+                    status = "Running"
+                else:
+                    status = "Pending"
             
             print(f"{job['name']:<30} {job['name'].split('-')[0]:<20} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {job['namespace']:<15} {job['creation_timestamp']:<20}")
         

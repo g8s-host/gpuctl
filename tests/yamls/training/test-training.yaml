@@ -9,7 +9,7 @@ job:
 
 # 环境与镜像
 environment:
-  image: registry.example.com/llama-factory-deepspeed:v0.8.0
+  image: pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
   command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft"]
   env:
     - name: NVIDIA_FLASH_ATTENTION
