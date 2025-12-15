@@ -325,8 +325,8 @@ class JobClient(KubernetesClient):
             job = self.batch_v1.read_namespaced_job(name, namespace)
             # 保存原始并行度和完成数
             job.metadata.annotations = job.metadata.annotations or {}
-            job.metadata.annotations["gpuctl/original-parallelism"] = str(job.spec.parallelism or 1)
-            job.metadata.annotations["gpuctl/original-completions"] = str(job.spec.completions or 1)
+            job.metadata.annotations["g8s.host/original-parallelism"] = str(job.spec.parallelism or 1)
+            job.metadata.annotations["g8s.host/original-completions"] = str(job.spec.completions or 1)
             # 设置并行度为0，暂停Job
             job.spec.parallelism = 0
             job.spec.completions = 0
@@ -344,16 +344,16 @@ class JobClient(KubernetesClient):
             # 获取当前Job
             job = self.batch_v1.read_namespaced_job(name, namespace)
             # 获取原始并行度和完成数
-            original_parallelism = job.metadata.annotations.get("gpuctl/original-parallelism", "1")
-            original_completions = job.metadata.annotations.get("gpuctl/original-completions", "1")
+            original_parallelism = job.metadata.annotations.get("g8s.host/original-parallelism", "1")
+            original_completions = job.metadata.annotations.get("g8s.host/original-completions", "1")
             # 恢复并行度和完成数
             job.spec.parallelism = int(original_parallelism)
             job.spec.completions = int(original_completions)
             # 移除注解
-            if "gpuctl/original-parallelism" in job.metadata.annotations:
-                del job.metadata.annotations["gpuctl/original-parallelism"]
-            if "gpuctl/original-completions" in job.metadata.annotations:
-                del job.metadata.annotations["gpuctl/original-completions"]
+            if "g8s.host/original-parallelism" in job.metadata.annotations:
+                del job.metadata.annotations["g8s.host/original-parallelism"]
+            if "g8s.host/original-completions" in job.metadata.annotations:
+                del job.metadata.annotations["g8s.host/original-completions"]
             # 更新Job
             self.batch_v1.patch_namespaced_job(name, namespace, job)
             return True

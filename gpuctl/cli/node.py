@@ -27,7 +27,7 @@ def get_nodes_command(args):
             gpu_used = node.get('gpu_used', 0)
             gpu_free = node.get('gpu_free', 0)
             gpu_types = ', '.join(node.get('gpu_types', []))
-            pool = node.get('labels', {}).get('gpuctl/pool', 'default')
+            pool = node.get('labels', {}).get('g8s.host/pool', 'default')
             
             print(f"{name:<30} {status:<10} {gpu_total:<10} {gpu_used:<10} {gpu_free:<10} {gpu_types:<15} {pool:<20}")
         
@@ -146,7 +146,7 @@ def describe_node_command(args):
         print(f"📊 Name: {node.get('name', 'N/A')}")
         print(f"📈 Status: {node.get('status', 'unknown')}")
         print(f"🔧 K8s Status: {node.get('k8s_status', 'N/A')}")
-        print(f"🖥️  Pool: {node.get('labels', {}).get('gpuctl/pool', 'default')}")
+        print(f"🖥️  Pool: {node.get('labels', {}).get('g8s.host/pool', 'default')}")
         print(f"⏰ Created: {node.get('created_at', 'N/A')}")
         print(f"⏰ Last Updated: {node.get('last_updated_at', 'N/A')}")
         

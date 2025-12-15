@@ -25,7 +25,7 @@ class PoolClient(KubernetesClient):
             pool_nodes = {}
             for node in nodes.items:
                 labels = node.metadata.labels or {}
-                pool_name = labels.get("gpuctl/pool", "default")
+                pool_name = labels.get("g8s.host/pool", "default")
 
                 if pool_name not in pool_nodes:
                     pool_nodes[pool_name] = []
@@ -47,7 +47,7 @@ class PoolClient(KubernetesClient):
         try:
             # 获取该资源池的所有节点
             nodes = self.core_v1.list_node(
-                label_selector=f"gpuctl/pool={pool_name}"
+                label_selector=f"g8s.host/pool={pool_name}"
             )
 
             if not nodes.items:
@@ -69,7 +69,7 @@ class PoolClient(KubernetesClient):
 
             # 为节点添加资源池标签
             for node_name in node_names:
-                self._label_node(node_name, "gpuctl/pool", pool_name)
+                self._label_node(node_name, "g8s.host/pool", pool_name)
 
             return {
                 "name": pool_name,
@@ -99,12 +99,12 @@ class PoolClient(KubernetesClient):
         try:
             # 获取资源池的所有节点
             nodes = self.core_v1.list_node(
-                label_selector=f"gpuctl/pool={pool_name}"
+                label_selector=f"g8s.host/pool={pool_name}"
             )
 
             # 移除资源池标签
             for node in nodes.items:
-                self._remove_node_label(node.metadata.name, "gpuctl/pool")
+                self._remove_node_label(node.metadata.name, "g8s.host/pool")
 
             return True
 
@@ -124,7 +124,7 @@ class PoolClient(KubernetesClient):
 
             for node_name in node_names:
                 try:
-                    self._label_node(node_name, "gpuctl/pool", pool_name)
+                    self._label_node(node_name, "g8s.host/pool", pool_name)
                     success.append(node_name)
                 except Exception as e:
                     failed.append({"node": node_name, "error": str(e)})
@@ -147,7 +147,7 @@ class PoolClient(KubernetesClient):
 
             for node_name in node_names:
                 try:
-                    self._remove_node_label(node_name, "gpuctl/pool")
+                    self._remove_node_label(node_name, "g8s.host/pool")
                     success.append(node_name)
                 except Exception as e:
                     failed.append({"node": node_name, "error": str(e)})
@@ -263,7 +263,7 @@ class PoolClient(KubernetesClient):
             if filters:
                 selector_parts = []
                 if filters.get("pool"):
-                    selector_parts.append(f"gpuctl/pool={filters['pool']}")
+                    selector_parts.append(f"g8s.host/pool={filters['pool']}")
                 if filters.get("gpu_type"):
                     selector_parts.append(f"nvidia.com/gpu-type={filters['gpu_type']}")
                 if selector_parts:
