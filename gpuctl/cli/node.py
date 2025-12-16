@@ -147,7 +147,27 @@ def describe_node_command(args):
         print(f"📈 Status: {node.get('status', 'unknown')}")
         print(f"🔧 K8s Status: {node.get('k8s_status', 'N/A')}")
         print(f"🖥️  Pool: {node.get('labels', {}).get('g8s.host/pool', 'default')}")
-        print(f"⏰ Created: {node.get('created_at', 'N/A')}")
+        
+        # 计算AGE
+        from datetime import datetime, timezone
+        def calculate_age(created_at_str):
+            if not created_at_str:
+                return "N/A"
+            created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+            now = datetime.now(timezone.utc)
+            delta = now - created_at
+            seconds = delta.total_seconds()
+            if seconds < 60:
+                return f"{int(seconds)}s"
+            elif seconds < 3600:
+                return f"{int(seconds/60)}m"
+            elif seconds < 86400:
+                return f"{int(seconds/3600)}h"
+            else:
+                return f"{int(seconds/86400)}d"
+        
+        age = calculate_age(node.get('created_at'))
+        print(f"⏰ Age: {age}")
         print(f"⏰ Last Updated: {node.get('last_updated_at', 'N/A')}")
         
         if 'resources' in node:

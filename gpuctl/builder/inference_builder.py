@@ -53,7 +53,7 @@ class InferenceBuilder(BaseBuilder):
             )
 
         # 为Deployment构建Pod模板，使用与selector匹配的labels和Always重启策略
-        app_label = f"inference-{inference_job.job.name}"
+        app_label = f"g8s-host-inference-{inference_job.job.name}"
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
@@ -67,13 +67,13 @@ class InferenceBuilder(BaseBuilder):
             replicas=inference_job.service.replicas,
             template=template,
             selector=client.V1LabelSelector(
-                match_labels={"app": f"inference-{inference_job.job.name}"}
+                match_labels={"app": app_label}
             )
         )
 
         # 构建Deployment元数据
         metadata = client.V1ObjectMeta(
-            name=f"inference-{inference_job.job.name}",
+            name=app_label,
             labels={
                 "g8s.host/job-type": "inference",
                 "g8s.host/priority": inference_job.job.priority,
@@ -91,8 +91,9 @@ class InferenceBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, inference_job: InferenceJob) -> client.V1Service:
         """构建K8s Service资源"""
+        app_label = f"g8s-host-inference-{inference_job.job.name}"
         service_spec = client.V1ServiceSpec(
-            selector={"app": f"inference-{inference_job.job.name}"},
+            selector={"app": app_label},
             ports=[client.V1ServicePort(
                 port=inference_job.service.port,
                 target_port=inference_job.service.port
@@ -101,7 +102,7 @@ class InferenceBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"svc-{inference_job.job.name}",
+            name=f"g8s-host-svc-{inference_job.job.name}",
             labels={
                 "g8s.host/job-type": "inference",
                 "g8s.host/pool": inference_job.resources.pool or "default"

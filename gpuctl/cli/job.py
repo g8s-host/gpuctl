@@ -88,8 +88,31 @@ def get_jobs_command(args):
         # 调用API获取作业列表，传递过滤条件
         jobs = client.list_jobs(args.namespace, labels=labels)
         
+        # 计算AGE的辅助函数
+        def calculate_age(created_at_str):
+            from datetime import datetime, timezone
+            import math
+            
+            if not created_at_str:
+                return "N/A"
+            
+            created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+            now = datetime.now(timezone.utc)  # 使用带时区的utcnow()
+            delta = now - created_at
+            
+            seconds = delta.total_seconds()
+            
+            if seconds < 60:
+                return f"{int(seconds)}s"
+            elif seconds < 3600:
+                return f"{int(seconds/60)}m"
+            elif seconds < 86400:
+                return f"{int(seconds/3600)}h"
+            else:
+                return f"{int(seconds/86400)}d"
+        
         # 打印作业列表
-        print(f"{'JOB ID':<30} {'NAME':<20} {'KIND':<15} {'STATUS':<10} {'NAMESPACE':<15} {'CREATED':<20}")
+        print(f"{'NAME':<30} {'KIND':<15} {'STATUS':<10} {'NAMESPACE':<15} {'AGE':<10}")
         
         for job in jobs:
             # 根据k8s状态判断，返回与k8s一致的简洁状态字符串
@@ -129,7 +152,10 @@ def get_jobs_command(args):
                 else:
                     status = "Pending"
             
-            print(f"{job['name']:<30} {job['name'].split('-')[0]:<20} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {job['namespace']:<15} {job['creation_timestamp']:<20}")
+            # 计算AGE
+            age = calculate_age(job['creation_timestamp'])
+            
+            print(f"{job['name']:<30} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {job['namespace']:<15} {age:<10}")
         
         return 0
     except Exception as e:
@@ -196,12 +222,13 @@ def delete_job_command(args):
             # 根据任务类型调用相应的删除方法
             if resource_type == "training":
                 # Training任务：删除Job
-                success = client.delete_job(resource_name, args.namespace, force)
+                full_job_name = f"g8s-host-{resource_name}"
+                success = client.delete_job(full_job_name, args.namespace, force)
             elif resource_type == "inference":
                 # Inference任务：删除Deployment和Service
                 # 生成完整资源名称
-                deployment_name = f"inference-{resource_name}"
-                service_name = f"svc-{resource_name}"
+                deployment_name = f"g8s-host-inference-{resource_name}"
+                service_name = f"g8s-host-svc-{resource_name}"
                 # 删除Deployment
                 deployment_deleted = client.delete_deployment(deployment_name, args.namespace, force)
                 # 删除Service
@@ -210,8 +237,8 @@ def delete_job_command(args):
             elif resource_type == "notebook":
                 # Notebook任务：删除StatefulSet和Service
                 # 生成完整资源名称
-                statefulset_name = f"notebook-{resource_name}"
-                service_name = f"svc-{resource_name}"
+                statefulset_name = f"g8s-host-notebook-{resource_name}"
+                service_name = f"g8s-host-svc-{resource_name}"
                 # 删除StatefulSet
                 statefulset_deleted = client.delete_statefulset(statefulset_name, args.namespace, force)
                 # 删除Service
@@ -219,16 +246,16 @@ def delete_job_command(args):
                 success = statefulset_deleted and service_deleted
             else:
                 # 尝试使用通用方式删除（先尝试Job，再尝试Deployment，最后尝试StatefulSet）
-                job_deleted = client.delete_job(resource_name, args.namespace, force)
+                job_deleted = client.delete_job(f"g8s-host-{resource_name}", args.namespace, force)
                 if not job_deleted:
-                    deployment_deleted = client.delete_deployment(f"inference-{resource_name}", args.namespace, force)
+                    deployment_deleted = client.delete_deployment(f"g8s-host-inference-{resource_name}", args.namespace, force)
                     if deployment_deleted:
-                        client.delete_service(f"svc-{resource_name}", args.namespace)
+                        client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
                         success = True
                     else:
-                        statefulset_deleted = client.delete_statefulset(f"notebook-{resource_name}", args.namespace, force)
+                        statefulset_deleted = client.delete_statefulset(f"g8s-host-notebook-{resource_name}", args.namespace, force)
                         if statefulset_deleted:
-                            client.delete_service(f"svc-{resource_name}", args.namespace)
+                            client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
                             success = True
                         else:
                             success = False
@@ -311,9 +338,47 @@ def describe_job_command(args):
         print(f"📋 Job Details: {args.job_id}")
         print(f"📊 Name: {job.get('name', 'N/A')}")
         print(f"📦 Namespace: {job.get('namespace', 'default')}")
-        print(f"🗂️  Kind: {job.get('labels', {}).get('g8s.host/job-type', 'unknown')}")
-        print(f"📈 Status: {job.get('status', 'unknown')}")
-        print(f"⏰ Created: {job.get('creation_timestamp', 'N/A')}")
+        
+        # 获取任务类型和状态
+        job_type = job.get('labels', {}).get('g8s.host/job-type', 'unknown')
+        status_dict = job.get('status', {})
+        
+        # 转换为与k8s一致的状态字符串
+        status = "Pending"
+        if status_dict.get('succeeded', 0) > 0:
+            status = "Succeeded"
+        elif status_dict.get('failed', 0) > 0:
+            # 对于inference任务，failed状态可能是因为pending状态导致的
+            if job_type == "inference":
+                status = "Pending"
+            else:
+                status = "Failed"
+        elif status_dict.get('active', 0) > 0:
+            status = "Running"
+        
+        # 计算AGE
+        from datetime import datetime, timezone
+        def calculate_age(created_at_str):
+            if not created_at_str:
+                return "N/A"
+            created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+            now = datetime.now(timezone.utc)
+            delta = now - created_at
+            seconds = delta.total_seconds()
+            if seconds < 60:
+                return f"{int(seconds)}s"
+            elif seconds < 3600:
+                return f"{int(seconds/60)}m"
+            elif seconds < 86400:
+                return f"{int(seconds/3600)}h"
+            else:
+                return f"{int(seconds/86400)}d"
+        
+        age = calculate_age(job.get('creation_timestamp'))
+        
+        print(f"🗂️  Kind: {job_type}")
+        print(f"📈 Status: {status}")
+        print(f"⏰ Age: {age}")
         print(f"🔧 Started: {job.get('start_time', 'N/A')}")
         print(f"🏁 Completed: {job.get('completion_time', 'N/A')}")
         print(f"📋 Priority: {job.get('labels', {}).get('g8s.host/priority', 'medium')}")

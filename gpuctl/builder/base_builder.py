@@ -40,17 +40,24 @@ class BaseBuilder:
     @staticmethod
     def build_container_spec(env_config, resources: ResourceRequest, workdirs: List[Dict[str, str]] = None) -> client.V1Container:
         """构建容器规格"""
+        # 初始化资源请求和限制
+        requests = {
+            "cpu": resources.cpu,
+            "memory": resources.memory
+        }
+        limits = {
+            "cpu": resources.cpu,
+            "memory": resources.memory
+        }
+        
+        # 只有当GPU数量大于0时，才添加GPU资源请求
+        if resources.gpu > 0:
+            requests["nvidia.com/gpu"] = str(resources.gpu)
+            limits["nvidia.com/gpu"] = str(resources.gpu)
+        
         resource_requirements = client.V1ResourceRequirements(
-            requests={
-                "cpu": resources.cpu,
-                "memory": resources.memory,
-                "nvidia.com/gpu": str(resources.gpu)
-            },
-            limits={
-                "cpu": resources.cpu,
-                "memory": resources.memory,
-                "nvidia.com/gpu": str(resources.gpu)
-            }
+            requests=requests,
+            limits=limits
         )
 
         env_vars = []

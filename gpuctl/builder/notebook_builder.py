@@ -34,7 +34,7 @@ class NotebookBuilder(BaseBuilder):
             pod_spec_extras['node_selector'] = node_selector
 
         # 为StatefulSet构建Pod模板，使用与selector匹配的labels和Always重启策略
-        app_label = f"notebook-{notebook_job.job.name}"
+        app_label = f"g8s-host-notebook-{notebook_job.job.name}"
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
@@ -44,18 +44,19 @@ class NotebookBuilder(BaseBuilder):
         )
 
         # 构建StatefulSet规格
+        service_name = f"g8s-host-svc-{notebook_job.job.name}"
         statefulset_spec = client.V1StatefulSetSpec(
             replicas=1,  # Notebook通常是单实例
             template=template,
             selector=client.V1LabelSelector(
-                match_labels={"app": f"notebook-{notebook_job.job.name}"}
+                match_labels={"app": app_label}
             ),
-            service_name=f"svc-{notebook_job.job.name}"
+            service_name=service_name
         )
 
         # 构建StatefulSet元数据
         metadata = client.V1ObjectMeta(
-            name=f"notebook-{notebook_job.job.name}",
+            name=app_label,
             labels={
                 "g8s.host/job-type": "notebook",
                 "g8s.host/priority": notebook_job.job.priority,
@@ -73,8 +74,9 @@ class NotebookBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, notebook_job: NotebookJob) -> client.V1Service:
         """构建K8s Service资源"""
+        app_label = f"g8s-host-notebook-{notebook_job.job.name}"
         service_spec = client.V1ServiceSpec(
-            selector={"app": f"notebook-{notebook_job.job.name}"},
+            selector={"app": app_label},
             ports=[client.V1ServicePort(
                 port=notebook_job.service.port,
                 target_port=notebook_job.service.port
@@ -83,7 +85,7 @@ class NotebookBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"svc-{notebook_job.job.name}",
+            name=f"g8s-host-svc-{notebook_job.job.name}",
             labels={
                 "g8s.host/job-type": "notebook",
                 "g8s.host/pool": notebook_job.resources.pool or "default"
