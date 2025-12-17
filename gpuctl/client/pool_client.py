@@ -95,8 +95,56 @@ class PoolClient(KubernetesClient):
             raise ValueError(f"节点不存在: {', '.join(invalid_nodes)}")
 
     def delete_pool(self, pool_name: str) -> bool:
-        """删除资源池"""
+        """删除资源池，包括级联删除关联的作业"""
         try:
+            from gpuctl.client.job_client import JobClient
+            from kubernetes.client import V1DeleteOptions
+            
+            # 1. 删除所有关联的作业
+            job_client = JobClient()
+            # 获取所有作业，然后筛选出属于该资源池的作业
+            all_jobs = job_client.list_jobs()
+            
+            for job in all_jobs:
+                # 检查作业是否属于该资源池
+                job_pool = job.get('labels', {}).get('g8s.host/pool')
+                if job_pool == pool_name:
+                    # 构建删除选项
+                    delete_options = V1DeleteOptions(propagation_policy="Foreground", grace_period_seconds=0)
+                    
+                    # 获取作业名称
+                    job_name = job['name']
+                    
+                    # 尝试删除作业资源
+                    try:
+                        # 先尝试删除Job资源
+                        job_client.batch_v1.delete_namespaced_job(job_name, job.get('namespace', 'g8s-host'), body=delete_options)
+                    except Exception:
+                        pass
+                    
+                    try:
+                        # 再尝试删除Deployment资源
+                        job_client.apps_v1.delete_namespaced_deployment(job_name, job.get('namespace', 'g8s-host'), body=delete_options)
+                    except Exception:
+                        pass
+                    
+                    try:
+                        # 最后尝试删除StatefulSet资源
+                        job_client.apps_v1.delete_namespaced_stateful_set(job_name, job.get('namespace', 'g8s-host'), body=delete_options)
+                    except Exception:
+                        pass
+                    
+                    try:
+                        # 尝试删除相关Service
+                        service_name = f"g8s-host-svc-{job_name}"
+                        if job_name.startswith("g8s-host-"):
+                            # 如果是完整名称，提取基础名称
+                            service_name = f"g8s-host-svc-{job_name[10:]}"
+                        job_client.core_v1.delete_namespaced_service(service_name, job.get('namespace', 'g8s-host'), body=delete_options)
+                    except Exception:
+                        pass
+            
+            # 2. 移除资源池标签
             # 获取资源池的所有节点
             nodes = self.core_v1.list_node(
                 label_selector=f"g8s.host/pool={pool_name}"

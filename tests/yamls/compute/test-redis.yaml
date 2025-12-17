@@ -1,0 +1,35 @@
+kind: compute
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: test-redis
+  priority: "high"
+  description: "测试redis缓存服务"
+
+# 环境与镜像
+environment:
+  image: redis:latest
+  command: ["redis-server"]
+  args: ["--appendonly", "yes", "--requirepass", "redis-password"]
+  env:
+    - name: REDIS_PORT
+      value: "6379"
+
+# 服务配置
+service:
+  replicas: 1
+  port: 6379
+  health_check: /health
+
+# 资源规格
+resources:
+  pool: test-pool
+  gpu: 0
+  cpu: 4
+  memory: 8Gi
+
+# 数据与存储配置
+storage:
+  workdirs:
+    - path: /data

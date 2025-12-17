@@ -20,6 +20,9 @@ def remove_prefix(name):
     # 对于notebook任务：g8s-host-notebook-xxx -> xxx
     elif name.startswith("g8s-host-notebook-"):
         return name.split("g8s-host-notebook-")[1]
+    # 对于compute任务：g8s-host-compute-xxx -> xxx
+    elif name.startswith("g8s-host-compute-"):
+        return name.split("g8s-host-compute-")[1]
     # 对于其他g8s-host-开头的名称：g8s-host-xxx -> xxx
     elif name.startswith("g8s-host-"):
         return name.split("g8s-host-")[1]
@@ -61,6 +64,15 @@ def create_job_command(args):
                 handler = NotebookKind()
                 result = handler.create_notebook(parsed_obj, args.namespace)
                 print(f"✅ Successfully created {parsed_obj.kind} job: {result['job_id']}")
+                print(f"📊 Name: {result['name']}")
+                print(f"📦 Namespace: {result['namespace']}")
+                if 'resources' in result:
+                    print(f"🖥️  Resources: {result['resources']}")
+            elif parsed_obj.kind == "compute":
+                from gpuctl.kind.compute_kind import ComputeKind
+                handler = ComputeKind()
+                result = handler.create_compute_service(parsed_obj, args.namespace)
+                print(f"✅ Successfully created {parsed_obj.kind} service: {result['job_id']}")
                 print(f"📊 Name: {result['name']}")
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
@@ -242,59 +254,108 @@ def delete_job_command(args):
             client = JobClient()
             # 检查是否有force属性
             force = getattr(args, 'force', False)
-            success = True
+            success = False
             
-            # 根据任务类型调用相应的删除方法
-            if resource_type == "training":
-                # Training任务：删除Job
-                full_job_name = add_prefix(resource_name, "training")
-                success = client.delete_job(full_job_name, args.namespace, force)
-            elif resource_type == "inference":
-                # Inference任务：删除Deployment和Service
-                # 生成完整资源名称
-                deployment_name = add_prefix(resource_name, "inference")
-                service_name = f"g8s-host-svc-{resource_name}"
-                # 删除Deployment
-                deployment_deleted = client.delete_deployment(deployment_name, args.namespace, force)
-                # 删除Service
-                service_deleted = client.delete_service(service_name, args.namespace)
-                success = deployment_deleted and service_deleted
-            elif resource_type == "notebook":
-                # Notebook任务：删除StatefulSet和Service
-                # 生成完整资源名称
-                statefulset_name = add_prefix(resource_name, "notebook")
-                service_name = f"g8s-host-svc-{resource_name}"
-                # 删除StatefulSet
-                statefulset_deleted = client.delete_statefulset(statefulset_name, args.namespace, force)
-                # 删除Service
-                service_deleted = client.delete_service(service_name, args.namespace)
-                success = statefulset_deleted and service_deleted
+            # 保存原始资源名称用于最终输出
+            original_resource_name = resource_name
+            
+            # 检查资源名称是否已经是完整名称（包含前缀）
+            is_full_name = False
+            if resource_name.startswith("g8s-host-"):
+                is_full_name = True
+            
+            # 获取所有作业列表，用于查询实际的作业类型
+            all_jobs = client.list_jobs(args.namespace)
+            found_job = None
+            
+            # 在所有作业中查找匹配的作业
+            for job in all_jobs:
+                job_name = job['name']
+                # 检查是否匹配完整名称或原始名称（不带前缀）
+                if job_name == resource_name or remove_prefix(job_name) == resource_name:
+                    found_job = job
+                    break
+            
+            if found_job:
+                # 从找到的作业中获取实际的作业类型
+                actual_job_type = found_job['labels'].get('g8s.host/job-type', 'unknown')
+                actual_job_name = found_job['name']
+                
+                # 根据实际作业类型调用相应的删除方法
+                if actual_job_type == "training":
+                    # Training任务：删除Job
+                    success = client.delete_job(actual_job_name, args.namespace, force)
+                elif actual_job_type == "inference":
+                    # Inference任务：删除Deployment和Service
+                    # 生成完整资源名称
+                    service_name = f"g8s-host-svc-{resource_name}"
+                    # 如果是完整名称，提取基础名称
+                    if is_full_name:
+                        service_name = f"g8s-host-svc-{remove_prefix(actual_job_name)}"
+                    # 删除Deployment
+                    deployment_deleted = client.delete_deployment(actual_job_name, args.namespace, force)
+                    # 删除Service
+                    service_deleted = client.delete_service(service_name, args.namespace)
+                    success = deployment_deleted and service_deleted
+                elif actual_job_type == "notebook":
+                    # Notebook任务：删除StatefulSet和Service
+                    # 生成完整资源名称
+                    service_name = f"g8s-host-svc-{resource_name}"
+                    # 如果是完整名称，提取基础名称
+                    if is_full_name:
+                        service_name = f"g8s-host-svc-{remove_prefix(actual_job_name)}"
+                    # 删除StatefulSet
+                    statefulset_deleted = client.delete_statefulset(actual_job_name, args.namespace, force)
+                    # 删除Service
+                    service_deleted = client.delete_service(service_name, args.namespace)
+                    success = statefulset_deleted and service_deleted
             else:
                 # 尝试使用通用方式删除（先尝试Job，再尝试Deployment，最后尝试StatefulSet）
-                job_deleted = client.delete_job(add_prefix(resource_name, "training"), args.namespace, force)
-                if not job_deleted:
-                    deployment_deleted = client.delete_deployment(add_prefix(resource_name, "inference"), args.namespace, force)
-                    if deployment_deleted:
-                        client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
+                # 先尝试直接删除（如果是完整名称）
+                if is_full_name:
+                    # 直接删除完整名称
+                    job_deleted = client.delete_job(resource_name, args.namespace, force)
+                    if job_deleted:
                         success = True
                     else:
-                        statefulset_deleted = client.delete_statefulset(add_prefix(resource_name, "notebook"), args.namespace, force)
-                        if statefulset_deleted:
-                            client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
+                        deployment_deleted = client.delete_deployment(resource_name, args.namespace, force)
+                        if deployment_deleted:
+                            service_name = f"g8s-host-svc-{remove_prefix(resource_name)}"
+                            client.delete_service(service_name, args.namespace)
                             success = True
                         else:
-                            success = False
+                            statefulset_deleted = client.delete_statefulset(resource_name, args.namespace, force)
+                            if statefulset_deleted:
+                                service_name = f"g8s-host-svc-{remove_prefix(resource_name)}"
+                                client.delete_service(service_name, args.namespace)
+                                success = True
                 else:
-                    success = True
+                    # 尝试所有可能的前缀
+                    job_types = ["training", "inference", "notebook"]
+                    for job_type in job_types:
+                        full_name = add_prefix(resource_name, job_type)
+                        if job_type == "training":
+                            success = client.delete_job(full_name, args.namespace, force)
+                        elif job_type == "inference":
+                            deployment_deleted = client.delete_deployment(full_name, args.namespace, force)
+                            service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
+                            success = deployment_deleted and service_deleted
+                        elif job_type == "notebook":
+                            statefulset_deleted = client.delete_statefulset(full_name, args.namespace, force)
+                            service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
+                            success = statefulset_deleted and service_deleted
+                        
+                        if success:
+                            break
             
             if success:
                 if force:
-                    print(f"✅ 成功强制删除任务: {resource_name}")
+                    print(f"✅ 成功强制删除任务: {original_resource_name}")
                 else:
-                    print(f"✅ 成功删除任务: {resource_name}")
+                    print(f"✅ 成功删除任务: {original_resource_name}")
                 return 0
             else:
-                print(f"❌ 任务不存在: {resource_name}")
+                print(f"❌ 任务不存在: {original_resource_name}")
                 return 1
 
     except Exception as e:
@@ -307,10 +368,17 @@ def logs_job_command(args):
     try:
         client = LogClient()
         # 无需添加前缀，因为log_client.get_job_logs已经处理了前缀逻辑
-        logs = client.get_job_logs(args.job_name, namespace=args.namespace, tail=100)
         
-        for log in logs:
-            print(log)
+        if args.follow:
+            # 使用流式日志，持续获取
+            logs = client.stream_job_logs(args.job_name, namespace=args.namespace)
+            for log in logs:
+                print(log)
+        else:
+            # 只获取一次日志
+            logs = client.get_job_logs(args.job_name, namespace=args.namespace, tail=100)
+            for log in logs:
+                print(log)
         
         return 0
     except Exception as e:
@@ -360,22 +428,45 @@ def describe_job_command(args):
     """描述作业详情命令"""
     try:
         client = JobClient()
+        job = None
+        
+        # 检查资源名称是否已经是完整名称（包含前缀）
+        is_full_name = False
+        if args.job_id.startswith("g8s-host-"):
+            is_full_name = True
+        
+        # 尝试直接获取作业
         job = client.get_job(args.job_id, args.namespace)
         
         if not job:
-            # 尝试添加不同类型的前缀再次查找
-            job_types = ["training", "inference", "notebook"]
-            found = False
-            for job_type in job_types:
-                prefixed_job_id = add_prefix(args.job_id, job_type)
-                job = client.get_job(prefixed_job_id, args.namespace)
-                if job:
-                    found = True
+            # 获取所有作业列表，用于查询实际的作业
+            all_jobs = client.list_jobs(args.namespace)
+            found_job = None
+            
+            # 在所有作业中查找匹配的作业
+            for job_item in all_jobs:
+                job_name = job_item['name']
+                # 检查是否匹配完整名称或原始名称（不带前缀）
+                if job_name == args.job_id or remove_prefix(job_name) == args.job_id:
+                    found_job = job_item
                     break
             
-            if not found:
-                print(f"❌ 作业不存在: {args.job_id}")
-                return 1
+            if found_job:
+                job = found_job
+            else:
+                # 尝试添加不同类型的前缀再次查找
+                job_types = ["training", "inference", "notebook", "compute"]
+                found = False
+                for job_type in job_types:
+                    prefixed_job_id = add_prefix(args.job_id, job_type)
+                    job = client.get_job(prefixed_job_id, args.namespace)
+                    if job:
+                        found = True
+                        break
+                
+                if not found:
+                    print(f"❌ 作业不存在: {args.job_id}")
+                    return 1
             
         # 打印作业详情，移除前缀
         display_name = remove_prefix(job.get('name', 'N/A'))

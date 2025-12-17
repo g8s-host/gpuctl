@@ -1,0 +1,36 @@
+kind: compute
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: test-nginx
+  priority: "medium"
+  description: "测试nginx web服务"
+
+# 环境与镜像
+environment:
+  image: registry.cn-shenzhen.aliyuncs.com/amgs/nginx:latest
+  command: []
+  args: []
+  env:
+    - name: NGINX_PORT
+      value: "80"
+
+# 服务配置
+service:
+  replicas: 2
+  port: 80
+  health_check: /health
+
+# 资源规格
+resources:
+  pool: test-pool
+  gpu: 0
+  cpu: 1
+  memory: 2Gi
+
+# 数据与存储配置
+storage:
+  workdirs:
+    - path: /etc/nginx/conf.d
+    - path: /var/www/html

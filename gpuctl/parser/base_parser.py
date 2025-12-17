@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from gpuctl.api.training import TrainingJob
 from gpuctl.api.inference import InferenceJob
 from gpuctl.api.notebook import NotebookJob
+from gpuctl.api.compute import ComputeJob
 from gpuctl.api.pool import ResourcePool
 
 
@@ -19,6 +20,7 @@ class BaseParser:
         "training": TrainingJob,
         "inference": InferenceJob,
         "notebook": NotebookJob,
+        "compute": ComputeJob,
         "pool": ResourcePool,
         "resource": ResourcePool
     }

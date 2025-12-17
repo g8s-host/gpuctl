@@ -54,6 +54,7 @@ gpuctl 是一个面向算法工程师的 AI 算力调度平台，旨在降低 GP
 - **训练任务**：支持分布式训练，集成 DeepSpeed 等加速框架
 - **推理服务**：支持模型部署，自动扩缩容
 - **调试任务**：提供 Jupyter Notebook 环境，方便调试
+- **计算任务**：支持纯CPU计算任务，如nginx、redis、mysql等服务
 
 ### 2. 资源池管理
 
@@ -293,7 +294,53 @@ storage:
 gpuctl create -f notebook-job.yaml
 ```
 
-### 5. 查询任务状态
+### 5. 提交Compute任务
+
+```yaml
+# nginx-job.yaml
+kind: compute
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: test-nginx
+  priority: "medium"
+  description: "测试nginx web服务"
+
+# 环境与镜像
+environment:
+  image: nginx:latest
+  command: []
+  args: []
+  env:
+    - name: NGINX_PORT
+      value: "80"
+
+# 服务配置
+service:
+  replicas: 2
+  port: 80
+  health_check: /health
+
+# 资源规格
+resources:
+  pool: test-pool
+  gpu: 0  # CPU任务，设置为0
+  cpu: 2
+  memory: 4Gi
+
+# 数据与存储配置
+storage:
+  workdirs:
+    - path: /etc/nginx/conf.d
+    - path: /var/www/html
+```
+
+```bash
+gpuctl create -f nginx-job.yaml
+```
+
+### 6. 查询任务状态
 
 ```bash
 gpuctl get jobs
@@ -414,6 +461,7 @@ gpuctl/
 │   ├── training.py       # 训练任务模型
 │   ├── inference.py      # 推理任务模型
 │   ├── notebook.py       # Notebook任务模型
+│   ├── compute.py        # Compute任务模型
 │   ├── pool.py           # 资源池模型
 │   └── common.py         # 公共数据模型
 ├── parser/               # YAML解析与校验
@@ -425,6 +473,7 @@ gpuctl/
 │   ├── training_builder.py # 训练任务→K8s Job
 │   ├── inference_builder.py # 推理任务→Deployment
 │   ├── notebook_builder.py # Notebook→deployment+Service
+│   ├── compute_builder.py # Compute任务→Deployment
 │   └── base_builder.py   # 基础构建逻辑
 ├── client/               # K8s操作封装
 │   ├── base_client.py    # 基础K8s客户端
@@ -434,7 +483,8 @@ gpuctl/
 ├── kind/             # 场景化逻辑
 │   ├── training_kind.py # 多卡训练/分布式调度
 │   ├── inference_kind.py # 推理服务扩缩容
-│   └── notebook_kind.py # Notebook生命周期管理
+│   ├── notebook_kind.py # Notebook生命周期管理
+│   └── compute_kind.py # Compute任务生命周期管理
 ├── cli/                  # 命令行入口
 │   ├── main.py           # 主命令入口
 │   ├── job.py            # 任务相关命令

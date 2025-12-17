@@ -39,9 +39,9 @@ class TrainingBuilder(BaseBuilder):
             ttl_seconds_after_finished=86400  # 24小时后自动清理
         )
 
-        # 构建Job元数据
+        # 构建Job元数据，使用一致的前缀格式：g8s-host-{job_type}-{job_name}
         metadata = client.V1ObjectMeta(
-            name=f"g8s-host-{training_job.job.name}",
+            name=f"g8s-host-training-{training_job.job.name}",
             labels={
                 "g8s.host/job-type": "training",
                 "g8s.host/priority": training_job.job.priority,

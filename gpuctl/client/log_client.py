@@ -47,24 +47,24 @@ class LogClient(KubernetesClient):
                     return
                 pod_name = pods[0].metadata.name
 
-            # 使用流式API获取实时日志
-            watcher = stream(
-                self.core_v1.read_namespaced_pod_log,
-                name=pod_name,
-                namespace=namespace,
-                follow=True,
-                timestamps=True,
-                _preload_content=False
-            )
-
-            # 实时输出日志
-            for line in watcher:
+            # 使用subprocess调用kubectl命令，确保权限正确
+            import subprocess
+            cmd = ["kubectl", "logs", pod_name, "-n", namespace, "-f", "--timestamps"]
+            
+            # 启动kubectl命令并持续读取输出
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            
+            # 持续读取日志流，直到用户中断或命令结束
+            for line in iter(process.stdout.readline, ''):
                 if line:
                     yield line.strip()
+            
+            # 等待命令结束并获取返回码
+            process.wait()
+            if process.returncode != 0:
+                yield f"Error streaming logs: kubectl command returned non-zero exit code: {process.returncode}"
 
-            watcher.close()
-
-        except ApiException as e:
+        except Exception as e:
             yield f"Error streaming logs: {e}"
 
     def get_pod_logs(self, pod_name: str, namespace: str = DEFAULT_NAMESPACE,
@@ -88,12 +88,13 @@ class LogClient(KubernetesClient):
     def _get_job_pods(self, job_name: str, namespace: str = DEFAULT_NAMESPACE):
         """获取Job关联的所有Pod"""
         try:
-            # 尝试使用两种标签选择器：job-name和app
-            # 对于inference任务，标签是app={job_id}
-            # 对于其他任务，标签可能是job-name={job_name}
+            # 对于compute任务，完整的作业名称应该是g8s-host-compute-{job_name}
+            # 所以我们需要尝试多种标签选择器
             selectors = [
                 f"job-name={job_name}",
-                f"app={job_name}"
+                f"app={job_name}",
+                f"job-name=g8s-host-compute-{job_name}",
+                f"app=g8s-host-compute-{job_name}"
             ]
             
             for selector in selectors:
