@@ -7,6 +7,29 @@ from gpuctl.client.job_client import JobClient
 from gpuctl.client.log_client import LogClient
 
 
+# 辅助函数：处理g8s-host前缀
+
+def remove_prefix(name):
+    """从名称中移除g8s-host前缀，只显示yaml文件中的原始名称"""
+    # 对于训练任务：g8s-host-training-xxx -> xxx
+    if name.startswith("g8s-host-training-"):
+        return name.split("g8s-host-training-")[1]
+    # 对于推理任务：g8s-host-inference-xxx -> xxx
+    elif name.startswith("g8s-host-inference-"):
+        return name.split("g8s-host-inference-")[1]
+    # 对于notebook任务：g8s-host-notebook-xxx -> xxx
+    elif name.startswith("g8s-host-notebook-"):
+        return name.split("g8s-host-notebook-")[1]
+    # 对于其他g8s-host-开头的名称：g8s-host-xxx -> xxx
+    elif name.startswith("g8s-host-"):
+        return name.split("g8s-host-")[1]
+    return name
+
+def add_prefix(name, job_type):
+    """为名称添加g8s-host前缀"""
+    return f"g8s-host-{job_type}-{name}"
+
+
 def create_job_command(args):
     """创建作业命令"""
     try:
@@ -112,7 +135,7 @@ def get_jobs_command(args):
                 return f"{int(seconds/86400)}d"
         
         # 打印作业列表
-        print(f"{'NAME':<30} {'KIND':<15} {'STATUS':<10} {'NAMESPACE':<15} {'AGE':<10}")
+        print(f"{'NAME':<45} {'KIND':<15} {'STATUS':<10} {'AGE':<10}")
         
         for job in jobs:
             # 根据k8s状态判断，返回与k8s一致的简洁状态字符串
@@ -155,7 +178,9 @@ def get_jobs_command(args):
             # 计算AGE
             age = calculate_age(job['creation_timestamp'])
             
-            print(f"{job['name']:<30} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {job['namespace']:<15} {age:<10}")
+            # 移除前缀后显示
+            display_name = remove_prefix(job['name'])
+            print(f"{display_name:<45} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {age:<10}")
         
         return 0
     except Exception as e:
@@ -222,12 +247,12 @@ def delete_job_command(args):
             # 根据任务类型调用相应的删除方法
             if resource_type == "training":
                 # Training任务：删除Job
-                full_job_name = f"g8s-host-{resource_name}"
+                full_job_name = add_prefix(resource_name, "training")
                 success = client.delete_job(full_job_name, args.namespace, force)
             elif resource_type == "inference":
                 # Inference任务：删除Deployment和Service
                 # 生成完整资源名称
-                deployment_name = f"g8s-host-inference-{resource_name}"
+                deployment_name = add_prefix(resource_name, "inference")
                 service_name = f"g8s-host-svc-{resource_name}"
                 # 删除Deployment
                 deployment_deleted = client.delete_deployment(deployment_name, args.namespace, force)
@@ -237,7 +262,7 @@ def delete_job_command(args):
             elif resource_type == "notebook":
                 # Notebook任务：删除StatefulSet和Service
                 # 生成完整资源名称
-                statefulset_name = f"g8s-host-notebook-{resource_name}"
+                statefulset_name = add_prefix(resource_name, "notebook")
                 service_name = f"g8s-host-svc-{resource_name}"
                 # 删除StatefulSet
                 statefulset_deleted = client.delete_statefulset(statefulset_name, args.namespace, force)
@@ -246,14 +271,14 @@ def delete_job_command(args):
                 success = statefulset_deleted and service_deleted
             else:
                 # 尝试使用通用方式删除（先尝试Job，再尝试Deployment，最后尝试StatefulSet）
-                job_deleted = client.delete_job(f"g8s-host-{resource_name}", args.namespace, force)
+                job_deleted = client.delete_job(add_prefix(resource_name, "training"), args.namespace, force)
                 if not job_deleted:
-                    deployment_deleted = client.delete_deployment(f"g8s-host-inference-{resource_name}", args.namespace, force)
+                    deployment_deleted = client.delete_deployment(add_prefix(resource_name, "inference"), args.namespace, force)
                     if deployment_deleted:
                         client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
                         success = True
                     else:
-                        statefulset_deleted = client.delete_statefulset(f"g8s-host-notebook-{resource_name}", args.namespace, force)
+                        statefulset_deleted = client.delete_statefulset(add_prefix(resource_name, "notebook"), args.namespace, force)
                         if statefulset_deleted:
                             client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
                             success = True
@@ -281,6 +306,7 @@ def logs_job_command(args):
     """获取作业日志命令"""
     try:
         client = LogClient()
+        # 无需添加前缀，因为log_client.get_job_logs已经处理了前缀逻辑
         logs = client.get_job_logs(args.job_name, namespace=args.namespace, tail=100)
         
         for log in logs:
@@ -298,10 +324,13 @@ def pause_job_command(args):
         client = JobClient()
         success = client.pause_job(args.job_name, args.namespace)
         if success:
-            print(f"✅ 成功暂停作业: {args.job_name}")
+            # 显示时移除前缀
+            display_name = remove_prefix(args.job_name)
+            print(f"✅ 成功暂停作业: {display_name}")
             return 0
         else:
-            print(f"❌ 暂停作业失败: {args.job_name}")
+            display_name = remove_prefix(args.job_name)
+            print(f"❌ 暂停作业失败: {display_name}")
             return 1
     except Exception as e:
         print(f"❌ Error pausing job: {e}")
@@ -314,10 +343,13 @@ def resume_job_command(args):
         client = JobClient()
         success = client.resume_job(args.job_name, args.namespace)
         if success:
-            print(f"✅ 成功恢复作业: {args.job_name}")
+            # 显示时移除前缀
+            display_name = remove_prefix(args.job_name)
+            print(f"✅ 成功恢复作业: {display_name}")
             return 0
         else:
-            print(f"❌ 恢复作业失败: {args.job_name}")
+            display_name = remove_prefix(args.job_name)
+            print(f"❌ 恢复作业失败: {display_name}")
             return 1
     except Exception as e:
         print(f"❌ Error resuming job: {e}")
@@ -331,13 +363,24 @@ def describe_job_command(args):
         job = client.get_job(args.job_id, args.namespace)
         
         if not job:
-            print(f"❌ 作业不存在: {args.job_id}")
-            return 1
+            # 尝试添加不同类型的前缀再次查找
+            job_types = ["training", "inference", "notebook"]
+            found = False
+            for job_type in job_types:
+                prefixed_job_id = add_prefix(args.job_id, job_type)
+                job = client.get_job(prefixed_job_id, args.namespace)
+                if job:
+                    found = True
+                    break
             
-        # 打印作业详情
-        print(f"📋 Job Details: {args.job_id}")
-        print(f"📊 Name: {job.get('name', 'N/A')}")
-        print(f"📦 Namespace: {job.get('namespace', 'default')}")
+            if not found:
+                print(f"❌ 作业不存在: {args.job_id}")
+                return 1
+            
+        # 打印作业详情，移除前缀
+        display_name = remove_prefix(job.get('name', 'N/A'))
+        print(f"📋 Job Details: {display_name}")
+        print(f"📊 Name: {display_name}")
         
         # 获取任务类型和状态
         job_type = job.get('labels', {}).get('g8s.host/job-type', 'unknown')
