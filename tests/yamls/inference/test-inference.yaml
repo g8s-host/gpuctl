@@ -3,7 +3,7 @@ version: v0.1
 
 # 任务标识
 job:
-  name: test-inference-job
+  name: new-test-inference-job
   priority: "medium"
   description: "测试推理任务"
 
@@ -25,9 +25,9 @@ service:
 
 # 资源规格
 resources:
-  pool: test-pool
+  pool: training-pool
   gpu: 1
-  gpu-type: a100-80g
+  gpu-type: a10-24g
   cpu: 8
   memory: 32Gi
   gpu-share: 2Gi

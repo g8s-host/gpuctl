@@ -285,8 +285,8 @@ def delete_job_command(args):
                 if actual_job_type == "training":
                     # Training任务：删除Job
                     success = client.delete_job(actual_job_name, args.namespace, force)
-                elif actual_job_type == "inference":
-                    # Inference任务：删除Deployment和Service
+                elif actual_job_type == "inference" or actual_job_type == "compute":
+                    # Inference或Compute任务：删除Deployment和Service
                     # 生成完整资源名称
                     service_name = f"g8s-host-svc-{resource_name}"
                     # 如果是完整名称，提取基础名称
@@ -331,12 +331,12 @@ def delete_job_command(args):
                                 success = True
                 else:
                     # 尝试所有可能的前缀
-                    job_types = ["training", "inference", "notebook"]
+                    job_types = ["training", "inference", "compute", "notebook"]
                     for job_type in job_types:
                         full_name = add_prefix(resource_name, job_type)
                         if job_type == "training":
                             success = client.delete_job(full_name, args.namespace, force)
-                        elif job_type == "inference":
+                        elif job_type == "inference" or job_type == "compute":
                             deployment_deleted = client.delete_deployment(full_name, args.namespace, force)
                             service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
                             success = deployment_deleted and service_deleted

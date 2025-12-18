@@ -2,7 +2,7 @@ kind: notebook
 version: v0.1
 
 job:
-  name: test-notebook-job
+  name: new-test-notebook-job
   priority: medium
   description: "测试Notebook任务"
 
@@ -15,7 +15,7 @@ service:
   port: 8888
 
 resources:
-  pool: test-pool
+  pool: training-pool
   gpu: 1
   gpu-type: a10-24g
   cpu: 8

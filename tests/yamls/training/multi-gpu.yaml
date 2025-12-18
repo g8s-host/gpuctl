@@ -34,11 +34,11 @@ environment:
 
 # 资源需求声明
 resources:
-  pool: high-performance-pool
-  gpu: 4
-  gpu-type: a100-80g
-  cpu: 32
-  memory: 128Gi
+  pool: training-pool
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 8
+  memory: 32Gi
   gpu-share: 2Gi
 
 # 数据与模型配置

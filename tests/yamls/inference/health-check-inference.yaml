@@ -21,7 +21,7 @@ service:
 
 # 资源规格
 resources:
-  pool: inference-pool
+  pool: training-pool
   gpu: 1
   gpu-type: a10-24g
   cpu: 6

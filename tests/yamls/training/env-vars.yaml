@@ -30,10 +30,10 @@ environment:
 # 资源需求声明
 resources:
   pool: training-pool
-  gpu: 2
-  gpu-type: a100-40g
-  cpu: 16
-  memory: 64Gi
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 8
+  memory: 32Gi
   gpu-share: 2Gi
 
 # 数据与模型配置
