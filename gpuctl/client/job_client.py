@@ -181,12 +181,184 @@ class JobClient(KubernetesClient):
                 return False
             self.handle_api_exception(e, f"delete statefulset {name}")
 
+    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 60, interval: int = 2) -> bool:
+        """等待资源删除完成
+        
+        Args:
+            check_func: 检查资源是否存在的函数
+            name: 资源名称
+            resource_type: 资源类型
+            timeout: 超时时间（秒）
+            interval: 检查间隔（秒）
+            
+        Returns:
+            bool: 资源是否在超时前被删除
+        """
+        import time
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            if not check_func(name):
+                return True
+            time.sleep(interval)
+        
+        print(f"⚠️  超时：{resource_type} {name} 在 {timeout} 秒内未被删除")
+        return False
+    
+    def _is_job_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """检查Job资源是否存在"""
+        try:
+            self.batch_v1.read_namespaced_job(name, namespace)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"check job existence {name}")
+            return False
+    
+    def _is_deployment_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """检查Deployment资源是否存在"""
+        try:
+            self.apps_v1.read_namespaced_deployment(name, namespace)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"check deployment existence {name}")
+            return False
+    
+    def _is_statefulset_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """检查StatefulSet资源是否存在"""
+        try:
+            self.apps_v1.read_namespaced_stateful_set(name, namespace)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"check statefulset existence {name}")
+            return False
+    
+    def _is_service_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """检查Service资源是否存在"""
+        try:
+            self.core_v1.read_namespaced_service(name, namespace)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"check service existence {name}")
+            return False
+    
+    def delete_job(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
+        """删除作业资源，包括Job、Deployment、StatefulSet和相关Service"""
+        try:
+            # 配置删除选项
+            if force:
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+            
+            deleted = False
+            
+            # 1. 尝试删除Job资源
+            try:
+                self.batch_v1.delete_namespaced_job(name, namespace, body=delete_options)
+                # 等待Job删除完成
+                self._wait_for_resource_deletion(lambda n: self._is_job_exists(n, namespace), name, "Job")
+                deleted = True
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete job {name}")
+            
+            # 2. 尝试删除Deployment资源
+            try:
+                self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
+                # 等待Deployment删除完成
+                self._wait_for_resource_deletion(lambda n: self._is_deployment_exists(n, namespace), name, "Deployment")
+                deleted = True
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete deployment {name}")
+            
+            # 3. 尝试删除StatefulSet资源
+            try:
+                self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
+                # 等待StatefulSet删除完成
+                self._wait_for_resource_deletion(lambda n: self._is_statefulset_exists(n, namespace), name, "StatefulSet")
+                deleted = True
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete statefulset {name}")
+            
+            # 4. 尝试删除相关Service（无论前面是否成功删除，都尝试删除Service）
+            try:
+                self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
+                # 等待Service删除完成
+                self._wait_for_resource_deletion(lambda n: self._is_service_exists(n, namespace), name, "Service")
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete service {name}")
+            
+            return deleted
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete job {name}")
+    
+    def delete_deployment(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
+        """删除Deployment"""
+        try:
+            # 配置删除选项
+            if force:
+                # 强制删除：立即终止Pod并删除Deployment，不等待优雅终止
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                # 正常删除：等待Pod优雅终止
+                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+            
+            self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
+            # 等待Deployment删除完成
+            return self._wait_for_resource_deletion(lambda n: self._is_deployment_exists(n, namespace), name, "Deployment")
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete deployment {name}")
+    
+    def delete_statefulset(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
+        """删除StatefulSet"""
+        try:
+            # 配置删除选项
+            if force:
+                # 强制删除：立即终止Pod并删除StatefulSet，不等待优雅终止
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                # 正常删除：等待Pod优雅终止
+                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+            
+            self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
+            # 等待StatefulSet删除完成
+            return self._wait_for_resource_deletion(lambda n: self._is_statefulset_exists(n, namespace), name, "StatefulSet")
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete statefulset {name}")
+    
     def delete_service(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
         """删除Service"""
         try:
-            delete_options = client.V1DeleteOptions(propagation_policy="Background")
+            delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
             self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
-            return True
+            # 等待Service删除完成
+            return self._wait_for_resource_deletion(lambda n: self._is_service_exists(n, namespace), name, "Service")
         except ApiException as e:
             if e.status == 404:
                 return False
