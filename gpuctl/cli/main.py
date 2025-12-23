@@ -25,8 +25,14 @@ def main():
     jobs_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                              help='Kubernetes namespace')
     jobs_parser.add_argument('--pool', help='Filter by resource pool')
-    jobs_parser.add_argument('--type', choices=['training', 'inference', 'notebook'],
+    jobs_parser.add_argument('--type', choices=['training', 'inference', 'notebook', 'compute'],
                              help='Filter by job type')
+    # 添加--pods选项，用于查看Pod实例级别信息
+    jobs_parser.add_argument(
+        "--pods",
+        action="store_true",
+        help="Show pod-level information instead of deployment/statefulset level"
+    )
 
     # get pools
     pools_parser = get_subparsers.add_parser('pools', help='Get resource pools')

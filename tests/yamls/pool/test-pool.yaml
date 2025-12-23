@@ -6,5 +6,5 @@ metadata:
   description: "测试资源池"
 
 nodes:
-  vm-0-12-ubuntu:
+  ip-172-31-13-129:
     gpu-type: a100-80g

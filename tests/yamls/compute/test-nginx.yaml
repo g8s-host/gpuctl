@@ -1,36 +1,27 @@
 kind: compute
-version: v0.1
-
-# 任务标识与描述
+version: v1
 job:
   name: test-nginx
-  priority: "medium"
-  description: "测试nginx web服务"
+  description: A simple Nginx test
 
-# 环境与镜像
 environment:
-  image: registry.cn-shenzhen.aliyuncs.com/amgs/nginx:latest
-  command: []
-  args: []
-  env:
-    - name: NGINX_PORT
-      value: "80"
+  image: nginx:latest
+  command: ["nginx", "-g", "daemon off;"]
 
-# 服务配置
 service:
   replicas: 2
   port: 80
-  health_check: /health
+  targetPort: 80
+  protocol: TCP
+  type: NodePort
 
-# 资源规格
 resources:
   pool: test-pool
   gpu: 0
   cpu: 1
   memory: 2Gi
 
-# 数据与存储配置
 storage:
-  workdirs:
-    - path: /etc/nginx/conf.d
-    - path: /var/www/html
+  data:
+    mountPath: /usr/share/nginx/html
+    size: 1Gi

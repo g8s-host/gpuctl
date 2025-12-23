@@ -121,7 +121,7 @@ def get_jobs_command(args):
             labels["g8s.host/job-type"] = args.type
         
         # 调用API获取作业列表，传递过滤条件
-        jobs = client.list_jobs(args.namespace, labels=labels)
+        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=args.pods)
         
         # 计算AGE的辅助函数
         def calculate_age(created_at_str):
@@ -151,10 +151,19 @@ def get_jobs_command(args):
         
         for job in jobs:
             # 根据k8s状态判断，返回与k8s一致的简洁状态字符串
-            status_dict = job["status"]
+            status_dict = job.get("status", {})
             
-            # 对于Job资源（Training任务）
-            if job['labels'].get('g8s.host/job-type') == 'training':
+            # 如果没有status信息，默认为Pending
+            if not status_dict:
+                status = "Pending"
+                age = calculate_age(job.get('creation_timestamp'))
+                kind = job['labels'].get('g8s.host/job-type', 'unknown').capitalize()
+                print(f"{job['name']:<45} {kind:<15} {status:<10} {age:<10}")
+                continue
+            
+            # 对于Pod实例
+            if job['name'].count('-') >= 4:  # Pod名称通常包含至少4个连字符
+                # 检查Pod的状态
                 if status_dict['succeeded'] > 0:
                     status = "Succeeded"
                 elif status_dict['failed'] > 0:
@@ -163,17 +172,24 @@ def get_jobs_command(args):
                     status = "Running"
                 else:
                     status = "Pending"
-            # 对于Deployment资源（Inference服务）
-            elif job['labels'].get('g8s.host/job-type') == 'inference':
-                # Deployment的状态判断：
-                # - Pending: 还没有可用的副本
-                # - Running: 至少有一个可用副本
-                # - Failed: 所有副本都不可用
-                if status_dict['active'] > 0:
-                    status = "Running"
+            # 对于Job资源（Training任务）
+            elif job['labels'].get('g8s.host/job-type') == 'training':
+                if status_dict['succeeded'] > 0:
+                    status = "Succeeded"
                 elif status_dict['failed'] > 0:
-                    # 检查是否有pod处于Pending状态
+                    status = "Failed"
+                elif status_dict['active'] > 0:
+                    status = "Running"
+                else:
                     status = "Pending"
+            # 对于Deployment资源（Inference服务和Compute服务）
+            elif job['labels'].get('g8s.host/job-type') in ['inference', 'compute']:
+                # Deployment的状态判断：
+                # - Running: 所有副本都可用
+                # - Pending: 部分或全部副本不可用
+                # - Failed: 所有副本都不可用
+                if status_dict['active'] > 0 and status_dict['failed'] == 0:
+                    status = "Running"
                 else:
                     status = "Pending"
             # 对于其他类型

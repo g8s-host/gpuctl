@@ -52,7 +52,7 @@ class JobClient(KubernetesClient):
         return None
 
     def list_jobs(self, namespace: str = DEFAULT_NAMESPACE,
-                  labels: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                  labels: Dict[str, str] = None, include_pods: bool = False) -> List[Dict[str, Any]]:
         """列出所有作业资源，包括Job、Deployment和StatefulSet"""
         try:
             label_selector = None
@@ -61,125 +61,56 @@ class JobClient(KubernetesClient):
 
             all_jobs = []
 
-            # 获取Job资源（Training任务）
-            jobs = self.batch_v1.list_namespaced_job(
-                namespace,
-                label_selector=label_selector
-            )
-            all_jobs.extend([self._job_to_dict(job) for job in jobs.items])
+            if include_pods:
+                # 如果需要包含Pod实例，直接获取所有相关Pod
+                try:
+                    pods = self.core_v1.list_namespaced_pod(namespace, label_selector=label_selector)
+                    
+                    for pod in pods.items:
+                        try:
+                            # 将Pod转换为字典并添加到作业列表
+                            pod_dict = self._pod_to_dict(pod)
+                            all_jobs.append(pod_dict)
+                        except Exception as e:
+                            # 即使单个Pod处理失败，也继续处理其他Pod
+                            print(f"Warning: Failed to process pod {pod.metadata.name}: {e}")
+                except Exception as e:
+                    # 如果获取Pod列表失败，打印警告并返回空列表
+                    print(f"Warning: Failed to get pods: {e}")
+                    return []
+            else:
+                # 获取Job资源（Training任务）
+                jobs = self.batch_v1.list_namespaced_job(
+                    namespace,
+                    label_selector=label_selector
+                )
+                all_jobs.extend([self._job_to_dict(job) for job in jobs.items])
 
-            # 获取Deployment资源（Inference服务）
-            deployments = self.apps_v1.list_namespaced_deployment(
-                namespace,
-                label_selector=label_selector
-            )
-            for deployment in deployments.items:
-                all_jobs.append(self._deployment_to_dict(deployment))
+                # 获取Deployment资源（Inference和Compute服务）
+                deployments = self.apps_v1.list_namespaced_deployment(
+                    namespace,
+                    label_selector=label_selector
+                )
+                for deployment in deployments.items:
+                    all_jobs.append(self._deployment_to_dict(deployment))
 
-            # 获取StatefulSet资源（Notebook服务）
-            statefulsets = self.apps_v1.list_namespaced_stateful_set(
-                namespace,
-                label_selector=label_selector
-            )
-            for statefulset in statefulsets.items:
-                all_jobs.append(self._statefulset_to_dict(statefulset))
+                # 获取StatefulSet资源（Notebook服务）
+                statefulsets = self.apps_v1.list_namespaced_stateful_set(
+                    namespace,
+                    label_selector=label_selector
+                )
+                for statefulset in statefulsets.items:
+                    all_jobs.append(self._statefulset_to_dict(statefulset))
 
             return all_jobs
         except ApiException as e:
             self.handle_api_exception(e, "list jobs")
 
-    def delete_job(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
-        """删除作业资源，包括Job、Deployment、StatefulSet和相关Service"""
-        try:
-            # 配置删除选项
-            if force:
-                delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
-                    grace_period_seconds=0
-                )
-            else:
-                delete_options = client.V1DeleteOptions(propagation_policy="Background")
-            
-            deleted = False
-            
-            # 1. 尝试删除Job资源
-            try:
-                self.batch_v1.delete_namespaced_job(name, namespace, body=delete_options)
-                deleted = True
-            except ApiException as e:
-                if e.status != 404:
-                    self.handle_api_exception(e, f"delete job {name}")
-            
-            # 2. 尝试删除Deployment资源
-            try:
-                self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
-                deleted = True
-            except ApiException as e:
-                if e.status != 404:
-                    self.handle_api_exception(e, f"delete deployment {name}")
-            
-            # 3. 尝试删除StatefulSet资源
-            try:
-                self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
-                deleted = True
-            except ApiException as e:
-                if e.status != 404:
-                    self.handle_api_exception(e, f"delete statefulset {name}")
-            
-            # 4. 尝试删除相关Service（无论前面是否成功删除，都尝试删除Service）
-            try:
-                self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
-            except ApiException as e:
-                if e.status != 404:
-                    self.handle_api_exception(e, f"delete service {name}")
-            
-            return deleted
-        except ApiException as e:
-            if e.status == 404:
-                return False
-            self.handle_api_exception(e, f"delete job {name}")
 
-    def delete_deployment(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
-        """删除Deployment"""
-        try:
-            # 配置删除选项
-            if force:
-                # 强制删除：立即终止Pod并删除Deployment，不等待优雅终止
-                delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
-                    grace_period_seconds=0
-                )
-            else:
-                # 正常删除：等待Pod优雅终止
-                delete_options = client.V1DeleteOptions(propagation_policy="Background")
-            
-            self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
-            return True
-        except ApiException as e:
-            if e.status == 404:
-                return False
-            self.handle_api_exception(e, f"delete deployment {name}")
 
-    def delete_statefulset(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
-        """删除StatefulSet"""
-        try:
-            # 配置删除选项
-            if force:
-                # 强制删除：立即终止Pod并删除StatefulSet，不等待优雅终止
-                delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
-                    grace_period_seconds=0
-                )
-            else:
-                # 正常删除：等待Pod优雅终止
-                delete_options = client.V1DeleteOptions(propagation_policy="Background")
-            
-            self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
-            return True
-        except ApiException as e:
-            if e.status == 404:
-                return False
-            self.handle_api_exception(e, f"delete statefulset {name}")
+
+
+
 
     def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 60, interval: int = 2) -> bool:
         """等待资源删除完成
@@ -364,6 +295,71 @@ class JobClient(KubernetesClient):
                 return False
             self.handle_api_exception(e, f"delete service {name}")
 
+    def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
+        """将Pod对象转换为字典格式"""
+        try:
+            # 确定Pod所属的作业类型
+            job_type = "compute"  # 默认设置为compute
+            labels = pod.metadata.labels or {}
+            pod_name = pod.metadata.name
+            
+            # 直接从Pod名称推断作业类型
+            if "g8s-host-inference-" in pod_name:
+                job_type = "inference"
+            elif "g8s-host-compute-" in pod_name:
+                job_type = "compute"
+            elif "g8s-host-notebook-" in pod_name:
+                job_type = "notebook"
+            elif "job-name" in labels:
+                job_type = "training"
+            elif "g8s.host/job-type" in labels:
+                job_type = labels["g8s.host/job-type"]
+            
+            # 确定Pod状态
+            active = 0
+            succeeded = 0
+            failed = 0
+            
+            if pod.status and pod.status.phase:
+                if pod.status.phase == "Running":
+                    active = 1
+                elif pod.status.phase == "Succeeded":
+                    succeeded = 1
+                elif pod.status.phase == "Failed":
+                    failed = 1
+            
+            # 创建并返回Pod字典
+            pod_dict = {
+                "name": pod.metadata.name,
+                "namespace": pod.metadata.namespace,
+                "labels": labels.copy(),
+                "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "status": {
+                    "active": active,
+                    "succeeded": succeeded,
+                    "failed": failed
+                }
+            }
+            
+            # 添加作业类型标签
+            if "g8s.host/job-type" not in pod_dict["labels"]:
+                pod_dict["labels"]["g8s.host/job-type"] = job_type
+            
+            return pod_dict
+        except Exception as e:
+            # 处理异常并返回基本信息
+            return {
+                "name": pod.metadata.name,
+                "namespace": pod.metadata.namespace,
+                "labels": pod.metadata.labels or {},
+                "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "status": {
+                    "active": 0,
+                    "succeeded": 0,
+                    "failed": 0
+                }
+            }
+
     def _job_to_dict(self, job: client.V1Job) -> Dict[str, Any]:
         """将Job对象转换为字典"""
         return {
@@ -391,6 +387,71 @@ class JobClient(KubernetesClient):
                 "failed": deployment.status.unavailable_replicas or 0
             }
         }
+
+    def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
+        """将Pod对象转换为字典格式"""
+        try:
+            # 确定Pod所属的作业类型
+            job_type = "unknown"
+            labels = pod.metadata.labels or {}
+            
+            if "g8s.host/job-type" in labels:
+                job_type = labels["g8s.host/job-type"]
+            elif "job-name" in labels:
+                job_type = "training"
+            elif "app.kubernetes.io/instance" in labels:
+                instance_name = labels["app.kubernetes.io/instance"]
+                if instance_name.startswith("g8s-host-inference-"):
+                    job_type = "inference"
+                elif instance_name.startswith("g8s-host-compute-"):
+                    job_type = "compute"
+                elif instance_name.startswith("g8s-host-notebook-"):
+                    job_type = "notebook"
+            
+            # 确定Pod状态
+            active = 0
+            succeeded = 0
+            failed = 0
+            
+            if pod.status:
+                if pod.status.phase == "Running":
+                    active = 1
+                elif pod.status.phase == "Succeeded":
+                    succeeded = 1
+                elif pod.status.phase == "Failed":
+                    failed = 1
+            
+            # 创建并返回Pod字典
+            pod_dict = {
+                "name": pod.metadata.name,
+                "namespace": pod.metadata.namespace,
+                "labels": labels.copy(),
+                "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "status": {
+                    "active": active,
+                    "succeeded": succeeded,
+                    "failed": failed
+                }
+            }
+            
+            # 添加作业类型标签
+            if "g8s.host/job-type" not in pod_dict["labels"]:
+                pod_dict["labels"]["g8s.host/job-type"] = job_type
+            
+            return pod_dict
+        except Exception as e:
+            # 处理异常并返回基本信息
+            return {
+                "name": pod.metadata.name,
+                "namespace": pod.metadata.namespace,
+                "labels": pod.metadata.labels or {},
+                "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "status": {
+                    "active": 0,
+                    "succeeded": 0,
+                    "failed": 0
+                }
+            }
 
     def _statefulset_to_dict(self, statefulset: client.V1StatefulSet) -> Dict[str, Any]:
         """将StatefulSet对象转换为字典"""
@@ -479,16 +540,7 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "list pods")
 
-    def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
-        """将Pod对象转换为字典"""
-        return {
-            "name": pod.metadata.name,
-            "namespace": pod.metadata.namespace,
-            "labels": pod.metadata.labels or {},
-            "phase": pod.status.phase,
-            "node_name": pod.spec.node_name if pod.spec else None,
-            "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None
-        }
+
 
     def pause_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
         """暂停Job"""

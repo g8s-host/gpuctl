@@ -5,6 +5,7 @@ from gpuctl.api.training import TrainingJob
 from gpuctl.api.inference import InferenceJob
 from gpuctl.api.notebook import NotebookJob
 from gpuctl.api.pool import ResourcePool
+from gpuctl.api.compute import ComputeJob
 
 
 class ParserError(Exception):
@@ -20,7 +21,8 @@ class BaseParser:
         "inference": InferenceJob,
         "notebook": NotebookJob,
         "pool": ResourcePool,
-        "resource": ResourcePool
+        "resource": ResourcePool,
+        "compute": ComputeJob
     }
 
     @classmethod
