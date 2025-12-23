@@ -100,7 +100,7 @@ sudo mv gpuctl /usr/local/bin/
 gpuctl --help
 ```
 
-#### 方式二：从源码安装
+#### 方式二：从源码安装（推荐）
 
 1. 克隆代码库
 
@@ -109,26 +109,18 @@ git clone https://github.com/your-org/gpuctl.git
 cd gpuctl
 ```
 
-2. 安装依赖
+2. 安装依赖并将 gpuctl 安装为系统命令
 
 ```bash
-pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0
+pip install -e .
 ```
 
 3. 运行 gpuctl
 
 ```bash
-python main.py --help
-```
-
-#### 方式三：使用 Poetry 管理依赖
-
-如果您偏好使用 Poetry 管理依赖：
-
-```bash
-poetry install
-poetry shell
 gpuctl --help
+# 或使用原始方式
+python main.py --help
 ```
 
 ### 配置 Kubernetes 访问
@@ -521,13 +513,13 @@ gpuctl/
 ### 启动开发服务器
 
 ```bash
-poetry run python server/main.py
+python server/main.py
 ```
 
 ### 运行测试
 
 ```bash
-poetry run pytest
+pytest
 ```
 
 ## 贡献指南

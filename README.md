@@ -99,7 +99,7 @@ sudo mv gpuctl /usr/local/bin/
 gpuctl --help
 ```
 
-#### Method 2: Install from Source
+#### Method 2: Install from Source (Recommended)
 
 1. Clone the repository
 
@@ -108,26 +108,22 @@ git clone https://github.com/your-org/gpuctl.git
 cd gpuctl
 ```
 
-2. Install dependencies
+2. Install dependencies and the package
 
 ```bash
-pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0
+pip install -e .
 ```
 
 3. Run gpuctl
 
 ```bash
-python main.py --help
+gpuctl --help
 ```
 
-#### Method 3: Use Poetry for Dependency Management
-
-If you prefer using Poetry for dependency management:
+or
 
 ```bash
-poetry install
-poetry shell
-gpuctl --help
+python main.py --help
 ```
 
 ### Configure Kubernetes Access
@@ -471,13 +467,13 @@ gpuctl/
 ### Start Development Server
 
 ```bash
-poetry run python server/main.py
+python server/main.py
 ```
 
 ### Run Tests
 
 ```bash
-poetry run pytest
+pytest
 ```
 
 ## Contribution Guide
