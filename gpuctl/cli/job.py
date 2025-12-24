@@ -47,7 +47,9 @@ def create_job_command(args):
             if parsed_obj.kind == "training":
                 handler = TrainingKind()
                 result = handler.create_training_job(parsed_obj, args.namespace)
-                print(f"✅ Successfully created {parsed_obj.kind} job: {result['job_id']}")
+                # 移除前缀后显示job_id
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"✅ Successfully created {parsed_obj.kind} job: {display_job_id}")
                 print(f"📊 Name: {result['name']}")
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
@@ -55,7 +57,9 @@ def create_job_command(args):
             elif parsed_obj.kind == "inference":
                 handler = InferenceKind()
                 result = handler.create_inference_service(parsed_obj, args.namespace)
-                print(f"✅ Successfully created {parsed_obj.kind} service: {result['job_id']}")
+                # 移除前缀后显示job_id
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"✅ Successfully created {parsed_obj.kind} service: {display_job_id}")
                 print(f"📊 Name: {result['name']}")
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
@@ -63,7 +67,9 @@ def create_job_command(args):
             elif parsed_obj.kind == "notebook":
                 handler = NotebookKind()
                 result = handler.create_notebook(parsed_obj, args.namespace)
-                print(f"✅ Successfully created {parsed_obj.kind} job: {result['job_id']}")
+                # 移除前缀后显示job_id
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"✅ Successfully created {parsed_obj.kind} job: {display_job_id}")
                 print(f"📊 Name: {result['name']}")
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
@@ -72,7 +78,9 @@ def create_job_command(args):
                 from gpuctl.kind.compute_kind import ComputeKind
                 handler = ComputeKind()
                 result = handler.create_compute_service(parsed_obj, args.namespace)
-                print(f"✅ Successfully created {parsed_obj.kind} service: {result['job_id']}")
+                # 移除前缀后显示job_id
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"✅ Successfully created {parsed_obj.kind} service: {display_job_id}")
                 print(f"📊 Name: {result['name']}")
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
