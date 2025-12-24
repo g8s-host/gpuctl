@@ -121,7 +121,8 @@ def get_jobs_command(args):
             labels["g8s.host/job-type"] = args.type
         
         # 调用API获取作业列表，传递过滤条件
-        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=args.pods)
+        # 默认显示Pod实例，将include_pods设置为True
+        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=True)
         
         # 计算AGE的辅助函数
         def calculate_age(created_at_str):
@@ -147,68 +148,42 @@ def get_jobs_command(args):
                 return f"{int(seconds/86400)}d"
         
         # 打印作业列表
-        print(f"{'NAME':<45} {'KIND':<15} {'STATUS':<10} {'AGE':<10}")
+        print(f"{'JOB ID':<55} {'NAME':<20} {'KIND':<15} {'STATUS':<10} {'AGE':<10}")
         
         for job in jobs:
-            # 根据k8s状态判断，返回与k8s一致的简洁状态字符串
+            # 计算AGE
+            age = calculate_age(job.get('creation_timestamp'))
+            
+            # 获取作业类型
+            job_type = job['labels'].get('g8s.host/job-type', 'unknown')
+            
+            # 直接使用job中的状态信息，这些信息已经在_pod_to_dict中根据Pod实际状态设置
             status_dict = job.get("status", {})
             
-            # 如果没有status信息，默认为Pending
-            if not status_dict:
-                status = "Pending"
-                age = calculate_age(job.get('creation_timestamp'))
-                kind = job['labels'].get('g8s.host/job-type', 'unknown').capitalize()
-                print(f"{job['name']:<45} {kind:<15} {status:<10} {age:<10}")
-                continue
-            
-            # 对于Pod实例
-            if job['name'].count('-') >= 4:  # Pod名称通常包含至少4个连字符
-                # 检查Pod的状态
-                if status_dict['succeeded'] > 0:
-                    status = "Succeeded"
-                elif status_dict['failed'] > 0:
-                    status = "Failed"
-                elif status_dict['active'] > 0:
-                    status = "Running"
-                else:
-                    status = "Pending"
-            # 对于Job资源（Training任务）
-            elif job['labels'].get('g8s.host/job-type') == 'training':
-                if status_dict['succeeded'] > 0:
-                    status = "Succeeded"
-                elif status_dict['failed'] > 0:
-                    status = "Failed"
-                elif status_dict['active'] > 0:
-                    status = "Running"
-                else:
-                    status = "Pending"
-            # 对于Deployment资源（Inference服务和Compute服务）
-            elif job['labels'].get('g8s.host/job-type') in ['inference', 'compute']:
-                # Deployment的状态判断：
-                # - Running: 所有副本都可用
-                # - Pending: 部分或全部副本不可用
-                # - Failed: 所有副本都不可用
-                if status_dict['active'] > 0 and status_dict['failed'] == 0:
-                    status = "Running"
-                else:
-                    status = "Pending"
-            # 对于其他类型
+            # 根据active、succeeded、failed字段直接判断状态，与k8s保持一致
+            if status_dict.get('succeeded', 0) > 0:
+                status = "Succeeded"
+            elif status_dict.get('failed', 0) > 0:
+                status = "Failed"
+            elif status_dict.get('active', 0) > 0:
+                status = "Running"
             else:
-                if status_dict['succeeded'] > 0:
-                    status = "Succeeded"
-                elif status_dict['failed'] > 0:
-                    status = "Failed"
-                elif status_dict['active'] > 0:
-                    status = "Running"
-                else:
-                    status = "Pending"
+                status = "Pending"
             
-            # 计算AGE
-            age = calculate_age(job['creation_timestamp'])
-            
-            # 移除前缀后显示
-            display_name = remove_prefix(job['name'])
-            print(f"{display_name:<45} {job['labels'].get('g8s.host/job-type', 'unknown'):<15} {status:<10} {age:<10}")
+            # 显示名称时移除前缀，只显示yaml文件中的原始名称，方便用户对应
+            yaml_name = remove_prefix(job['name'])
+            # 从yaml_name中提取基础名称（去除Deployment hash和Pod后缀）
+            # 格式：base-name-deployment-hash-pod-suffix
+            parts = yaml_name.split('-')
+            if len(parts) >= 3:
+                # 移除最后两个部分（deployment hash和pod suffix）
+                base_name = '-'.join(parts[:-2])
+            else:
+                # 如果格式不符合预期，使用完整名称
+                base_name = yaml_name
+            # 对于Pod实例，JOB ID显示不带前缀的Pod名称，NAME显示yaml中的原始名称
+            display_job_id = remove_prefix(job['name'])
+            print(f"{display_job_id:<55} {base_name:<20} {job_type:<15} {status:<10} {age:<10}")
         
         return 0
     except Exception as e:
@@ -219,42 +194,26 @@ def get_jobs_command(args):
 def delete_job_command(args):
     """删除作业命令"""
     try:
-        resource_type = "job"
-        resource_name = None
-
-        if args.file:
-            # 从YAML文件解析资源类型和名称
-            try:
-                parsed_obj = BaseParser.parse_yaml_file(args.file)
-                resource_type = parsed_obj.kind
-                # 处理资源池嵌套结构
-                if resource_type in ["pool", "resource"]:
-                    # 资源池处理
-                    if hasattr(parsed_obj, 'metadata') and hasattr(parsed_obj.metadata, 'name'):
-                        resource_name = parsed_obj.metadata.name
-                    elif hasattr(parsed_obj, 'pool') and hasattr(parsed_obj.pool, 'name'):
-                        resource_name = parsed_obj.pool.name
-                    else:
-                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
-                elif resource_type in ["training", "inference", "notebook"]:
-                    # 任务处理
-                    if hasattr(parsed_obj, 'job') and hasattr(parsed_obj.job, 'name'):
-                        resource_name = parsed_obj.job.name
-                    else:
-                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
-                else:
-                    # 其他类型，从文件名推断
-                    resource_name = args.file.replace('.yaml', '').replace('.yml', '')
-            except ParserError as e:
-                # 如果解析失败，尝试从文件名推断
-                resource_name = args.file.replace('.yaml', '').replace('.yml', '')
-        elif args.resource_name:
-            resource_name = args.resource_name
-        else:
-            print("❌ 必须提供YAML文件或资源名称")
+        # 只允许从文件删除资源
+        if not args.file:
+            print("❌ 必须提供YAML文件路径 (-f/--file)")
             return 1
 
-        if resource_type == "pool" or resource_type == "resource" or resource_name.endswith("-pool"):
+        # 从YAML文件解析资源类型和名称
+        parsed_obj = BaseParser.parse_yaml_file(args.file)
+        resource_type = parsed_obj.kind
+        resource_name = None
+
+        # 处理资源池嵌套结构
+        if resource_type in ["pool", "resource"]:
+            # 资源池处理
+            if hasattr(parsed_obj, 'metadata') and hasattr(parsed_obj.metadata, 'name'):
+                resource_name = parsed_obj.metadata.name
+            elif hasattr(parsed_obj, 'pool') and hasattr(parsed_obj.pool, 'name'):
+                resource_name = parsed_obj.pool.name
+            else:
+                resource_name = args.file.replace('.yaml', '').replace('.yml', '')
+                
             # 删除资源池
             from gpuctl.client.pool_client import PoolClient
             client = PoolClient()
@@ -265,7 +224,13 @@ def delete_job_command(args):
             else:
                 print(f"❌ 资源池不存在: {resource_name}")
                 return 1
-        else:
+        elif resource_type in ["training", "inference", "notebook", "compute"]:
+            # 任务处理
+            if hasattr(parsed_obj, 'job') and hasattr(parsed_obj.job, 'name'):
+                resource_name = parsed_obj.job.name
+            else:
+                resource_name = args.file.replace('.yaml', '').replace('.yml', '')
+                
             # 删除任务
             client = JobClient()
             # 检查是否有force属性
@@ -275,39 +240,32 @@ def delete_job_command(args):
             # 保存原始资源名称用于最终输出
             original_resource_name = resource_name
             
-            # 检查资源名称是否已经是完整名称（包含前缀）
-            is_full_name = False
-            if resource_name.startswith("g8s-host-"):
-                is_full_name = True
-            
             # 获取所有作业列表，用于查询实际的作业类型
-            all_jobs = client.list_jobs(args.namespace)
+            # 这里需要获取Deployment/StatefulSet级别资源，而不是Pod实例
+            all_jobs = client.list_jobs(args.namespace, include_pods=False)
             found_job = None
             
             # 在所有作业中查找匹配的作业
             for job in all_jobs:
                 job_name = job['name']
-                # 检查是否匹配完整名称或原始名称（不带前缀）
-                if job_name == resource_name or remove_prefix(job_name) == resource_name:
+                # 检查是否匹配原始名称（不带前缀）
+                if remove_prefix(job_name) == resource_name:
                     found_job = job
                     break
             
             if found_job:
-                # 从找到的作业中获取实际的作业类型
+                # 从找到的作业中获取实际的作业类型和名称
                 actual_job_type = found_job['labels'].get('g8s.host/job-type', 'unknown')
                 actual_job_name = found_job['name']
                 
-                # 根据实际作业类型调用相应的删除方法
+                # 根据实际作业类型调用相应的删除方法（删除整个Deployment/StatefulSet/Job）
                 if actual_job_type == "training":
                     # Training任务：删除Job
                     success = client.delete_job(actual_job_name, args.namespace, force)
                 elif actual_job_type == "inference" or actual_job_type == "compute":
                     # Inference或Compute任务：删除Deployment和Service
-                    # 生成完整资源名称
+                    # 生成完整Service名称
                     service_name = f"g8s-host-svc-{resource_name}"
-                    # 如果是完整名称，提取基础名称
-                    if is_full_name:
-                        service_name = f"g8s-host-svc-{remove_prefix(actual_job_name)}"
                     # 删除Deployment
                     deployment_deleted = client.delete_deployment(actual_job_name, args.namespace, force)
                     # 删除Service
@@ -315,54 +273,31 @@ def delete_job_command(args):
                     success = deployment_deleted and service_deleted
                 elif actual_job_type == "notebook":
                     # Notebook任务：删除StatefulSet和Service
-                    # 生成完整资源名称
+                    # 生成完整Service名称
                     service_name = f"g8s-host-svc-{resource_name}"
-                    # 如果是完整名称，提取基础名称
-                    if is_full_name:
-                        service_name = f"g8s-host-svc-{remove_prefix(actual_job_name)}"
                     # 删除StatefulSet
                     statefulset_deleted = client.delete_statefulset(actual_job_name, args.namespace, force)
                     # 删除Service
                     service_deleted = client.delete_service(service_name, args.namespace)
                     success = statefulset_deleted and service_deleted
             else:
-                # 尝试使用通用方式删除（先尝试Job，再尝试Deployment，最后尝试StatefulSet）
-                # 先尝试直接删除（如果是完整名称）
-                if is_full_name:
-                    # 直接删除完整名称
-                    job_deleted = client.delete_job(resource_name, args.namespace, force)
-                    if job_deleted:
-                        success = True
-                    else:
-                        deployment_deleted = client.delete_deployment(resource_name, args.namespace, force)
-                        if deployment_deleted:
-                            service_name = f"g8s-host-svc-{remove_prefix(resource_name)}"
-                            client.delete_service(service_name, args.namespace)
-                            success = True
-                        else:
-                            statefulset_deleted = client.delete_statefulset(resource_name, args.namespace, force)
-                            if statefulset_deleted:
-                                service_name = f"g8s-host-svc-{remove_prefix(resource_name)}"
-                                client.delete_service(service_name, args.namespace)
-                                success = True
-                else:
-                    # 尝试所有可能的前缀
-                    job_types = ["training", "inference", "compute", "notebook"]
-                    for job_type in job_types:
-                        full_name = add_prefix(resource_name, job_type)
-                        if job_type == "training":
-                            success = client.delete_job(full_name, args.namespace, force)
-                        elif job_type == "inference" or job_type == "compute":
-                            deployment_deleted = client.delete_deployment(full_name, args.namespace, force)
-                            service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
-                            success = deployment_deleted and service_deleted
-                        elif job_type == "notebook":
-                            statefulset_deleted = client.delete_statefulset(full_name, args.namespace, force)
-                            service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
-                            success = statefulset_deleted and service_deleted
-                        
-                        if success:
-                            break
+                # 尝试所有可能的前缀
+                job_types = ["training", "inference", "compute", "notebook"]
+                for job_type in job_types:
+                    full_name = add_prefix(resource_name, job_type)
+                    if job_type == "training":
+                        success = client.delete_job(full_name, args.namespace, force)
+                    elif job_type == "inference" or job_type == "compute":
+                        deployment_deleted = client.delete_deployment(full_name, args.namespace, force)
+                        service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
+                        success = deployment_deleted and service_deleted
+                    elif job_type == "notebook":
+                        statefulset_deleted = client.delete_statefulset(full_name, args.namespace, force)
+                        service_deleted = client.delete_service(f"g8s-host-svc-{resource_name}", args.namespace)
+                        success = statefulset_deleted and service_deleted
+                    
+                    if success:
+                        break
             
             if success:
                 if force:
@@ -373,6 +308,9 @@ def delete_job_command(args):
             else:
                 print(f"❌ 任务不存在: {original_resource_name}")
                 return 1
+        else:
+            print(f"❌ 不支持的资源类型: {resource_type}")
+            return 1
 
     except Exception as e:
         print(f"❌ 删除资源时出错: {e}")
@@ -382,17 +320,37 @@ def delete_job_command(args):
 def logs_job_command(args):
     """获取作业日志命令"""
     try:
-        client = LogClient()
-        # 无需添加前缀，因为log_client.get_job_logs已经处理了前缀逻辑
+        log_client = LogClient()
+        job_client = JobClient()
+        
+        # 处理Pod名称，确保使用完整的带前缀名称
+        pod_name = args.job_name
+        
+        # 如果Pod名称不带有前缀，尝试获取作业类型并添加正确的前缀
+        if not pod_name.startswith("g8s-host-"):
+            # 获取所有作业列表，查找对应的作业类型
+            all_jobs = job_client.list_jobs(args.namespace, include_pods=True)
+            found = False
+            for job in all_jobs:
+                if remove_prefix(job['name']) == pod_name:
+                    # 找到匹配的作业，获取其完整名称
+                    pod_name = job['name']
+                    found = True
+                    break
+            
+            # 如果没有找到匹配的作业，尝试使用默认的compute前缀构建完整名称
+            if not found:
+                # 尝试使用compute前缀构建完整名称
+                pod_name = f"g8s-host-compute-{pod_name}"
         
         if args.follow:
             # 使用流式日志，持续获取
-            logs = client.stream_job_logs(args.job_name, namespace=args.namespace)
+            logs = log_client.stream_job_logs(args.job_name, namespace=args.namespace, pod_name=pod_name)
             for log in logs:
                 print(log)
         else:
             # 只获取一次日志
-            logs = client.get_job_logs(args.job_name, namespace=args.namespace, tail=100)
+            logs = log_client.get_job_logs(args.job_name, namespace=args.namespace, tail=100, pod_name=pod_name)
             for log in logs:
                 print(log)
         
@@ -455,8 +413,8 @@ def describe_job_command(args):
         job = client.get_job(args.job_id, args.namespace)
         
         if not job:
-            # 获取所有作业列表，用于查询实际的作业
-            all_jobs = client.list_jobs(args.namespace)
+            # 获取所有作业列表，包括Pod实例，用于查询实际的作业
+            all_jobs = client.list_jobs(args.namespace, include_pods=True)
             found_job = None
             
             # 在所有作业中查找匹配的作业

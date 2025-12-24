@@ -13,12 +13,27 @@ class LogClient(KubernetesClient):
                      tail: int = 100, pod_name: Optional[str] = None) -> List[str]:
         """获取任务日志"""
         try:
-            # 如果未指定Pod，找到Job关联的Pod
+            # 如果未指定Pod，先尝试直接将job_name作为Pod名称获取
             if not pod_name:
-                pods = self._get_job_pods(job_name, namespace)
-                if not pods:
-                    return ["No pods found for this job"]
-                pod_name = pods[0].metadata.name
+                try:
+                    # 尝试直接将job_name作为Pod名称获取日志
+                    log_content = self.core_v1.read_namespaced_pod_log(
+                        name=job_name,
+                        namespace=namespace,
+                        tail_lines=tail,
+                        timestamps=True
+                    )
+                    # 按行分割日志
+                    logs = log_content.strip().split('\n') if log_content else []
+                    return logs
+                except ApiException as e:
+                    if e.status != 404:
+                        self.handle_api_exception(e, f"get logs for pod {job_name}")
+                    # 如果直接获取失败，尝试找到Job关联的Pod
+                    pods = self._get_job_pods(job_name, namespace)
+                    if not pods:
+                        return ["No pods found for this job"]
+                    pod_name = pods[0].metadata.name
 
             # 获取Pod日志
             log_content = self.core_v1.read_namespaced_pod_log(
@@ -39,13 +54,24 @@ class LogClient(KubernetesClient):
                         pod_name: Optional[str] = None):
         """流式获取任务日志（生成器）"""
         try:
-            # 如果未指定Pod，找到Job关联的Pod
+            # 如果未指定Pod，先尝试直接将job_name作为Pod名称
             if not pod_name:
-                pods = self._get_job_pods(job_name, namespace)
-                if not pods:
-                    yield "No pods found for this job"
-                    return
-                pod_name = pods[0].metadata.name
+                try:
+                    # 尝试直接将job_name作为Pod名称获取
+                    # 使用Kubernetes API的stream方法获取日志
+                    # 先检查Pod是否存在
+                    self.core_v1.read_namespaced_pod(job_name, namespace)
+                    pod_name = job_name
+                except ApiException as e:
+                    if e.status != 404:
+                        yield f"Error checking pod {job_name}: {e}"
+                        return
+                    # 如果直接获取失败，尝试找到Job关联的Pod
+                    pods = self._get_job_pods(job_name, namespace)
+                    if not pods:
+                        yield "No pods found for this job"
+                        return
+                    pod_name = pods[0].metadata.name
 
             # 使用subprocess调用kubectl命令，确保权限正确
             import subprocess
@@ -88,24 +114,55 @@ class LogClient(KubernetesClient):
     def _get_job_pods(self, job_name: str, namespace: str = DEFAULT_NAMESPACE):
         """获取Job关联的所有Pod"""
         try:
+            # 首先尝试直接将job_name作为Pod名称返回
+            try:
+                pod = self.core_v1.read_namespaced_pod(job_name, namespace)
+                return [pod]
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"check pod {job_name}")
+            
             # 对于compute任务，完整的作业名称应该是g8s-host-compute-{job_name}
             # 所以我们需要尝试多种标签选择器
+            # 同时处理带前缀和不带前缀的情况
+            base_name = job_name
+            if job_name.startswith("g8s-host-"):
+                base_name = job_name.split("-", 3)[3] if "-" in job_name else job_name
+            elif "-" in job_name:
+                # 如果是Pod名称，去掉后缀获取基础名称
+                parts = job_name.split("-")
+                if len(parts) >= 3:
+                    # 格式：base-name-deployment-hash-pod-suffix
+                    base_name = "-".join(parts[:-2])
+            
             selectors = [
                 f"job-name={job_name}",
                 f"app={job_name}",
+                f"job-name={base_name}",
+                f"app={base_name}",
                 f"job-name=g8s-host-compute-{job_name}",
-                f"app=g8s-host-compute-{job_name}"
+                f"app=g8s-host-compute-{job_name}",
+                f"job-name=g8s-host-compute-{base_name}",
+                f"app=g8s-host-compute-{base_name}",
+                f"app.kubernetes.io/name={base_name}",
+                f"app.kubernetes.io/instance={base_name}",
+                f"app.kubernetes.io/name=g8s-host-compute-{base_name}",
+                f"app.kubernetes.io/instance=g8s-host-compute-{base_name}"
             ]
             
             for selector in selectors:
-                pods = self.core_v1.list_namespaced_pod(
-                    namespace=namespace,
-                    label_selector=selector
-                )
-                if pods.items:
-                    return pods.items
+                try:
+                    pods = self.core_v1.list_namespaced_pod(
+                        namespace=namespace,
+                        label_selector=selector
+                    )
+                    if pods.items:
+                        return pods.items
+                except ApiException as e:
+                    if e.status != 404:
+                        print(f"Warning: Failed to get pods with selector {selector}: {e}")
             
-            # 如果两种选择器都找不到pods，返回空列表
+            # 如果所有选择器都找不到pods，返回空列表
             return []
 
         except ApiException as e:

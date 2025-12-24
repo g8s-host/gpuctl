@@ -295,6 +295,37 @@ class JobClient(KubernetesClient):
                 return False
             self.handle_api_exception(e, f"delete service {name}")
 
+    def delete_pod(self, name: str, namespace: str = DEFAULT_NAMESPACE, force: bool = False) -> bool:
+        """删除Pod"""
+        try:
+            # 配置删除选项
+            if force:
+                delete_options = client.V1DeleteOptions(
+                    propagation_policy="Foreground",
+                    grace_period_seconds=0
+                )
+            else:
+                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")
+            
+            self.core_v1.delete_namespaced_pod(name, namespace, body=delete_options)
+            # 等待Pod删除完成
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"delete pod {name}")
+
+    def _is_pod_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
+        """检查Pod资源是否存在"""
+        try:
+            self.core_v1.read_namespaced_pod(name, namespace)
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return False
+            self.handle_api_exception(e, f"check pod existence {name}")
+            return False
+
     def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
         """将Pod对象转换为字典格式"""
         try:
@@ -388,70 +419,7 @@ class JobClient(KubernetesClient):
             }
         }
 
-    def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
-        """将Pod对象转换为字典格式"""
-        try:
-            # 确定Pod所属的作业类型
-            job_type = "unknown"
-            labels = pod.metadata.labels or {}
-            
-            if "g8s.host/job-type" in labels:
-                job_type = labels["g8s.host/job-type"]
-            elif "job-name" in labels:
-                job_type = "training"
-            elif "app.kubernetes.io/instance" in labels:
-                instance_name = labels["app.kubernetes.io/instance"]
-                if instance_name.startswith("g8s-host-inference-"):
-                    job_type = "inference"
-                elif instance_name.startswith("g8s-host-compute-"):
-                    job_type = "compute"
-                elif instance_name.startswith("g8s-host-notebook-"):
-                    job_type = "notebook"
-            
-            # 确定Pod状态
-            active = 0
-            succeeded = 0
-            failed = 0
-            
-            if pod.status:
-                if pod.status.phase == "Running":
-                    active = 1
-                elif pod.status.phase == "Succeeded":
-                    succeeded = 1
-                elif pod.status.phase == "Failed":
-                    failed = 1
-            
-            # 创建并返回Pod字典
-            pod_dict = {
-                "name": pod.metadata.name,
-                "namespace": pod.metadata.namespace,
-                "labels": labels.copy(),
-                "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
-                "status": {
-                    "active": active,
-                    "succeeded": succeeded,
-                    "failed": failed
-                }
-            }
-            
-            # 添加作业类型标签
-            if "g8s.host/job-type" not in pod_dict["labels"]:
-                pod_dict["labels"]["g8s.host/job-type"] = job_type
-            
-            return pod_dict
-        except Exception as e:
-            # 处理异常并返回基本信息
-            return {
-                "name": pod.metadata.name,
-                "namespace": pod.metadata.namespace,
-                "labels": pod.metadata.labels or {},
-                "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
-                "status": {
-                    "active": 0,
-                    "succeeded": 0,
-                    "failed": 0
-                }
-            }
+
 
     def _statefulset_to_dict(self, statefulset: client.V1StatefulSet) -> Dict[str, Any]:
         """将StatefulSet对象转换为字典"""

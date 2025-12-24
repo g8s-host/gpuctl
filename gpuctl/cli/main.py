@@ -50,23 +50,10 @@ def main():
     # delete命令
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
     # 添加全局-f参数，支持直接使用delete -f <yaml_file>形式
-    delete_parser.add_argument('-f', '--file', help='YAML file path')
+    delete_parser.add_argument('-f', '--file', required=True, help='YAML file path')
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
     delete_parser.add_argument('--force', action='store_true', help='Force delete resource')
-    
-    delete_subparsers = delete_parser.add_subparsers(dest='resource', help='Resource type')
-    
-    # delete job
-    delete_job_parser = delete_subparsers.add_parser('job', help='Delete a job')
-    delete_job_parser.add_argument('job_name', nargs='?', help='Job name')
-    delete_job_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
-                                  help='Kubernetes namespace')
-    delete_job_parser.add_argument('--force', action='store_true', help='Force delete job')
-    
-    # delete pool
-    delete_pool_parser = delete_subparsers.add_parser('pool', help='Delete a resource pool')
-    delete_pool_parser.add_argument('pool_name', nargs='?', help='Resource pool name')
     
     # delete node label (keep existing functionality)
 
@@ -152,26 +139,8 @@ def main():
                 print(f"Unknown resource type: {args.resource}")
                 return 1
         elif args.command == 'delete':
-            # 当使用-f参数时，不需要指定资源类型，直接从YAML文件中获取
-            if args.file:
-                # 直接调用delete_job_command，它会从YAML文件中解析资源类型
-                return delete_job_command(args)
-            elif not args.resource:
-                delete_parser.print_help()
-                return 1
-            elif args.resource == 'job':
-                # 转换参数，保持与原有delete_job_command兼容
-                if hasattr(args, 'job_name'):
-                    args.resource_name = args.job_name
-                return delete_job_command(args)
-            elif args.resource == 'pool':
-                # 转换参数，调用pool删除命令
-                if hasattr(args, 'pool_name'):
-                    args.resource_name = args.pool_name
-                return delete_pool_command(args)
-            else:
-                print(f"Unknown resource type: {args.resource}")
-                return 1
+            # 只允许通过-f参数删除文件，直接调用delete_job_command，它会从YAML文件中解析资源类型
+            return delete_job_command(args)
         elif args.command == 'logs':
             return logs_job_command(args)
         elif args.command == 'pause':
