@@ -49,11 +49,20 @@ def main():
 
     # delete命令
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
-    # 添加全局-f参数，支持直接使用delete -f <yaml_file>形式
-    delete_parser.add_argument('-f', '--file', required=True, help='YAML file path')
+    delete_subparsers = delete_parser.add_subparsers(dest='resource', help='Resource type to delete')
+    
+    # 支持直接使用delete -f <yaml_file>形式
+    delete_parser.add_argument('-f', '--file', help='YAML file path (alternative to specifying resource type)')
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
     delete_parser.add_argument('--force', action='store_true', help='Force delete resource')
+    
+    # delete job
+    job_delete_parser = delete_subparsers.add_parser('job', help='Delete a job')
+    job_delete_parser.add_argument('job_name', help='Job name to delete')
+    job_delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
+                                  help='Kubernetes namespace')
+    job_delete_parser.add_argument('--force', action='store_true', help='Force delete job')
     
     # delete node label (keep existing functionality)
 
@@ -139,8 +148,18 @@ def main():
                 print(f"Unknown resource type: {args.resource}")
                 return 1
         elif args.command == 'delete':
-            # 只允许通过-f参数删除文件，直接调用delete_job_command，它会从YAML文件中解析资源类型
-            return delete_job_command(args)
+            # 安全检查args.job_name属性
+            job_name = getattr(args, 'job_name', None)
+            if args.resource == 'job' or job_name:
+                # 处理delete job <job_name>命令
+                return delete_job_command(args)
+            elif args.file:
+                # 处理delete -f <yaml_file>命令
+                return delete_job_command(args)
+            else:
+                print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")
+                delete_parser.print_help()
+                return 1
         elif args.command == 'logs':
             return logs_job_command(args)
         elif args.command == 'pause':
