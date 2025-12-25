@@ -64,6 +64,46 @@ def create_job_command(args):
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
                     print(f"🖥️  Resources: {result['resources']}")
+                
+                # 显示Access Methods
+                print("\n🌐 Access Methods:")
+                
+                try:
+                    import subprocess
+                    import json
+                    
+                    # 获取Service信息
+                    service_base_name = result['name']
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_output = subprocess.check_output(service_cmd, shell=True, text=True)
+                    service_data = json.loads(service_output)
+                    
+                    # 获取Node IP
+                    node_cmd = f"kubectl get nodes -o json"
+                    node_output = subprocess.check_output(node_cmd, shell=True, text=True)
+                    node_data = json.loads(node_output)
+                    node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                    
+                    # 获取Service的端口信息
+                    node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                    service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
+                    target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                    
+                    # 方式1: 通过Pod IP访问
+                    print(f"   1. Pod IP Access:")
+                    print(f"      - Pod is initializing, IP will be available once running")
+                    print(f"      - Expected Port: {target_port if target_port != 'N/A' else service_port}")
+                    
+                    # 方式2: 通过NodePort访问
+                    print(f"   2. NodePort Access:")
+                    print(f"      - Node IP: {node_ip}")
+                    print(f"      - NodePort: {node_port}")
+                    if node_port != 'N/A':
+                        print(f"      - Access: curl http://{node_ip}:{node_port}")
+                    else:
+                        print(f"      - NodePort not available")
+                except Exception as e:
+                    print(f"      - Access methods information not available yet")
             elif parsed_obj.kind == "notebook":
                 handler = NotebookKind()
                 result = handler.create_notebook(parsed_obj, args.namespace)
@@ -74,6 +114,46 @@ def create_job_command(args):
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
                     print(f"🖥️  Resources: {result['resources']}")
+                
+                # 显示Access Methods
+                print("\n🌐 Access Methods:")
+                
+                try:
+                    import subprocess
+                    import json
+                    
+                    # 获取Service信息
+                    service_base_name = result['name']
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_output = subprocess.check_output(service_cmd, shell=True, text=True)
+                    service_data = json.loads(service_output)
+                    
+                    # 获取Node IP
+                    node_cmd = f"kubectl get nodes -o json"
+                    node_output = subprocess.check_output(node_cmd, shell=True, text=True)
+                    node_data = json.loads(node_output)
+                    node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                    
+                    # 获取Service的端口信息
+                    node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                    service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
+                    target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                    
+                    # 方式1: 通过Pod IP访问
+                    print(f"   1. Pod IP Access:")
+                    print(f"      - Pod is initializing, IP will be available once running")
+                    print(f"      - Expected Port: {target_port if target_port != 'N/A' else service_port}")
+                    
+                    # 方式2: 通过NodePort访问
+                    print(f"   2. NodePort Access:")
+                    print(f"      - Node IP: {node_ip}")
+                    print(f"      - NodePort: {node_port}")
+                    if node_port != 'N/A':
+                        print(f"      - Access: curl http://{node_ip}:{node_port}")
+                    else:
+                        print(f"      - NodePort not available")
+                except Exception as e:
+                    print(f"      - Access methods information not available yet")
             elif parsed_obj.kind == "compute":
                 from gpuctl.kind.compute_kind import ComputeKind
                 handler = ComputeKind()
@@ -85,6 +165,46 @@ def create_job_command(args):
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
                     print(f"🖥️  Resources: {result['resources']}")
+                
+                # 显示Access Methods
+                print("\n🌐 Access Methods:")
+                
+                try:
+                    import subprocess
+                    import json
+                    
+                    # 获取Service信息
+                    service_base_name = result['name']
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_output = subprocess.check_output(service_cmd, shell=True, text=True)
+                    service_data = json.loads(service_output)
+                    
+                    # 获取Node IP
+                    node_cmd = f"kubectl get nodes -o json"
+                    node_output = subprocess.check_output(node_cmd, shell=True, text=True)
+                    node_data = json.loads(node_output)
+                    node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                    
+                    # 获取Service的端口信息
+                    node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                    service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
+                    target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                    
+                    # 方式1: 通过Pod IP访问
+                    print(f"   1. Pod IP Access:")
+                    print(f"      - Pod is initializing, IP will be available once running")
+                    print(f"      - Expected Port: {target_port if target_port != 'N/A' else service_port}")
+                    
+                    # 方式2: 通过NodePort访问
+                    print(f"   2. NodePort Access:")
+                    print(f"      - Node IP: {node_ip}")
+                    print(f"      - NodePort: {node_port}")
+                    if node_port != 'N/A':
+                        print(f"      - Access: curl http://{node_ip}:{node_port}")
+                    else:
+                        print(f"      - NodePort not available")
+                except Exception as e:
+                    print(f"      - Access methods information not available yet")
             elif parsed_obj.kind == "pool" or parsed_obj.kind == "resource":
                 # 资源池创建逻辑
                 from gpuctl.client.pool_client import PoolClient
@@ -515,11 +635,113 @@ def describe_job_command(args):
             print(f"   Memory Usage: {metrics.get('memoryUsage', 'N/A')}")
             print(f"   Throughput: {metrics.get('throughput', 'N/A')}")
         
-        if 'k8sResources' in job:
-            print("\n🔧 Kubernetes Resources:")
-            k8s_resources = job['k8sResources']
-            print(f"   Job Name: {k8s_resources.get('jobName', 'N/A')}")
-            print(f"   Pods: {', '.join(k8s_resources.get('pods', []))}")
+        # 获取并显示访问方式
+        job_type = job.get('labels', {}).get('g8s.host/job-type', '')
+        if job_type in ['inference', 'compute', 'notebook']:
+            print("\n🌐 Access Methods:")
+            
+            # 获取完整作业名称
+            full_job_name = job.get('name', '')
+            base_job_name = remove_prefix(full_job_name)
+            
+            # 先获取Service信息，用于获取端口
+            service_data = None
+            try:
+                import subprocess
+                import json
+                
+                # 提取基础作业名称（如果是Pod名称的话，去除Pod后缀）
+                service_base_name = base_job_name
+                if '-' in service_base_name and len(service_base_name.split('-')) >= 3:
+                    # 格式：base-name-deployment-hash-pod-suffix
+                    service_base_name = '-'.join(service_base_name.split('-')[:-2])
+                
+                service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                service_output = subprocess.check_output(service_cmd, shell=True, text=True)
+                service_data = json.loads(service_output)
+            except Exception as e:
+                pass
+            
+            # 方式1: 通过Pod IP访问
+            print(f"   1. Pod IP Access:")
+            try:
+                import subprocess
+                import json
+                
+                # 直接获取指定Pod的信息，而不是所有匹配的Pod
+                pod_cmd = f"kubectl get pod {full_job_name} -n g8s-host -o json"
+                pod_output = subprocess.check_output(pod_cmd, shell=True, text=True)
+                pod_data = json.loads(pod_output)
+                
+                # 检查Pod状态
+                pod_status = pod_data['status']['phase']
+                if pod_status == 'Running':
+                    # 只在Running状态下获取并显示Pod IP
+                    pod_ip = pod_data['status'].get('podIP', 'N/A')
+                    if service_data:
+                        # 获取Service的端口信息
+                        target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                        service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
+                        pod_port = target_port if target_port != 'N/A' else service_port
+                        print(f"      - Pod IP: {pod_ip}")
+                        print(f"      - Port: {pod_port}")
+                        print(f"      - Access: curl http://{pod_ip}:{pod_port}")
+                    else:
+                        print(f"      - Pod IP: {pod_ip}")
+                else:
+                    # Pod不是Running状态，不显示IP
+                    print(f"      - Pod is {pod_status}, no IP available")
+            except subprocess.CalledProcessError:
+                print(f"      - Pod {full_job_name} not found")
+            except Exception as e:
+                print(f"      - Failed to get pod info: {e}")
+            
+            # 方式2: 通过NodePort访问
+            print(f"   2. NodePort Access:")
+            try:
+                import subprocess
+                import json
+                
+                if not service_data:
+                    # 重新尝试获取Service信息
+                    service_base_name = base_job_name
+                    if '-' in service_base_name and len(service_base_name.split('-')) >= 3:
+                        service_base_name = '-'.join(service_base_name.split('-')[:-2])
+                    
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_output = subprocess.check_output(service_cmd, shell=True, text=True)
+                    service_data = json.loads(service_output)
+                
+                if service_data:
+                    # 获取Service的端口信息
+                    node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                    
+                    # 获取Node IP
+                    node_cmd = f"kubectl get nodes -o json"
+                    node_output = subprocess.check_output(node_cmd, shell=True, text=True)
+                    node_data = json.loads(node_output)
+                    node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                    
+                    # 检查Pod状态，如果Pod不是Running，则NodePort访问不可用
+                    pod_cmd = f"kubectl get pod {full_job_name} -n g8s-host -o json"
+                    pod_output = subprocess.check_output(pod_cmd, shell=True, text=True)
+                    pod_data = json.loads(pod_output)
+                    pod_status = pod_data['status']['phase']
+                    
+                    if pod_status == 'Running':
+                        print(f"      - Node IP: {node_ip}")
+                        print(f"      - NodePort: {node_port}")
+                        if node_port != 'N/A':
+                            print(f"      - Access: curl http://{node_ip}:{node_port}")
+                        else:
+                            print(f"      - NodePort not available")
+                    else:
+                        # Pod不是Running状态，NodePort访问不可用
+                        print(f"      - Pod is {pod_status}, NodePort access unavailable")
+                else:
+                    print(f"      - No service found for this job")
+            except Exception as e:
+                print(f"      - Failed to get service info: {e}")
         
         return 0
     except Exception as e:

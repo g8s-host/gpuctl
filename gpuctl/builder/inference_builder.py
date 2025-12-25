@@ -98,7 +98,7 @@ class InferenceBuilder(BaseBuilder):
                 port=inference_job.service.port,
                 target_port=inference_job.service.port
             )],
-            type="ClusterIP"  # 可以根据需要调整为NodePort或LoadBalancer
+            type="NodePort"  # 修改为NodePort，方便用户访问
         )
 
         metadata = client.V1ObjectMeta(
