@@ -39,7 +39,9 @@ build/
 # Nuitka output
 *.dist/
 gpuctl.exe
+# 只忽略gpuctl二进制文件，不忽略gpuctl目录
 gpuctl
+!gpuctl/
 
 # main.dist directory
 main.dist/
