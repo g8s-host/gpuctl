@@ -215,6 +215,10 @@ class PoolClient(KubernetesClient):
         gpu_total = 0
         gpu_used = 0
         gpu_types = set()
+        node_names = [node.metadata.name for node in nodes]
+
+        # 批量获取所有节点的已使用GPU数量
+        node_used_gpus = self._get_all_nodes_used_gpu_count()
 
         # 获取节点上的GPU信息
         for node in nodes:
@@ -227,13 +231,13 @@ class PoolClient(KubernetesClient):
             if gpu_type:
                 gpu_types.add(gpu_type)
 
-            # 获取已使用的GPU数量（需要从运行的Pod中统计）
-            gpu_used += self._get_used_gpu_count(node.metadata.name)
+            # 获取已使用的GPU数量（从批量统计结果中获取）
+            gpu_used += node_used_gpus.get(node.metadata.name, 0)
 
         return {
             "name": pool_name,
             "description": f"{pool_name}资源池",
-            "nodes": [node.metadata.name for node in nodes],
+            "nodes": node_names,
             "gpu_total": gpu_total,
             "gpu_used": gpu_used,
             "gpu_free": gpu_total - gpu_used,
@@ -277,30 +281,52 @@ class PoolClient(KubernetesClient):
         labels = node.metadata.labels or {}
         return labels.get("nvidia.com/gpu-type")
 
-    def _get_used_gpu_count(self, node_name: str) -> int:
-        """获取节点上已使用的GPU数量"""
+    def _get_all_nodes_used_gpu_count(self) -> Dict[str, int]:
+        """批量获取所有节点上已使用的GPU数量"""
         try:
-            # 获取节点上运行的所有Pod
-            pods = self.core_v1.list_pod_for_all_namespaces(
-                field_selector=f"spec.nodeName={node_name}"
-            )
+            # 一次获取所有命名空间的所有Pod
+            pods = self.core_v1.list_pod_for_all_namespaces()
 
-            used_gpus = 0
+            # 初始化节点GPU使用情况字典
+            node_used_gpus = {}
+
+            # 遍历所有Pod，统计每个节点的GPU使用情况
             for pod in pods.items:
                 # 检查Pod是否正在运行
                 if pod.status.phase not in ["Running", "Pending"]:
                     continue
 
+                # 获取Pod所在的节点名称
+                node_name = pod.spec.node_name
+                if not node_name:
+                    continue
+
                 # 统计Pod请求的GPU数量
+                pod_gpus = 0
                 for container in pod.spec.containers:
                     if container.resources and container.resources.requests:
                         gpu_request = container.resources.requests.get("nvidia.com/gpu")
                         if gpu_request:
-                            used_gpus += int(gpu_request)
+                            pod_gpus += int(gpu_request)
 
-            return used_gpus
+                # 更新节点的GPU使用情况
+                if node_name in node_used_gpus:
+                    node_used_gpus[node_name] += pod_gpus
+                else:
+                    node_used_gpus[node_name] = pod_gpus
+
+            return node_used_gpus
 
         except ApiException:
+            return {}
+
+    def _get_used_gpu_count(self, node_name: str) -> int:
+        """获取节点上已使用的GPU数量（兼容旧方法）"""
+        try:
+            # 调用新的批量统计方法
+            node_used_gpus = self._get_all_nodes_used_gpu_count()
+            return node_used_gpus.get(node_name, 0)
+        except Exception:
             return 0
 
     def list_nodes(self, filters: Dict[str, str] = None) -> List[Dict[str, Any]]:
@@ -320,10 +346,13 @@ class PoolClient(KubernetesClient):
             # 获取节点列表
             nodes = self.core_v1.list_node(label_selector=label_selector)
 
+            # 批量获取所有节点的GPU使用情况
+            node_used_gpus = self._get_all_nodes_used_gpu_count()
+
             # 构建节点信息
             node_list = []
             for node in nodes.items:
-                node_info = self._build_node_info(node)
+                node_info = self._build_node_info(node, node_used_gpus)
                 node_list.append(node_info)
 
             return node_list
@@ -335,18 +364,26 @@ class PoolClient(KubernetesClient):
         """获取特定节点详情"""
         try:
             node = self.core_v1.read_node(node_name)
-            return self._build_node_info(node)
+            # 批量获取所有节点的GPU使用情况
+            node_used_gpus = self._get_all_nodes_used_gpu_count()
+            return self._build_node_info(node, node_used_gpus)
         except ApiException as e:
             if e.status == 404:
                 return None
             self.handle_api_exception(e, f"get node {node_name}")
 
-    def _build_node_info(self, node: Any) -> Dict[str, Any]:
+    def _build_node_info(self, node: Any, node_used_gpus: Dict[str, int] = None) -> Dict[str, Any]:
         """构建节点信息"""
         labels = node.metadata.labels or {}
         gpu_count = self._get_node_gpu_count(node)
         gpu_type = self._get_node_gpu_type(node)
-        used_gpus = self._get_used_gpu_count(node.metadata.name)
+        
+        # 如果没有提供GPU使用情况，调用批量获取方法
+        if node_used_gpus is None:
+            node_used_gpus = self._get_all_nodes_used_gpu_count()
+        
+        # 从字典中获取已使用的GPU数量
+        used_gpus = node_used_gpus.get(node.metadata.name, 0)
 
         return {
             "name": node.metadata.name,
