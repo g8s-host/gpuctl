@@ -491,33 +491,46 @@ def logs_job_command(args):
         # 处理Pod名称，确保使用完整的带前缀名称
         pod_name = args.job_name
         
-        # 如果Pod名称不带有前缀，尝试获取作业类型并添加正确的前缀
+        # 如果Pod名称不带有前缀，尝试查找对应的完整Pod名称
         if not pod_name.startswith("g8s-host-"):
-            # 获取所有作业列表，查找对应的作业类型
-            all_jobs = job_client.list_jobs(args.namespace, include_pods=True)
-            found = False
-            for job in all_jobs:
-                if remove_prefix(job['name']) == pod_name:
-                    # 找到匹配的作业，获取其完整名称
-                    pod_name = job['name']
-                    found = True
-                    break
+            # 获取所有Pod，查找匹配的完整名称
+            import subprocess
+            import json
             
-            # 如果没有找到匹配的作业，尝试使用默认的compute前缀构建完整名称
-            if not found:
-                # 尝试使用compute前缀构建完整名称
-                pod_name = f"g8s-host-compute-{pod_name}"
+            try:
+                # 获取所有Pod的完整信息
+                cmd = f"kubectl get pods -n {args.namespace} -o json"
+                output = subprocess.check_output(cmd, shell=True, text=True)
+                pods_data = json.loads(output)
+                
+                # 查找匹配的Pod
+                for pod in pods_data['items']:
+                    full_pod_name = pod['metadata']['name']
+                    # 检查是否包含用户提供的名称
+                    if pod_name in full_pod_name:
+                        pod_name = full_pod_name
+                        break
+            except Exception as e:
+                # 如果查找失败，继续使用原始名称
+                pass
         
         if args.follow:
             # 使用流式日志，持续获取
-            logs = log_client.stream_job_logs(args.job_name, namespace=args.namespace, pod_name=pod_name)
+            logs = log_client.stream_job_logs(pod_name, namespace=args.namespace, pod_name=pod_name)
+            has_logs = False
             for log in logs:
                 print(log)
+                has_logs = True
+            if not has_logs:
+                print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
         else:
             # 只获取一次日志
-            logs = log_client.get_job_logs(args.job_name, namespace=args.namespace, tail=100, pod_name=pod_name)
-            for log in logs:
-                print(log)
+            logs = log_client.get_job_logs(pod_name, namespace=args.namespace, tail=100, pod_name=pod_name)
+            if not logs:
+                print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+            else:
+                for log in logs:
+                    print(log)
         
         return 0
     except Exception as e:

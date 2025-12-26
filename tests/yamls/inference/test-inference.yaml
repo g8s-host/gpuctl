@@ -25,11 +25,11 @@ service:
 
 # 资源规格
 resources:
-  pool: training-pool
-  gpu: 1
-  gpu-type: a10-24g
-  cpu: 8
-  memory: 32Gi
+  #pool: training-pool
+  #gpu: 1
+  #gpu-type: a10-24g
+  cpu: 1
+  memory: 2Gi
   gpu-share: 2Gi
 
 storage:

@@ -112,7 +112,7 @@ class JobClient(KubernetesClient):
 
 
 
-    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 60, interval: int = 2) -> bool:
+    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 600, interval: int = 2) -> bool:
         """等待资源删除完成
         
         Args:

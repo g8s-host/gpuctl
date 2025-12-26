@@ -26,7 +26,7 @@ class Priority(str, Enum):
 
 class ResourceRequest(BaseModel):
     pool: Optional[str] = Field(default=None, description="资源池名称")
-    gpu: int = Field(..., ge=0, description="GPU数量", alias="accelerator_count")
+    gpu: int = Field(default=0, ge=0, description="GPU数量", alias="accelerator_count")
     gpu_type: Optional[str] = Field(default=None, description="GPU类型", alias="gpu-type")
     cpu: Union[int, str] = Field(..., description="CPU需求，如 8, '8' 或 '8000m'")
     memory: str = Field(..., description="内存需求，如 '32Gi'")
