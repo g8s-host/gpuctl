@@ -476,6 +476,58 @@ python server/main.py
 pytest
 ```
 
+### Build Binary
+
+You can build a standalone binary file using PyInstaller. This allows you to run gpuctl without a Python environment.
+
+#### Prerequisites
+
+- PyInstaller 5.0+
+- Python 3.12 (recommended)
+
+#### Build Steps
+
+1. Install dependencies
+
+```bash
+pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0 pyinstaller
+```
+
+2. Build the binary for Linux/macOS
+
+```bash
+# Build for Linux
+pyinstaller --onefile --name="gpuctl-linux-amd64" --hidden-import=yaml --hidden-import=PyYAML main.py
+
+# Build for macOS
+pyinstaller --onefile --name="gpuctl-macos-amd64" --hidden-import=yaml --hidden-import=PyYAML main.py
+```
+
+3. Build the binary for Windows
+
+```bash
+pyinstaller --onefile --name="gpuctl-windows-amd64.exe" --hidden-import=yaml --hidden-import=PyYAML main.py
+```
+
+4. Find the built binary
+
+```bash
+ls -la dist/
+```
+
+The built binary will be in the `dist/` directory.
+
+5. Use the binary
+
+```bash
+# Linux/macOS
+chmod +x dist/gpuctl-linux-amd64
+./dist/gpuctl-linux-amd64 --help
+
+# Windows
+./dist/gpuctl-windows-amd64.exe --help
+```
+
 ## Contribution Guide
 
 1. Fork the repository

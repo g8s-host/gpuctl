@@ -522,6 +522,58 @@ python server/main.py
 pytest
 ```
 
+### 构建二进制文件
+
+您可以使用 PyInstaller 构建独立的二进制文件，这样您就可以在没有 Python 环境的情况下运行 gpuctl。
+
+#### 前提条件
+
+- PyInstaller 5.0+
+- Python 3.12（推荐）
+
+#### 构建步骤
+
+1. 安装依赖
+
+```bash
+pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0 pyinstaller
+```
+
+2. 为 Linux/macOS 构建二进制文件
+
+```bash
+# 为 Linux 构建
+pyinstaller --onefile --name="gpuctl-linux-amd64" --hidden-import=yaml --hidden-import=PyYAML main.py
+
+# 为 macOS 构建
+pyinstaller --onefile --name="gpuctl-macos-amd64" --hidden-import=yaml --hidden-import=PyYAML main.py
+```
+
+3. 为 Windows 构建二进制文件
+
+```bash
+pyinstaller --onefile --name="gpuctl-windows-amd64.exe" --hidden-import=yaml --hidden-import=PyYAML main.py
+```
+
+4. 查找构建的二进制文件
+
+```bash
+ls -la dist/
+```
+
+构建的二进制文件将在 `dist/` 目录中。
+
+5. 使用二进制文件
+
+```bash
+# Linux/macOS
+chmod +x dist/gpuctl-linux-amd64
+./dist/gpuctl-linux-amd64 --help
+
+# Windows
+./dist/gpuctl-windows-amd64.exe --help
+```
+
 ## 贡献指南
 
 1. Fork 代码库
