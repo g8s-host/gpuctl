@@ -329,12 +329,10 @@ class JobClient(KubernetesClient):
     def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
         """将Pod对象转换为字典格式"""
         try:
-            # 确定Pod所属的作业类型
-            job_type = "compute"  # 默认设置为compute
+            job_type = "compute"
             labels = pod.metadata.labels or {}
             pod_name = pod.metadata.name
             
-            # 直接从Pod名称推断作业类型
             if "g8s-host-inference-" in pod_name:
                 job_type = "inference"
             elif "g8s-host-compute-" in pod_name:
@@ -346,7 +344,6 @@ class JobClient(KubernetesClient):
             elif "g8s.host/job-type" in labels:
                 job_type = labels["g8s.host/job-type"]
             
-            # 确定Pod状态
             active = 0
             succeeded = 0
             failed = 0
@@ -359,12 +356,13 @@ class JobClient(KubernetesClient):
                 elif pod.status.phase == "Failed":
                     failed = 1
             
-            # 创建并返回Pod字典
             pod_dict = {
                 "name": pod.metadata.name,
                 "namespace": pod.metadata.namespace,
                 "labels": labels.copy(),
                 "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "start_time": pod.status.start_time.isoformat() if pod.status and pod.status.start_time else (pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None),
+                "completion_time": None,
                 "status": {
                     "active": active,
                     "succeeded": succeeded,
@@ -372,18 +370,18 @@ class JobClient(KubernetesClient):
                 }
             }
             
-            # 添加作业类型标签
             if "g8s.host/job-type" not in pod_dict["labels"]:
                 pod_dict["labels"]["g8s.host/job-type"] = job_type
             
             return pod_dict
         except Exception as e:
-            # 处理异常并返回基本信息
             return {
                 "name": pod.metadata.name,
                 "namespace": pod.metadata.namespace,
                 "labels": pod.metadata.labels or {},
                 "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "start_time": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
+                "completion_time": None,
                 "status": {
                     "active": 0,
                     "succeeded": 0,
@@ -398,6 +396,8 @@ class JobClient(KubernetesClient):
             "namespace": job.metadata.namespace,
             "labels": job.metadata.labels or {},
             "creation_timestamp": job.metadata.creation_timestamp.isoformat() if job.metadata.creation_timestamp else None,
+            "start_time": job.status.start_time.isoformat() if job.status and job.status.start_time else None,
+            "completion_time": job.status.completion_time.isoformat() if job.status and job.status.completion_time else None,
             "status": {
                 "active": job.status.active or 0,
                 "succeeded": job.status.succeeded or 0,
@@ -412,6 +412,8 @@ class JobClient(KubernetesClient):
             "namespace": deployment.metadata.namespace,
             "labels": deployment.metadata.labels or {},
             "creation_timestamp": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
+            "start_time": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
+            "completion_time": None,
             "status": {
                 "active": deployment.status.ready_replicas or 0,
                 "succeeded": 0,
@@ -430,6 +432,8 @@ class JobClient(KubernetesClient):
             "namespace": statefulset.metadata.namespace,
             "labels": statefulset.metadata.labels or {},
             "creation_timestamp": statefulset.metadata.creation_timestamp.isoformat() if statefulset.metadata.creation_timestamp else None,
+            "start_time": statefulset.metadata.creation_timestamp.isoformat() if statefulset.metadata.creation_timestamp else None,
+            "completion_time": None,
             "status": {
                 "active": ready_replicas,
                 "succeeded": 0,
