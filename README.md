@@ -65,13 +65,20 @@ The platform adopts a layered design, exposing a user-friendly abstraction layer
 - Flexible binding and unbinding of nodes and resource pools
 - Resource isolation and quota management at the resource pool level
 
-### 3. Declarative Configuration
+### 3. Resource Quota Management
+
+- Declarative YAML-based quota configuration
+- Set resource limits per user/namespace (CPU, Memory, GPU)
+- View quota usage and consumption rates
+- Automatic namespace creation for each user
+
+### 4. Declarative Configuration
 
 - Use terminology familiar to algorithm engineers
 - Hide underlying infrastructure details
 - Support YAML format for task definition
 
-### 4. Rich CLI Commands
+### 5. Rich CLI Commands
 
 - Task lifecycle management
 - Node and resource pool management
@@ -333,13 +340,40 @@ storage:
 gpuctl create -f compute-job.yaml
 ```
 
-### 6. Query Task Status
+### 6. Configure Resource Quota
+
+```yaml
+# quota-config.yaml
+kind: quota
+version: v0.1
+
+metadata:
+  name: team-resource-quota
+  description: "Team resource quota configuration"
+
+# User resource allocation (automatically creates namespace for each user)
+users:
+  elon-musk:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
+  sam-altman:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
+```
+
+```bash
+gpuctl create -f quota-config.yaml
+```
+
+### 7. Query Task Status
 
 ```bash
 gpuctl get jobs
 ```
 
-### 7. View Task Logs
+### 8. View Task Logs
 
 ```bash
 gpuctl logs qwen2-7b-llamafactory-sft -f
@@ -385,6 +419,16 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | Mark a label for a specific node, supports overwriting existing labels with the same key |
 | `gpuctl get label <node-name> --key=g8s.host/gpu-type` | Query the value of a specific GPU type label for a node |
 | `gpuctl label node <node-name> <label-key> --delete` | Delete a specific label from a node |
+
+### Resource Quota Management
+
+| Command Example | Description |
+|---------|---------|
+| `gpuctl create -f quota.yaml` | Create resource quota configuration |
+| `gpuctl get quotas` | List all resource quotas |
+| `gpuctl get quotas <user-name>` | View quota for a specific user |
+| `gpuctl describe quota <user-name>` | View detailed quota usage (used/total) |
+| `gpuctl delete -f quota.yaml` | Delete resource quota |
 
 ## API Documentation
 
@@ -438,6 +482,15 @@ The platform provides RESTful API interfaces that can be used to build third-par
 | `/nodes/labels` | GET | Query node labels |
 | `/nodes/{nodeName}/labels/{key}` | DELETE | Delete node label |
 
+#### Resource Quota Management API
+
+| Endpoint | Method | Function |
+|----------|--------|----------|
+| `/quotas` | GET | Query quota list |
+| `/quotas/{userName}` | GET | Query quota details with usage |
+| `/quotas` | POST | Create resource quota |
+| `/quotas/{userName}` | DELETE | Delete resource quota |
+
 ### Interactive API Documentation
 
 After starting the server, you can access the interactive Swagger UI at:
@@ -457,6 +510,7 @@ gpuctl/
 │   ├── inference.py      # Inference task model
 │   ├── notebook.py       # Notebook task model
 │   ├── compute.py        # Compute task model
+│   ├── quota.py          # Resource quota model
 │   ├── pool.py           # Resource pool model
 │   └── common.py         # Common data models
 ├── parser/               # YAML parsing and validation
@@ -465,6 +519,7 @@ gpuctl/
 │   ├── inference_parser.py # Inference task parsing
 │   ├── notebook_parser.py # Notebook task parsing
 │   ├── compute_parser.py # Compute task parsing
+│   ├── quota_parser.py   # Resource quota parsing
 │   └── pool_parser.py    # Resource pool parsing
 ├── builder/              # Model to K8s resource conversion
 │   ├── training_builder.py # Training task → K8s Job
@@ -475,6 +530,7 @@ gpuctl/
 ├── client/               # K8s operation encapsulation
 │   ├── base_client.py    # Basic K8s client
 │   ├── job_client.py     # Task management
+│   ├── quota_client.py   # Resource quota management
 │   ├── pool_client.py    # Resource pool management
 │   └── log_client.py     # Log retrieval
 ├── kind/                 # Scenario-specific logic
@@ -486,6 +542,7 @@ gpuctl/
 │   ├── main.py           # Main command entry
 │   ├── job.py            # Task-related commands
 │   ├── pool.py           # Resource pool-related commands
+│   ├── quota.py          # Resource quota commands
 │   └── node.py           # Node-related commands
 ├── server/               # API server implementation
 │   ├── main.py           # Server entry point
@@ -495,6 +552,7 @@ gpuctl/
 │   └── routes/           # API routes
 │       ├── jobs.py        # Task management routes
 │       ├── pools.py       # Resource pool management routes
+│       ├── quotas.py      # Resource quota routes
 │       ├── nodes.py       # Node management routes
 │       ├── labels.py      # Label management routes
 │       └── auth.py        # Authentication routes

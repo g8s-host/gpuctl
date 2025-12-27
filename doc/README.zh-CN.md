@@ -62,13 +62,20 @@ gpuctl 是一个面向算法工程师的 AI 算力调度平台，旨在降低 GP
 - 节点与资源池的灵活绑定与解绑
 - 资源池级别的资源隔离与配额管理
 
-### 3. 声明式配置
+### 3. 资源配额管理
+
+- 声明式 YAML 配置资源配额
+- 为每个用户/命名空间设置资源限制（CPU、内存、GPU）
+- 查看配额使用率和消耗情况
+- 自动为每个用户创建独立命名空间
+
+### 4. 声明式配置
 
 - 使用算法工程师熟悉的术语
 - 隐藏底层基础设施细节
 - 支持 YAML 格式的任务定义
 
-### 4. 丰富的 CLI 命令
+### 5. 丰富的 CLI 命令
 
 - 任务生命周期管理
 - 节点与资源池管理
@@ -332,7 +339,34 @@ storage:
 gpuctl create -f nginx-job.yaml
 ```
 
-### 6. 查询任务状态
+### 6. 配置资源配额
+
+```yaml
+# quota-config.yaml
+kind: quota
+version: v0.1
+
+metadata:
+  name: team-resource-quota
+  description: "团队资源配额配置"
+
+# 用户资源配置（自动为每个用户创建命名空间）
+users:
+  elon-musk:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
+  sam-altman:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
+```
+
+```bash
+gpuctl create -f quota-config.yaml
+```
+
+### 7. 查询任务状态
 
 ```bash
 gpuctl get jobs
@@ -387,6 +421,16 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl get label <node-name> --key=g8s.host/gpu-type`     | 查询指定节点的指定GPU类型Label值 |
 | `gpuctl label node <node-name> <label-key> --delete`       | 删除指定节点的指定Label |
 
+### 资源配额管理
+
+| 命令示例 | 功能描述 |
+|----------|---------|
+| `gpuctl create -f quota.yaml` | 创建资源配额配置 |
+| `gpuctl get quotas` | 列出所有资源配额 |
+| `gpuctl get quotas <用户名>` | 查看指定用户的配额 |
+| `gpuctl describe quota <用户名>` | 查看配额使用率（已用/总量） |
+| `gpuctl delete -f quota.yaml` | 删除资源配额 |
+
 ## API 文档
 
 平台提供 RESTful API 接口，可用于构建第三方工具或集成到现有系统中。
@@ -439,6 +483,15 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `/nodes/labels`                   | GET    | 查询节点标签                 |
 | `/nodes/{nodeName}/labels/{key}`  | DELETE | 删除节点标签                 |
 
+#### 资源配额管理 API
+
+| 端点                        | 方法   | 功能                         |
+|-----------------------------|--------|------------------------------|
+| `/quotas`                   | GET    | 查询配额列表                 |
+| `/quotas/{userName}`        | GET    | 查询配额详情（含使用率）     |
+| `/quotas`                   | POST   | 创建资源配额                 |
+| `/quotas/{userName}`        | DELETE | 删除资源配额                 |
+
 ### 交互式 API 文档
 
 启动服务器后，可通过以下地址访问交互式 Swagger UI：
@@ -458,6 +511,7 @@ gpuctl/
 │   ├── inference.py          # 推理任务模型
 │   ├── notebook.py           # Notebook任务模型
 │   ├── compute.py            # Compute任务模型
+│   ├── quota.py              # 资源配额模型
 │   ├── pool.py               # 资源池模型
 │   └── common.py             # 公共数据模型
 ├── parser/                   # YAML解析与校验
@@ -465,6 +519,7 @@ gpuctl/
 │   ├── training_parser.py    # 训练任务解析
 │   ├── inference_parser.py   # 推理任务解析
 │   ├── compute_parser.py     # 计算任务解析
+│   ├── quota_parser.py       # 资源配额解析
 │   └── pool_parser.py        # 资源池解析
 ├── builder/                  # 模型转K8s资源
 │   ├── training_builder.py   # 训练任务→K8s Job
@@ -475,6 +530,7 @@ gpuctl/
 ├── client/                   # K8s操作封装
 │   ├── base_client.py        # 基础K8s客户端
 │   ├── job_client.py         # 任务管理
+│   ├── quota_client.py       # 资源配额管理
 │   ├── pool_client.py        # 资源池管理
 │   └── log_client.py         # 日志获取
 ├── kind/                     # 场景化逻辑
@@ -486,6 +542,7 @@ gpuctl/
 │   ├── main.py               # 主命令入口
 │   ├── job.py                # 任务相关命令
 │   ├── pool.py               # 资源池相关命令
+│   ├── quota.py              # 资源配额命令
 │   └── node.py               # 节点相关命令
 ├── server/                   # API服务器
 │   ├── main.py               # 服务器入口
@@ -495,6 +552,7 @@ gpuctl/
 │   └── routes/               # API路由
 │       ├── jobs.py           # 任务管理路由
 │       ├── pools.py          # 资源池管理路由
+│       ├── quotas.py         # 资源配额路由
 │       ├── nodes.py          # 节点管理路由
 │       ├── labels.py         # 标签管理路由
 │       └── auth.py           # 认证路由
