@@ -10,13 +10,13 @@ def main():
     parser = argparse.ArgumentParser(description='GPU Control CLI')
     subparsers = parser.add_subparsers(dest='command', help='Command to execute')
 
-    # create命令
+    # create command
     create_parser = subparsers.add_parser('create', help='Create a job from YAML')
     create_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can be specified multiple times)')
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
 
-    # get命令
+    # get command
     get_parser = subparsers.add_parser('get', help='Get resource information')
     get_subparsers = get_parser.add_subparsers(dest='resource', help='Resource type')
 
@@ -27,7 +27,7 @@ def main():
     jobs_parser.add_argument('--pool', help='Filter by resource pool')
     jobs_parser.add_argument('--type', choices=['training', 'inference', 'notebook', 'compute'],
                              help='Filter by job type')
-    # 添加--pods选项，用于查看Pod实例级别信息
+    # Add --pods option to view pod-level information
     jobs_parser.add_argument(
         "--pods",
         action="store_true",
@@ -47,11 +47,11 @@ def main():
     labels_parser.add_argument('node_name', help='Node name')
     labels_parser.add_argument('--key', help='Label key to filter')
 
-    # delete命令
+    # delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
     delete_subparsers = delete_parser.add_subparsers(dest='resource', help='Resource type to delete')
     
-    # 支持直接使用delete -f <yaml_file>形式
+    # Support delete -f <yaml_file> format
     delete_parser.add_argument('-f', '--file', help='YAML file path (alternative to specifying resource type)')
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
@@ -66,7 +66,7 @@ def main():
     
     # delete node label (keep existing functionality)
 
-    # logs命令
+    # logs command
     logs_parser = subparsers.add_parser('logs', help='Get job logs')
     logs_parser.add_argument('job_name', help='Job name')
     logs_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
@@ -74,7 +74,7 @@ def main():
     logs_parser.add_argument('-f', '--follow', action='store_true',
                              help='Follow log output')
 
-    # label命令
+    # label command
     label_parser = subparsers.add_parser('label', help='Manage node labels')
     label_subparsers = label_parser.add_subparsers(dest='action', help='Label action')
     
@@ -148,13 +148,13 @@ def main():
                 print(f"Unknown resource type: {args.resource}")
                 return 1
         elif args.command == 'delete':
-            # 安全检查args.job_name属性
+            # Safely check args.job_name attribute
             job_name = getattr(args, 'job_name', None)
             if args.resource == 'job' or job_name:
-                # 处理delete job <job_name>命令
+                # Handle delete job <job_name> command
                 return delete_job_command(args)
             elif args.file:
-                # 处理delete -f <yaml_file>命令
+                # Handle delete -f <yaml_file> command
                 return delete_job_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")

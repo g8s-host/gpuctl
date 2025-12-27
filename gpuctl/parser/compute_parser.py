@@ -3,31 +3,29 @@ from gpuctl.api.compute import ComputeJob
 
 
 class ComputeParser(BaseParser):
-    """计算任务解析器"""
+    """Compute job parser"""
 
     @classmethod
     def validate_resources(cls, compute_job: ComputeJob) -> None:
-        """验证资源需求"""
+        """Validate resource requirements"""
         resources = compute_job.resources
 
-        # 计算任务默认不需要GPU
         if resources.gpu < 0:
-            raise ParserError("GPU数量不能为负数")
+            raise ParserError("GPU count cannot be negative")
 
-        # 验证CPU和内存格式
         if isinstance(resources.cpu, str):
             if not resources.cpu.endswith('m') and not resources.cpu.isdigit():
-                raise ParserError("CPU格式错误，应为数字或毫核数（如8000m）")
+                raise ParserError("Invalid CPU format, should be a number or millicores (e.g., 8000m)")
 
         if not resources.memory.upper().endswith(('GI', 'MI', 'KI')):
-            raise ParserError("内存格式错误，应为如32Gi格式")
+            raise ParserError("Invalid memory format, should be like 32Gi")
 
     @classmethod
     def parse_and_validate(cls, yaml_content: str) -> ComputeJob:
-        """解析并验证计算任务"""
+        """Parse and validate compute job"""
         compute_job = cls.parse_yaml(yaml_content)
         if not isinstance(compute_job, ComputeJob):
-            raise ParserError("YAML内容不是计算任务")
+            raise ParserError("YAML content is not a compute job")
 
         cls.validate_resources(compute_job)
         return compute_job

@@ -4,21 +4,17 @@ from gpuctl.api.notebook import NotebookJob
 
 
 class NotebookBuilder(BaseBuilder):
-    """Notebook任务构建器"""
+    """Notebook job builder"""
 
     @classmethod
     def build_statefulset(cls, notebook_job: NotebookJob) -> client.V1StatefulSet:
-        """构建K8s StatefulSet资源"""
-        # 获取workdirs
+        """Build K8s StatefulSet resource"""
         workdirs = notebook_job.storage.workdirs if hasattr(notebook_job.storage, 'workdirs') else []
         
-        # 构建容器
         container = cls.build_container_spec(notebook_job.environment, notebook_job.resources, workdirs)
 
-        # 添加Notebook特定配置，使用默认端口8888
         container.ports = [client.V1ContainerPort(container_port=8888)]
 
-        # 构建Pod模板
         pod_spec_extras = {}
         if notebook_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
@@ -33,20 +29,18 @@ class NotebookBuilder(BaseBuilder):
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 
-        # 为StatefulSet构建Pod模板，使用与selector匹配的labels和Always重启策略
         app_label = f"g8s-host-notebook-{notebook_job.job.name}"
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
             labels={"app": app_label}, 
-            restart_policy="Always",  # StatefulSet要求使用Always重启策略
+            restart_policy="Always",
             workdirs=workdirs
         )
 
-        # 构建StatefulSet规格
         service_name = f"g8s-host-svc-{notebook_job.job.name}"
         statefulset_spec = client.V1StatefulSetSpec(
-            replicas=1,  # Notebook通常是单实例
+            replicas=1,
             template=template,
             selector=client.V1LabelSelector(
                 match_labels={"app": app_label}
@@ -54,7 +48,6 @@ class NotebookBuilder(BaseBuilder):
             service_name=service_name
         )
 
-        # 构建StatefulSet元数据
         metadata = client.V1ObjectMeta(
             name=app_label,
             labels={
@@ -73,7 +66,7 @@ class NotebookBuilder(BaseBuilder):
 
     @classmethod
     def build_service(cls, notebook_job: NotebookJob) -> client.V1Service:
-        """构建K8s Service资源"""
+        """Build K8s Service resource"""
         app_label = f"g8s-host-notebook-{notebook_job.job.name}"
         service_spec = client.V1ServiceSpec(
             selector={"app": app_label},
@@ -81,7 +74,7 @@ class NotebookBuilder(BaseBuilder):
                 port=notebook_job.service.port,
                 target_port=notebook_job.service.port
             )],
-            type="NodePort"  # 方便外部访问
+            type="NodePort"
         )
 
         metadata = client.V1ObjectMeta(

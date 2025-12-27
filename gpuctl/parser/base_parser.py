@@ -9,12 +9,12 @@ from gpuctl.api.compute import ComputeJob
 
 
 class ParserError(Exception):
-    """解析错误异常"""
+    """Parser error exception"""
     pass
 
 
 class BaseParser:
-    """基础解析器"""
+    """Base parser"""
 
     KIND_MAPPING = {
         "training": TrainingJob,
@@ -27,7 +27,7 @@ class BaseParser:
 
     @classmethod
     def parse_yaml(cls, yaml_content: str) -> Any:
-        """解析YAML内容"""
+        """Parse YAML content"""
         try:
             data = yaml.safe_load(yaml_content)
             if not data or 'kind' not in data:
@@ -47,7 +47,7 @@ class BaseParser:
 
     @classmethod
     def parse_yaml_file(cls, file_path: str) -> Any:
-        """从文件解析YAML"""
+        """Parse YAML from file"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()

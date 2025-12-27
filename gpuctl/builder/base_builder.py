@@ -4,11 +4,11 @@ from gpuctl.api.common import ResourceRequest, StorageConfig
 
 
 class BaseBuilder:
-    """基础构建器"""
+    """Base builder"""
 
     @staticmethod
     def build_volume_mounts(workdirs: List[Dict[str, str]]) -> List[client.V1VolumeMount]:
-        """构建VolumeMounts"""
+        """Build VolumeMounts"""
         volume_mounts = []
         for idx, workdir in enumerate(workdirs):
             volume_name = f"workdir-{idx}"
@@ -22,7 +22,7 @@ class BaseBuilder:
 
     @staticmethod
     def build_volumes(workdirs: List[Dict[str, str]]) -> List[client.V1Volume]:
-        """构建Volumes"""
+        """Build Volumes"""
         volumes = []
         for idx, workdir in enumerate(workdirs):
             volume_name = f"workdir-{idx}"
@@ -39,8 +39,7 @@ class BaseBuilder:
 
     @staticmethod
     def build_container_spec(env_config, resources: ResourceRequest, workdirs: List[Dict[str, str]] = None) -> client.V1Container:
-        """构建容器规格"""
-        # 初始化资源请求和限制
+        """Build container spec"""
         requests = {
             "cpu": resources.cpu,
             "memory": resources.memory
@@ -50,7 +49,6 @@ class BaseBuilder:
             "memory": resources.memory
         }
         
-        # 只有当GPU数量大于0时，才添加GPU资源请求
         if resources.gpu > 0:
             requests["nvidia.com/gpu"] = str(resources.gpu)
             limits["nvidia.com/gpu"] = str(resources.gpu)
@@ -76,7 +74,6 @@ class BaseBuilder:
             image_pull_policy="IfNotPresent"
         )
 
-        # 添加VolumeMounts
         if workdirs:
             container.volume_mounts = BaseBuilder.build_volume_mounts(workdirs)
 
@@ -88,7 +85,7 @@ class BaseBuilder:
                                 labels: Dict[str, str] = None,
                                 restart_policy: str = "Never",
                                 workdirs: List[Dict[str, str]] = None) -> client.V1PodTemplateSpec:
-        """构建Pod模板规格"""
+        """Build Pod template spec"""
         spec = client.V1PodSpec(
             containers=[container],
             restart_policy=restart_policy
@@ -100,11 +97,9 @@ class BaseBuilder:
             if 'node_selector' in pod_spec_extras:
                 spec.node_selector = pod_spec_extras['node_selector']
 
-        # 添加Volumes
         if workdirs:
             spec.volumes = BaseBuilder.build_volumes(workdirs)
 
-        # 使用提供的labels，如果没有则使用默认值
         pod_labels = labels or {"app": "gpuctl-job"}
         metadata = client.V1ObjectMeta(labels=pod_labels)
         return client.V1PodTemplateSpec(metadata=metadata, spec=spec)

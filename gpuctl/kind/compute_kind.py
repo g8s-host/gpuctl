@@ -5,24 +5,20 @@ from typing import Dict, Any
 
 
 class ComputeKind:
-    """计算任务处理逻辑"""
+    """Compute job processing logic"""
 
     def __init__(self):
         self.builder = ComputeBuilder()
         self.client = JobClient()
 
     def create_compute_service(self, compute_job: ComputeJob, namespace: str = "default") -> Dict[str, Any]:
-        """创建计算任务"""
-        # 构建K8s Deployment资源
+        """Create compute job"""
         deployment = self.builder.build_deployment(compute_job)
         
-        # 构建K8s Service资源
         service = self.builder.build_service(compute_job)
 
-        # 提交Deployment到Kubernetes
         deployment_result = self.client.create_deployment(deployment, namespace)
         
-        # 提交Service到Kubernetes
         service_result = self.client.create_service(service, namespace)
 
         return {
@@ -42,14 +38,13 @@ class ComputeKind:
         }
 
     def get_compute_job_status(self, job_name: str, namespace: str = "default") -> Dict[str, Any]:
-        """获取计算任务状态"""
+        """Get compute job status"""
         deployment_name = f"g8s-host-compute-{job_name}"
         deployment_info = self.client.get_deployment(deployment_name, namespace)
         
         if not deployment_info:
             return {"status": "not_found"}
 
-        # 获取Pod信息以获取详细状态
         pods = self.client.list_pods(namespace, labels={"app": deployment_name})
 
         status = "pending"

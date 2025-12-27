@@ -2,25 +2,25 @@ from gpuctl.client.pool_client import PoolClient
 
 
 def get_nodes_command(args):
-    """获取节点列表命令"""
+    """Get nodes list command"""
     try:
         client = PoolClient()
         
-        # 构建过滤条件
+        # Build filter criteria
         filters = {}
         if args.pool:
             filters["pool"] = args.pool
         if args.gpu_type:
             filters["gpu_type"] = args.gpu_type
         
-        # 调用API获取节点列表，传递过滤条件
+        # Call API to get nodes list with filter criteria
         nodes = client.list_nodes(filters=filters)
         
-        # 打印节点列表
+        # Print nodes list
         print(f"{'NODE NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'POOL':<20}")
         
         for node in nodes:
-            # 安全访问字典字段，使用默认值处理缺失情况
+            # Safely access dictionary fields with default values for missing cases
             name = node.get('name', 'N/A')
             status = node.get('status', 'unknown')
             gpu_total = node.get('gpu_total', 0)
@@ -38,24 +38,24 @@ def get_nodes_command(args):
 
 
 def get_labels_command(args):
-    """获取节点标签命令"""
+    """Get node labels command"""
     try:
         client = PoolClient()
         
-        # 获取节点信息
+        # Get node info
         node = client.get_node(args.node_name)
         
-        # 获取节点标签
+        # Get node labels
         labels = node.get('labels', {})
         
-        # 如果指定了key，则只打印该key的标签
+        # If key is specified, only print that key's label
         if args.key:
             if args.key in labels:
                 print(f"{args.node_name} {args.key}: {labels[args.key]}")
             else:
                 print(f"❌ Label {args.key} not found on node {args.node_name}")
         else:
-            # 打印所有标签
+            # Print all labels
             print(f"🏷️  Labels for node {args.node_name}:")
             for key, value in labels.items():
                 print(f"   {key}: {value}")
@@ -67,13 +67,13 @@ def get_labels_command(args):
 
 
 def label_node_command(args):
-    """为节点添加标签命令"""
+    """Add label to node command"""
     try:
         client = PoolClient()
         
         for node_name in args.node_name:
             if args.delete:
-                # 删除标签
+                # Remove label
                 if args.label:
                     key = args.label.split('=')[0]
                     client._remove_node_label(node_name, key)
@@ -82,7 +82,7 @@ def label_node_command(args):
                     print(f"❌ Must specify label to delete")
                     return 1
             else:
-                # 添加或更新标签
+                # Add or update label
                 if args.label:
                     key, value = args.label.split('=')
                     client._label_node(node_name, key, value)
@@ -98,7 +98,7 @@ def label_node_command(args):
 
 
 def add_node_to_pool_command(args):
-    """将节点添加到资源池命令"""
+    """Add node to pool command"""
     try:
         client = PoolClient()
         result = client.add_nodes_to_pool(args.pool, args.node_name)
@@ -117,7 +117,7 @@ def add_node_to_pool_command(args):
 
 
 def remove_node_from_pool_command(args):
-    """从资源池移除节点命令"""
+    """Remove node from pool command"""
     try:
         client = PoolClient()
         result = client.remove_nodes_from_pool(args.pool, args.node_name)
@@ -136,19 +136,19 @@ def remove_node_from_pool_command(args):
 
 
 def describe_node_command(args):
-    """描述节点详情命令"""
+    """Describe node details command"""
     try:
         client = PoolClient()
         node = client.get_node(args.node_name)
         
-        # 打印节点详情
+        # Print node details
         print(f"📋 Node Details: {args.node_name}")
         print(f"📊 Name: {node.get('name', 'N/A')}")
         print(f"📈 Status: {node.get('status', 'unknown')}")
         print(f"🔧 K8s Status: {node.get('k8s_status', 'N/A')}")
         print(f"🖥️  Pool: {node.get('labels', {}).get('g8s.host/pool', 'default')}")
         
-        # 计算AGE
+        # Calculate AGE
         from datetime import datetime, timezone
         def calculate_age(created_at_str):
             if not created_at_str:

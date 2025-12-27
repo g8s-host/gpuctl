@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 
 class TrainingKind:
-    """训练任务处理逻辑"""
+    """Training job processing logic"""
 
     def __init__(self):
         self.builder = TrainingBuilder()
@@ -13,11 +13,9 @@ class TrainingKind:
 
     def create_training_job(self, training_job: TrainingJob,
                             namespace: str = "default") -> Dict[str, Any]:
-        """创建训练任务"""
-        # 构建K8s Job资源
+        """Create training job"""
         k8s_job = self.builder.build_job(training_job)
 
-        # 提交到Kubernetes
         result = self.client.create_job(k8s_job, namespace)
 
         return {
@@ -34,12 +32,11 @@ class TrainingKind:
 
     def get_training_job_status(self, job_name: str,
                                 namespace: str = "default") -> Dict[str, Any]:
-        """获取训练任务状态"""
+        """Get training job status"""
         job_info = self.client.get_job(job_name, namespace)
         if not job_info:
             return {"status": "not_found"}
 
-        # 获取Pod信息以获取详细状态
         pods = self.client.list_pods(namespace, labels={"job-name": job_name})
 
         status = "pending"

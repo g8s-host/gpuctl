@@ -4,20 +4,17 @@ from gpuctl.api.compute import ComputeJob
 
 
 class ComputeBuilder(BaseBuilder):
-    """计算任务构建器"""
+    """Compute job builder"""
 
     @classmethod
     def build_deployment(cls, compute_job: ComputeJob) -> client.V1Deployment:
-        """构建K8s Deployment资源"""
-        # 获取workdirs
+        """Build K8s Deployment resource"""
         workdirs = []
         if compute_job.storage and hasattr(compute_job.storage, 'workdirs'):
             workdirs = compute_job.storage.workdirs
         
-        # 构建容器
         container = cls.build_container_spec(compute_job.environment, compute_job.resources, workdirs)
 
-        # 构建Pod模板
         pod_spec_extras = {}
         if compute_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
@@ -32,7 +29,6 @@ class ComputeBuilder(BaseBuilder):
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 
-        # 添加健康检查
         if compute_job.service and compute_job.service.health_check:
             health_path = compute_job.service.health_check
             container.liveness_probe = client.V1Probe(
@@ -52,17 +48,15 @@ class ComputeBuilder(BaseBuilder):
                 period_seconds=10
             )
 
-        # 为Deployment构建Pod模板，使用与selector匹配的labels和Always重启策略
         app_label = f"g8s-host-compute-{compute_job.job.name}"
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
             labels={"app": app_label},
-            restart_policy="Always",  # Deployment要求使用Always重启策略
+            restart_policy="Always",
             workdirs=workdirs
         )
 
-        # 构建Deployment规格
         deployment_spec = client.V1DeploymentSpec(
             replicas=compute_job.service.replicas if compute_job.service else 1,
             template=template,
@@ -71,7 +65,6 @@ class ComputeBuilder(BaseBuilder):
             )
         )
 
-        # 构建Deployment元数据
         metadata = client.V1ObjectMeta(
             name=app_label,
             labels={
@@ -90,7 +83,7 @@ class ComputeBuilder(BaseBuilder):
 
     @classmethod
     def build_service(cls, compute_job: ComputeJob) -> client.V1Service:
-        """构建K8s Service资源"""
+        """Build K8s Service resource"""
         app_label = f"g8s-host-compute-{compute_job.job.name}"
         service_spec = client.V1ServiceSpec(
             selector={"app": app_label},
@@ -98,7 +91,7 @@ class ComputeBuilder(BaseBuilder):
                 port=compute_job.service.port,
                 target_port=compute_job.service.port
             )],
-            type="NodePort"  # 修改为NodePort，方便用户访问
+            type="NodePort"
         )
 
         metadata = client.V1ObjectMeta(

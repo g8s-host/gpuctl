@@ -2,12 +2,12 @@ from gpuctl.client.pool_client import PoolClient
 
 
 def get_pools_command(args):
-    """获取资源池列表命令"""
+    """Get resource pools list command"""
     try:
         client = PoolClient()
         pools = client.list_pools()
         
-        # 打印资源池列表
+        # Print resource pools list
         print(f"{'POOL NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'NODE COUNT':<10}")
         
         for pool in pools:
@@ -20,7 +20,7 @@ def get_pools_command(args):
 
 
 def create_pool_command(args):
-    """创建资源池命令"""
+    """Create resource pool command"""
     try:
         client = PoolClient()
         
@@ -44,7 +44,7 @@ def create_pool_command(args):
 
 
 def delete_pool_command(args):
-    """删除资源池命令"""
+    """Delete resource pool command"""
     try:
         client = PoolClient()
         success = client.delete_pool(args.pool_name)
@@ -61,12 +61,12 @@ def delete_pool_command(args):
 
 
 def describe_pool_command(args):
-    """描述资源池详情命令"""
+    """Describe resource pool details command"""
     try:
         client = PoolClient()
         pool = client.get_pool(args.pool_name)
         
-        # 打印资源池详情
+        # Print resource pool details
         print(f"📋 Pool Details: {args.pool_name}")
         print(f"📊 Name: {pool.get('name', 'N/A')}")
         print(f"📝 Description: {pool.get('description', 'N/A')}")

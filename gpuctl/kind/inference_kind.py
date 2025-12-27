@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 
 class InferenceKind:
-    """推理任务处理逻辑"""
+    """Inference job processing logic"""
 
     def __init__(self):
         self.builder = InferenceBuilder()
@@ -13,12 +13,10 @@ class InferenceKind:
 
     def create_inference_service(self, inference_job: InferenceJob,
                                  namespace: str = "default") -> Dict[str, Any]:
-        """创建推理服务"""
-        # 构建K8s Deployment和Service资源
+        """Create inference service"""
         deployment = self.builder.build_deployment(inference_job)
         service = self.builder.build_service(inference_job)
 
-        # 提交到Kubernetes
         deployment_result = self.client.create_deployment(deployment, namespace)
         service_result = self.client.create_service(service, namespace)
 
