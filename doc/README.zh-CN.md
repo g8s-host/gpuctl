@@ -18,33 +18,33 @@ gpuctl 是一个面向算法工程师的 AI 算力调度平台，旨在降低 GP
 平台采用分层设计，对用户暴露友好的抽象层，底层则基于成熟的Kubernetes和容器化技术构建，新增资源池管理模块以支撑资源精细化调度。
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        算法工程师                                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        接入层                                     │
-│                     (gpuctl CLI / REST API)                     │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        抽象与转换层                                │
-│ （解析YAML → 验证合法性 → 转换为K8s资源定义 → 封装K8s复杂性）         │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        调度与执行层                                │
-│ （基于Kubernetes及生态实现资源池化管理，按池分配GPU资源）             │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        监控与反馈层                                │
-│ （基于Prometheus+Grafana构建监控体系，收集任务运行全量数据）         │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         算法工程师                                    │
+└─────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                           接入层                                      │
+│                   (gpuctl CLI / REST API)                          │
+└─────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        抽象与转换层                                   │
+│  (解析YAML → 验证合法性 → 转换为K8s资源定义 → 封装K8s复杂性)          │
+└─────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        调度与执行层                                   │
+│  (基于Kubernetes及生态实现资源池化管理，按池分配GPU资源)                │
+└─────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        监控与反馈层                                   │
+│  (基于Prometheus+Grafana构建监控体系，收集任务运行全量数据)            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 核心功能
@@ -204,7 +204,7 @@ gpuctl create -f training-job.yaml
 ```yaml
 # inference-service.yaml
 kind: inference
-version: v0.1
+version: v0.1  
   
 # 任务标识
 job:
@@ -338,7 +338,7 @@ gpuctl create -f nginx-job.yaml
 gpuctl get jobs
 ```
 
-### 6. 查看任务日志
+### 7. 查看任务日志
 
 ```bash
 gpuctl logs qwen2-7b-llamafactory-sft -f
@@ -348,41 +348,44 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 
 ### 任务管理
 
-| 命令示例 | 功能描述 |
-|---------|---------|
-| `gpuctl create -f train-job.yaml` | 提交一个训练任务 |
-| `gpuctl create -f task1.yaml -f task2.yaml` | 批量提交多个任务 |
-| `gpuctl get jobs` | 列出所有任务（训练/推理）及核心指标 |
-| `gpuctl get jobs --pool training-pool` | 列出指定资源池的任务 |
-| `gpuctl describe job <job-id>` | 查看任务详细信息及资源使用曲线 |
-| `gpuctl logs <job-id> -f` | 实时查看任务日志，支持按关键词过滤 |
-| `gpuctl delete -f job.yaml` | 删除/停止任务，支持--force强制删除 |
-| `gpuctl pause <job-id>` | 暂停运行中的任务 |
-| `gpuctl resume <job-id>` | 恢复暂停的任务 |
+| 命令示例                                          | 功能描述 |
+|--------------------------------------------------|---------|
+| `gpuctl create -f train-job.yaml`                | 提交一个训练任务 |
+| `gpuctl create -f task1.yaml -f task2.yaml`      | 批量提交多个任务 |
+| `gpuctl get jobs`                                | 列出所有任务（训练/推理）及核心指标 |
+| `gpuctl get jobs --pool training-pool`           | 列出指定资源池的任务 |
+| `gpuctl get jobs --pods`                         | 显示Pod实例级别信息 |
+| `gpuctl get jobs --type training`                | 按任务类型过滤 |
+| `gpuctl describe job <job-id>`                   | 查看任务详细信息及资源使用曲线 |
+| `gpuctl logs <job-id> -f`                        | 实时查看任务日志，支持按关键词过滤 |
+| `gpuctl delete -f job.yaml`                      | 删除/停止任务，支持--force强制删除 |
+| `gpuctl delete job <job-name>`                   | 直接通过任务名称删除任务 |
+| `gpuctl pause <job-id>`                          | 暂停运行中的任务 |
+| `gpuctl resume <job-id>`                         | 恢复暂停的任务 |
 
 ### 资源池管理
 
-| 命令示例 | 功能描述 |
-|---------|---------|
-| `gpuctl get pools` | 列出所有资源池及基本信息 |
-| `gpuctl create -f pool.yaml` | 创建新的资源池 |
-| `gpuctl delete -f pool.yaml` | 删除资源池 |
-| `gpuctl describe pool <pool-name>` | 查看资源池详细信息 |
+| 命令示例                                          | 功能描述 |
+|--------------------------------------------------|---------|
+| `gpuctl get pools`                               | 列出所有资源池及基本信息 |
+| `gpuctl create -f pool.yaml`                     | 创建新的资源池 |
+| `gpuctl delete -f pool.yaml`                     | 删除资源池 |
+| `gpuctl describe pool <pool-name>`               | 查看资源池详细信息 |
 | `gpuctl add node <node-name> --pool <pool-name>` | 将节点添加到资源池 |
 | `gpuctl remove node <node-name> --pool <pool-name>` | 从资源池移除节点 |
 
 ### 节点管理
 
-| 命令示例 | 功能描述 |
-|---------|---------|
-| `gpuctl get nodes` | 列出集群所有节点的基础信息（名称、状态、GPU 总数、绑定资源池） |
-| `gpuctl get nodes --pool <pool-name>` | 过滤查询指定资源池绑定的所有节点 |
-| `gpuctl get nodes --gpu-type <gpu-type>` | 过滤查询带有指定 GPU 类型的所有节点 |
-| `gpuctl describe node <node-name>` | 查看单个节点的详细信息（CPU/GPU 资源、GPU 类型 / 数量、Label 列表、绑定资源池、K8s 节点详情） |
-| `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | 给指定节点标记 GPU 类型 Label（默认 Label 键） |
-| `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | 给指定节点标记 Label，支持覆盖已有同键 Label |
-| `gpuctl get label <node-name> --key=g8s.host/gpu-type` | 查询指定节点的指定 GPU 类型 Label 值 |
-| `gpuctl label node <node-name> <label-key> --delete` | 删除指定节点的指定 Label |
+| 命令示例                                                      | 功能描述 |
+|-------------------------------------------------------------|---------|
+| `gpuctl get nodes`                                          | 列出集群所有节点的基础信息（名称、状态、GPU总数、绑定资源池） |
+| `gpuctl get nodes --pool <pool-name>`                       | 过滤查询指定资源池绑定的所有节点 |
+| `gpuctl get nodes --gpu-type <gpu-type>`                    | 过滤查询带有指定GPU类型的所有节点 |
+| `gpuctl describe node <node-name>`                          | 查看单个节点的详细信息（CPU/GPU资源、GPU类型/数量、Label列表、绑定资源池、K8s节点详情） |
+| `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | 给指定节点标记GPU类型Label（默认Label键） |
+| `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | 给指定节点标记Label，支持覆盖已有同键Label |
+| `gpuctl get label <node-name> --key=g8s.host/gpu-type`     | 查询指定节点的指定GPU类型Label值 |
+| `gpuctl label node <node-name> <label-key> --delete`       | 删除指定节点的指定Label |
 
 ## API 文档
 
@@ -391,7 +394,7 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 ### 基础信息
 
 - **基础路径**：`/api/v1`
-- **数据格式**：请求 / 响应均采用 JSON 格式，YAML 配置通过`application/yaml`媒体类型传输
+- **数据格式**：请求/响应均采用 JSON 格式，YAML 配置通过`application/yaml`媒体类型传输
 - **认证方式**：基于 Bearer Token 认证，通过 HTTP 请求头`Authorization: Bearer <token>`传递
 - **版本控制**：URL 路径包含版本（如`v1`），支持多版本并行维护
 - **状态码规范**：
@@ -407,33 +410,34 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 
 #### 任务管理 API
 
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/jobs` | POST | 创建任务 |
-| `/jobs/batch` | POST | 批量创建任务 |
-| `/jobs` | GET | 查询任务列表 |
-| `/jobs/{jobId}` | GET | 查询任务详情 |
-| `/jobs/{jobId}` | DELETE | 删除任务 |
-| `/jobs/{jobId}/logs` | GET | 获取任务实时日志 |
-| `/jobs/{jobId}/metrics` | GET | 获取任务指标时序数据 |
+| 端点                        | 方法   | 功能                         |
+|-----------------------------|--------|------------------------------|
+| `/jobs`                     | POST   | 创建任务                     |
+| `/jobs/batch`               | POST   | 批量创建任务                 |
+| `/jobs`                     | GET    | 查询任务列表                 |
+| `/jobs/{jobId}`             | GET    | 查询任务详情                 |
+| `/jobs/{jobId}`             | DELETE | 删除任务                     |
+| `/jobs/{jobId}/logs`        | GET    | 获取任务实时日志             |
+| `/jobs/{jobId}/metrics`     | GET    | 获取任务指标时序数据         |
 
 #### 资源池管理 API
 
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/pools` | GET | 查询资源池列表 |
-| `/pools/{poolName}` | GET | 查询资源池详情 |
-| `/pools` | POST | 创建资源池 |
+| 端点                        | 方法   | 功能                         |
+|-----------------------------|--------|------------------------------|
+| `/pools`                    | GET    | 查询资源池列表               |
+| `/pools/{poolName}`         | GET    | 查询资源池详情               |
+| `/pools`                    | POST   | 创建资源池                   |
+| `/pools/{poolName}`         | DELETE | 删除资源池                   |
 
 #### 节点管理 API
 
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/nodes` | GET | 查询节点列表 |
-| `/nodes/{nodeName}` | GET | 查询节点详情 |
-| `/nodes/{nodeName}/labels` | POST | 给节点添加标签 |
-| `/nodes/labels` | GET | 查询节点标签 |
-| `/nodes/{nodeName}/labels/{key}` | DELETE | 删除节点标签 |
+| 端点                              | 方法   | 功能                         |
+|-----------------------------------|--------|------------------------------|
+| `/nodes`                          | GET    | 查询节点列表                 |
+| `/nodes/{nodeName}`               | GET    | 查询节点详情                 |
+| `/nodes/{nodeName}/labels`        | POST   | 给节点添加标签               |
+| `/nodes/labels`                   | GET    | 查询节点标签                 |
+| `/nodes/{nodeName}/labels/{key}`  | DELETE | 删除节点标签                 |
 
 ### 交互式 API 文档
 
@@ -449,65 +453,66 @@ http://localhost:8000/api/v1/docs
 
 ```
 gpuctl/
-├── api/                  # 数据模型层（新增抽象资源字段，兼容多芯片）
-│   ├── training.py       # 训练任务模型
-│   ├── inference.py      # 推理任务模型
-│   ├── notebook.py       # Notebook任务模型
-│   ├── compute.py        # Compute任务模型
-│   ├── pool.py           # 资源池模型
-│   └── common.py         # 公共数据模型
-├── parser/               # YAML解析与校验
-│   ├── base_parser.py    # 基础解析逻辑
-│   ├── training_parser.py # 训练任务解析
-│   ├── inference_parser.py # 推理任务解析
-│   └── pool_parser.py    # 资源池解析
-├── builder/              # 模型转K8s资源
-│   ├── training_builder.py # 训练任务→K8s Job
-│   ├── inference_builder.py # 推理任务→Deployment
-│   ├── notebook_builder.py # Notebook→deployment+Service
-│   ├── compute_builder.py # Compute任务→Deployment
-│   └── base_builder.py   # 基础构建逻辑
-├── client/               # K8s操作封装
-│   ├── base_client.py    # 基础K8s客户端
-│   ├── job_client.py     # 任务管理
-│   ├── pool_client.py    # 资源池管理
-│   └── log_client.py     # 日志获取
-├── kind/             # 场景化逻辑
-│   ├── training_kind.py # 多卡训练/分布式调度
-│   ├── inference_kind.py # 推理服务扩缩容
-│   ├── notebook_kind.py # Notebook生命周期管理
-│   └── compute_kind.py # Compute任务生命周期管理
-├── cli/                  # 命令行入口
-│   ├── main.py           # 主命令入口
-│   ├── job.py            # 任务相关命令
-│   ├── pool.py           # 资源池相关命令
-│   └── node.py           # 节点相关命令
-├── server/               # API服务器
-│   ├── main.py           # 服务器入口
-│   ├── models.py         # 数据模型
-│   ├── auth.py           # 认证授权
-│   ├── dependencies.py   # 依赖注入
-│   └── routes/           # API路由
-│       ├── jobs.py        # 任务管理路由
-│       ├── pools.py       # 资源池管理路由
-│       ├── nodes.py       # 节点管理路由
-│       ├── labels.py      # 标签管理路由
-│       └── auth.py        # 认证路由
-├── tests/                # 测试用例
-│   ├── conftest.py       # 测试配置
-│   ├── test_gpuctl.py    # 核心功能测试
-│   ├── api/              # API测试
-│   │   ├── test_jobs.py   # 任务API测试
-│   │   ├── test_pools.py  # 资源池API测试
-│   │   ├── test_nodes.py  # 节点API测试
-│   │   └── test_labels.py # 标签API测试
-│   └── cli/              # CLI测试
-│       ├── test_job_commands.py   # 任务命令测试
-│       ├── test_pool_commands.py  # 资源池命令测试
-│       └── test_node_commands.py  # 节点命令测试
-├── main.py               # 主入口
-├── poetry.lock           # 依赖锁定文件
-└── pyproject.toml        # 项目配置
+├── api/                      # 数据模型层（新增抽象资源字段，兼容多芯片）
+│   ├── training.py           # 训练任务模型
+│   ├── inference.py          # 推理任务模型
+│   ├── notebook.py           # Notebook任务模型
+│   ├── compute.py            # Compute任务模型
+│   ├── pool.py               # 资源池模型
+│   └── common.py             # 公共数据模型
+├── parser/                   # YAML解析与校验
+│   ├── base_parser.py        # 基础解析逻辑
+│   ├── training_parser.py    # 训练任务解析
+│   ├── inference_parser.py   # 推理任务解析
+│   ├── compute_parser.py     # 计算任务解析
+│   └── pool_parser.py        # 资源池解析
+├── builder/                  # 模型转K8s资源
+│   ├── training_builder.py   # 训练任务→K8s Job
+│   ├── inference_builder.py  # 推理任务→Deployment+HPA
+│   ├── notebook_builder.py   # Notebook→StatefulSet+Service
+│   ├── compute_builder.py    # Compute任务→Deployment
+│   └── base_builder.py       # 基础构建逻辑
+├── client/                   # K8s操作封装
+│   ├── base_client.py        # 基础K8s客户端
+│   ├── job_client.py         # 任务管理
+│   ├── pool_client.py        # 资源池管理
+│   └── log_client.py         # 日志获取
+├── kind/                     # 场景化逻辑
+│   ├── training_kind.py      # 多卡训练/分布式调度
+│   ├── inference_kind.py     # 推理服务扩缩容
+│   ├── notebook_kind.py      # Notebook生命周期管理
+│   └── compute_kind.py       # Compute任务生命周期管理
+├── cli/                      # 命令行入口
+│   ├── main.py               # 主命令入口
+│   ├── job.py                # 任务相关命令
+│   ├── pool.py               # 资源池相关命令
+│   └── node.py               # 节点相关命令
+├── server/                   # API服务器
+│   ├── main.py               # 服务器入口
+│   ├── models.py             # 数据模型
+│   ├── auth.py               # 认证授权
+│   ├── dependencies.py       # 依赖注入
+│   └── routes/               # API路由
+│       ├── jobs.py           # 任务管理路由
+│       ├── pools.py          # 资源池管理路由
+│       ├── nodes.py          # 节点管理路由
+│       ├── labels.py         # 标签管理路由
+│       └── auth.py           # 认证路由
+├── tests/                    # 测试用例
+│   ├── conftest.py           # 测试配置
+│   ├── test_gpuctl.py        # 核心功能测试
+│   ├── api/                  # API测试
+│   │   ├── test_jobs.py      # 任务API测试
+│   │   ├── test_pools.py     # 资源池API测试
+│   │   ├── test_nodes.py     # 节点API测试
+│   │   └── test_labels.py    # 标签API测试
+│   └── cli/                  # CLI测试
+│       ├── test_job_commands.py    # 任务命令测试
+│       ├── test_pool_commands.py   # 资源池命令测试
+│       └── test_node_commands.py   # 节点命令测试
+├── main.py                   # 主入口
+├── INSTALLATION_GUIDE.md     # 安装指南
+└── pyproject.toml            # 项目配置
 ```
 
 ### 启动开发服务器

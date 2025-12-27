@@ -30,20 +30,23 @@ The platform adopts a layered design, exposing a user-friendly abstraction layer
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Abstraction & Conversion Layer           │
-│  (Parse YAML → Validate → Convert to K8s resources → Encapsulate K8s complexity) │
+│                    Abstraction & Conversion Layer                │
+│ (Parse YAML → Validate → Convert to K8s resources → Encapsulate │
+│                          K8s complexity)                        │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Scheduling & Execution Layer             │
-│  (Implement resource pooling based on Kubernetes and ecosystem, allocate GPU resources by pool) │
+│                 Scheduling & Execution Layer                     │
+│ (Implement resource pooling based on Kubernetes and ecosystem,  │
+│               allocate GPU resources by pool)                   │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Monitoring & Feedback Layer              │
-│  (Build monitoring system based on Prometheus+Grafana, collect full task runtime data) │
+│                   Monitoring & Feedback Layer                    │
+│  (Build monitoring system based on Prometheus+Grafana, collect  │
+│                     full task runtime data)                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -54,6 +57,7 @@ The platform adopts a layered design, exposing a user-friendly abstraction layer
 - **Training Tasks**: Support distributed training, integrated with acceleration frameworks like DeepSpeed
 - **Inference Services**: Support model deployment with automatic scaling
 - **Debugging Tasks**: Provide Jupyter Notebook environment for easy debugging
+- **Compute Tasks**: Support for batch compute workloads with various resource configurations
 
 ### 2. Resource Pool Management
 
@@ -143,8 +147,8 @@ metadata:
   name: training-pool
   description: "Resource pool dedicated to training tasks"
 
-nodes: 
-  node1: 
+nodes:
+  node1:
     gpu-type: A100-100G
   node2:
     gpu-type: A800-20G
@@ -192,10 +196,10 @@ resources:
 storage:
   workdirs:
     - path: /datasets/alpaca-qwen.json
-    - path: /models/qwen2-7b    
+    - path: /models/qwen2-7b
     - path: /cache/models
     - path: /output/qwen2-sft
-    - path: /output/qwen2-sft/checkpoints    
+    - path: /output/qwen2-sft/checkpoints
 ```
 
 ```bash
@@ -207,7 +211,7 @@ gpuctl create -f training-job.yaml
 ```yaml
 # inference-service.yaml
 kind: inference
-version: v0.1  
+version: v0.1
 
 # Task identification
 job:
@@ -289,13 +293,53 @@ storage:
 gpuctl create -f notebook-job.yaml
 ```
 
-### 5. Query Task Status
+### 5. Submit a Compute Task
+
+```yaml
+# compute-job.yaml
+kind: compute
+version: v0.1
+
+job:
+  name: batch-compute-job
+  priority: medium
+  description: "Batch compute task"
+
+environment:
+  image: registry.example.com/compute:v1.0
+  command: ["python", "compute.py"]
+  args:
+    - "--input"
+    - "/data/input"
+    - "--output"
+    - "/data/output"
+
+resources:
+  pool: default
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 4
+  memory: 16Gi
+  gpu-share: 2Gi
+  pods: 3
+
+storage:
+  workdirs:
+    - path: /data/input
+    - path: /data/output
+```
+
+```bash
+gpuctl create -f compute-job.yaml
+```
+
+### 6. Query Task Status
 
 ```bash
 gpuctl get jobs
 ```
 
-### 6. View Task Logs
+### 7. View Task Logs
 
 ```bash
 gpuctl logs qwen2-7b-llamafactory-sft -f
@@ -311,6 +355,7 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl create -f task1.yaml -f task2.yaml` | Batch submit multiple tasks |
 | `gpuctl get jobs` | List all tasks (training/inference) and core metrics |
 | `gpuctl get jobs --pool training-pool` | List tasks in a specified resource pool |
+| `gpuctl get jobs --type training` | List tasks of a specific type |
 | `gpuctl describe job <job-id>` | View detailed task information and resource usage curves |
 | `gpuctl logs <job-id> -f` | View real-time task logs, supports keyword filtering |
 | `gpuctl delete -f job.yaml` | Delete/stop a task, supports --force for forced deletion |
@@ -381,6 +426,7 @@ The platform provides RESTful API interfaces that can be used to build third-par
 | `/pools` | GET | Query resource pool list |
 | `/pools/{poolName}` | GET | Query resource pool details |
 | `/pools` | POST | Create resource pool |
+| `/pools/{poolName}` | DELETE | Delete resource pool |
 
 #### Node Management API
 
@@ -410,27 +456,32 @@ gpuctl/
 │   ├── training.py       # Training task model
 │   ├── inference.py      # Inference task model
 │   ├── notebook.py       # Notebook task model
+│   ├── compute.py        # Compute task model
 │   ├── pool.py           # Resource pool model
 │   └── common.py         # Common data models
 ├── parser/               # YAML parsing and validation
 │   ├── base_parser.py    # Basic parsing logic
 │   ├── training_parser.py # Training task parsing
 │   ├── inference_parser.py # Inference task parsing
+│   ├── notebook_parser.py # Notebook task parsing
+│   ├── compute_parser.py # Compute task parsing
 │   └── pool_parser.py    # Resource pool parsing
 ├── builder/              # Model to K8s resource conversion
 │   ├── training_builder.py # Training task → K8s Job
 │   ├── inference_builder.py # Inference task → Deployment+HPA
 │   ├── notebook_builder.py # Notebook → StatefulSet+Service
+│   ├── compute_builder.py # Compute task → K8s Job/Deployment
 │   └── base_builder.py   # Basic building logic
 ├── client/               # K8s operation encapsulation
 │   ├── base_client.py    # Basic K8s client
 │   ├── job_client.py     # Task management
 │   ├── pool_client.py    # Resource pool management
 │   └── log_client.py     # Log retrieval
-├── kind/             # Scenario-specific logic
-│   ├── training_kind.py # Multi-GPU training/distributed scheduling
+├── kind/                 # Scenario-specific logic
+│   ├── training_kind.py  # Multi-GPU training/distributed scheduling
 │   ├── inference_kind.py # Inference service scaling
-│   └── notebook_kind.py # Notebook lifecycle management
+│   ├── notebook_kind.py  # Notebook lifecycle management
+│   └── compute_kind.py   # Batch compute task management
 ├── cli/                  # CLI command implementations
 │   ├── main.py           # Main command entry
 │   ├── job.py            # Task-related commands
@@ -454,7 +505,7 @@ gpuctl/
 │   │   ├── test_jobs.py   # Task API tests
 │   │   ├── test_pools.py  # Resource pool API tests
 │   │   ├── test_nodes.py  # Node API tests
-│   │   └── test_labels.py # Label API tests
+│   │   └── test_labels.py # Label management API tests
 │   └── cli/              # CLI tests
 │       ├── test_job_commands.py   # Task command tests
 │       ├── test_pool_commands.py  # Resource pool command tests
