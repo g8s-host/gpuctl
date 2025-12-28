@@ -36,3 +36,21 @@ class InferenceKind:
                 "service": service_result["name"]
             }
         }
+
+    def update_inference_service(self, inference_job: InferenceJob,
+                                 namespace: str = "default") -> Dict[str, Any]:
+        """Update inference service (delete and recreate)"""
+        deployment_name = f"g8s-host-inference-{inference_job.job.name}"
+        service_name = f"g8s-host-svc-{inference_job.job.name}"
+        
+        try:
+            self.client.delete_deployment(deployment_name, namespace)
+        except Exception:
+            pass
+        
+        try:
+            self.client.delete_service(service_name, namespace)
+        except Exception:
+            pass
+        
+        return self.create_inference_service(inference_job, namespace)

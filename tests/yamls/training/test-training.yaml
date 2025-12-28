@@ -18,7 +18,7 @@ environment:
 # 资源需求声明
 resources:
   pool: training-pool
-  gpu: 1
+  gpu: 2
   gpu-type: a10-24g
   cpu: 8
   memory: 32Gi

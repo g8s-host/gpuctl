@@ -34,6 +34,24 @@ class NotebookKind:
             "access_url": self._build_access_url(service_result, notebook_job)
         }
 
+    def update_notebook(self, notebook_job: NotebookJob,
+                        namespace: str = "default") -> Dict[str, Any]:
+        """Update Notebook service (delete and recreate)"""
+        statefulset_name = f"g8s-host-notebook-{notebook_job.job.name}"
+        service_name = f"g8s-host-svc-{notebook_job.job.name}"
+        
+        try:
+            self.client.delete_statefulset(statefulset_name, namespace)
+        except Exception:
+            pass
+        
+        try:
+            self.client.delete_service(service_name, namespace)
+        except Exception:
+            pass
+        
+        return self.create_notebook(notebook_job, namespace)
+
     def _build_access_url(self, service_result: Dict[str, Any],
                           notebook_job: NotebookJob) -> str:
         """Build Notebook access URL"""

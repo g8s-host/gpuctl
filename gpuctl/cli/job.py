@@ -241,6 +241,119 @@ def create_job_command(args):
         return 1
 
 
+def apply_job_command(args):
+    """Apply job command (create or update)"""
+    try:
+        for file_path in args.file:
+            print(f"\n📝 Applying file: {file_path}")
+            
+            parsed_obj = BaseParser.parse_yaml_file(file_path)
+            
+            if parsed_obj.kind == "training":
+                from gpuctl.kind.training_kind import TrainingKind
+                handler = TrainingKind()
+                job_client = JobClient()
+                
+                job_name = add_prefix(parsed_obj.job.name, "training")
+                existing = job_client.get_job(job_name, args.namespace)
+                
+                if existing:
+                    print(f"🔄 Updating {parsed_obj.kind} job: {remove_prefix(job_name)}")
+                    result = handler.update_training_job(parsed_obj, args.namespace)
+                else:
+                    print(f"✅ Creating {parsed_obj.kind} job: {remove_prefix(job_name)}")
+                    result = handler.create_training_job(parsed_obj, args.namespace)
+                
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"📊 Name: {result['name']}")
+                print(f"📦 Namespace: {result['namespace']}")
+                if 'resources' in result:
+                    print(f"🖥️  Resources: {result['resources']}")
+                    
+            elif parsed_obj.kind == "inference":
+                from gpuctl.kind.inference_kind import InferenceKind
+                handler = InferenceKind()
+                job_client = JobClient()
+                
+                job_name = add_prefix(parsed_obj.job.name, "inference")
+                existing = job_client.get_job(job_name, args.namespace)
+                
+                if existing:
+                    print(f"🔄 Updating {parsed_obj.kind} service: {remove_prefix(job_name)}")
+                    result = handler.update_inference_service(parsed_obj, args.namespace)
+                else:
+                    print(f"✅ Creating {parsed_obj.kind} service: {remove_prefix(job_name)}")
+                    result = handler.create_inference_service(parsed_obj, args.namespace)
+                
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"📊 Name: {result['name']}")
+                print(f"📦 Namespace: {result['namespace']}")
+                if 'resources' in result:
+                    print(f"🖥️  Resources: {result['resources']}")
+                    
+            elif parsed_obj.kind == "notebook":
+                from gpuctl.kind.notebook_kind import NotebookKind
+                handler = NotebookKind()
+                job_client = JobClient()
+                
+                job_name = add_prefix(parsed_obj.job.name, "notebook")
+                existing = job_client.get_job(job_name, args.namespace)
+                
+                if existing:
+                    print(f"🔄 Updating {parsed_obj.kind} job: {remove_prefix(job_name)}")
+                    result = handler.update_notebook(parsed_obj, args.namespace)
+                else:
+                    print(f"✅ Creating {parsed_obj.kind} job: {remove_prefix(job_name)}")
+                    result = handler.create_notebook(parsed_obj, args.namespace)
+                
+                display_job_id = remove_prefix(result['job_id'])
+                print(f"📊 Name: {result['name']}")
+                print(f"📦 Namespace: {result['namespace']}")
+                if 'resources' in result:
+                    print(f"🖥️  Resources: {result['resources']}")
+                    
+            elif parsed_obj.kind == "pool" or parsed_obj.kind == "resource":
+                from gpuctl.client.pool_client import PoolClient
+                client = PoolClient()
+                
+                existing = client.get_pool(parsed_obj.metadata.name)
+                
+                pool_config = {
+                    "name": parsed_obj.metadata.name,
+                    "description": parsed_obj.metadata.description,
+                    "nodes": list(parsed_obj.nodes.keys())
+                }
+                
+                if existing:
+                    print(f"🔄 Updating resource pool: {parsed_obj.metadata.name}")
+                    result = client.update_pool(pool_config)
+                else:
+                    print(f"✅ Creating resource pool: {parsed_obj.metadata.name}")
+                    result = client.create_pool(pool_config)
+                
+                print(f"📊 Description: {parsed_obj.metadata.description}")
+                print(f"📦 Node count: {len(parsed_obj.nodes)}")
+                print(f"📋 Status: {result['status']}")
+                
+            elif parsed_obj.kind == "quota":
+                from gpuctl.cli.quota import apply_quota_command as quota_apply
+                import argparse
+                quota_args = argparse.Namespace(file=[file_path])
+                return quota_apply(quota_args)
+                
+            else:
+                print(f"❌ Unsupported kind: {parsed_obj.kind}")
+                return 1
+
+        return 0
+    except ParserError as e:
+        print(f"❌ Parser error: {e}")
+        return 1
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+        return 1
+
+
 def get_jobs_command(args):
     """Get jobs list command"""
     try:

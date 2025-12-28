@@ -22,6 +22,19 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create job")
 
+    def update_job(self, name: str, namespace: str, job: client.V1Job) -> Dict[str, Any]:
+        """更新Job"""
+        try:
+            job.metadata.resource_version = None
+            response = self.batch_v1.replace_namespaced_job(name, namespace, job)
+            return {
+                "name": response.metadata.name,
+                "namespace": response.metadata.namespace,
+                "uid": response.metadata.uid
+            }
+        except ApiException as e:
+            self.handle_api_exception(e, f"update job {name}")
+
     def get_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> Optional[Dict[str, Any]]:
         """获取作业资源信息，包括Job、Deployment和StatefulSet"""
         try:
@@ -455,6 +468,19 @@ class JobClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create deployment")
 
+    def update_deployment(self, name: str, namespace: str, deployment: client.V1Deployment) -> Dict[str, Any]:
+        """更新Deployment"""
+        try:
+            deployment.metadata.resource_version = None
+            response = self.apps_v1.replace_namespaced_deployment(name, namespace, deployment)
+            return {
+                "name": response.metadata.name,
+                "namespace": response.metadata.namespace,
+                "uid": response.metadata.uid
+            }
+        except ApiException as e:
+            self.handle_api_exception(e, f"update deployment {name}")
+
     def create_service(self, service: client.V1Service, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Service"""
         try:
@@ -468,6 +494,19 @@ class JobClient(KubernetesClient):
             }
         except ApiException as e:
             self.handle_api_exception(e, "create service")
+
+    def update_service(self, name: str, namespace: str, service: client.V1Service) -> Dict[str, Any]:
+        """更新Service"""
+        try:
+            service.metadata.resource_version = None
+            response = self.core_v1.replace_namespaced_service(name, namespace, service)
+            return {
+                "name": response.metadata.name,
+                "namespace": response.metadata.namespace,
+                "uid": response.metadata.uid
+            }
+        except ApiException as e:
+            self.handle_api_exception(e, f"update service {name}")
 
     def create_hpa(self, hpa: client.V1HorizontalPodAutoscaler, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建HorizontalPodAutoscaler"""
@@ -496,6 +535,19 @@ class JobClient(KubernetesClient):
             }
         except ApiException as e:
             self.handle_api_exception(e, "create statefulset")
+
+    def update_statefulset(self, name: str, namespace: str, statefulset: client.V1StatefulSet) -> Dict[str, Any]:
+        """更新StatefulSet"""
+        try:
+            statefulset.metadata.resource_version = None
+            response = self.apps_v1.replace_namespaced_stateful_set(name, namespace, statefulset)
+            return {
+                "name": response.metadata.name,
+                "namespace": response.metadata.namespace,
+                "uid": response.metadata.uid
+            }
+        except ApiException as e:
+            self.handle_api_exception(e, f"update statefulset {name}")
 
     def list_pods(self, namespace: str = DEFAULT_NAMESPACE, labels: Dict[str, str] = None) -> List[Dict[str, Any]]:
         """列出Pods"""

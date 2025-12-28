@@ -1,10 +1,10 @@
 import argparse
 import sys
 from gpuctl import DEFAULT_NAMESPACE
-from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, pause_job_command, resume_job_command
+from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, pause_job_command, resume_job_command, apply_job_command
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
-from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command, apply_quota_command
+from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
 
 
 def main():
@@ -57,13 +57,10 @@ def main():
     quotas_parser.add_argument('user', nargs='?', help='Filter by user name')
 
     # apply command
-    apply_parser = subparsers.add_parser('apply', help='Apply a resource configuration')
-    apply_parser.add_argument('-f', '--file', action='append', help='YAML file path (can specify multiple)')
-    apply_subparsers = apply_parser.add_subparsers(dest='resource', help='Resource type to apply')
-
-    # apply quota
-    quota_apply_parser = apply_subparsers.add_parser('quota', help='Apply resource quota configuration')
-    quota_apply_parser.add_argument('--force', action='store_true', help='Force apply and recreate resources')
+    apply_parser = subparsers.add_parser('apply', help='Apply a resource configuration (create or update)')
+    apply_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can specify multiple)')
+    apply_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
+                               help='Kubernetes namespace')
 
     # delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
@@ -186,19 +183,13 @@ def main():
                 print(f"Unknown resource type: {args.resource}")
                 return 1
         elif args.command == 'apply':
-            if args.resource == 'quota' or args.file:
-                return apply_quota_command(args)
-            else:
-                apply_parser.print_help()
-                return 1
+            return apply_job_command(args)
         elif args.command == 'delete':
-            job_name = getattr(args, 'job_name', None)
-            user_name = getattr(args, 'user_name', None)
-            if args.resource == 'job' or job_name:
+            if args.file:
+                return delete_job_command(args)
+            elif args.resource == 'job' or job_name:
                 return delete_job_command(args)
             elif args.resource == 'quota' or user_name:
-                return delete_quota_command(args)
-            elif args.file:
                 return delete_quota_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")

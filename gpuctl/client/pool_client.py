@@ -80,6 +80,40 @@ class PoolClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "create pool")
 
+    def update_pool(self, pool_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Update resource pool"""
+        try:
+            pool_name = pool_config["name"]
+            node_names = pool_config.get("nodes", [])
+
+            existing_pool = self.get_pool(pool_name)
+            if not existing_pool:
+                raise ValueError(f"Pool {pool_name} does not exist")
+
+            old_nodes = set(existing_pool.get("nodes", []))
+            new_nodes = set(node_names)
+
+            nodes_to_add = new_nodes - old_nodes
+            nodes_to_remove = old_nodes - new_nodes
+
+            if nodes_to_add:
+                self._validate_nodes_exist(list(nodes_to_add))
+                for node_name in nodes_to_add:
+                    self._label_node(node_name, "g8s.host/pool", pool_name)
+
+            if nodes_to_remove:
+                for node_name in nodes_to_remove:
+                    self._unlabel_node(node_name, "g8s.host/pool")
+
+            return {
+                "name": pool_name,
+                "status": "updated",
+                "message": "Resource pool updated successfully"
+            }
+
+        except ApiException as e:
+            self.handle_api_exception(e, "update pool")
+
     def _validate_nodes_exist(self, node_names: List[str]) -> None:
         """Validate all nodes exist"""
         if not node_names:
@@ -255,6 +289,10 @@ class PoolClient(KubernetesClient):
             }
         }
         self.core_v1.patch_node(node_name, patch)
+
+    def _unlabel_node(self, node_name: str, key: str) -> None:
+        """Remove label from node"""
+        self._remove_node_label(node_name, key)
 
     def _remove_node_label(self, node_name: str, key: str) -> None:
         """Remove node label"""

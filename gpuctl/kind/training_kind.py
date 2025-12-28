@@ -30,6 +30,18 @@ class TrainingKind:
             }
         }
 
+    def update_training_job(self, training_job: TrainingJob,
+                            namespace: str = "default") -> Dict[str, Any]:
+        """Update training job (delete and recreate)"""
+        job_name = f"g8s-host-training-{training_job.job.name}"
+        
+        try:
+            self.client.delete_job(job_name, namespace)
+        except Exception:
+            pass
+        
+        return self.create_training_job(training_job, namespace)
+
     def get_training_job_status(self, job_name: str,
                                 namespace: str = "default") -> Dict[str, Any]:
         """Get training job status"""
