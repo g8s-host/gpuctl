@@ -4,6 +4,7 @@ from gpuctl import DEFAULT_NAMESPACE
 from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, pause_job_command, resume_job_command
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
+from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
 
 
 def main():
@@ -15,6 +16,10 @@ def main():
     create_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can be specified multiple times)')
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+
+    # create-quota command (alternative to create -f quota.yaml)
+    create_quota_parser = subparsers.add_parser('create-quota', help='Create resource quota from YAML')
+    create_quota_parser.add_argument('-f', '--file', required=True, help='Quota YAML file path')
 
     # get command
     get_parser = subparsers.add_parser('get', help='Get resource information')
@@ -47,6 +52,10 @@ def main():
     labels_parser.add_argument('node_name', help='Node name')
     labels_parser.add_argument('--key', help='Label key to filter')
 
+    # get quotas
+    quotas_parser = get_subparsers.add_parser('quotas', help='Get resource quotas')
+    quotas_parser.add_argument('user', nargs='?', help='Filter by user name')
+
     # delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
     delete_subparsers = delete_parser.add_subparsers(dest='resource', help='Resource type to delete')
@@ -63,7 +72,19 @@ def main():
     job_delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                   help='Kubernetes namespace')
     job_delete_parser.add_argument('--force', action='store_true', help='Force delete job')
-    
+
+    # delete quota
+    quota_delete_parser = delete_subparsers.add_parser('quota', help='Delete a quota')
+    quota_delete_parser.add_argument('user_name', nargs='?', help='User name to delete quota for')
+    quota_delete_parser.add_argument('-f', '--file', help='Quota YAML file path to delete all quotas in file')
+    quota_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
+
+    # delete-quota command (standalone)
+    delete_quota_parser = subparsers.add_parser('delete-quota', help='Delete resource quota')
+    delete_quota_parser.add_argument('-f', '--file', help='Quota YAML file path')
+    delete_quota_parser.add_argument('user_name', nargs='?', help='User name')
+    delete_quota_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
+
     # delete node label (keep existing functionality)
 
     # logs command
@@ -116,6 +137,10 @@ def main():
     node_describe_parser = describe_subparsers.add_parser('node', help='Describe node details')
     node_describe_parser.add_argument('node_name', help='Node name')
 
+    # describe quota
+    quota_describe_parser = describe_subparsers.add_parser('quota', help='Describe quota details')
+    quota_describe_parser.add_argument('user_name', help='User name')
+
     # pause command
     pause_parser = subparsers.add_parser('pause', help='Pause a running job')
     pause_parser.add_argument('job_name', help='Job name to pause')
@@ -135,6 +160,8 @@ def main():
     try:
         if args.command == 'create':
             return create_job_command(args)
+        elif args.command == 'create-quota':
+            return create_quota_command(args)
         elif args.command == 'get':
             if args.resource == 'jobs':
                 return get_jobs_command(args)
@@ -144,22 +171,26 @@ def main():
                 return get_nodes_command(args)
             elif args.resource == 'labels':
                 return get_labels_command(args)
+            elif args.resource == 'quotas':
+                return get_quotas_command(args)
             else:
                 print(f"Unknown resource type: {args.resource}")
                 return 1
         elif args.command == 'delete':
-            # Safely check args.job_name attribute
             job_name = getattr(args, 'job_name', None)
+            user_name = getattr(args, 'user_name', None)
             if args.resource == 'job' or job_name:
-                # Handle delete job <job_name> command
                 return delete_job_command(args)
+            elif args.resource == 'quota' or user_name:
+                return delete_quota_command(args)
             elif args.file:
-                # Handle delete -f <yaml_file> command
-                return delete_job_command(args)
+                return delete_quota_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")
                 delete_parser.print_help()
                 return 1
+        elif args.command == 'delete-quota':
+            return delete_quota_command(args)
         elif args.command == 'logs':
             return logs_job_command(args)
         elif args.command == 'pause':
@@ -179,6 +210,8 @@ def main():
                 return describe_pool_command(args)
             elif args.resource == 'node':
                 return describe_node_command(args)
+            elif args.resource == 'quota':
+                return describe_quota_command(args)
             else:
                 print(f"Unknown resource type: {args.resource}")
                 return 1

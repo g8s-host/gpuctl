@@ -1,0 +1,16 @@
+kind: quota
+version: v0.1
+
+metadata:
+  name: team-resource-quota
+  description: "Team resource quota configuration"
+
+users:
+  elon-musk:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
+  sam-altman:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4

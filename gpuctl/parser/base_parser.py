@@ -6,6 +6,7 @@ from gpuctl.api.inference import InferenceJob
 from gpuctl.api.notebook import NotebookJob
 from gpuctl.api.pool import ResourcePool
 from gpuctl.api.compute import ComputeJob
+from gpuctl.api.quota import QuotaConfig
 
 
 class ParserError(Exception):
@@ -22,7 +23,8 @@ class BaseParser:
         "notebook": NotebookJob,
         "pool": ResourcePool,
         "resource": ResourcePool,
-        "compute": ComputeJob
+        "compute": ComputeJob,
+        "quota": QuotaConfig
     }
 
     @classmethod

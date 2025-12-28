@@ -223,6 +223,11 @@ def create_job_command(args):
                 print(f"📊 Description: {parsed_obj.metadata.description}")
                 print(f"📦 Node count: {len(parsed_obj.nodes)}")
                 print(f"📋 Status: {result['status']}")
+            elif parsed_obj.kind == "quota":
+                from gpuctl.cli.quota import create_quota_command
+                import argparse
+                quota_args = argparse.Namespace(file=[args.file[0]])
+                return create_quota_command(quota_args)
             else:
                 print(f"❌ Unsupported kind: {parsed_obj.kind}")
                 return 1

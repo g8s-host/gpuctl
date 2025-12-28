@@ -1,0 +1,21 @@
+kind: quota
+version: v0.1
+
+metadata:
+  name: tesla-quota
+  description: "Tesla team resource quota configuration"
+
+default:
+  cpu: 10
+  memory: 20Gi
+  gpu: 1
+
+users:
+  elon-musk:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
+  sam-altman:
+    cpu: 10
+    memory: 20Gi
+    gpu: 4
