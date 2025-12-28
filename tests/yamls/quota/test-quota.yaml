@@ -6,16 +6,20 @@ metadata:
   description: "Tesla team resource quota configuration"
 
 default:
-  cpu: 10
-  memory: 20Gi
-  gpu: 1
+  cpu: 20
+  memory: 40Gi
+  gpu: 2
 
 users:
   elon-musk:
-    cpu: 10
-    memory: 20Gi
-    gpu: 4
+    cpu: 20
+    memory: 40Gi
+    gpu: 8
   sam-altman:
-    cpu: 10
-    memory: 20Gi
-    gpu: 4
+    cpu: 15
+    memory: 30Gi
+    gpu: 6
+  new-user:
+    cpu: 5
+    memory: 10Gi
+    gpu: 1

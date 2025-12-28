@@ -70,6 +70,53 @@ class QuotaClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, f"create quota {quota_name} for {user_name}")
 
+    def apply_quota(self, quota_name: str, user_name: str, cpu: str = None,
+                    memory: str = None, gpu: str = None) -> Dict[str, Any]:
+        """Apply resource quota for a user (create or update)"""
+        namespace_name = self._get_user_namespace(user_name)
+
+        try:
+            self.core_v1.read_namespaced_resource_quota(
+                f"{quota_name}-{user_name}", namespace_name
+            )
+            return self.update_quota(quota_name, user_name, cpu, memory, gpu)
+        except ApiException as e:
+            if e.status == 404:
+                return self.create_quota(quota_name, user_name, cpu, memory, gpu)
+            raise
+
+    def update_quota(self, quota_name: str, user_name: str, cpu: str = None,
+                     memory: str = None, gpu: str = None) -> Dict[str, Any]:
+        """Update existing resource quota"""
+        try:
+            namespace_name = self._get_user_namespace(user_name)
+
+            hard_limits = {}
+            if cpu:
+                hard_limits["cpu"] = cpu
+            if memory:
+                hard_limits["memory"] = memory
+            if gpu:
+                hard_limits["nvidia.com/gpu"] = gpu
+
+            self.core_v1.patch_namespaced_resource_quota(
+                name=f"{quota_name}-{user_name}",
+                namespace=namespace_name,
+                body=[{"op": "replace", "path": "/spec/hard", "value": hard_limits}]
+            )
+
+            return {
+                "name": quota_name,
+                "user": user_name,
+                "namespace": namespace_name,
+                "cpu": cpu or "unlimited",
+                "memory": memory or "unlimited",
+                "gpu": gpu or "unlimited",
+                "status": "updated"
+            }
+        except ApiException as e:
+            self.handle_api_exception(e, f"update quota {quota_name} for {user_name}")
+
     def create_quota_config(self, quota_config: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Create resource quota for multiple users"""
         results = []
@@ -183,6 +230,11 @@ class QuotaClient(KubernetesClient):
                     "status": "updated"
                 }
             self.handle_api_exception(e, f"create quota {quota_name} for default")
+
+    def apply_default_quota(self, quota_name: str, cpu: str = None,
+                            memory: str = None, gpu: str = None) -> Dict[str, Any]:
+        """Apply resource quota for default namespace (create or update)"""
+        return self._create_default_namespace_quota(quota_name, cpu, memory, gpu)
 
     def list_quotas(self, quota_name: str = None) -> List[Dict[str, Any]]:
         """List all resource quotas"""
@@ -302,10 +354,31 @@ class QuotaClient(KubernetesClient):
                 return False
             self.handle_api_exception(e, f"delete quota for {user_name}")
 
-    def delete_quota_config(self, quota_name: str) -> Dict[str, Any]:
+    def delete_quota_config(self, quota_name: str, include_default: bool = False) -> Dict[str, Any]:
         """Delete all quotas with the given name"""
         try:
             results = {"deleted": [], "failed": []}
+
+            if include_default:
+                try:
+                    quota = self.core_v1.read_namespaced_resource_quota(
+                        f"{quota_name}-default", "default"
+                    )
+                    if quota.metadata.labels.get("g8s.host/quota") == quota_name:
+                        self.core_v1.delete_namespaced_resource_quota(
+                            f"{quota_name}-default", "default"
+                        )
+                        results["deleted"].append({
+                            "user": "default",
+                            "namespace": "default"
+                        })
+                except ApiException as e:
+                    if e.status != 404:
+                        results["failed"].append({
+                            "user": "default",
+                            "error": str(e)
+                        })
+
             namespaces = self.core_v1.list_namespace(
                 label_selector="g8s.host/user-namespace=true"
             )

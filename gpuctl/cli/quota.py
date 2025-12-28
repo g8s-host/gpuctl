@@ -59,6 +59,80 @@ def create_quota_command(args):
         return 1
 
 
+def apply_quota_command(args):
+    """Apply resource quota command (create or update)"""
+    try:
+        client = QuotaClient()
+
+        if not args.file:
+            print("❌ Must provide YAML file path (-f/--file)")
+            return 1
+
+        file_list = args.file if isinstance(args.file, list) else [args.file]
+
+        for file_path in file_list:
+            print(f"\n📝 Applying file: {file_path}")
+
+            try:
+                parsed_obj = BaseParser.parse_yaml_file(file_path)
+
+                if parsed_obj.kind != "quota":
+                    print(f"❌ Unsupported kind: {parsed_obj.kind}")
+                    continue
+
+                quota_name = parsed_obj.metadata.name
+                users = parsed_obj.users or {}
+                default_quota = parsed_obj.default
+
+                applied_count = 0
+                updated_count = 0
+
+                if default_quota:
+                    result = client.apply_default_quota(
+                        quota_name=quota_name,
+                        cpu=str(default_quota.get_cpu_str()) if default_quota.get_cpu_str() else None,
+                        memory=default_quota.memory,
+                        gpu=str(default_quota.get_gpu_str()) if default_quota.get_gpu_str() else None
+                    )
+                    if result['status'] == 'created':
+                        applied_count += 1
+                        print(f"✅ Created default quota in namespace 'default'")
+                    elif result['status'] == 'updated':
+                        updated_count += 1
+                        print(f"🔄 Updated default quota in namespace 'default'")
+                    print(f"   CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
+
+                for user_name, user_quota in users.items():
+                    if user_name == "default":
+                        continue
+                    result = client.apply_quota(
+                        quota_name=quota_name,
+                        user_name=user_name,
+                        cpu=user_quota.get_cpu_str() if user_quota.get_cpu_str() else None,
+                        memory=user_quota.memory,
+                        gpu=user_quota.get_gpu_str() if user_quota.get_gpu_str() else None
+                    )
+                    if result['status'] == 'created':
+                        applied_count += 1
+                        print(f"✅ Created quota for user: {user_name}")
+                    elif result['status'] == 'updated':
+                        updated_count += 1
+                        print(f"🔄 Updated quota for user: {user_name}")
+                    print(f"   Namespace: {result['namespace']}, CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
+
+                print(f"\n📊 Summary: {applied_count} created, {updated_count} updated")
+
+            except ParserError as e:
+                print(f"❌ Parser error: {e}")
+            except Exception as e:
+                print(f"❌ Error applying file {file_path}: {e}")
+
+        return 0
+    except Exception as e:
+        print(f"❌ Error applying quota: {e}")
+        return 1
+
+
 def get_quotas_command(args):
     """Get resource quotas list command"""
     try:
@@ -140,9 +214,18 @@ def delete_quota_command(args):
                 quota_name = parsed_obj.metadata.name
                 users_to_delete = list(parsed_obj.users.keys())
 
-                print(f"⚠️  Warning: About to delete {len(users_to_delete)} namespaces and all resources within:")
+                namespaces_to_delete = []
                 for user in users_to_delete:
-                    print(f"   - {user}")
+                    namespaces_to_delete.append(user)
+
+                if parsed_obj.default:
+                    namespaces_to_delete.append("default")
+
+                unique_namespaces = list(set(namespaces_to_delete))
+
+                print(f"⚠️  Warning: About to delete {len(unique_namespaces)} namespaces and all resources within:")
+                for ns in unique_namespaces:
+                    print(f"   - {ns}")
 
                 if not args.force:
                     confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
@@ -150,7 +233,7 @@ def delete_quota_command(args):
                         print("❌ Cancelled.")
                         return 0
 
-                result = client.delete_quota_config(quota_name)
+                result = client.delete_quota_config(quota_name, include_default=bool(parsed_obj.default))
 
                 print(f"✅ Deleted quotas for config: {quota_name}")
                 for deleted in result.get('deleted', []):
