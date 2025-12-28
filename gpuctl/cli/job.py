@@ -632,13 +632,17 @@ def logs_job_command(args):
         
         if args.follow:
             # Use streaming logs, continuously fetch
-            logs = log_client.stream_job_logs(pod_name, namespace=args.namespace, pod_name=pod_name)
-            has_logs = False
-            for log in logs:
-                print(log)
-                has_logs = True
-            if not has_logs:
-                print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+            try:
+                logs = log_client.stream_job_logs(pod_name, namespace=args.namespace, pod_name=pod_name)
+                has_logs = False
+                for log in logs:
+                    print(log)
+                    has_logs = True
+                if not has_logs:
+                    print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+            except KeyboardInterrupt:
+                print(f"\n👋 Log streaming stopped by user")
+                return 0
         else:
             # Get logs once
             logs = log_client.get_job_logs(pod_name, namespace=args.namespace, tail=100, pod_name=pod_name)
@@ -648,6 +652,8 @@ def logs_job_command(args):
                 for log in logs:
                     print(log)
         
+        return 0
+    except KeyboardInterrupt:
         return 0
     except Exception as e:
         print(f"❌ Error getting logs: {e}")
