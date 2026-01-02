@@ -1,5 +1,6 @@
 from .. import DEFAULT_NAMESPACE
 from .base_client import KubernetesClient
+from .quota_client import QuotaClient
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 from typing import List, Dict, Any, Optional
@@ -8,10 +9,25 @@ from typing import List, Dict, Any, Optional
 class JobClient(KubernetesClient):
     """任务管理客户端"""
 
+    def _validate_namespace_quota(self, namespace: str) -> bool:
+        """验证namespace是否已配置quota"""
+        if namespace == "default":
+            return True
+        
+        quota_client = QuotaClient.get_instance()
+        if quota_client.namespace_has_quota(namespace):
+            return True
+        return False
+
     def create_job(self, job: client.V1Job, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Job"""
+        if not self._validate_namespace_quota(namespace):
+            raise ValueError(
+                f"Namespace '{namespace}' has no quota configured. "
+                f"Please create a quota configuration first using 'gpuctl create -f <quota.yaml>'"
+            )
+        
         try:
-            # 确保命名空间存在
             self.ensure_namespace_exists(namespace)
             response = self.batch_v1.create_namespaced_job(namespace, job)
             return {
@@ -64,60 +80,117 @@ class JobClient(KubernetesClient):
         # 所有类型都未找到
         return None
 
-    def list_jobs(self, namespace: str = DEFAULT_NAMESPACE,
+    def list_jobs(self, namespace: str = None,
                   labels: Dict[str, str] = None, include_pods: bool = False) -> List[Dict[str, Any]]:
         """列出所有作业资源，包括Job、Deployment和StatefulSet"""
         try:
-            label_selector = None
-            if labels:
-                label_selector = ",".join([f"{k}={v}" for k, v in labels.items()])
-
             all_jobs = []
 
-            if include_pods:
-                # 如果需要包含Pod实例，直接获取所有相关Pod
-                try:
-                    pods = self.core_v1.list_namespaced_pod(namespace, label_selector=label_selector)
-                    
-                    for pod in pods.items:
-                        try:
-                            # 将Pod转换为字典并添加到作业列表
-                            pod_dict = self._pod_to_dict(pod)
-                            all_jobs.append(pod_dict)
-                        except Exception as e:
-                            # 即使单个Pod处理失败，也继续处理其他Pod
-                            print(f"Warning: Failed to process pod {pod.metadata.name}: {e}")
-                except Exception as e:
-                    # 如果获取Pod列表失败，打印警告并返回空列表
-                    print(f"Warning: Failed to get pods: {e}")
-                    return []
+            if namespace:
+                return self._list_jobs_in_namespace(namespace, labels, include_pods)
             else:
-                # 获取Job资源（Training任务）
-                jobs = self.batch_v1.list_namespaced_job(
-                    namespace,
-                    label_selector=label_selector
-                )
-                all_jobs.extend([self._job_to_dict(job) for job in jobs.items])
-
-                # 获取Deployment资源（Inference和Compute服务）
-                deployments = self.apps_v1.list_namespaced_deployment(
-                    namespace,
-                    label_selector=label_selector
-                )
-                for deployment in deployments.items:
-                    all_jobs.append(self._deployment_to_dict(deployment))
-
-                # 获取StatefulSet资源（Notebook服务）
-                statefulsets = self.apps_v1.list_namespaced_stateful_set(
-                    namespace,
-                    label_selector=label_selector
-                )
-                for statefulset in statefulsets.items:
-                    all_jobs.append(self._statefulset_to_dict(statefulset))
-
-            return all_jobs
+                all_namespaces = self._get_all_gpuctl_namespaces()
+                for ns in all_namespaces:
+                    ns_jobs = self._list_jobs_in_namespace(ns, labels, include_pods)
+                    all_jobs.extend(ns_jobs)
+                return all_jobs
         except ApiException as e:
             self.handle_api_exception(e, "list jobs")
+
+    def _get_all_gpuctl_namespaces(self) -> List[str]:
+        """获取所有gpuctl管理的namespace，包括default和带有g8s.host标签的namespace"""
+        namespaces = set()
+        
+        # 始终包含default命名空间
+        namespaces.add("default")
+        
+        try:
+            # 获取带有g8s.host/namespace标签的命名空间
+            labeled_ns = self.core_v1.list_namespace(
+                label_selector="g8s.host/namespace=true"
+            )
+            for ns in labeled_ns.items:
+                namespaces.add(ns.metadata.name)
+            
+            # 扫描所有命名空间查找带有g8s.host标签的资源
+            all_ns = self.core_v1.list_namespace()
+            for ns in all_ns.items:
+                ns_name = ns.metadata.name
+                
+                # 检查该命名空间下的job
+                try:
+                    jobs = self.batch_v1.list_namespaced_job(ns_name, label_selector="g8s.host/")
+                    if jobs.items:
+                        namespaces.add(ns_name)
+                        continue
+                except ApiException:
+                    pass
+                
+                # 检查该命名空间下的deployment
+                try:
+                    deployments = self.apps_v1.list_namespaced_deployment(ns_name, label_selector="g8s.host/")
+                    if deployments.items:
+                        namespaces.add(ns_name)
+                        continue
+                except ApiException:
+                    pass
+                
+                # 检查该命名空间下的statefulset
+                try:
+                    statefulsets = self.apps_v1.list_namespaced_stateful_set(ns_name, label_selector="g8s.host/")
+                    if statefulsets.items:
+                        namespaces.add(ns_name)
+                except ApiException:
+                    pass
+        
+        except ApiException as e:
+            self.handle_api_exception(e, "list namespaces")
+        
+        return list(namespaces)
+
+    def _list_jobs_in_namespace(self, namespace: str, labels: Dict[str, str] = None, include_pods: bool = False) -> List[Dict[str, Any]]:
+        """在指定namespace中列出作业资源"""
+        label_selector = None
+        if labels:
+            label_selector = ",".join([f"{k}={v}" for k, v in labels.items()])
+        
+        jobs = []
+
+        if include_pods:
+            try:
+                pods = self.core_v1.list_namespaced_pod(namespace, label_selector=label_selector)
+                for pod in pods.items:
+                    try:
+                        pod_dict = self._pod_to_dict(pod)
+                        jobs.append(pod_dict)
+                    except Exception as e:
+                        print(f"Warning: Failed to process pod {pod.metadata.name}: {e}")
+            except ApiException as e:
+                if e.status != 404:
+                    raise
+        else:
+            try:
+                job_list = self.batch_v1.list_namespaced_job(namespace, label_selector=label_selector)
+                jobs.extend([self._job_to_dict(job) for job in job_list.items])
+            except ApiException as e:
+                if e.status != 404:
+                    raise
+
+            try:
+                deployment_list = self.apps_v1.list_namespaced_deployment(namespace, label_selector=label_selector)
+                jobs.extend([self._deployment_to_dict(deployment) for deployment in deployment_list.items])
+            except ApiException as e:
+                if e.status != 404:
+                    raise
+
+            try:
+                statefulset_list = self.apps_v1.list_namespaced_stateful_set(namespace, label_selector=label_selector)
+                jobs.extend([self._statefulset_to_dict(statefulset) for statefulset in statefulset_list.items])
+            except ApiException as e:
+                if e.status != 404:
+                    raise
+
+        return jobs
 
 
 
@@ -467,8 +540,13 @@ class JobClient(KubernetesClient):
 
     def create_deployment(self, deployment: client.V1Deployment, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Deployment"""
+        if not self._validate_namespace_quota(namespace):
+            raise ValueError(
+                f"Namespace '{namespace}' has no quota configured. "
+                f"Please create a quota configuration first using 'gpuctl create -f <quota.yaml>'"
+            )
+        
         try:
-            # 确保命名空间存在
             self.ensure_namespace_exists(namespace)
             response = self.apps_v1.create_namespaced_deployment(namespace, deployment)
             return {
@@ -494,8 +572,13 @@ class JobClient(KubernetesClient):
 
     def create_service(self, service: client.V1Service, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建Service"""
+        if not self._validate_namespace_quota(namespace):
+            raise ValueError(
+                f"Namespace '{namespace}' has no quota configured. "
+                f"Please create a quota configuration first using 'gpuctl create -f <quota.yaml>'"
+            )
+        
         try:
-            # 确保命名空间存在
             self.ensure_namespace_exists(namespace)
             response = self.core_v1.create_namespaced_service(namespace, service)
             return {
@@ -521,8 +604,13 @@ class JobClient(KubernetesClient):
 
     def create_hpa(self, hpa: client.V1HorizontalPodAutoscaler, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建HorizontalPodAutoscaler"""
+        if not self._validate_namespace_quota(namespace):
+            raise ValueError(
+                f"Namespace '{namespace}' has no quota configured. "
+                f"Please create a quota configuration first using 'gpuctl create -f <quota.yaml>'"
+            )
+        
         try:
-            # 确保命名空间存在
             self.ensure_namespace_exists(namespace)
             response = self.autoscaling_v1.create_namespaced_horizontal_pod_autoscaler(namespace, hpa)
             return {
@@ -535,8 +623,13 @@ class JobClient(KubernetesClient):
 
     def create_statefulset(self, statefulset: client.V1StatefulSet, namespace: str = DEFAULT_NAMESPACE) -> Dict[str, Any]:
         """创建StatefulSet"""
+        if not self._validate_namespace_quota(namespace):
+            raise ValueError(
+                f"Namespace '{namespace}' has no quota configured. "
+                f"Please create a quota configuration first using 'gpuctl create -f <quota.yaml>'"
+            )
+        
         try:
-            # 确保命名空间存在
             self.ensure_namespace_exists(namespace)
             response = self.apps_v1.create_namespaced_stateful_set(namespace, statefulset)
             return {

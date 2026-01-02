@@ -5,6 +5,7 @@ from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_comm
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
 from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
+from gpuctl.parser.base_parser import BaseParser
 
 
 def main():
@@ -27,8 +28,8 @@ def main():
 
     # get jobs
     jobs_parser = get_subparsers.add_parser('jobs', help='Get jobs')
-    jobs_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
-                             help='Kubernetes namespace')
+    jobs_parser.add_argument('-n', '--namespace', default=None,
+                             help='Kubernetes namespace (optional, if not specified, list jobs from all namespaces)')
     jobs_parser.add_argument('--pool', help='Filter by resource pool')
     jobs_parser.add_argument('--type', choices=['training', 'inference', 'notebook', 'compute'],
                              help='Filter by job type')
@@ -186,10 +187,14 @@ def main():
             return apply_job_command(args)
         elif args.command == 'delete':
             if args.file:
+                parsed_obj = BaseParser.parse_yaml_file(args.file)
+                if parsed_obj.kind == "quota":
+                    return delete_quota_command(args)
+                else:
+                    return delete_job_command(args)
+            elif args.resource == 'job':
                 return delete_job_command(args)
-            elif args.resource == 'job' or job_name:
-                return delete_job_command(args)
-            elif args.resource == 'quota' or args.namespace_name:
+            elif args.resource == 'quota':
                 return delete_quota_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")

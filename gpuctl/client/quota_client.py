@@ -22,6 +22,26 @@ class QuotaClient(KubernetesClient):
         """Get namespace name"""
         return namespace_name
 
+    def namespace_has_quota(self, namespace_name: str) -> bool:
+        """Check if a namespace has quota configured"""
+        try:
+            if namespace_name == "default":
+                return True
+            namespaces = self.core_v1.list_namespace(
+                label_selector="g8s.host/user-namespace=true"
+            )
+            if not namespaces.items:
+                namespaces = self.core_v1.list_namespace(
+                    label_selector="g8s.host/namespace=true"
+                )
+            for ns in namespaces.items:
+                if ns.metadata.name == namespace_name:
+                    return True
+            return False
+        except ApiException as e:
+            self.handle_api_exception(e, f"check namespace {namespace_name}")
+            return False
+
     def create_quota(self, quota_name: str, namespace_name: str, cpu: str = None,
                      memory: str = None, gpu: str = None) -> Dict[str, Any]:
         """Create resource quota for a namespace"""
@@ -236,21 +256,22 @@ class QuotaClient(KubernetesClient):
         """List all resource quotas"""
         try:
             quotas = []
-            namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/namespace=true"
-            )
-
-            for ns in namespaces.items:
+            
+            # 扫描所有命名空间，查找带有g8s.host/quota标签的ResourceQuota
+            all_namespaces = self.core_v1.list_namespace()
+            
+            for ns in all_namespaces.items:
                 ns_name = ns.metadata.name
                 quota_list = self.core_v1.list_namespaced_resource_quota(ns_name)
 
                 for quota in quota_list.items:
-                    if quota_name and quota.metadata.labels.get("g8s.host/quota") != quota_name:
-                        continue
+                    if quota.metadata.labels.get("g8s.host/quota"):
+                        if quota_name and quota.metadata.labels.get("g8s.host/quota") != quota_name:
+                            continue
 
-                    namespace_name = quota.metadata.labels.get("g8s.host/namespace", ns_name)
-                    quota_info = self._build_quota_info(quota, namespace_name, ns_name)
-                    quotas.append(quota_info)
+                        namespace_name = quota.metadata.labels.get("g8s.host/namespace", ns_name)
+                        quota_info = self._build_quota_info(quota, namespace_name, ns_name)
+                        quotas.append(quota_info)
 
             return quotas
 
@@ -374,8 +395,12 @@ class QuotaClient(KubernetesClient):
                         })
 
             namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/namespace=true"
+                label_selector="g8s.host/user-namespace=true"
             )
+            if not namespaces.items:
+                namespaces = self.core_v1.list_namespace(
+                    label_selector="g8s.host/namespace=true"
+                )
 
             for ns in namespaces.items:
                 ns_name = ns.metadata.name

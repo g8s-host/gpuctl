@@ -137,9 +137,10 @@ def create_job_command(args):
                     import subprocess
                     import json
                     
-                    # Get Service info
+                    # Get Service info - use the actual namespace from result
+                    service_namespace = result.get('namespace', 'default')
                     service_base_name = result['name']
-                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {service_namespace} -o json"
                     service_output = subprocess.check_output(service_cmd, shell=True, text=True)
                     service_data = json.loads(service_output)
                     
@@ -187,9 +188,10 @@ def create_job_command(args):
                     import subprocess
                     import json
                     
-                    # Get Service info
+                    # Get Service info - use the actual namespace from result
+                    service_namespace = result.get('namespace', 'default')
                     service_base_name = result['name']
-                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {service_namespace} -o json"
                     service_output = subprocess.check_output(service_cmd, shell=True, text=True)
                     service_data = json.loads(service_output)
                     
@@ -238,9 +240,10 @@ def create_job_command(args):
                     import subprocess
                     import json
                     
-                    # Get Service info
+                    # Get Service info - use the actual namespace from result
+                    service_namespace = result.get('namespace', 'default')
                     service_base_name = result['name']
-                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {service_namespace} -o json"
                     service_output = subprocess.check_output(service_cmd, shell=True, text=True)
                     service_data = json.loads(service_output)
                     
@@ -300,6 +303,9 @@ def create_job_command(args):
         return 0
     except ParserError as e:
         print(f"❌ Parser error: {e}")
+        return 1
+    except ValueError as e:
+        print(f"❌ {e}")
         return 1
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
@@ -414,6 +420,9 @@ def apply_job_command(args):
     except ParserError as e:
         print(f"❌ Parser error: {e}")
         return 1
+    except ValueError as e:
+        print(f"❌ {e}")
+        return 1
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
         return 1
@@ -458,14 +467,15 @@ def get_jobs_command(args):
                 return f"{int(seconds/86400)}d"
         
         # Calculate column widths dynamically
-        headers = ['JOB ID', 'NAME', 'KIND', 'STATUS', 'AGE']
-        col_widths = {'job_id': 10, 'name': 10, 'kind': 10, 'status': 10, 'age': 10}
+        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'AGE']
+        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'age': 10}
         
         # First pass: collect all data and calculate max widths
         job_rows = []
         for job in jobs:
             age = calculate_age(job.get('creation_timestamp'))
             job_type = job['labels'].get('g8s.host/job-type', 'unknown')
+            job_namespace = job.get('namespace', 'default')
             status_dict = job.get("status", {})
             pod_phase = status_dict.get("phase", "Unknown")
             
@@ -509,6 +519,7 @@ def get_jobs_command(args):
             job_rows.append({
                 'job_id': display_job_id,
                 'name': base_name,
+                'namespace': job_namespace,
                 'kind': job_type,
                 'status': status,
                 'age': age
@@ -516,16 +527,17 @@ def get_jobs_command(args):
             
             col_widths['job_id'] = max(col_widths['job_id'], len(display_job_id))
             col_widths['name'] = max(col_widths['name'], len(base_name))
+            col_widths['namespace'] = max(col_widths['namespace'], len(job_namespace))
             col_widths['kind'] = max(col_widths['kind'], len(job_type))
             col_widths['status'] = max(col_widths['status'], len(status))
             col_widths['age'] = max(col_widths['age'], len(age))
         
         # Print header
-        print(f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['kind']}}  {headers[3]:<{col_widths['status']}}  {headers[4]:<{col_widths['age']}}")
+        print(f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['age']}}")
         
         # Print rows
         for row in job_rows:
-            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['age']:<{col_widths['age']}}")
+            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['age']:<{col_widths['age']}}")
         
         return 0
     except Exception as e:
@@ -996,7 +1008,7 @@ def describe_job_command(args):
                 import subprocess
                 import json
                 
-                service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n g8s-host -o json"
+                service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {args.namespace} -o json"
                 service_output = subprocess.check_output(service_cmd, shell=True, text=True)
                 service_data = json.loads(service_output)
             except Exception as e:
@@ -1009,7 +1021,7 @@ def describe_job_command(args):
                 import json
                 
                 # Get specific Pod info directly instead of all matching Pods
-                pod_cmd = f"kubectl get pod {full_job_name} -n g8s-host -o json"
+                pod_cmd = f"kubectl get pod {full_job_name} -n {args.namespace} -o json"
                 pod_output = subprocess.check_output(pod_cmd, shell=True, text=True)
                 pod_data = json.loads(pod_output)
                 
@@ -1057,7 +1069,7 @@ def describe_job_command(args):
                         node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
                         
                         # Check Pod status, if Pod is not Running, NodePort access is not available
-                        pod_cmd = f"kubectl get pod {full_job_name} -n g8s-host -o json"
+                        pod_cmd = f"kubectl get pod {full_job_name} -n {args.namespace} -o json"
                         pod_output = subprocess.check_output(pod_cmd, shell=True, text=True)
                         pod_data = json.loads(pod_output)
                         pod_status = pod_data['status']['phase']
