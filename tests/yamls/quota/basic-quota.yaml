@@ -5,7 +5,7 @@ metadata:
   name: team-resource-quota
   description: "Team resource quota configuration"
 
-users:
+namespace:
   elon-musk:
     cpu: 10
     memory: 20Gi

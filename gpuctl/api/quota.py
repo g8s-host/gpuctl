@@ -33,9 +33,15 @@ class QuotaConfig(BaseModel):
     kind: str = "quota"
     version: str = "v0.1"
     metadata: QuotaMetadata
-    users: Dict[str, UserQuota] = Field(default_factory=dict)
+    namespace: Dict[str, UserQuota] = Field(default_factory=dict)
     default: Optional[UserQuota] = None
 
     model_config = {
-        "populate_by_name": True
+        "populate_by_name": True,
+        "alias_generator": lambda s: s.replace("_", "-")
     }
+
+    @property
+    def users(self) -> Dict[str, UserQuota]:
+        """Backward compatibility: return namespace as users"""
+        return self.namespace

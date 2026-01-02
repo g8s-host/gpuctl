@@ -18,17 +18,17 @@ class QuotaClient(KubernetesClient):
             cls._instance = cls()
         return cls._instance
 
-    def _get_user_namespace(self, user_name: str) -> str:
-        """Get namespace for a user"""
-        return user_name
+    def _get_namespace_name(self, namespace_name: str) -> str:
+        """Get namespace name"""
+        return namespace_name
 
-    def create_quota(self, quota_name: str, user_name: str, cpu: str = None,
+    def create_quota(self, quota_name: str, namespace_name: str, cpu: str = None,
                      memory: str = None, gpu: str = None) -> Dict[str, Any]:
-        """Create resource quota for a user"""
+        """Create resource quota for a namespace"""
         try:
-            namespace_name = self._get_user_namespace(user_name)
+            namespace = self._get_namespace_name(namespace_name)
 
-            self._ensure_namespace_exists(namespace_name)
+            self._ensure_namespace_exists(namespace)
 
             hard_limits = {}
             if cpu:
@@ -42,25 +42,24 @@ class QuotaClient(KubernetesClient):
                 api_version="v1",
                 kind="ResourceQuota",
                 metadata=V1ObjectMeta(
-                    name=f"{quota_name}-{user_name}",
-                    namespace=namespace_name,
+                    name=f"{quota_name}-{namespace_name}",
+                    namespace=namespace,
                     labels={
                         "g8s.host/quota": quota_name,
-                        "g8s.host/user": user_name
+                        "g8s.host/namespace": namespace_name
                     }
                 ),
                 spec={"hard": hard_limits}
             )
 
             self.core_v1.create_namespaced_resource_quota(
-                namespace=namespace_name,
+                namespace=namespace,
                 body=resource_quota
             )
 
             return {
                 "name": quota_name,
-                "user": user_name,
-                "namespace": namespace_name,
+                "namespace": namespace,
                 "cpu": cpu or "unlimited",
                 "memory": memory or "unlimited",
                 "gpu": gpu or "unlimited",
@@ -68,28 +67,28 @@ class QuotaClient(KubernetesClient):
             }
 
         except ApiException as e:
-            self.handle_api_exception(e, f"create quota {quota_name} for {user_name}")
+            self.handle_api_exception(e, f"create quota {quota_name} for {namespace_name}")
 
-    def apply_quota(self, quota_name: str, user_name: str, cpu: str = None,
+    def apply_quota(self, quota_name: str, namespace_name: str, cpu: str = None,
                     memory: str = None, gpu: str = None) -> Dict[str, Any]:
-        """Apply resource quota for a user (create or update)"""
-        namespace_name = self._get_user_namespace(user_name)
+        """Apply resource quota for a namespace (create or update)"""
+        namespace = self._get_namespace_name(namespace_name)
 
         try:
             self.core_v1.read_namespaced_resource_quota(
-                f"{quota_name}-{user_name}", namespace_name
+                f"{quota_name}-{namespace_name}", namespace
             )
-            return self.update_quota(quota_name, user_name, cpu, memory, gpu)
+            return self.update_quota(quota_name, namespace_name, cpu, memory, gpu)
         except ApiException as e:
             if e.status == 404:
-                return self.create_quota(quota_name, user_name, cpu, memory, gpu)
+                return self.create_quota(quota_name, namespace_name, cpu, memory, gpu)
             raise
 
-    def update_quota(self, quota_name: str, user_name: str, cpu: str = None,
+    def update_quota(self, quota_name: str, namespace_name: str, cpu: str = None,
                      memory: str = None, gpu: str = None) -> Dict[str, Any]:
         """Update existing resource quota"""
         try:
-            namespace_name = self._get_user_namespace(user_name)
+            namespace = self._get_namespace_name(namespace_name)
 
             hard_limits = {}
             if cpu:
@@ -100,28 +99,27 @@ class QuotaClient(KubernetesClient):
                 hard_limits["nvidia.com/gpu"] = gpu
 
             self.core_v1.patch_namespaced_resource_quota(
-                name=f"{quota_name}-{user_name}",
-                namespace=namespace_name,
+                name=f"{quota_name}-{namespace_name}",
+                namespace=namespace,
                 body=[{"op": "replace", "path": "/spec/hard", "value": hard_limits}]
             )
 
             return {
                 "name": quota_name,
-                "user": user_name,
-                "namespace": namespace_name,
+                "namespace": namespace,
                 "cpu": cpu or "unlimited",
                 "memory": memory or "unlimited",
                 "gpu": gpu or "unlimited",
                 "status": "updated"
             }
         except ApiException as e:
-            self.handle_api_exception(e, f"update quota {quota_name} for {user_name}")
+            self.handle_api_exception(e, f"update quota {quota_name} for {namespace_name}")
 
     def create_quota_config(self, quota_config: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Create resource quota for multiple users"""
+        """Create resource quota for multiple namespaces"""
         results = []
         quota_name = quota_config.get("name", "default-quota")
-        users = quota_config.get("users", {})
+        namespaces = quota_config.get("namespace", {})
 
         default_quota_config = quota_config.get("default")
         if default_quota_config:
@@ -137,15 +135,15 @@ class QuotaClient(KubernetesClient):
             )
             results.append(result)
 
-        for user_name, user_quota in users.items():
-            if user_name == "default":
+        for namespace_name, namespace_quota in namespaces.items():
+            if namespace_name == "default":
                 continue
             result = self.create_quota(
                 quota_name=quota_name,
-                user_name=user_name,
-                cpu=user_quota.get("cpu"),
-                memory=user_quota.get("memory"),
-                gpu=user_quota.get("gpu")
+                namespace_name=namespace_name,
+                cpu=namespace_quota.get("cpu"),
+                memory=namespace_quota.get("memory"),
+                gpu=namespace_quota.get("gpu")
             )
             results.append(result)
 
@@ -158,14 +156,14 @@ class QuotaClient(KubernetesClient):
         except ApiException as e:
             if e.status == 404:
                 if namespace_name == "default":
-                    raise ValueError(f"Namespace 'default' is a reserved Kubernetes namespace. Please use a different user name.")
+                    raise ValueError(f"Namespace 'default' is a reserved Kubernetes namespace. Please use a different namespace name.")
                 namespace = V1Namespace(
                     api_version="v1",
                     kind="Namespace",
                     metadata=V1ObjectMeta(
                         name=namespace_name,
                         labels={
-                            "g8s.host/user-namespace": "true"
+                            "g8s.host/namespace": "true"
                         }
                     )
                 )
@@ -193,7 +191,7 @@ class QuotaClient(KubernetesClient):
                     namespace="default",
                     labels={
                         "g8s.host/quota": quota_name,
-                        "g8s.host/user": "default"
+                        "g8s.host/namespace": "default"
                     }
                 ),
                 spec={"hard": hard_limits}
@@ -206,7 +204,6 @@ class QuotaClient(KubernetesClient):
 
             return {
                 "name": quota_name,
-                "user": "default",
                 "namespace": "default",
                 "cpu": cpu or "unlimited",
                 "memory": memory or "unlimited",
@@ -222,7 +219,6 @@ class QuotaClient(KubernetesClient):
                 )
                 return {
                     "name": quota_name,
-                    "user": "default",
                     "namespace": "default",
                     "cpu": cpu or "unlimited",
                     "memory": memory or "unlimited",
@@ -241,7 +237,7 @@ class QuotaClient(KubernetesClient):
         try:
             quotas = []
             namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/user-namespace=true"
+                label_selector="g8s.host/namespace=true"
             )
 
             for ns in namespaces.items:
@@ -252,8 +248,8 @@ class QuotaClient(KubernetesClient):
                     if quota_name and quota.metadata.labels.get("g8s.host/quota") != quota_name:
                         continue
 
-                    user_name = quota.metadata.labels.get("g8s.host/user", "")
-                    quota_info = self._build_quota_info(quota, user_name, ns_name)
+                    namespace_name = quota.metadata.labels.get("g8s.host/namespace", ns_name)
+                    quota_info = self._build_quota_info(quota, namespace_name, ns_name)
                     quotas.append(quota_info)
 
             return quotas
@@ -261,42 +257,42 @@ class QuotaClient(KubernetesClient):
         except ApiException as e:
             self.handle_api_exception(e, "list quotas")
 
-    def get_quota(self, user_name: str) -> Optional[Dict[str, Any]]:
-        """Get resource quota for a specific user"""
+    def get_quota(self, namespace_name: str) -> Optional[Dict[str, Any]]:
+        """Get resource quota for a specific namespace"""
         try:
-            namespace_name = self._get_user_namespace(user_name)
+            namespace = self._get_namespace_name(namespace_name)
 
-            quota_list = self.core_v1.list_namespaced_resource_quota(namespace_name)
+            quota_list = self.core_v1.list_namespaced_resource_quota(namespace)
 
             if not quota_list.items:
                 return None
 
             quota = quota_list.items[0]
-            return self._build_quota_info(quota, user_name, namespace_name)
+            return self._build_quota_info(quota, namespace_name, namespace)
 
         except ApiException as e:
             if e.status == 404:
                 return None
-            self.handle_api_exception(e, f"get quota for {user_name}")
+            self.handle_api_exception(e, f"get quota for {namespace_name}")
 
-    def describe_quota(self, user_name: str) -> Optional[Dict[str, Any]]:
+    def describe_quota(self, namespace_name: str) -> Optional[Dict[str, Any]]:
         """Get detailed quota information with usage"""
         try:
-            namespace_name = self._get_user_namespace(user_name)
+            namespace = self._get_namespace_name(namespace_name)
 
-            quota_list = self.core_v1.list_namespaced_resource_quota(namespace_name)
+            quota_list = self.core_v1.list_namespaced_resource_quota(namespace)
 
             if not quota_list.items:
                 return None
 
             quota = quota_list.items[0]
-            quota_info = self._build_quota_info(quota, user_name, namespace_name)
+            quota_info = self._build_quota_info(quota, namespace_name, namespace)
 
             if quota.status and quota.status.used:
-                quota_info["usage"] = {
-                    "cpu": quota_info["hard"].get("cpu", "unlimited"),
-                    "memory": quota_info["hard"].get("memory", "unlimited"),
-                    "gpu": quota_info["hard"].get("nvidia.com/gpu", "unlimited")
+                quota_info["used"] = {
+                    "cpu": quota.status.used.get("cpu", "0"),
+                    "memory": quota.status.used.get("memory", "0"),
+                    "nvidia.com/gpu": quota.status.used.get("nvidia.com/gpu", "0")
                 }
 
             return quota_info
@@ -304,9 +300,9 @@ class QuotaClient(KubernetesClient):
         except ApiException as e:
             if e.status == 404:
                 return None
-            self.handle_api_exception(e, f"describe quota for {user_name}")
+            self.handle_api_exception(e, f"describe quota for {namespace_name}")
 
-    def _build_quota_info(self, quota, user_name: str, namespace_name: str) -> Dict[str, Any]:
+    def _build_quota_info(self, quota, namespace_name: str, namespace: str) -> Dict[str, Any]:
         """Build quota information dictionary"""
         hard_limits = {}
         if quota.spec and quota.spec.hard:
@@ -327,24 +323,23 @@ class QuotaClient(KubernetesClient):
 
         return {
             "name": quota.metadata.labels.get("g8s.host/quota", "default"),
-            "user": user_name,
-            "namespace": namespace_name,
+            "namespace": namespace,
             "hard": hard_limits,
             "used": used,
             "status": "Active"
         }
 
-    def delete_quota(self, user_name: str) -> bool:
-        """Delete resource quota for a user"""
+    def delete_quota(self, namespace_name: str) -> bool:
+        """Delete resource quota for a namespace"""
         try:
-            namespace_name = self._get_user_namespace(user_name)
+            namespace = self._get_namespace_name(namespace_name)
 
-            quota_list = self.core_v1.list_namespaced_resource_quota(namespace_name)
+            quota_list = self.core_v1.list_namespaced_resource_quota(namespace)
 
             for quota in quota_list.items:
                 self.core_v1.delete_namespaced_resource_quota(
                     quota.metadata.name,
-                    namespace_name
+                    namespace
                 )
 
             return True
@@ -352,7 +347,7 @@ class QuotaClient(KubernetesClient):
         except ApiException as e:
             if e.status == 404:
                 return False
-            self.handle_api_exception(e, f"delete quota for {user_name}")
+            self.handle_api_exception(e, f"delete quota for {namespace_name}")
 
     def delete_quota_config(self, quota_name: str, include_default: bool = False) -> Dict[str, Any]:
         """Delete all quotas with the given name"""
@@ -369,18 +364,17 @@ class QuotaClient(KubernetesClient):
                             f"{quota_name}-default", "default"
                         )
                         results["deleted"].append({
-                            "user": "default",
                             "namespace": "default"
                         })
                 except ApiException as e:
                     if e.status != 404:
                         results["failed"].append({
-                            "user": "default",
+                            "namespace": "default",
                             "error": str(e)
                         })
 
             namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/user-namespace=true"
+                label_selector="g8s.host/namespace=true"
             )
 
             for ns in namespaces.items:
@@ -396,12 +390,12 @@ class QuotaClient(KubernetesClient):
                             )
                             self.core_v1.delete_namespace(ns_name)
                             results["deleted"].append({
-                                "user": quota.metadata.labels.get("g8s.host/user"),
-                                "namespace": ns_name
+                                "namespace": quota.metadata.labels.get("g8s.host/namespace"),
+                                "original_namespace": ns_name
                             })
                         except Exception as e:
                             results["failed"].append({
-                                "user": quota.metadata.labels.get("g8s.host/user"),
+                                "namespace": quota.metadata.labels.get("g8s.host/namespace"),
                                 "error": str(e)
                             })
 

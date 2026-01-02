@@ -54,7 +54,7 @@ def main():
 
     # get quotas
     quotas_parser = get_subparsers.add_parser('quotas', help='Get resource quotas')
-    quotas_parser.add_argument('user', nargs='?', help='Filter by user name')
+    quotas_parser.add_argument('namespace', nargs='?', help='Filter by namespace name')
 
     # apply command
     apply_parser = subparsers.add_parser('apply', help='Apply a resource configuration (create or update)')
@@ -81,14 +81,14 @@ def main():
 
     # delete quota
     quota_delete_parser = delete_subparsers.add_parser('quota', help='Delete a quota')
-    quota_delete_parser.add_argument('user_name', nargs='?', help='User name to delete quota for')
+    quota_delete_parser.add_argument('namespace_name', nargs='?', help='Namespace name to delete quota for')
     quota_delete_parser.add_argument('-f', '--file', help='Quota YAML file path to delete all quotas in file')
     quota_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
 
     # delete-quota command (standalone)
     delete_quota_parser = subparsers.add_parser('delete-quota', help='Delete resource quota')
     delete_quota_parser.add_argument('-f', '--file', help='Quota YAML file path')
-    delete_quota_parser.add_argument('user_name', nargs='?', help='User name')
+    delete_quota_parser.add_argument('namespace_name', nargs='?', help='Namespace name')
     delete_quota_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
 
     # delete node label (keep existing functionality)
@@ -145,7 +145,7 @@ def main():
 
     # describe quota
     quota_describe_parser = describe_subparsers.add_parser('quota', help='Describe quota details')
-    quota_describe_parser.add_argument('user_name', help='User name')
+    quota_describe_parser.add_argument('namespace_name', help='Namespace name')
 
     # pause command
     pause_parser = subparsers.add_parser('pause', help='Pause a running job')
@@ -189,7 +189,7 @@ def main():
                 return delete_job_command(args)
             elif args.resource == 'job' or job_name:
                 return delete_job_command(args)
-            elif args.resource == 'quota' or user_name:
+            elif args.resource == 'quota' or args.namespace_name:
                 return delete_quota_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")

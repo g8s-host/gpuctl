@@ -68,9 +68,9 @@ The platform adopts a layered design, exposing a user-friendly abstraction layer
 ### 3. Resource Quota Management
 
 - Declarative YAML-based quota configuration
-- Set resource limits per user/namespace (CPU, Memory, GPU)
+- Set resource limits per namespace (CPU, Memory, GPU)
 - View quota usage and consumption rates
-- Automatic namespace creation for each user
+- Automatic namespace creation for each namespace
 
 ### 4. Declarative Configuration
 
@@ -351,8 +351,8 @@ metadata:
   name: team-resource-quota
   description: "Team resource quota configuration"
 
-# User resource allocation (automatically creates namespace for each user)
-users:
+# Namespace resource allocation (automatically creates namespace for each namespace)
+namespace:
   elon-musk:
     cpu: 10
     memory: 20Gi
@@ -426,8 +426,8 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 |---------|---------|
 | `gpuctl create -f quota.yaml` | Create resource quota configuration |
 | `gpuctl get quotas` | List all resource quotas |
-| `gpuctl get quotas <user-name>` | View quota for a specific user |
-| `gpuctl describe quota <user-name>` | View detailed quota usage (used/total) |
+| `gpuctl get quotas <namespace-name>` | View quota for a specific namespace |
+| `gpuctl describe quota <namespace-name>` | View detailed quota usage (used/total) |
 | `gpuctl delete -f quota.yaml` | Delete resource quota |
 
 ## API Documentation
@@ -487,9 +487,9 @@ The platform provides RESTful API interfaces that can be used to build third-par
 | Endpoint | Method | Function |
 |----------|--------|----------|
 | `/quotas` | GET | Query quota list |
-| `/quotas/{userName}` | GET | Query quota details with usage |
+| `/quotas/{namespaceName}` | GET | Query quota details with usage |
 | `/quotas` | POST | Create resource quota |
-| `/quotas/{userName}` | DELETE | Delete resource quota |
+| `/quotas/{namespaceName}` | DELETE | Delete resource quota |
 
 ### Interactive API Documentation
 

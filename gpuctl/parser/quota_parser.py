@@ -8,17 +8,17 @@ class QuotaParser(BaseParser):
     @classmethod
     def validate_quota(cls, quota: QuotaConfig) -> None:
         """Validate quota configuration"""
-        if not quota.users:
-            raise ParserError("At least one user must be defined in users")
+        if not quota.namespace:
+            raise ParserError("At least one namespace must be defined in namespace")
 
-        for user_name, user_quota in quota.users.items():
-            if user_quota.gpu:
+        for namespace_name, namespace_quota in quota.namespace.items():
+            if namespace_quota.gpu:
                 try:
-                    gpu_count = int(user_quota.gpu)
+                    gpu_count = int(namespace_quota.gpu)
                     if gpu_count < 0:
-                        raise ParserError(f"GPU count must be non-negative for user {user_name}")
+                        raise ParserError(f"GPU count must be non-negative for namespace {namespace_name}")
                 except ValueError:
-                    raise ParserError(f"Invalid GPU format for user {user_name}, should be a number")
+                    raise ParserError(f"Invalid GPU format for namespace {namespace_name}, should be a number")
 
     @classmethod
     def parse_and_validate(cls, yaml_content: str) -> QuotaConfig:

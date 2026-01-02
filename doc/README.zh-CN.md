@@ -65,9 +65,9 @@ gpuctl 是一个面向算法工程师的 AI 算力调度平台，旨在降低 GP
 ### 3. 资源配额管理
 
 - 声明式 YAML 配置资源配额
-- 为每个用户/命名空间设置资源限制（CPU、内存、GPU）
+- 为每个命名空间设置资源限制（CPU、内存、GPU）
 - 查看配额使用率和消耗情况
-- 自动为每个用户创建独立命名空间
+- 自动为每个命名空间创建独立命名空间
 
 ### 4. 声明式配置
 
@@ -350,8 +350,8 @@ metadata:
   name: team-resource-quota
   description: "团队资源配额配置"
 
-# 用户资源配置（自动为每个用户创建命名空间）
-users:
+# 命名空间资源配置（自动为每个命名空间创建独立命名空间）
+namespace:
   elon-musk:
     cpu: 10
     memory: 20Gi
@@ -427,8 +427,8 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 |----------|---------|
 | `gpuctl create -f quota.yaml` | 创建资源配额配置 |
 | `gpuctl get quotas` | 列出所有资源配额 |
-| `gpuctl get quotas <用户名>` | 查看指定用户的配额 |
-| `gpuctl describe quota <用户名>` | 查看配额使用率（已用/总量） |
+| `gpuctl get quotas <命名空间名>` | 查看指定命名空间的配额 |
+| `gpuctl describe quota <命名空间名>` | 查看配额使用率（已用/总量） |
 | `gpuctl delete -f quota.yaml` | 删除资源配额 |
 
 ## API 文档
@@ -488,9 +488,9 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | 端点                        | 方法   | 功能                         |
 |-----------------------------|--------|------------------------------|
 | `/quotas`                   | GET    | 查询配额列表                 |
-| `/quotas/{userName}`        | GET    | 查询配额详情（含使用率）     |
+| `/quotas/{namespaceName}`   | GET    | 查询配额详情（含使用率）     |
 | `/quotas`                   | POST   | 创建资源配额                 |
-| `/quotas/{userName}`        | DELETE | 删除资源配额                 |
+| `/quotas/{namespaceName}`   | DELETE | 删除资源配额                 |
 
 ### 交互式 API 文档
 

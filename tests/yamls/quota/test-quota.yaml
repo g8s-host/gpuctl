@@ -10,7 +10,7 @@ default:
   memory: 40Gi
   gpu: 2
 
-users:
+namespace:
   elon-musk:
     cpu: 20
     memory: 40Gi

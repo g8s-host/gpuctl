@@ -22,7 +22,7 @@ def create_quota_command(args):
                 quota_config = {
                     "name": parsed_obj.metadata.name,
                     "description": parsed_obj.metadata.description,
-                    "users": {}
+                    "namespace": {}
                 }
 
                 if parsed_obj.default:
@@ -32,17 +32,17 @@ def create_quota_command(args):
                         "gpu": parsed_obj.default.get_gpu_str()
                     }
 
-                for user_name, user_quota in parsed_obj.users.items():
-                    quota_config["users"][user_name] = {
-                        "cpu": user_quota.get_cpu_str(),
-                        "memory": user_quota.memory,
-                        "gpu": user_quota.get_gpu_str()
+                for namespace_name, namespace_quota in parsed_obj.namespace.items():
+                    quota_config["namespace"][namespace_name] = {
+                        "cpu": namespace_quota.get_cpu_str(),
+                        "memory": namespace_quota.memory,
+                        "gpu": namespace_quota.get_gpu_str()
                     }
 
                 results = client.create_quota_config(quota_config)
 
                 for result in results:
-                    print(f"✅ Successfully created quota for user: {result['user']}")
+                    print(f"✅ Successfully created quota for namespace: {result['namespace']}")
                     print(f"   Namespace: {result['namespace']}")
                     print(f"   CPU: {result['cpu']}")
                     print(f"   Memory: {result['memory']}")
@@ -81,7 +81,7 @@ def apply_quota_command(args):
                     continue
 
                 quota_name = parsed_obj.metadata.name
-                users = parsed_obj.users or {}
+                namespaces = parsed_obj.namespace or {}
                 default_quota = parsed_obj.default
 
                 applied_count = 0
@@ -102,22 +102,22 @@ def apply_quota_command(args):
                         print(f"🔄 Updated default quota in namespace 'default'")
                     print(f"   CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
 
-                for user_name, user_quota in users.items():
-                    if user_name == "default":
+                for namespace_name, namespace_quota in namespaces.items():
+                    if namespace_name == "default":
                         continue
                     result = client.apply_quota(
                         quota_name=quota_name,
-                        user_name=user_name,
-                        cpu=user_quota.get_cpu_str() if user_quota.get_cpu_str() else None,
-                        memory=user_quota.memory,
-                        gpu=user_quota.get_gpu_str() if user_quota.get_gpu_str() else None
+                        namespace_name=namespace_name,
+                        cpu=namespace_quota.get_cpu_str() if namespace_quota.get_cpu_str() else None,
+                        memory=namespace_quota.memory,
+                        gpu=namespace_quota.get_gpu_str() if namespace_quota.get_gpu_str() else None
                     )
                     if result['status'] == 'created':
                         applied_count += 1
-                        print(f"✅ Created quota for user: {user_name}")
+                        print(f"✅ Created quota for namespace: {namespace_name}")
                     elif result['status'] == 'updated':
                         updated_count += 1
-                        print(f"🔄 Updated quota for user: {user_name}")
+                        print(f"🔄 Updated quota for namespace: {namespace_name}")
                     print(f"   Namespace: {result['namespace']}, CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
 
                 print(f"\n📊 Summary: {applied_count} created, {updated_count} updated")
@@ -138,31 +138,31 @@ def get_quotas_command(args):
     try:
         client = QuotaClient()
 
-        if args.user:
-            quota = client.get_quota(args.user)
+        if args.namespace:
+            quota = client.get_quota(args.namespace)
             if quota:
                 print(f"QUOTA NAME: {quota['name']}")
-                print(f"USER: {quota['user']}")
+                print(f"NAMESPACE: {quota['namespace']}")
                 print(f"CPU: {quota['hard'].get('cpu', 'N/A')}")
                 print(f"MEMORY: {quota['hard'].get('memory', 'N/A')}")
                 print(f"GPU: {quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))}")
                 print(f"STATUS: {quota['status']}")
             else:
-                print(f"❌ Quota not found for user: {args.user}")
+                print(f"❌ Quota not found for namespace: {args.namespace}")
                 return 1
         else:
             quotas = client.list_quotas()
             
             # Calculate column widths dynamically
-            headers = ['QUOTA NAME', 'USER', 'CPU', 'MEMORY', 'GPU', 'STATUS']
-            col_widths = {'name': 15, 'user': 15, 'cpu': 10, 'memory': 12, 'gpu': 8, 'status': 10}
+            headers = ['QUOTA NAME', 'NAMESPACE', 'CPU', 'MEMORY', 'GPU', 'STATUS']
+            col_widths = {'name': 15, 'namespace': 15, 'cpu': 10, 'memory': 12, 'gpu': 8, 'status': 10}
             
             quota_rows = []
             for quota in quotas:
                 gpu_value = quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))
                 quota_rows.append({
                     'name': quota['name'],
-                    'user': quota['user'],
+                    'namespace': quota['namespace'],
                     'cpu': str(quota['hard'].get('cpu', 'N/A')),
                     'memory': str(quota['hard'].get('memory', 'N/A')),
                     'gpu': str(gpu_value),
@@ -170,16 +170,16 @@ def get_quotas_command(args):
                 })
                 
                 col_widths['name'] = max(col_widths['name'], len(quota['name']))
-                col_widths['user'] = max(col_widths['user'], len(quota['user']))
+                col_widths['namespace'] = max(col_widths['namespace'], len(quota['namespace']))
                 col_widths['cpu'] = max(col_widths['cpu'], len(str(quota['hard'].get('cpu', 'N/A'))))
                 col_widths['memory'] = max(col_widths['memory'], len(str(quota['hard'].get('memory', 'N/A'))))
                 col_widths['gpu'] = max(col_widths['gpu'], len(str(gpu_value)))
                 col_widths['status'] = max(col_widths['status'], len(quota['status']))
             
-            print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['user']}}  {headers[2]:<{col_widths['cpu']}}  {headers[3]:<{col_widths['memory']}}  {headers[4]:<{col_widths['gpu']}}  {headers[5]:<{col_widths['status']}}")
+            print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['namespace']}}  {headers[2]:<{col_widths['cpu']}}  {headers[3]:<{col_widths['memory']}}  {headers[4]:<{col_widths['gpu']}}  {headers[5]:<{col_widths['status']}}")
             
             for row in quota_rows:
-                print(f"{row['name']:<{col_widths['name']}}  {row['user']:<{col_widths['user']}}  {row['cpu']:<{col_widths['cpu']}}  {row['memory']:<{col_widths['memory']}}  {row['gpu']:<{col_widths['gpu']}}  {row['status']:<{col_widths['status']}}")
+                print(f"{row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['cpu']:<{col_widths['cpu']}}  {row['memory']:<{col_widths['memory']}}  {row['gpu']:<{col_widths['gpu']}}  {row['status']:<{col_widths['status']}}")
 
         return 0
     except Exception as e:
@@ -192,14 +192,13 @@ def describe_quota_command(args):
     try:
         client = QuotaClient()
 
-        quota = client.describe_quota(args.user_name)
+        quota = client.describe_quota(args.namespace_name)
         if not quota:
-            print(f"❌ Quota not found for user: {args.user_name}")
+            print(f"❌ Quota not found for namespace: {args.namespace_name}")
             return 1
 
-        print(f"📋 Quota Details: {args.user_name}")
+        print(f"📋 Quota Details: {args.namespace_name}")
         print(f"📊 Name: {quota.get('name', 'N/A')}")
-        print(f"👤 User: {quota.get('user', 'N/A')}")
         print(f"📦 Namespace: {quota.get('namespace', 'N/A')}")
         print(f"📈 Status: {quota.get('status', 'N/A')}")
 
@@ -239,16 +238,16 @@ def delete_quota_command(args):
                     return 1
 
                 quota_name = parsed_obj.metadata.name
-                users_to_delete = list(parsed_obj.users.keys())
+                namespaces_to_delete = list(parsed_obj.namespace.keys())
 
-                namespaces_to_delete = []
-                for user in users_to_delete:
-                    namespaces_to_delete.append(user)
+                namespaces_to_delete_result = []
+                for ns in namespaces_to_delete:
+                    namespaces_to_delete_result.append(ns)
 
                 if parsed_obj.default:
-                    namespaces_to_delete.append("default")
+                    namespaces_to_delete_result.append("default")
 
-                unique_namespaces = list(set(namespaces_to_delete))
+                unique_namespaces = list(set(namespaces_to_delete_result))
 
                 print(f"⚠️  Warning: About to delete {len(unique_namespaces)} namespaces and all resources within:")
                 for ns in unique_namespaces:
@@ -264,18 +263,18 @@ def delete_quota_command(args):
 
                 print(f"✅ Deleted quotas for config: {quota_name}")
                 for deleted in result.get('deleted', []):
-                    print(f"   - User: {deleted['user']}, Namespace: {deleted['namespace']}")
+                    print(f"   - Namespace: {deleted['namespace']}")
 
                 if result.get('failed'):
                     print(f"❌ Failed to delete:")
                     for failed in result['failed']:
-                        print(f"   - User: {failed['user']}, Error: {failed['error']}")
+                        print(f"   - Namespace: {failed['namespace']}, Error: {failed['error']}")
 
             except ParserError as e:
                 print(f"❌ Parser error: {e}")
                 return 1
-        elif args.user_name:
-            print(f"⚠️  Warning: About to delete namespace '{args.user_name}' and all resources within")
+        elif args.namespace_name:
+            print(f"⚠️  Warning: About to delete namespace '{args.namespace_name}' and all resources within")
 
             if not args.force:
                 confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
@@ -283,14 +282,14 @@ def delete_quota_command(args):
                     print("❌ Cancelled.")
                     return 0
 
-            success = client.delete_quota(args.user_name)
+            success = client.delete_quota(args.namespace_name)
             if success:
-                print(f"✅ Successfully deleted quota for user: {args.user_name}")
+                print(f"✅ Successfully deleted quota for namespace: {args.namespace_name}")
             else:
-                print(f"❌ Quota not found for user: {args.user_name}")
+                print(f"❌ Quota not found for namespace: {args.namespace_name}")
                 return 1
         else:
-            print("❌ Must provide YAML file path (-f/--file) or user name")
+            print("❌ Must provide YAML file path (-f/--file) or namespace name")
             return 1
 
         return 0
