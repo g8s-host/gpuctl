@@ -16,11 +16,12 @@ def get_nodes_command(args):
         # Call API to get nodes list with filter criteria
         nodes = client.list_nodes(filters=filters)
         
-        # Print nodes list
-        print(f"{'NODE NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'POOL':<20}")
+        # Calculate column widths dynamically
+        headers = ['NODE NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'POOL']
+        col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'pool': 15}
         
+        node_rows = []
         for node in nodes:
-            # Safely access dictionary fields with default values for missing cases
             name = node.get('name', 'N/A')
             status = node.get('status', 'unknown')
             gpu_total = node.get('gpu_total', 0)
@@ -29,7 +30,28 @@ def get_nodes_command(args):
             gpu_types = ', '.join(node.get('gpu_types', []))
             pool = node.get('labels', {}).get('g8s.host/pool', 'default')
             
-            print(f"{name:<30} {status:<10} {gpu_total:<10} {gpu_used:<10} {gpu_free:<10} {gpu_types:<15} {pool:<20}")
+            node_rows.append({
+                'name': name,
+                'status': status,
+                'total': str(gpu_total),
+                'used': str(gpu_used),
+                'free': str(gpu_free),
+                'type': gpu_types,
+                'pool': pool
+            })
+            
+            col_widths['name'] = max(col_widths['name'], len(name))
+            col_widths['status'] = max(col_widths['status'], len(status))
+            col_widths['total'] = max(col_widths['total'], len(str(gpu_total)))
+            col_widths['used'] = max(col_widths['used'], len(str(gpu_used)))
+            col_widths['free'] = max(col_widths['free'], len(str(gpu_free)))
+            col_widths['type'] = max(col_widths['type'], len(gpu_types))
+            col_widths['pool'] = max(col_widths['pool'], len(pool))
+        
+        print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['pool']}}")
+        
+        for row in node_rows:
+            print(f"{row['name']:<{col_widths['name']}}  {row['status']:<{col_widths['status']}}  {row['total']:<{col_widths['total']}}  {row['used']:<{col_widths['used']}}  {row['free']:<{col_widths['free']}}  {row['type']:<{col_widths['type']}}  {row['pool']:<{col_widths['pool']}}")
         
         return 0
     except Exception as e:

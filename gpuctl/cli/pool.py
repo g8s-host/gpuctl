@@ -7,11 +7,34 @@ def get_pools_command(args):
         client = PoolClient()
         pools = client.list_pools()
         
-        # Print resource pools list
-        print(f"{'POOL NAME':<30} {'STATUS':<10} {'GPU TOTAL':<10} {'GPU USED':<10} {'GPU FREE':<10} {'GPU TYPE':<15} {'NODE COUNT':<10}")
+        # Calculate column widths dynamically
+        headers = ['POOL NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'NODE COUNT']
+        col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'count': 10}
         
+        pool_rows = []
         for pool in pools:
-            print(f"{pool['name']:<30} {pool['status']:<10} {pool['gpu_total']:<10} {pool['gpu_used']:<10} {pool['gpu_free']:<10} {', '.join(pool['gpu_types']):<15} {len(pool['nodes']):<10}")
+            pool_rows.append({
+                'name': pool['name'],
+                'status': pool['status'],
+                'total': str(pool['gpu_total']),
+                'used': str(pool['gpu_used']),
+                'free': str(pool['gpu_free']),
+                'type': ', '.join(pool['gpu_types']),
+                'count': str(len(pool['nodes']))
+            })
+            
+            col_widths['name'] = max(col_widths['name'], len(pool['name']))
+            col_widths['status'] = max(col_widths['status'], len(pool['status']))
+            col_widths['total'] = max(col_widths['total'], len(str(pool['gpu_total'])))
+            col_widths['used'] = max(col_widths['used'], len(str(pool['gpu_used'])))
+            col_widths['free'] = max(col_widths['free'], len(str(pool['gpu_free'])))
+            col_widths['type'] = max(col_widths['type'], len(', '.join(pool['gpu_types'])))
+            col_widths['count'] = max(col_widths['count'], len(str(len(pool['nodes']))))
+        
+        print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['count']}}")
+        
+        for row in pool_rows:
+            print(f"{row['name']:<{col_widths['name']}}  {row['status']:<{col_widths['status']}}  {row['total']:<{col_widths['total']}}  {row['used']:<{col_widths['used']}}  {row['free']:<{col_widths['free']}}  {row['type']:<{col_widths['type']}}  {row['count']:<{col_widths['count']}}")
         
         return 0
     except Exception as e:

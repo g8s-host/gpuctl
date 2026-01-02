@@ -457,23 +457,18 @@ def get_jobs_command(args):
             else:
                 return f"{int(seconds/86400)}d"
         
-        # Print jobs list
-        print(f"{'JOB ID':<55} {'NAME':<20} {'KIND':<15} {'STATUS':<10} {'AGE':<10}")
+        # Calculate column widths dynamically
+        headers = ['JOB ID', 'NAME', 'KIND', 'STATUS', 'AGE']
+        col_widths = {'job_id': 10, 'name': 10, 'kind': 10, 'status': 10, 'age': 10}
         
+        # First pass: collect all data and calculate max widths
+        job_rows = []
         for job in jobs:
-            # Calculate AGE
             age = calculate_age(job.get('creation_timestamp'))
-            
-            # Get job type
             job_type = job['labels'].get('g8s.host/job-type', 'unknown')
-            
-            # Use status info from job/pod
             status_dict = job.get("status", {})
-            
-            # Display real Pod status (phase) - sync with kubectl
             pod_phase = status_dict.get("phase", "Unknown")
             
-            # Map k8s phases - same as kubectl output
             phase_to_status = {
                 "Pending": "Pending",
                 "Running": "Running",
@@ -490,9 +485,7 @@ def get_jobs_command(args):
             else:
                 status = pod_phase
             
-            # Check for special container waiting reasons
             container_statuses = status_dict.get("container_statuses", [])
-            
             if container_statuses:
                 for cs in container_statuses:
                     if cs.state and cs.state.waiting:
@@ -501,29 +494,38 @@ def get_jobs_command(args):
                             status = waiting_reason
                             break
             
-            # Display name with prefix removed, show only original name from YAML file
             yaml_name = remove_prefix(job['name'])
-            
-            # Get job type
-            job_type = job['labels'].get('g8s.host/job-type', 'unknown')
-            
-            # Extract base name from yaml_name
             parts = yaml_name.split('-')
             base_name = yaml_name
             
             if job_type == 'notebook':
-                # StatefulSet Pod format: base-name-index (e.g., new-test-notebook-job-0)
                 if len(parts) >= 2 and parts[-1].isdigit():
-                    # Remove last numeric part
                     base_name = '-'.join(parts[:-1])
             elif len(parts) >= 3:
-                # Deployment Pod format: base-name-deployment-hash-pod-suffix
-                # Remove last two parts (deployment hash and pod suffix)
                 base_name = '-'.join(parts[:-2])
             
-            # For Pod instances, JOB ID shows Pod name without prefix, NAME shows original name from YAML
             display_job_id = remove_prefix(job['name'])
-            print(f"{display_job_id:<55} {base_name:<20} {job_type:<15} {status:<10} {age:<10}")
+            
+            job_rows.append({
+                'job_id': display_job_id,
+                'name': base_name,
+                'kind': job_type,
+                'status': status,
+                'age': age
+            })
+            
+            col_widths['job_id'] = max(col_widths['job_id'], len(display_job_id))
+            col_widths['name'] = max(col_widths['name'], len(base_name))
+            col_widths['kind'] = max(col_widths['kind'], len(job_type))
+            col_widths['status'] = max(col_widths['status'], len(status))
+            col_widths['age'] = max(col_widths['age'], len(age))
+        
+        # Print header
+        print(f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['kind']}}  {headers[3]:<{col_widths['status']}}  {headers[4]:<{col_widths['age']}}")
+        
+        # Print rows
+        for row in job_rows:
+            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['age']:<{col_widths['age']}}")
         
         return 0
     except Exception as e:

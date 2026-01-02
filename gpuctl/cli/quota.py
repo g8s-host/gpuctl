@@ -141,18 +141,45 @@ def get_quotas_command(args):
         if args.user:
             quota = client.get_quota(args.user)
             if quota:
-                print(f"{'QUOTA NAME':<20} {'USER':<15} {'CPU':<10} {'MEMORY':<12} {'GPU':<8} {'STATUS':<10}")
-                print(f"{quota['name']:<20} {quota['user']:<15} {quota['hard'].get('cpu', 'N/A'):<10} {quota['hard'].get('memory', 'N/A'):<12} {quota['hard'].get('gpu', 'N/A'):<8} {quota['status']:<10}")
+                print(f"QUOTA NAME: {quota['name']}")
+                print(f"USER: {quota['user']}")
+                print(f"CPU: {quota['hard'].get('cpu', 'N/A')}")
+                print(f"MEMORY: {quota['hard'].get('memory', 'N/A')}")
+                print(f"GPU: {quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))}")
+                print(f"STATUS: {quota['status']}")
             else:
                 print(f"❌ Quota not found for user: {args.user}")
                 return 1
         else:
             quotas = client.list_quotas()
-            print(f"{'QUOTA NAME':<20} {'USER':<15} {'CPU':<10} {'MEMORY':<12} {'GPU':<8} {'STATUS':<10}")
-
+            
+            # Calculate column widths dynamically
+            headers = ['QUOTA NAME', 'USER', 'CPU', 'MEMORY', 'GPU', 'STATUS']
+            col_widths = {'name': 15, 'user': 15, 'cpu': 10, 'memory': 12, 'gpu': 8, 'status': 10}
+            
+            quota_rows = []
             for quota in quotas:
                 gpu_value = quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))
-                print(f"{quota['name']:<20} {quota['user']:<15} {quota['hard'].get('cpu', 'N/A'):<10} {quota['hard'].get('memory', 'N/A'):<12} {gpu_value:<8} {quota['status']:<10}")
+                quota_rows.append({
+                    'name': quota['name'],
+                    'user': quota['user'],
+                    'cpu': str(quota['hard'].get('cpu', 'N/A')),
+                    'memory': str(quota['hard'].get('memory', 'N/A')),
+                    'gpu': str(gpu_value),
+                    'status': quota['status']
+                })
+                
+                col_widths['name'] = max(col_widths['name'], len(quota['name']))
+                col_widths['user'] = max(col_widths['user'], len(quota['user']))
+                col_widths['cpu'] = max(col_widths['cpu'], len(str(quota['hard'].get('cpu', 'N/A'))))
+                col_widths['memory'] = max(col_widths['memory'], len(str(quota['hard'].get('memory', 'N/A'))))
+                col_widths['gpu'] = max(col_widths['gpu'], len(str(gpu_value)))
+                col_widths['status'] = max(col_widths['status'], len(quota['status']))
+            
+            print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['user']}}  {headers[2]:<{col_widths['cpu']}}  {headers[3]:<{col_widths['memory']}}  {headers[4]:<{col_widths['gpu']}}  {headers[5]:<{col_widths['status']}}")
+            
+            for row in quota_rows:
+                print(f"{row['name']:<{col_widths['name']}}  {row['user']:<{col_widths['user']}}  {row['cpu']:<{col_widths['cpu']}}  {row['memory']:<{col_widths['memory']}}  {row['gpu']:<{col_widths['gpu']}}  {row['status']:<{col_widths['status']}}")
 
         return 0
     except Exception as e:
