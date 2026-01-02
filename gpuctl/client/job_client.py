@@ -360,14 +360,22 @@ class JobClient(KubernetesClient):
             active = 0
             succeeded = 0
             failed = 0
+            pod_phase = "Unknown"
+            pod_conditions = []
+            container_statuses = []
             
-            if pod.status and pod.status.phase:
+            if pod.status:
+                pod_phase = pod.status.phase or "Unknown"
+                
                 if pod.status.phase == "Running":
                     active = 1
                 elif pod.status.phase == "Succeeded":
                     succeeded = 1
                 elif pod.status.phase == "Failed":
                     failed = 1
+                
+                pod_conditions = pod.status.conditions or []
+                container_statuses = pod.status.container_statuses or []
             
             pod_dict = {
                 "name": pod.metadata.name,
@@ -379,7 +387,10 @@ class JobClient(KubernetesClient):
                 "status": {
                     "active": active,
                     "succeeded": succeeded,
-                    "failed": failed
+                    "failed": failed,
+                    "phase": pod_phase,
+                    "conditions": pod_conditions,
+                    "container_statuses": container_statuses
                 }
             }
             

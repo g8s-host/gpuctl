@@ -200,6 +200,60 @@ def describe_node_command(args):
             for job in node['running_jobs']:
                 print(f"   - {job.get('name', 'N/A')} (GPU: {job.get('gpu', 0)})")
         
+        import subprocess
+        import json
+        try:
+            events_cmd = f"kubectl get events -n default --field-selector involvedObject.name={args.node_name},involvedObject.kind=Node -o json"
+            events_output = subprocess.check_output(events_cmd, shell=True, text=True)
+            events_data = json.loads(events_output)
+            
+            if events_data.get('items'):
+                print(f"\n📋 Events:")
+                
+                for i, event in enumerate(events_data['items'][:10]):
+                    event_type = event.get('type', 'Normal')
+                    reason = event.get('reason', '-')
+                    
+                    timestamp = event.get('lastTimestamp') or event.get('firstTimestamp') or event.get('eventTime')
+                    if timestamp:
+                        if isinstance(timestamp, str) and '.' in timestamp:
+                            timestamp = timestamp.split('.')[0] + 'Z'
+                    
+                    from datetime import datetime, timezone
+                    def format_event_age(ts):
+                        if not ts:
+                            return "-"
+                        try:
+                            event_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                            now = datetime.now(timezone.utc)
+                            delta = now - event_time
+                            seconds = delta.total_seconds()
+                            if seconds < 0:
+                                seconds = 0
+                            if seconds < 60:
+                                return f"{int(seconds)}s"
+                            elif seconds < 3600:
+                                return f"{int(seconds/60)}m"
+                            elif seconds < 86400:
+                                return f"{int(seconds/3600)}h"
+                            else:
+                                return f"{int(seconds/86400)}d"
+                        except Exception:
+                            return "-"
+                    
+                    age = format_event_age(timestamp)
+                    source = event.get('source', {}).get('component', '-') or event.get('reportingComponent', '-')
+                    message = event.get('message', '-')
+                    
+                    print(f"  [{age}] {event_type} {reason}")
+                    print(f"    From: {source}")
+                    print(f"    Message: {message}")
+                    
+                    if i < len(events_data['items']) - 1:
+                        print()
+        except Exception:
+            pass
+        
         return 0
     except Exception as e:
         print(f"❌ Error describing node: {e}")

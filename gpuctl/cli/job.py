@@ -7,6 +7,71 @@ from gpuctl.client.job_client import JobClient
 from gpuctl.client.log_client import LogClient
 
 
+def _get_detailed_status(waiting_reason: str, waiting_message: str) -> str:
+    """Get detailed status from container waiting reason"""
+    status_mapping = {
+        "ImagePullBackOff": "ImagePullBackOff",
+        "ErrImagePull": "ErrImagePull",
+        "CrashLoopBackOff": "CrashLoopBackOff",
+        "CreateContainerConfigError": "CreateContainerConfigError",
+        "CreateContainerError": "CreateContainerError",
+        "InvalidImageName": "InvalidImageName",
+        "ImageInspectError": "ImageInspectError",
+        "RegistryUnavailable": "RegistryUnavailable",
+        "RunInitContainerError": "RunInitContainerError",
+        "Resizing": "Resizing",
+        "Restarting": "Restarting",
+        "Waiting": "Waiting",
+        "Terminating": "Terminating",
+        "Unknown": "Unknown",
+    }
+    
+    if waiting_reason in status_mapping:
+        return status_mapping[waiting_reason]
+    
+    if "BackOff" in waiting_reason:
+        return "BackOff"
+    
+    if "NotFound" in waiting_reason or "not found" in waiting_message.lower():
+        return "NotFound"
+    
+    if "Permission" in waiting_reason or "denied" in waiting_message.lower():
+        return "PermissionDenied"
+    
+    if "Storage" in waiting_reason or "storage" in waiting_message.lower():
+        return "StorageError"
+    
+    return waiting_reason if waiting_reason else "Waiting"
+
+
+def _format_event_age(timestamp_str: str) -> str:
+    """Format event timestamp to age string"""
+    if not timestamp_str:
+        return "-"
+    
+    from datetime import datetime, timezone
+    
+    try:
+        event_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        now = datetime.now(timezone.utc)
+        delta = now - event_time
+        
+        seconds = delta.total_seconds()
+        if seconds < 0:
+            seconds = 0
+        
+        if seconds < 60:
+            return f"{int(seconds)}s"
+        elif seconds < 3600:
+            return f"{int(seconds/60)}m"
+        elif seconds < 86400:
+            return f"{int(seconds/3600)}h"
+        else:
+            return f"{int(seconds/86400)}d"
+    except Exception:
+        return "-"
+
+
 # Helper function: handle g8s-host prefix
 
 def remove_prefix(name):
@@ -402,18 +467,39 @@ def get_jobs_command(args):
             # Get job type
             job_type = job['labels'].get('g8s.host/job-type', 'unknown')
             
-            # Use status info from job, which was set based on Pod actual status in _pod_to_dict
+            # Use status info from job/pod
             status_dict = job.get("status", {})
             
-            # Determine status based on active, succeeded, failed fields, consistent with k8s
-            if status_dict.get('succeeded', 0) > 0:
-                status = "Succeeded"
-            elif status_dict.get('failed', 0) > 0:
-                status = "Failed"
-            elif status_dict.get('active', 0) > 0:
-                status = "Running"
+            # Display real Pod status (phase) - sync with kubectl
+            pod_phase = status_dict.get("phase", "Unknown")
+            
+            # Map k8s phases - same as kubectl output
+            phase_to_status = {
+                "Pending": "Pending",
+                "Running": "Running",
+                "Succeeded": "Succeeded",
+                "Failed": "Failed",
+                "Unknown": "Unknown",
+                "Completed": "Completed",
+                "Terminating": "Terminating",
+                "Deleting": "Deleting"
+            }
+            
+            if pod_phase in phase_to_status:
+                status = phase_to_status[pod_phase]
             else:
-                status = "Pending"
+                status = pod_phase
+            
+            # Check for special container waiting reasons
+            container_statuses = status_dict.get("container_statuses", [])
+            
+            if container_statuses:
+                for cs in container_statuses:
+                    if cs.state and cs.state.waiting:
+                        waiting_reason = cs.state.waiting.reason
+                        if waiting_reason in ["ImagePullBackOff", "CrashLoopBackOff", "ErrImagePull"]:
+                            status = waiting_reason
+                            break
             
             # Display name with prefix removed, show only original name from YAML file
             yaml_name = remove_prefix(job['name'])
@@ -751,18 +837,55 @@ def describe_job_command(args):
         job_type = job.get('labels', {}).get('g8s.host/job-type', 'unknown')
         status_dict = job.get('status', {})
         
-        # Convert to status string consistent with k8s
-        status = "Pending"
-        if status_dict.get('succeeded', 0) > 0:
-            status = "Succeeded"
-        elif status_dict.get('failed', 0) > 0:
-            # For inference jobs, failed status might be caused by pending status
-            if job_type == "inference":
-                status = "Pending"
-            else:
-                status = "Failed"
-        elif status_dict.get('active', 0) > 0:
-            status = "Running"
+        # Display real Pod status (phase)
+        pod_phase = status_dict.get("phase", "Unknown")
+        
+        # Full status sync with kubectl
+        phase_to_status = {
+            "Pending": "Pending",
+            "Running": "Running",
+            "Succeeded": "Succeeded",
+            "Failed": "Failed",
+            "Unknown": "Unknown",
+            "Completed": "Completed",
+            "Terminating": "Terminating",
+            "Deleting": "Deleting"
+        }
+        
+        if pod_phase in phase_to_status:
+            status = phase_to_status[pod_phase]
+        else:
+            status = pod_phase
+        
+        # Check for special conditions
+        container_statuses = status_dict.get("container_statuses", [])
+        pod_conditions = status_dict.get("conditions", [])
+        
+        if container_statuses:
+            for cs in container_statuses:
+                if cs.state:
+                    if cs.state.waiting:
+                        waiting_reason = cs.state.waiting.reason
+                        waiting_message = cs.state.waiting.message or ""
+                        status = _get_detailed_status(waiting_reason, waiting_message)
+                        break
+                    if cs.state.terminated:
+                        terminated_reason = cs.state.terminated.reason
+                        if terminated_reason == "OOMKilled":
+                            status = "OOMKilled"
+                            break
+                        elif terminated_reason == "Error":
+                            status = "Error"
+                            break
+        
+        # Check pod conditions
+        if status == "Pending":
+            for condition in pod_conditions:
+                if condition.type == "PodScheduled" and condition.status == "False":
+                    reason = condition.reason or ""
+                    if "Unschedulable" in reason or "SchedulingDisabled" in reason:
+                        status = "Unschedulable"
+                        break
         
         # Calculate AGE
         from datetime import datetime, timezone
@@ -791,6 +914,40 @@ def describe_job_command(args):
         print(f"🏁 Completed: {job.get('completion_time', 'N/A')}")
         print(f"📋 Priority: {job.get('labels', {}).get('g8s.host/priority', 'medium')}")
         print(f"🖥️  Pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
+        
+        full_job_name = job.get('name', '')
+        if full_job_name:
+            import subprocess
+            import json
+            try:
+                events_cmd = f"kubectl get events -n {args.namespace} --field-selector involvedObject.name={full_job_name},involvedObject.kind=Pod -o json"
+                events_output = subprocess.check_output(events_cmd, shell=True, text=True)
+                events_data = json.loads(events_output)
+                
+                if events_data.get('items'):
+                    print(f"\n📋 Events:")
+                    
+                    for i, event in enumerate(events_data['items'][:10]):
+                        event_type = event.get('type', 'Normal')
+                        reason = event.get('reason', '-')
+                        
+                        timestamp = event.get('lastTimestamp') or event.get('firstTimestamp') or event.get('eventTime')
+                        if timestamp:
+                            if isinstance(timestamp, str) and '.' in timestamp:
+                                timestamp = timestamp.split('.')[0] + 'Z'
+                        age = _format_event_age(timestamp)
+                        
+                        source = event.get('source', {}).get('component', '-') or event.get('reportingComponent', '-')
+                        message = event.get('message', '-')
+                        
+                        print(f"  [{age}] {event_type} {reason}")
+                        print(f"    From: {source}")
+                        print(f"    Message: {message}")
+                        
+                        if i < len(events_data['items']) - 1:
+                            print()
+            except Exception:
+                pass
         
         if 'resources' in job:
             print("\n💻 Resources:")
