@@ -198,7 +198,7 @@ class JobClient(KubernetesClient):
 
 
 
-    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 600, interval: int = 2) -> bool:
+    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 600, interval: float = 0.3) -> bool:
         """等待资源删除完成
         
         Args:
@@ -212,14 +212,21 @@ class JobClient(KubernetesClient):
             bool: 资源是否在超时前被删除
         """
         import time
+        import sys
+        
         start_time = time.time()
+        dot_count = 0
         
         while time.time() - start_time < timeout:
             if not check_func(name):
                 return True
+            
+            dot_count = (dot_count % 3) + 1
+            dots = "." * dot_count
+            print(f"\r{dots:<3}", end="", flush=True)
             time.sleep(interval)
         
-        print(f"⚠️  超时：{resource_type} {name} 在 {timeout} 秒内未被删除")
+        print(f"\r⚠️  超时：{resource_type} {name} 在 {timeout} 秒内未被删除")
         return False
     
     def _is_job_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
