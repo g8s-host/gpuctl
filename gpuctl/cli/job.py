@@ -437,11 +437,11 @@ def get_jobs_command(args):
         labels = {}
         if args.pool:
             labels["g8s.host/pool"] = args.pool
-        if args.type:
-            labels["g8s.host/job-type"] = args.type
+        if args.kind:
+            labels["g8s.host/job-type"] = args.kind
         
         # Call API to get jobs list with filter criteria
-        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=True)
+        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=False)
         
         # Helper function to calculate AGE
         def calculate_age(created_at_str):
@@ -477,44 +477,74 @@ def get_jobs_command(args):
             job_type = job['labels'].get('g8s.host/job-type', 'unknown')
             job_namespace = job.get('namespace', 'default')
             status_dict = job.get("status", {})
-            pod_phase = status_dict.get("phase", "Unknown")
             
-            phase_to_status = {
-                "Pending": "Pending",
-                "Running": "Running",
-                "Succeeded": "Succeeded",
-                "Failed": "Failed",
-                "Unknown": "Unknown",
-                "Completed": "Completed",
-                "Terminating": "Terminating",
-                "Deleting": "Deleting"
-            }
+            # Check if this is a Pod, Job, Deployment, or StatefulSet
+            job_name = job['name']
+            status = "Unknown"
             
-            if pod_phase in phase_to_status:
-                status = phase_to_status[pod_phase]
-            else:
-                status = pod_phase
+            if "phase" in status_dict:
+                # This is a Pod
+                pod_phase = status_dict.get("phase", "Unknown")
+                
+                phase_to_status = {
+                    "Pending": "Pending",
+                    "Running": "Running",
+                    "Succeeded": "Succeeded",
+                    "Failed": "Failed",
+                    "Unknown": "Unknown",
+                    "Completed": "Completed",
+                    "Terminating": "Terminating",
+                    "Deleting": "Deleting"
+                }
+                
+                if pod_phase in phase_to_status:
+                    status = phase_to_status[pod_phase]
+                else:
+                    status = pod_phase
+                
+                container_statuses = status_dict.get("container_statuses", [])
+                if container_statuses:
+                    for cs in container_statuses:
+                        if cs.state and cs.state.waiting:
+                            waiting_reason = cs.state.waiting.reason
+                            if waiting_reason in ["ImagePullBackOff", "CrashLoopBackOff", "ErrImagePull"]:
+                                status = waiting_reason
+                                break
+            elif "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
+                # This is a Job
+                if status_dict["succeeded"] > 0:
+                    status = "Succeeded"
+                elif status_dict["failed"] > 0:
+                    status = "Failed"
+                elif status_dict["active"] > 0:
+                    status = "Running"
+                else:
+                    status = "Pending"
+            elif "ready_replicas" in status_dict and "unavailable_replicas" in status_dict:
+                # This is a Deployment
+                ready_replicas = status_dict.get("ready_replicas", 0)
+                unavailable_replicas = status_dict.get("unavailable_replicas", 0)
+                
+                if ready_replicas > 0 and unavailable_replicas == 0:
+                    status = "Running"
+                elif ready_replicas == 0 and unavailable_replicas > 0:
+                    status = "Failed"
+                else:
+                    status = "Pending"
+            elif "ready_replicas" in status_dict and "replicas" in status_dict:
+                # This is a StatefulSet
+                ready_replicas = status_dict.get("ready_replicas", 0)
+                replicas = status_dict.get("replicas", 0)
+                
+                if ready_replicas == replicas and replicas > 0:
+                    status = "Running"
+                elif ready_replicas < replicas and ready_replicas > 0:
+                    status = "Running"
+                else:
+                    status = "Pending"
             
-            container_statuses = status_dict.get("container_statuses", [])
-            if container_statuses:
-                for cs in container_statuses:
-                    if cs.state and cs.state.waiting:
-                        waiting_reason = cs.state.waiting.reason
-                        if waiting_reason in ["ImagePullBackOff", "CrashLoopBackOff", "ErrImagePull"]:
-                            status = waiting_reason
-                            break
-            
-            yaml_name = remove_prefix(job['name'])
-            parts = yaml_name.split('-')
-            base_name = yaml_name
-            
-            if job_type == 'notebook':
-                if len(parts) >= 2 and parts[-1].isdigit():
-                    base_name = '-'.join(parts[:-1])
-            elif len(parts) >= 3:
-                base_name = '-'.join(parts[:-2])
-            
-            display_job_id = remove_prefix(job['name'])
+            base_name = remove_prefix(job['name'])
+            display_job_id = base_name
             
             job_rows.append({
                 'job_id': display_job_id,

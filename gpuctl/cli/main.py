@@ -31,8 +31,8 @@ def main():
     jobs_parser.add_argument('-n', '--namespace', default=None,
                              help='Kubernetes namespace (optional, if not specified, list jobs from all namespaces)')
     jobs_parser.add_argument('--pool', help='Filter by resource pool')
-    jobs_parser.add_argument('--type', choices=['training', 'inference', 'notebook', 'compute'],
-                             help='Filter by job type')
+    jobs_parser.add_argument('--kind', choices=['training', 'inference', 'notebook', 'compute'],
+                             help='Filter by job kind')
     # Add --pods option to view pod-level information
     jobs_parser.add_argument(
         "--pods",
