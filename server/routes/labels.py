@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 async def add_node_label(nodeName: str, request: LabelRequest, token: str = Depends(AuthValidator.validate_token)):
     """给指定节点添加Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 添加Label
         client._label_node(nodeName, request.key, request.value)
@@ -51,7 +51,7 @@ async def batch_add_node_labels(
 ):
     """批量给多个节点添加Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         success = []
         failed = []
@@ -88,7 +88,7 @@ async def batch_add_node_labels(
 async def get_node_label(nodeName: str, key: str, token: str = Depends(AuthValidator.validate_token)):
     """查询指定节点的指定Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 获取节点信息
         node = client.core_v1.read_node(nodeName)
@@ -119,7 +119,7 @@ async def get_node_label(nodeName: str, key: str, token: str = Depends(AuthValid
 async def get_node_labels(nodeName: str, token: str = Depends(AuthValidator.validate_token)):
     """查询指定节点的所有Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 获取节点信息
         node = client.get_node(nodeName)
@@ -148,7 +148,7 @@ async def get_nodes_labels(
 ):
     """查询所有节点的指定Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 获取所有节点
         nodes = client.core_v1.list_node()
@@ -187,7 +187,7 @@ async def get_all_nodes_labels(
 ):
     """列出所有节点的GPU相关Label及绑定资源池"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 获取所有节点
         nodes = client.core_v1.list_node()
@@ -233,7 +233,7 @@ async def get_all_nodes_labels(
 async def delete_node_label(nodeName: str, key: str, token: str = Depends(AuthValidator.validate_token)):
     """删除指定节点的指定Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 删除Label
         client._remove_node_label(nodeName, key)
@@ -255,7 +255,7 @@ async def delete_node_label(nodeName: str, key: str, token: str = Depends(AuthVa
 async def update_node_label(nodeName: str, key: str, request: Dict[str, Any], token: str = Depends(AuthValidator.validate_token)):
     """更新指定节点的指定Label"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 更新Label
         value = request.get("value")
@@ -281,7 +281,7 @@ async def update_node_label(nodeName: str, key: str, request: Dict[str, Any], to
 async def list_all_node_labels(token: str = Depends(AuthValidator.validate_token)):
     """获取所有节点标签"""
     try:
-        client = PoolClient()
+        client = PoolClient.get_instance()
         
         # 获取所有节点
         nodes = client.list_nodes()

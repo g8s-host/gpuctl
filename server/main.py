@@ -13,7 +13,8 @@ from server.routes import (
     labels_router,
     global_labels_router,
     auth_router,
-    permissions_router
+    permissions_router,
+    quotas_router
 )
 
 # 配置日志
@@ -46,6 +47,7 @@ app.include_router(jobs_router)
 app.include_router(pools_router)
 app.include_router(labels_router)  # 先注册labels_router，避免路由冲突
 app.include_router(nodes_router)    # 后注册nodes_router
+app.include_router(quotas_router)  # 注册配额路由
 app.include_router(global_labels_router)
 app.include_router(auth_router)
 app.include_router(permissions_router)

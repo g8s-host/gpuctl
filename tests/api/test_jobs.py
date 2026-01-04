@@ -306,26 +306,101 @@ def test_get_job_metrics(mock_job_client):
 
 
 @patch('server.routes.jobs.BaseParser.parse_yaml')
-@patch('server.routes.jobs.TrainingKind')
-def test_batch_create_jobs(mock_training_kind, mock_parse_yaml):
-    """测试批量创建作业API"""
+@patch('server.routes.jobs.NotebookKind')
+def test_create_notebook_job(mock_notebook_kind, mock_parse_yaml):
+    """测试创建笔记本作业API"""
     # 设置模拟返回值
-    mock_parse_yaml.return_value.kind = "training"
+    mock_parse_yaml.return_value.kind = "notebook"
     mock_handler = MagicMock()
-    mock_handler.create_training_job.return_value = {
-        "job_id": "test-job-{}",
-        "name": "test-job-{}",
+    mock_handler.create_notebook.return_value = {
+        "job_id": "test-notebook-job",
+        "name": "test-notebook-job",
         "status": "created"
     }
-    mock_training_kind.return_value = mock_handler
+    mock_notebook_kind.return_value = mock_handler
+    
+    # 发送API请求
+    response = client.post(
+        "/api/v1/jobs",
+        json={
+            "yamlContent": "kind: notebook\nversion: v0.1\njob:\n  name: test-notebook-job"
+        },
+        headers={"Authorization": "Bearer test-token"}
+    )
+    
+    # 断言结果
+    assert response.status_code == 201
+    assert response.json()["jobId"] == "test-notebook-job"
+    assert response.json()["kind"] == "notebook"
+
+
+@patch('server.routes.jobs.BaseParser.parse_yaml')
+@patch('server.routes.jobs.ComputeKind')
+def test_create_compute_job(mock_compute_kind, mock_parse_yaml):
+    """测试创建计算作业API"""
+    # 设置模拟返回值
+    mock_parse_yaml.return_value.kind = "compute"
+    mock_handler = MagicMock()
+    mock_handler.create_compute_service.return_value = {
+        "job_id": "test-compute-job",
+        "name": "test-compute-job",
+        "status": "created"
+    }
+    mock_compute_kind.return_value = mock_handler
+    
+    # 发送API请求
+    response = client.post(
+        "/api/v1/jobs",
+        json={
+            "yamlContent": "kind: compute\nversion: v0.1\njob:\n  name: test-compute-job"
+        },
+        headers={"Authorization": "Bearer test-token"}
+    )
+    
+    # 断言结果
+    assert response.status_code == 201
+    assert response.json()["jobId"] == "test-compute-job"
+    assert response.json()["kind"] == "compute"
+
+
+@patch('server.routes.jobs.BaseParser.parse_yaml')
+@patch('server.routes.jobs.TrainingKind')
+@patch('server.routes.jobs.InferenceKind')
+@patch('server.routes.jobs.NotebookKind')
+@patch('server.routes.jobs.ComputeKind')
+def test_batch_create_jobs_with_multiple_kinds(mock_compute_kind, mock_notebook_kind, mock_inference_kind, mock_training_kind, mock_parse_yaml):
+    """测试批量创建多种类型的作业API"""
+    # 设置模拟返回值
+    # 第一次调用返回training类型，第二次返回compute类型
+    mock_parse_yaml.side_effect = [
+        type('MockTraining', (), {'kind': 'training', 'job': type('MockJob', (), {'name': 'test-training-job'})})(),
+        type('MockCompute', (), {'kind': 'compute', 'job': type('MockJob', (), {'name': 'test-compute-job'})})()
+    ]
+    
+    # 设置各类型handler的返回值
+    mock_training_handler = MagicMock()
+    mock_training_handler.create_training_job.return_value = {
+        "job_id": "test-training-job",
+        "name": "test-training-job",
+        "status": "created"
+    }
+    mock_training_kind.return_value = mock_training_handler
+    
+    mock_compute_handler = MagicMock()
+    mock_compute_handler.create_compute_service.return_value = {
+        "job_id": "test-compute-job",
+        "name": "test-compute-job",
+        "status": "created"
+    }
+    mock_compute_kind.return_value = mock_compute_handler
     
     # 发送API请求
     response = client.post(
         "/api/v1/jobs/batch",
         json={
             "yamlContents": [
-                "kind: training\nversion: v0.1\njob:\n  name: test-job-1",
-                "kind: training\nversion: v0.1\njob:\n  name: test-job-2"
+                "kind: training\nversion: v0.1\njob:\n  name: test-training-job",
+                "kind: compute\nversion: v0.1\njob:\n  name: test-compute-job"
             ]
         },
         headers={"Authorization": "Bearer test-token"}
@@ -336,5 +411,5 @@ def test_batch_create_jobs(mock_training_kind, mock_parse_yaml):
     response_json = response.json()
     assert len(response_json["success"]) == 2
     assert len(response_json["failed"]) == 0
-    assert response_json["success"][0]["jobId"] == "test-job-{}"
-    assert response_json["success"][1]["jobId"] == "test-job-{}"
+    assert response_json["success"][0]["jobId"] == "test-training-job"
+    assert response_json["success"][1]["jobId"] == "test-compute-job"

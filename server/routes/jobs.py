@@ -9,6 +9,7 @@ from gpuctl.parser.base_parser import BaseParser, ParserError
 from gpuctl.kind.training_kind import TrainingKind
 from gpuctl.kind.inference_kind import InferenceKind
 from gpuctl.kind.notebook_kind import NotebookKind
+from gpuctl.kind.compute_kind import ComputeKind
 from gpuctl.client.job_client import JobClient
 from gpuctl.client.log_client import LogClient
 
@@ -46,15 +47,19 @@ async def create_job(request: JobCreateRequest, token: str = Depends(AuthValidat
         if parsed_obj.kind == "training":
             logger.debug("处理训练任务")
             handler = TrainingKind()
-            result = handler.create_training_job(parsed_obj)
+            result = handler.create_training_job(parsed_obj, namespace="default")
         elif parsed_obj.kind == "inference":
             logger.debug("处理推理服务任务")
             handler = InferenceKind()
-            result = handler.create_inference_service(parsed_obj)
+            result = handler.create_inference_service(parsed_obj, namespace="default")
         elif parsed_obj.kind == "notebook":
             logger.debug("处理Notebook任务")
             handler = NotebookKind()
-            result = handler.create_notebook(parsed_obj)
+            result = handler.create_notebook(parsed_obj, namespace="default")
+        elif parsed_obj.kind == "compute":
+            logger.debug("处理计算任务")
+            handler = ComputeKind()
+            result = handler.create_compute_service(parsed_obj, namespace="default")
         else:
             logger.error(f"不支持的任务类型: {parsed_obj.kind}")
             raise HTTPException(status_code=400, detail=f"Unsupported job kind: {parsed_obj.kind}")
@@ -87,13 +92,16 @@ async def create_jobs_batch(request: BatchCreateRequest, token: str = Depends(Au
 
             if parsed_obj.kind == "training":
                 handler = TrainingKind()
-                result = handler.create_training_job(parsed_obj)
+                result = handler.create_training_job(parsed_obj, namespace="default")
             elif parsed_obj.kind == "inference":
                 handler = InferenceKind()
-                result = handler.create_inference_service(parsed_obj)
+                result = handler.create_inference_service(parsed_obj, namespace="default")
             elif parsed_obj.kind == "notebook":
                 handler = NotebookKind()
-                result = handler.create_notebook(parsed_obj)
+                result = handler.create_notebook(parsed_obj, namespace="default")
+            elif parsed_obj.kind == "compute":
+                handler = ComputeKind()
+                result = handler.create_compute_service(parsed_obj, namespace="default")
             else:
                 failed.append({"index": i, "error": f"Unsupported kind: {parsed_obj.kind}"})
                 continue
