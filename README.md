@@ -100,10 +100,10 @@ Download the binary file suitable for your system from GitHub Releases:
 
 ```bash
 # Linux x86_64 architecture
-wget https://github.com/your-org/gpuctl/releases/latest/download/gpuctl-linux-amd64 -O gpuctl
+wget https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-linux-amd64 -O gpuctl
 
 # macOS x86_64 architecture
-curl -L https://github.com/your-org/gpuctl/releases/latest/download/gpuctl-macos-amd64 -o gpuctl
+curl -L https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-macos-amd64 -o gpuctl
 
 chmod +x gpuctl
 sudo mv gpuctl /usr/local/bin/
@@ -115,7 +115,7 @@ gpuctl --help
 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/gpuctl.git
+git clone https://github.com/g8s-host/gpuctl.git
 cd gpuctl
 ```
 
@@ -651,9 +651,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-- Project Home: https://github.com/your-org/gpuctl
-- Issue Tracker: https://github.com/your-org/gpuctl/issues
-- Documentation: https://github.com/your-org/gpuctl/tree/main/doc
+- Project Home: https://github.com/g8s-host/gpuctl
+- Issue Tracker: https://github.com/g8s-host/gpuctl/issues
+- Documentation: https://github.com/g8s-host/gpuctl/tree/main/doc
 
 ## Acknowledgments
 

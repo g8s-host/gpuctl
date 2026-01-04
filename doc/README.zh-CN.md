@@ -97,10 +97,10 @@ gpuctl 是一个面向算法工程师的 AI 算力调度平台，旨在降低 GP
 
 ```bash
 # Linux x86_64架构
-wget https://github.com/your-org/gpuctl/releases/latest/download/gpuctl-linux-amd64 -O gpuctl
+wget https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-linux-amd64 -O gpuctl
 
 # macOS x86_64架构
-curl -L https://github.com/your-org/gpuctl/releases/latest/download/gpuctl-macos-amd64 -o gpuctl
+curl -L https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-macos-amd64 -o gpuctl
 
 chmod +x gpuctl
 sudo mv gpuctl /usr/local/bin/
@@ -112,7 +112,7 @@ gpuctl --help
 1. 克隆代码库
 
 ```bash
-git clone https://github.com/your-org/gpuctl.git
+git clone https://github.com/g8s-host/gpuctl.git
 cd gpuctl
 ```
 
@@ -651,9 +651,9 @@ chmod +x dist/gpuctl-linux-amd64
 
 ## 联系方式
 
-- 项目主页：https://github.com/your-org/gpuctl
-- 问题反馈：https://github.com/your-org/gpuctl/issues
-- 文档地址：https://github.com/your-org/gpuctl/tree/main/doc
+- 项目主页：https://github.com/g8s-host/gpuctl
+- 问题反馈：https://github.com/g8s-host/gpuctl/issues
+- 文档地址：https://github.com/g8s-host/gpuctl/tree/main/doc
 
 ## 致谢
 
