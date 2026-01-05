@@ -5,6 +5,7 @@ from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_comm
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
 from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
+from gpuctl.client.priority_client import PriorityClient
 from gpuctl.parser.base_parser import BaseParser
 
 
@@ -158,6 +159,9 @@ def main():
     resume_parser.add_argument('job_name', help='Job name to resume')
     resume_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
 
+    # init-priority-classes command
+    init_priority_parser = subparsers.add_parser('init-priority-classes', help='Initialize priority classes in Kubernetes')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -214,6 +218,24 @@ def main():
             return add_node_to_pool_command(args)
         elif args.command == 'remove' and args.resource == 'node':
             return remove_node_from_pool_command(args)
+        elif args.command == 'init-priority-classes':
+            # 初始化优先级类
+            try:
+                client = PriorityClient()
+                results = client.create_priority_classes()
+                print("✅ Priority Classes Initialization Results:")
+                for result in results:
+                    status = "✅" if result["status"] in ["created", "updated"] else "❌"
+                    if result["status"] in ["created", "updated"]:
+                        print(f"{status} {result['name']} - Value: {result['value']}, Preemption: {result['preemption_policy']}, Status: {result['status']}")
+                    else:
+                        print(f"{status} {result['name']} - Status: {result['status']}")
+                    if "error" in result:
+                        print(f"   Error: {result['error']}")
+                return 0
+            except Exception as e:
+                print(f"Error initializing priority classes: {e}")
+                return 1
         elif args.command == 'describe':
             if args.resource == 'job':
                 return describe_job_command(args)

@@ -84,7 +84,8 @@ class BaseBuilder:
                                 pod_spec_extras: Dict[str, Any] = None,
                                 labels: Dict[str, str] = None,
                                 restart_policy: str = "Never",
-                                workdirs: List[Dict[str, str]] = None) -> client.V1PodTemplateSpec:
+                                workdirs: List[Dict[str, str]] = None,
+                                priority_class_name: str = None) -> client.V1PodTemplateSpec:
         """Build Pod template spec"""
         spec = client.V1PodSpec(
             containers=[container],
@@ -99,6 +100,10 @@ class BaseBuilder:
 
         if workdirs:
             spec.volumes = BaseBuilder.build_volumes(workdirs)
+
+        # 添加优先级类
+        if priority_class_name:
+            spec.priority_class_name = priority_class_name
 
         pod_labels = labels or {"app": "gpuctl-job"}
         metadata = client.V1ObjectMeta(labels=pod_labels)

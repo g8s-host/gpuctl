@@ -101,6 +101,12 @@ def add_prefix(name, job_type):
 def create_job_command(args):
     """Create job command"""
     try:
+        # 自动初始化优先级类，确保所有所需的PriorityClass存在
+        from gpuctl.client.priority_client import PriorityClient
+        priority_client = PriorityClient()
+        print("🔍 Checking and initializing priority classes...")
+        priority_client.ensure_priority_classes()
+        
         # Handle multiple files
         for file_path in args.file:
             print(f"\n📝 Processing file: {file_path}")

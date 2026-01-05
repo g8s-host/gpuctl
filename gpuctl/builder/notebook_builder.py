@@ -30,12 +30,19 @@ class NotebookBuilder(BaseBuilder):
             pod_spec_extras['node_selector'] = node_selector
 
         app_label = f"g8s-host-notebook-{notebook_job.job.name}"
+        
+        # 获取优先级类名称
+        from gpuctl.client.priority_client import PriorityConfig, PriorityLevel
+        priority_config = PriorityConfig.PRIORITY_CLASSES.get(notebook_job.job.priority)
+        priority_class_name = priority_config["name"] if priority_config else None
+        
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
             labels={"app": app_label}, 
             restart_policy="Always",
-            workdirs=workdirs
+            workdirs=workdirs,
+            priority_class_name=priority_class_name
         )
 
         service_name = f"g8s-host-svc-{notebook_job.job.name}"
