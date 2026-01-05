@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from argparse import Namespace
-from gpuctl.cli.pool import get_pools_command, create_pool_command
+from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 
 
 @patch('gpuctl.cli.pool.PoolClient')
@@ -86,3 +86,47 @@ def test_create_pool_command(mock_pool_client):
     assert mock_instance.create_pool.call_args[0][0]["description"] == "Test pool"
     assert mock_instance.create_pool.call_args[0][0]["nodes"] == ["node-1", "node-2"]
     assert mock_instance.create_pool.call_args[0][0]["gpu_type"] == ["A100"]
+
+
+@patch('gpuctl.cli.pool.PoolClient')
+def test_describe_pool_command(mock_pool_client):
+    """测试获取资源池详情命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.get_pool.return_value = {
+        "name": "test-pool",
+        "status": "active",
+        "gpu_total": 8,
+        "gpu_used": 4,
+        "gpu_free": 4,
+        "gpu_types": ["A100"],
+        "nodes": ["node-1", "node-2"]
+    }
+    mock_pool_client.return_value = mock_instance
+    
+    # 调用命令
+    args = Namespace(pool_name="test-pool")
+    result = describe_pool_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.get_pool.assert_called_once_with("test-pool")
+
+
+@patch('gpuctl.cli.pool.PoolClient')
+def test_delete_pool_command(mock_pool_client):
+    """测试删除资源池命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.delete_pool.return_value = {
+        "message": "Pool deleted successfully"
+    }
+    mock_pool_client.return_value = mock_instance
+    
+    # 调用命令
+    args = Namespace(pool_name="test-pool")
+    result = delete_pool_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.delete_pool.assert_called_once_with("test-pool")

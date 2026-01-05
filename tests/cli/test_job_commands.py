@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from argparse import Namespace
-from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command
+from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, apply_job_command, describe_job_command
 from gpuctl.parser.base_parser import ParserError
 
 
@@ -81,52 +81,7 @@ def test_create_notebook_job(mock_notebook_kind, mock_parse_yaml_file):
     assert result == 0
 
 
-@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
-@patch('gpuctl.cli.job.InferenceKind')
-def test_create_inference_job(mock_inference_kind, mock_parse_yaml_file):
-    """测试创建推理作业命令"""
-    # 设置模拟返回值
-    mock_parse_yaml_file.return_value.kind = "inference"
-    mock_parse_yaml_file.return_value.job.name = "test-inference-job"
-    
-    mock_handler = MagicMock()
-    mock_handler.create_inference_service.return_value = {
-        "job_id": "test-inference-job",
-        "name": "test-inference-job",
-        "namespace": "default"
-    }
-    mock_inference_kind.return_value = mock_handler
-    
-    # 调用命令
-    args = Namespace(file="test.yaml", namespace="default")
-    result = create_job_command(args)
-    
-    # 断言结果
-    assert result == 0
 
-
-@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
-@patch('gpuctl.cli.job.NotebookKind')
-def test_create_notebook_job(mock_notebook_kind, mock_parse_yaml_file):
-    """测试创建笔记本作业命令"""
-    # 设置模拟返回值
-    mock_parse_yaml_file.return_value.kind = "notebook"
-    mock_parse_yaml_file.return_value.job.name = "test-notebook-job"
-    
-    mock_handler = MagicMock()
-    mock_handler.create_notebook.return_value = {
-        "job_id": "test-notebook-job",
-        "name": "test-notebook-job",
-        "namespace": "default"
-    }
-    mock_notebook_kind.return_value = mock_handler
-    
-    # 调用命令
-    args = Namespace(file="test.yaml", namespace="default")
-    result = create_job_command(args)
-    
-    # 断言结果
-    assert result == 0
 
 
 @patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
@@ -384,3 +339,85 @@ def test_delete_job_with_force(mock_job_client):
     # 断言结果
     assert result == 0
     mock_instance.delete_job.assert_called_once_with("test-job", "default", True)
+
+
+@patch('gpuctl.cli.job.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.job.TrainingKind')
+def test_apply_job_command(mock_training_kind, mock_parse_yaml_file):
+    """测试应用作业命令"""
+    # 设置模拟返回值
+    mock_parse_yaml_file.return_value.kind = "training"
+    mock_parse_yaml_file.return_value.job.name = "test-job"
+    
+    mock_handler = MagicMock()
+    mock_handler.create_training_job.return_value = {
+        "job_id": "test-training-job",
+        "name": "test-training-job",
+        "namespace": "default",
+        "resources": {"gpu": 1, "cpu": 4}
+    }
+    mock_training_kind.return_value = mock_handler
+    
+    # 模拟JobClient.get_job返回None，这样会创建新作业
+    with patch('gpuctl.cli.job.JobClient') as mock_job_client:
+        mock_job_instance = MagicMock()
+        mock_job_instance.get_job.return_value = None
+        mock_job_client.return_value = mock_job_instance
+        
+        # 调用命令
+        args = Namespace(file=["test.yaml"], namespace="default")
+        result = apply_job_command(args)
+        
+        # 断言结果
+        assert result == 0
+        mock_parse_yaml_file.assert_called_once_with("test.yaml")
+        mock_training_kind.assert_called_once()
+        mock_handler.create_training_job.assert_called_once()
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_describe_job_command(mock_job_client):
+    """测试获取作业详情命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.get_job.return_value = {
+        "name": "test-job",
+        "namespace": "default",
+        "labels": {"g8s.host/job-type": "training"},
+        "created_at": "2023-01-01T12:00:00Z",
+        "status": {"succeeded": 0, "failed": 0, "active": 1}
+    }
+    mock_job_client.return_value = mock_instance
+    
+    # 调用命令
+    args = Namespace(job_id="test-job", namespace="default")
+    result = describe_job_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.get_job.assert_called_once_with("test-job", "default")
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_get_jobs_with_pods_option(mock_job_client):
+    """测试使用--pods选项获取作业列表命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "test-job-1",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "training"},
+            "creation_timestamp": "2023-01-01T12:00:00Z",
+            "status": {"succeeded": 0, "failed": 0, "active": 1}
+        }
+    ]
+    mock_job_client.return_value = mock_instance
+    
+    # 调用命令 - 使用--pods选项
+    args = Namespace(namespace="default", pool=None, kind=None, pods=True)
+    result = get_jobs_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.list_jobs.assert_called_once_with("default", labels={}, include_pods=True)

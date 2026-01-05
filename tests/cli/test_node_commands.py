@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from argparse import Namespace
-from gpuctl.cli.node import get_nodes_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command
+from gpuctl.cli.node import get_nodes_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command, get_labels_command
 
 
 @patch('gpuctl.cli.node.PoolClient')
@@ -165,3 +165,76 @@ def test_remove_node_from_pool_partial_success(mock_pool_client):
     # 断言结果
     assert result == 0
     mock_instance.remove_nodes_from_pool.assert_called_once_with("training-pool", ["node-1", "node-2"])
+
+
+@patch('gpuctl.cli.node.PoolClient')
+def test_describe_node_command(mock_pool_client):
+    """测试获取节点详情命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.get_node.return_value = {
+        "name": "node-1",
+        "status": "active",
+        "k8s_status": "Ready",
+        "created_at": "2023-01-01T00:00:00Z",
+        "gpu_total": 8,
+        "gpu_used": 4,
+        "gpu_free": 4,
+        "gpu_types": ["A100"],
+        "labels": {"g8s.host/pool": "training-pool"}
+    }
+    mock_pool_client.return_value = mock_instance
+    
+    # 调用命令
+    args = Namespace(node_name="node-1")
+    result = describe_node_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.get_node.assert_called_once_with("node-1")
+
+
+@patch('gpuctl.cli.node.PoolClient')
+def test_get_labels_command(mock_pool_client):
+    """测试获取节点标签命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.get_node.return_value = {
+        "name": "node-1",
+        "labels": {
+            "g8s.host/pool": "training-pool",
+            "nvidia.com/gpu-type": "a100"
+        }
+    }
+    mock_pool_client.return_value = mock_instance
+    
+    # 调用命令
+    args = Namespace(node_name="node-1", key=None)
+    result = get_labels_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.get_node.assert_called_once_with("node-1")
+
+
+@patch('gpuctl.cli.node.PoolClient')
+def test_get_labels_with_key_command(mock_pool_client):
+    """测试使用key参数获取节点标签命令"""
+    # 设置模拟返回值
+    mock_instance = MagicMock()
+    mock_instance.get_node.return_value = {
+        "name": "node-1",
+        "labels": {
+            "g8s.host/pool": "training-pool",
+            "nvidia.com/gpu-type": "a100"
+        }
+    }
+    mock_pool_client.return_value = mock_instance
+    
+    # 调用命令
+    args = Namespace(node_name="node-1", key="nvidia.com/gpu-type")
+    result = get_labels_command(args)
+    
+    # 断言结果
+    assert result == 0
+    mock_instance.get_node.assert_called_once_with("node-1")
