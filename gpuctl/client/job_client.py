@@ -86,12 +86,19 @@ class JobClient(KubernetesClient):
         try:
             all_jobs = []
 
+            # 如果没有指定labels，添加默认过滤器，只返回gpuctl创建的资源
+            # 所有gpuctl创建的资源都会带有g8s.host/job-type标签
+            if not labels:
+                use_gpuctl_filter = True
+            else:
+                use_gpuctl_filter = False
+
             if namespace:
-                return self._list_jobs_in_namespace(namespace, labels, include_pods)
+                return self._list_jobs_in_namespace(namespace, labels, include_pods, use_gpuctl_filter)
             else:
                 all_namespaces = self._get_all_gpuctl_namespaces()
                 for ns in all_namespaces:
-                    ns_jobs = self._list_jobs_in_namespace(ns, labels, include_pods)
+                    ns_jobs = self._list_jobs_in_namespace(ns, labels, include_pods, use_gpuctl_filter)
                     all_jobs.extend(ns_jobs)
                 return all_jobs
         except ApiException as e:
@@ -148,11 +155,22 @@ class JobClient(KubernetesClient):
         
         return list(namespaces)
 
-    def _list_jobs_in_namespace(self, namespace: str, labels: Dict[str, str] = None, include_pods: bool = False) -> List[Dict[str, Any]]:
+    def _list_jobs_in_namespace(self, namespace: str, labels: Dict[str, str] = None, include_pods: bool = False, use_gpuctl_filter: bool = False) -> List[Dict[str, Any]]:
         """在指定namespace中列出作业资源"""
-        label_selector = None
+        # 构建标签选择器
+        selector_parts = []
+        
+        # 如果需要过滤gpuctl创建的资源，添加g8s.host/job-type标签存在性检查
+        if use_gpuctl_filter:
+            selector_parts.append("g8s.host/job-type")
+        
+        # 添加用户提供的标签选择器
         if labels:
-            label_selector = ",".join([f"{k}={v}" for k, v in labels.items()])
+            for k, v in labels.items():
+                selector_parts.append(f"{k}={v}")
+        
+        # 组合所有标签选择器，使用逗号分隔（AND关系）
+        label_selector = ",".join(selector_parts) if selector_parts else None
         
         jobs = []
 

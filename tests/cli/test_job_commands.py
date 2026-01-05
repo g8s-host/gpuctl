@@ -226,12 +226,12 @@ def test_get_jobs_command(mock_job_client):
     mock_job_client.return_value = mock_instance
     
     # 调用命令
-    args = Namespace(namespace="default", pool=None, type=None)
+    args = Namespace(namespace="default", pool=None, kind=None)
     result = get_jobs_command(args)
     
     # 断言结果
     assert result == 0
-    mock_instance.list_jobs.assert_called_once_with("default", labels={})
+    mock_instance.list_jobs.assert_called_once_with("default", labels={}, include_pods=False)
 
 
 @patch('gpuctl.cli.job.JobClient')
@@ -243,14 +243,15 @@ def test_get_jobs_command_with_filters(mock_job_client):
     mock_job_client.return_value = mock_instance
     
     # 调用命令 - 带过滤条件
-    args = Namespace(namespace="default", pool="test-pool", type="training")
+    args = Namespace(namespace="default", pool="test-pool", kind="training")
     result = get_jobs_command(args)
     
     # 断言结果
     assert result == 0
     mock_instance.list_jobs.assert_called_once_with(
         "default", 
-        labels={"g8s.host/pool": "test-pool", "g8s.host/job-type": "training"}
+        labels={"g8s.host/pool": "test-pool", "g8s.host/job-type": "training"},
+        include_pods=False
     )
 
 
@@ -263,12 +264,12 @@ def test_get_jobs_command_empty(mock_job_client):
     mock_job_client.return_value = mock_instance
     
     # 调用命令
-    args = Namespace(namespace="default", pool=None, type=None)
+    args = Namespace(namespace="default", pool=None, kind=None)
     result = get_jobs_command(args)
     
     # 断言结果
     assert result == 0
-    mock_instance.list_jobs.assert_called_once_with("default", labels={})
+    mock_instance.list_jobs.assert_called_once_with("default", labels={}, include_pods=False)
 
 
 @patch('gpuctl.cli.job.JobClient')
