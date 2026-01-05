@@ -19,9 +19,7 @@ def main():
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
 
-    # create-quota command (alternative to create -f quota.yaml)
-    create_quota_parser = subparsers.add_parser('create-quota', help='Create resource quota from YAML')
-    create_quota_parser.add_argument('-f', '--file', required=True, help='Quota YAML file path')
+
 
     # get command
     get_parser = subparsers.add_parser('get', help='Get resource information')
@@ -87,11 +85,7 @@ def main():
     quota_delete_parser.add_argument('-f', '--file', help='Quota YAML file path to delete all quotas in file')
     quota_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
 
-    # delete-quota command (standalone)
-    delete_quota_parser = subparsers.add_parser('delete-quota', help='Delete resource quota')
-    delete_quota_parser.add_argument('-f', '--file', help='Quota YAML file path')
-    delete_quota_parser.add_argument('namespace_name', nargs='?', help='Namespace name')
-    delete_quota_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
+
 
     # delete node label (keep existing functionality)
 
@@ -159,8 +153,7 @@ def main():
     resume_parser.add_argument('job_name', help='Job name to resume')
     resume_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
 
-    # init-priority-classes command
-    init_priority_parser = subparsers.add_parser('init-priority-classes', help='Initialize priority classes in Kubernetes')
+
 
     args = parser.parse_args()
 
@@ -218,24 +211,7 @@ def main():
             return add_node_to_pool_command(args)
         elif args.command == 'remove' and args.resource == 'node':
             return remove_node_from_pool_command(args)
-        elif args.command == 'init-priority-classes':
-            # 初始化优先级类
-            try:
-                client = PriorityClient()
-                results = client.create_priority_classes()
-                print("✅ Priority Classes Initialization Results:")
-                for result in results:
-                    status = "✅" if result["status"] in ["created", "updated"] else "❌"
-                    if result["status"] in ["created", "updated"]:
-                        print(f"{status} {result['name']} - Value: {result['value']}, Preemption: {result['preemption_policy']}, Status: {result['status']}")
-                    else:
-                        print(f"{status} {result['name']} - Status: {result['status']}")
-                    if "error" in result:
-                        print(f"   Error: {result['error']}")
-                return 0
-            except Exception as e:
-                print(f"Error initializing priority classes: {e}")
-                return 1
+
         elif args.command == 'describe':
             if args.resource == 'job':
                 return describe_job_command(args)

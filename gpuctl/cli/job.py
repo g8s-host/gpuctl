@@ -238,47 +238,15 @@ def create_job_command(args):
                 print(f"📦 Namespace: {result['namespace']}")
                 if 'resources' in result:
                     print(f"🖥️  Resources: {result['resources']}")
-                
-                # Display Access Methods
-                print("\n🌐 Access Methods:")
-                
-                try:
-                    import subprocess
-                    import json
-                    
-                    # Get Service info - use the actual namespace from result
-                    service_namespace = result.get('namespace', 'default')
-                    service_base_name = result['name']
-                    service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {service_namespace} -o json"
-                    service_output = subprocess.check_output(service_cmd, shell=True, text=True)
-                    service_data = json.loads(service_output)
-                    
-                    # Get Node IP
-                    node_cmd = f"kubectl get nodes -o json"
-                    node_output = subprocess.check_output(node_cmd, shell=True, text=True)
-                    node_data = json.loads(node_output)
-                    node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
-                    
-                    # Get Service port info
-                    node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
-                    service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
-                    target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
-                    
-                    # Method 1: Access via Pod IP
-                    print(f"   1. Pod IP Access:")
-                    print(f"      - Pod is initializing, IP will be available once running")
-                    print(f"      - Expected Port: {target_port if target_port != 'N/A' else service_port}")
-                    
-                    # Method 2: Access via NodePort
-                    print(f"   2. NodePort Access:")
-                    print(f"      - Node IP: {node_ip}")
-                    print(f"      - NodePort: {node_port}")
-                    if node_port != 'N/A':
-                        print(f"      - Access: curl http://{node_ip}:{node_port}")
-                    else:
-                        print(f"      - NodePort not available")
-                except Exception as e:
-                    print(f"      - Access methods information not available yet")
+            elif parsed_obj.kind == "quota":
+                # 处理quota类型，调用quota创建命令
+                from gpuctl.cli.quota import create_quota_command
+                # 创建一个简化的args对象，只包含quota命令需要的参数
+                from argparse import Namespace
+                quota_args = Namespace()
+                quota_args.file = [file_path]  # 确保是列表格式
+                quota_args.namespace = args.namespace
+                create_quota_command(quota_args)
             elif parsed_obj.kind == "pool" or parsed_obj.kind == "resource":
                 # Resource pool creation logic
                 from gpuctl.client.pool_client import PoolClient
