@@ -764,42 +764,7 @@ def logs_job_command(args):
         return 1
 
 
-def pause_job_command(args):
-    """Pause job command"""
-    try:
-        client = JobClient()
-        success = client.pause_job(args.job_name, args.namespace)
-        if success:
-            # Remove prefix when displaying
-            display_name = remove_prefix(args.job_name)
-            print(f"✅ Successfully paused job: {display_name}")
-            return 0
-        else:
-            display_name = remove_prefix(args.job_name)
-            print(f"❌ Failed to pause job: {display_name}")
-            return 1
-    except Exception as e:
-        print(f"❌ Error pausing job: {e}")
-        return 1
 
-
-def resume_job_command(args):
-    """Resume job command"""
-    try:
-        client = JobClient()
-        success = client.resume_job(args.job_name, args.namespace)
-        if success:
-            # Remove prefix when displaying
-            display_name = remove_prefix(args.job_name)
-            print(f"✅ Successfully resumed job: {display_name}")
-            return 0
-        else:
-            display_name = remove_prefix(args.job_name)
-            print(f"❌ Failed to resume job: {display_name}")
-            return 1
-    except Exception as e:
-        print(f"❌ Error resuming job: {e}")
-        return 1
 
 
 def describe_job_command(args):

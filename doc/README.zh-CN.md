@@ -394,8 +394,6 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl logs <job-id> -f`                        | 实时查看任务日志，支持按关键词过滤 |
 | `gpuctl delete -f job.yaml`                      | 删除/停止任务，支持--force强制删除 |
 | `gpuctl delete job <job-name>`                   | 直接通过任务名称删除任务 |
-| `gpuctl pause <job-id>`                          | 暂停运行中的任务 |
-| `gpuctl resume <job-id>`                         | 恢复暂停的任务 |
 
 ### 资源池管理
 

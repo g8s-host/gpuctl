@@ -310,35 +310,7 @@ async def delete_job(jobId: str, force: bool = Query(False, description="是否�
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.post("/{jobId}/pause")
-async def pause_job(jobId: str, token: str = Depends(AuthValidator.validate_token)):
-    """暂停任务"""
-    try:
-        # 这里需要实现暂停逻辑
-        # 实际实现会调用Kubernetes API暂停Job
-        return {
-            "jobId": jobId,
-            "status": "paused",
-            "message": "任务已暂停，资源保留"
-        }
-    except Exception as e:
-        logger.error(f"Failed to pause job: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
 
-
-@router.post("/{jobId}/resume")
-async def resume_job(jobId: str, token: str = Depends(AuthValidator.validate_token)):
-    """恢复任务"""
-    try:
-        # 这里需要实现恢复逻辑
-        return {
-            "jobId": jobId,
-            "status": "resumed",
-            "message": "任务已恢复"
-        }
-    except Exception as e:
-        logger.error(f"Failed to resume job: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{jobId}/logs", response_model=LogResponse)

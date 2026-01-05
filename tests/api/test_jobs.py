@@ -178,40 +178,7 @@ def test_delete_job_force(mock_job_client):
     mock_instance.delete_job.assert_called_once_with("test-job", force=True)
 
 
-@patch('server.routes.jobs.JobClient')
-def test_pause_job(mock_job_client):
-    """测试暂停作业API"""
-    # 发送API请求
-    response = client.post(
-        "/api/v1/jobs/test-job/pause",
-        headers={"Authorization": "Bearer test-token"}
-    )
-    
-    # 断言结果
-    assert response.status_code == 200
-    assert response.json() == {
-        "jobId": "test-job",
-        "status": "paused",
-        "message": "任务已暂停，资源保留"
-    }
 
-
-@patch('server.routes.jobs.JobClient')
-def test_resume_job(mock_job_client):
-    """测试恢复作业API"""
-    # 发送API请求
-    response = client.post(
-        "/api/v1/jobs/test-job/resume",
-        headers={"Authorization": "Bearer test-token"}
-    )
-    
-    # 断言结果
-    assert response.status_code == 200
-    assert response.json() == {
-        "jobId": "test-job",
-        "status": "resumed",
-        "message": "任务已恢复"
-    }
 
 
 @patch('server.routes.jobs.LogClient')

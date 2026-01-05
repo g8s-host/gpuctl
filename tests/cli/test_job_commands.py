@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from argparse import Namespace
-from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, pause_job_command, resume_job_command
+from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command
 from gpuctl.parser.base_parser import ParserError
 
 
@@ -337,38 +337,7 @@ def test_logs_job_command(mock_log_client):
     mock_instance.get_job_logs.assert_called_once()
 
 
-@patch('gpuctl.cli.job.JobClient')
-def test_pause_job_command(mock_job_client):
-    """测试暂停作业命令"""
-    # 设置模拟返回值
-    mock_instance = MagicMock()
-    mock_instance.pause_job.return_value = True
-    mock_job_client.return_value = mock_instance
-    
-    # 调用命令
-    args = Namespace(job_name="test-job", namespace="default")
-    result = pause_job_command(args)
-    
-    # 断言结果
-    assert result == 0
-    mock_instance.pause_job.assert_called_once_with("test-job", "default")
 
-
-@patch('gpuctl.cli.job.JobClient')
-def test_resume_job_command(mock_job_client):
-    """测试恢复作业命令"""
-    # 设置模拟返回值
-    mock_instance = MagicMock()
-    mock_instance.resume_job.return_value = True
-    mock_job_client.return_value = mock_instance
-    
-    # 调用命令
-    args = Namespace(job_name="test-job", namespace="default")
-    result = resume_job_command(args)
-    
-    # 断言结果
-    assert result == 0
-    mock_instance.resume_job.assert_called_once_with("test-job", "default")
 
 
 @patch('gpuctl.cli.job.BaseParser.parse_yaml_file')

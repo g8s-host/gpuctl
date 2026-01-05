@@ -393,8 +393,6 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl describe job <job-id>` | View detailed task information and resource usage curves |
 | `gpuctl logs <job-id> -f` | View real-time task logs, supports keyword filtering |
 | `gpuctl delete -f job.yaml` | Delete/stop a task, supports --force for forced deletion |
-| `gpuctl pause <job-id>` | Pause a running task |
-| `gpuctl resume <job-id>` | Resume a paused task |
 
 ### Resource Pool Management
 

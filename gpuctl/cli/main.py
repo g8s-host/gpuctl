@@ -1,7 +1,7 @@
 import argparse
 import sys
 from gpuctl import DEFAULT_NAMESPACE
-from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, pause_job_command, resume_job_command, apply_job_command
+from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, apply_job_command
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
 from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
@@ -143,18 +143,6 @@ def main():
     quota_describe_parser = describe_subparsers.add_parser('quota', help='Describe quota details')
     quota_describe_parser.add_argument('namespace_name', help='Namespace name')
 
-    # pause command
-    pause_parser = subparsers.add_parser('pause', help='Pause a running job')
-    pause_parser.add_argument('job_name', help='Job name to pause')
-    pause_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
-
-    # resume command
-    resume_parser = subparsers.add_parser('resume', help='Resume a paused job')
-    resume_parser.add_argument('job_name', help='Job name to resume')
-    resume_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
-
-
-
     args = parser.parse_args()
 
     if not args.command:
@@ -201,10 +189,7 @@ def main():
             return delete_quota_command(args)
         elif args.command == 'logs':
             return logs_job_command(args)
-        elif args.command == 'pause':
-            return pause_job_command(args)
-        elif args.command == 'resume':
-            return resume_job_command(args)
+
         elif args.command == 'label' and args.action == 'node':
             return label_node_command(args)
         elif args.command == 'add' and args.resource == 'node':
