@@ -48,7 +48,7 @@ class InferenceBuilder(BaseBuilder):
                 period_seconds=10
             )
 
-        app_label = f"g8s-host-inference-{inference_job.job.name}"
+        app_label = f"{inference_job.job.name}"
         
         # 获取优先级类名称
         from gpuctl.client.priority_client import PriorityConfig, PriorityLevel
@@ -91,7 +91,7 @@ class InferenceBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, inference_job: InferenceJob) -> client.V1Service:
         """Build K8s Service resource"""
-        app_label = f"g8s-host-inference-{inference_job.job.name}"
+        app_label = f"{inference_job.job.name}"
         service_spec = client.V1ServiceSpec(
             selector={"app": app_label},
             ports=[client.V1ServicePort(
@@ -102,7 +102,7 @@ class InferenceBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"g8s-host-svc-{inference_job.job.name}",
+            name=f"svc-{inference_job.job.name}",
             labels={
                 "g8s.host/job-type": "inference",
                 "g8s.host/pool": inference_job.resources.pool or "default"

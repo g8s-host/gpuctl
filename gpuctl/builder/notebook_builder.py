@@ -29,7 +29,7 @@ class NotebookBuilder(BaseBuilder):
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 
-        app_label = f"g8s-host-notebook-{notebook_job.job.name}"
+        app_label = f"{notebook_job.job.name}"
         
         # 获取优先级类名称
         from gpuctl.client.priority_client import PriorityConfig, PriorityLevel
@@ -45,7 +45,7 @@ class NotebookBuilder(BaseBuilder):
             priority_class_name=priority_class_name
         )
 
-        service_name = f"g8s-host-svc-{notebook_job.job.name}"
+        service_name = f"svc-{notebook_job.job.name}"
         statefulset_spec = client.V1StatefulSetSpec(
             replicas=1,
             template=template,
@@ -74,7 +74,7 @@ class NotebookBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, notebook_job: NotebookJob) -> client.V1Service:
         """Build K8s Service resource"""
-        app_label = f"g8s-host-notebook-{notebook_job.job.name}"
+        app_label = f"{notebook_job.job.name}"
         service_spec = client.V1ServiceSpec(
             selector={"app": app_label},
             ports=[client.V1ServicePort(
@@ -85,7 +85,7 @@ class NotebookBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"g8s-host-svc-{notebook_job.job.name}",
+            name=f"svc-{notebook_job.job.name}",
             labels={
                 "g8s.host/job-type": "notebook",
                 "g8s.host/pool": notebook_job.resources.pool or "default"

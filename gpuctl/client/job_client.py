@@ -445,16 +445,21 @@ class JobClient(KubernetesClient):
             labels = pod.metadata.labels or {}
             pod_name = pod.metadata.name
             
-            if "g8s-host-inference-" in pod_name:
+            # 优先使用标签来判断作业类型
+            if "g8s.host/job-type" in labels:
+                job_type = labels["g8s.host/job-type"]
+            elif "job-name" in labels:
+                job_type = "training"
+            # 保持对旧格式Pod名称的支持，保持向后兼容
+            elif "g8s-host-inference-" in pod_name:
                 job_type = "inference"
             elif "g8s-host-compute-" in pod_name:
                 job_type = "compute"
             elif "g8s-host-notebook-" in pod_name:
                 job_type = "notebook"
-            elif "job-name" in labels:
-                job_type = "training"
-            elif "g8s.host/job-type" in labels:
-                job_type = labels["g8s.host/job-type"]
+            else:
+                # 对于新格式的没有前缀的Pod，默认使用'inference'类型
+                job_type = "inference"
             
             active = 0
             succeeded = 0

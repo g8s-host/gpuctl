@@ -170,11 +170,13 @@ class PoolClient(KubernetesClient):
                     
                     try:
                         # Attempt to delete related Service
-                        service_name = f"g8s-host-svc-{job_name}"
+                        # 不再使用g8s-host-svc-前缀，只使用svc-前缀
+                        service_base_name = job_name
                         if job_name.startswith("g8s-host-"):
-                            # If it's a full name, extract base name
-                            service_name = f"g8s-host-svc-{job_name[10:]}"
-                        job_client.core_v1.delete_namespaced_service(service_name, job.get('namespace', 'g8s-host'), body=delete_options)
+                            # 保持对旧格式的支持，提取基础名称
+                            service_base_name = job_name[10:]
+                        service_name = f"svc-{service_base_name}"
+                        job_client.core_v1.delete_namespaced_service(service_name, job.get('namespace', 'default'), body=delete_options)
                     except Exception:
                         pass
             

@@ -39,7 +39,7 @@ class ComputeKind:
 
     def get_compute_job_status(self, job_name: str, namespace: str = "default") -> Dict[str, Any]:
         """Get compute job status"""
-        deployment_name = f"g8s-host-compute-{job_name}"
+        deployment_name = f"{job_name}"
         deployment_info = self.client.get_deployment(deployment_name, namespace)
         
         if not deployment_info:

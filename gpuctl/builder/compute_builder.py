@@ -48,7 +48,7 @@ class ComputeBuilder(BaseBuilder):
                 period_seconds=10
             )
 
-        app_label = f"g8s-host-compute-{compute_job.job.name}"
+        app_label = f"{compute_job.job.name}"
         
         # 获取优先级类名称
         from gpuctl.client.priority_client import PriorityConfig, PriorityLevel
@@ -58,7 +58,12 @@ class ComputeBuilder(BaseBuilder):
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
-            labels={"app": app_label},
+            labels={
+                "app": app_label,
+                "g8s.host/job-type": "compute",
+                "g8s.host/priority": compute_job.job.priority,
+                "g8s.host/pool": compute_job.resources.pool or "default"
+            },
             restart_policy="Always",
             workdirs=workdirs,
             priority_class_name=priority_class_name
@@ -91,7 +96,7 @@ class ComputeBuilder(BaseBuilder):
     @classmethod
     def build_service(cls, compute_job: ComputeJob) -> client.V1Service:
         """Build K8s Service resource"""
-        app_label = f"g8s-host-compute-{compute_job.job.name}"
+        app_label = f"{compute_job.job.name}"
         service_spec = client.V1ServiceSpec(
             selector={"app": app_label},
             ports=[client.V1ServicePort(
@@ -102,7 +107,7 @@ class ComputeBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"g8s-host-svc-{compute_job.job.name}",
+            name=f"svc-{compute_job.job.name}",
             labels={
                 "g8s.host/job-type": "compute",
                 "g8s.host/pool": compute_job.resources.pool or "default"

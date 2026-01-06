@@ -8,15 +8,21 @@ def create_quota_command(args):
         client = QuotaClient()
 
         file_list = args.file if isinstance(args.file, list) else [args.file]
+        all_results = []
 
         for file_path in file_list:
-            print(f"\n📝 Processing file: {file_path}")
+            if not args.json:
+                print(f"\n📝 Processing file: {file_path}")
 
             try:
                 parsed_obj = BaseParser.parse_yaml_file(file_path)
 
                 if parsed_obj.kind != "quota":
-                    print(f"❌ Unsupported kind: {parsed_obj.kind}")
+                    error = {"error": f"Unsupported kind: {parsed_obj.kind}", "file": file_path}
+                    if args.json:
+                        all_results.append(error)
+                    else:
+                        print(f"❌ Unsupported kind: {parsed_obj.kind}")
                     continue
 
                 quota_config = {
@@ -40,22 +46,40 @@ def create_quota_command(args):
                     }
 
                 results = client.create_quota_config(quota_config)
+                all_results.extend(results)
 
                 for result in results:
-                    print(f"✅ Successfully created quota for namespace: {result['namespace']}")
-                    print(f"   Namespace: {result['namespace']}")
-                    print(f"   CPU: {result['cpu']}")
-                    print(f"   Memory: {result['memory']}")
-                    print(f"   GPU: {result['gpu']}")
+                    if not args.json:
+                        print(f"✅ Successfully created quota for namespace: {result['namespace']}")
+                        print(f"   Namespace: {result['namespace']}")
+                        print(f"   CPU: {result['cpu']}")
+                        print(f"   Memory: {result['memory']}")
+                        print(f"   GPU: {result['gpu']}")
 
             except ParserError as e:
-                print(f"❌ Parser error: {e}")
+                error = {"error": f"Parser error: {str(e)}", "file": file_path}
+                if args.json:
+                    all_results.append(error)
+                else:
+                    print(f"❌ Parser error: {e}")
             except Exception as e:
-                print(f"❌ Error processing file {file_path}: {e}")
+                error = {"error": f"Error processing file {file_path}: {str(e)}", "file": file_path}
+                if args.json:
+                    all_results.append(error)
+                else:
+                    print(f"❌ Error processing file {file_path}: {e}")
+
+        if args.json:
+            import json
+            print(json.dumps(all_results, indent=2))
 
         return 0
     except Exception as e:
-        print(f"❌ Error creating quota: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error creating quota: {e}")
         return 1
 
 
@@ -65,27 +89,45 @@ def apply_quota_command(args):
         client = QuotaClient()
 
         if not args.file:
-            print("❌ Must provide YAML file path (-f/--file)")
+            error = {"error": "Must provide YAML file path (-f/--file)"}
+            if args.json:
+                import json
+                print(json.dumps(error, indent=2))
+            else:
+                print("❌ Must provide YAML file path (-f/--file)")
             return 1
 
         file_list = args.file if isinstance(args.file, list) else [args.file]
+        all_results = []
 
         for file_path in file_list:
-            print(f"\n📝 Applying file: {file_path}")
+            if not args.json:
+                print(f"\n📝 Applying file: {file_path}")
 
             try:
                 parsed_obj = BaseParser.parse_yaml_file(file_path)
 
                 if parsed_obj.kind != "quota":
-                    print(f"❌ Unsupported kind: {parsed_obj.kind}")
+                    error = {"error": f"Unsupported kind: {parsed_obj.kind}", "file": file_path}
+                    if args.json:
+                        all_results.append(error)
+                    else:
+                        print(f"❌ Unsupported kind: {parsed_obj.kind}")
                     continue
 
                 quota_name = parsed_obj.metadata.name
                 namespaces = parsed_obj.namespace or {}
                 default_quota = parsed_obj.default
 
-                applied_count = 0
-                updated_count = 0
+                file_results = {
+                    "file": file_path,
+                    "quota_name": quota_name,
+                    "results": [],
+                    "summary": {
+                        "created": 0,
+                        "updated": 0
+                    }
+                }
 
                 if default_quota:
                     result = client.apply_default_quota(
@@ -94,13 +136,17 @@ def apply_quota_command(args):
                         memory=default_quota.memory,
                         gpu=str(default_quota.get_gpu_str()) if default_quota.get_gpu_str() else None
                     )
+                    file_results["results"].append(result)
                     if result['status'] == 'created':
-                        applied_count += 1
-                        print(f"✅ Created default quota in namespace 'default'")
+                        file_results["summary"]["created"] += 1
+                        if not args.json:
+                            print(f"✅ Created default quota in namespace 'default'")
                     elif result['status'] == 'updated':
-                        updated_count += 1
-                        print(f"🔄 Updated default quota in namespace 'default'")
-                    print(f"   CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
+                        file_results["summary"]["updated"] += 1
+                        if not args.json:
+                            print(f"🔄 Updated default quota in namespace 'default'")
+                    if not args.json:
+                        print(f"   CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
 
                 for namespace_name, namespace_quota in namespaces.items():
                     if namespace_name == "default":
@@ -112,24 +158,44 @@ def apply_quota_command(args):
                         memory=namespace_quota.memory,
                         gpu=namespace_quota.get_gpu_str() if namespace_quota.get_gpu_str() else None
                     )
+                    file_results["results"].append(result)
                     if result['status'] == 'created':
-                        applied_count += 1
-                        print(f"✅ Created quota for namespace: {namespace_name}")
+                        file_results["summary"]["created"] += 1
+                        if not args.json:
+                            print(f"✅ Created quota for namespace: {namespace_name}")
                     elif result['status'] == 'updated':
-                        updated_count += 1
-                        print(f"🔄 Updated quota for namespace: {namespace_name}")
-                    print(f"   Namespace: {result['namespace']}, CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
+                        file_results["summary"]["updated"] += 1
+                        if not args.json:
+                            print(f"🔄 Updated quota for namespace: {namespace_name}")
+                    if not args.json:
+                        print(f"   Namespace: {result['namespace']}, CPU: {result['cpu']}, Memory: {result['memory']}, GPU: {result['gpu']}")
 
-                print(f"\n📊 Summary: {applied_count} created, {updated_count} updated")
+                all_results.append(file_results)
+                if not args.json:
+                    print(f"\n📊 Summary: {file_results['summary']['created']} created, {file_results['summary']['updated']} updated")
 
             except ParserError as e:
-                print(f"❌ Parser error: {e}")
+                error = {"error": f"Parser error: {str(e)}", "file": file_path}
+                all_results.append(error)
+                if not args.json:
+                    print(f"❌ Parser error: {e}")
             except Exception as e:
-                print(f"❌ Error applying file {file_path}: {e}")
+                error = {"error": f"Error applying file {file_path}: {str(e)}", "file": file_path}
+                all_results.append(error)
+                if not args.json:
+                    print(f"❌ Error applying file {file_path}: {e}")
+
+        if args.json:
+            import json
+            print(json.dumps(all_results, indent=2))
 
         return 0
     except Exception as e:
-        print(f"❌ Error applying quota: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error applying quota: {e}")
         return 1
 
 
@@ -137,53 +203,68 @@ def get_quotas_command(args):
     """Get resource quotas list command"""
     try:
         client = QuotaClient()
+        import json
 
         if args.namespace:
             quota = client.get_quota(args.namespace)
             if quota:
-                print(f"QUOTA NAME: {quota['name']}")
-                print(f"NAMESPACE: {quota['namespace']}")
-                print(f"CPU: {quota['hard'].get('cpu', 'N/A')}")
-                print(f"MEMORY: {quota['hard'].get('memory', 'N/A')}")
-                print(f"GPU: {quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))}")
-                print(f"STATUS: {quota['status']}")
+                if args.json:
+                    print(json.dumps(quota, indent=2))
+                else:
+                    print(f"QUOTA NAME: {quota['name']}")
+                    print(f"NAMESPACE: {quota['namespace']}")
+                    print(f"CPU: {quota['hard'].get('cpu', 'N/A')}")
+                    print(f"MEMORY: {quota['hard'].get('memory', 'N/A')}")
+                    print(f"GPU: {quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))}")
+                    print(f"STATUS: {quota['status']}")
             else:
-                print(f"❌ Quota not found for namespace: {args.namespace}")
+                error = {"error": f"Quota not found for namespace: {args.namespace}"}
+                if args.json:
+                    print(json.dumps(error, indent=2))
+                else:
+                    print(f"❌ Quota not found for namespace: {args.namespace}")
                 return 1
         else:
             quotas = client.list_quotas()
             
-            # Calculate column widths dynamically
-            headers = ['QUOTA NAME', 'NAMESPACE', 'CPU', 'MEMORY', 'GPU', 'STATUS']
-            col_widths = {'name': 15, 'namespace': 15, 'cpu': 10, 'memory': 12, 'gpu': 8, 'status': 10}
-            
-            quota_rows = []
-            for quota in quotas:
-                gpu_value = quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))
-                quota_rows.append({
-                    'name': quota['name'],
-                    'namespace': quota['namespace'],
-                    'cpu': str(quota['hard'].get('cpu', 'N/A')),
-                    'memory': str(quota['hard'].get('memory', 'N/A')),
-                    'gpu': str(gpu_value),
-                    'status': quota['status']
-                })
+            if args.json:
+                print(json.dumps(quotas, indent=2))
+            else:
+                # Calculate column widths dynamically
+                headers = ['QUOTA NAME', 'NAMESPACE', 'CPU', 'MEMORY', 'GPU', 'STATUS']
+                col_widths = {'name': 15, 'namespace': 15, 'cpu': 10, 'memory': 12, 'gpu': 8, 'status': 10}
                 
-                col_widths['name'] = max(col_widths['name'], len(quota['name']))
-                col_widths['namespace'] = max(col_widths['namespace'], len(quota['namespace']))
-                col_widths['cpu'] = max(col_widths['cpu'], len(str(quota['hard'].get('cpu', 'N/A'))))
-                col_widths['memory'] = max(col_widths['memory'], len(str(quota['hard'].get('memory', 'N/A'))))
-                col_widths['gpu'] = max(col_widths['gpu'], len(str(gpu_value)))
-                col_widths['status'] = max(col_widths['status'], len(quota['status']))
-            
-            print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['namespace']}}  {headers[2]:<{col_widths['cpu']}}  {headers[3]:<{col_widths['memory']}}  {headers[4]:<{col_widths['gpu']}}  {headers[5]:<{col_widths['status']}}")
-            
-            for row in quota_rows:
-                print(f"{row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['cpu']:<{col_widths['cpu']}}  {row['memory']:<{col_widths['memory']}}  {row['gpu']:<{col_widths['gpu']}}  {row['status']:<{col_widths['status']}}")
+                quota_rows = []
+                for quota in quotas:
+                    gpu_value = quota['hard'].get('nvidia.com/gpu', quota['hard'].get('gpu', 'N/A'))
+                    quota_rows.append({
+                        'name': quota['name'],
+                        'namespace': quota['namespace'],
+                        'cpu': str(quota['hard'].get('cpu', 'N/A')),
+                        'memory': str(quota['hard'].get('memory', 'N/A')),
+                        'gpu': str(gpu_value),
+                        'status': quota['status']
+                    })
+                    
+                    col_widths['name'] = max(col_widths['name'], len(quota['name']))
+                    col_widths['namespace'] = max(col_widths['namespace'], len(quota['namespace']))
+                    col_widths['cpu'] = max(col_widths['cpu'], len(str(quota['hard'].get('cpu', 'N/A'))))
+                    col_widths['memory'] = max(col_widths['memory'], len(str(quota['hard'].get('memory', 'N/A'))))
+                    col_widths['gpu'] = max(col_widths['gpu'], len(str(gpu_value)))
+                    col_widths['status'] = max(col_widths['status'], len(quota['status']))
+                
+                print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['namespace']}}  {headers[2]:<{col_widths['cpu']}}  {headers[3]:<{col_widths['memory']}}  {headers[4]:<{col_widths['gpu']}}  {headers[5]:<{col_widths['status']}}")
+                
+                for row in quota_rows:
+                    print(f"{row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['cpu']:<{col_widths['cpu']}}  {row['memory']:<{col_widths['memory']}}  {row['gpu']:<{col_widths['gpu']}}  {row['status']:<{col_widths['status']}}")
 
         return 0
     except Exception as e:
-        print(f"❌ Error getting quotas: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error getting quotas: {e}")
         return 1
 
 
@@ -194,33 +275,46 @@ def describe_quota_command(args):
 
         quota = client.describe_quota(args.namespace_name)
         if not quota:
-            print(f"❌ Quota not found for namespace: {args.namespace_name}")
+            error = {"error": f"Quota not found for namespace: {args.namespace_name}"}
+            if args.json:
+                import json
+                print(json.dumps(error, indent=2))
+            else:
+                print(f"❌ Quota not found for namespace: {args.namespace_name}")
             return 1
 
-        print(f"📋 Quota Details: {args.namespace_name}")
-        print(f"📊 Name: {quota.get('name', 'N/A')}")
-        print(f"📦 Namespace: {quota.get('namespace', 'N/A')}")
-        print(f"📈 Status: {quota.get('status', 'N/A')}")
+        if args.json:
+            import json
+            print(json.dumps(quota, indent=2))
+        else:
+            print(f"📋 Quota Details: {args.namespace_name}")
+            print(f"📊 Name: {quota.get('name', 'N/A')}")
+            print(f"📦 Namespace: {quota.get('namespace', 'N/A')}")
+            print(f"📈 Status: {quota.get('status', 'N/A')}")
 
-        print(f"\n💻 Resource Limits:")
-        hard = quota.get('hard', {})
-        used = quota.get('used', {})
+            print(f"\n💻 Resource Limits:")
+            hard = quota.get('hard', {})
+            used = quota.get('used', {})
 
-        cpu_hard = hard.get('cpu', 'unlimited')
-        cpu_used = used.get('cpu', '0')
-        print(f"   CPU:     {cpu_used}/{cpu_hard}")
+            cpu_hard = hard.get('cpu', 'unlimited')
+            cpu_used = used.get('cpu', '0')
+            print(f"   CPU:     {cpu_used}/{cpu_hard}")
 
-        mem_hard = hard.get('memory', 'unlimited')
-        mem_used = used.get('memory', '0')
-        print(f"   Memory:  {mem_used}/{mem_hard}")
+            mem_hard = hard.get('memory', 'unlimited')
+            mem_used = used.get('memory', '0')
+            print(f"   Memory:  {mem_used}/{mem_hard}")
 
-        gpu_hard = hard.get('nvidia.com/gpu', 'unlimited')
-        gpu_used = used.get('nvidia.com/gpu', '0')
-        print(f"   GPU:     {gpu_used}/{gpu_hard}")
+            gpu_hard = hard.get('nvidia.com/gpu', 'unlimited')
+            gpu_used = used.get('nvidia.com/gpu', '0')
+            print(f"   GPU:     {gpu_used}/{gpu_hard}")
 
         return 0
     except Exception as e:
-        print(f"❌ Error describing quota: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error describing quota: {e}")
         return 1
 
 
@@ -228,13 +322,18 @@ def delete_quota_command(args):
     """Delete resource quota command"""
     try:
         client = QuotaClient()
+        import json
 
         if args.file:
             try:
                 parsed_obj = BaseParser.parse_yaml_file(args.file)
 
                 if parsed_obj.kind != "quota":
-                    print(f"❌ Unsupported kind: {parsed_obj.kind}")
+                    error = {"error": f"Unsupported kind: {parsed_obj.kind}"}
+                    if args.json:
+                        print(json.dumps(error, indent=2))
+                    else:
+                        print(f"❌ Unsupported kind: {parsed_obj.kind}")
                     return 1
 
                 quota_name = parsed_obj.metadata.name
@@ -249,50 +348,81 @@ def delete_quota_command(args):
 
                 unique_namespaces = list(set(namespaces_to_delete_result))
 
-                print(f"⚠️  Warning: About to delete {len(unique_namespaces)} namespaces and all resources within:")
-                for ns in unique_namespaces:
-                    print(f"   - {ns}")
+                if not args.force and not args.json:
+                    print(f"⚠️  Warning: About to delete {len(unique_namespaces)} namespaces and all resources within:")
+                    for ns in unique_namespaces:
+                        print(f"   - {ns}")
 
-                if not args.force:
                     confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
                     if confirm != 'Y':
-                        print("❌ Cancelled.")
+                        result = {"status": "cancelled", "message": "Operation cancelled by user"}
+                        if args.json:
+                            print(json.dumps(result, indent=2))
+                        else:
+                            print("❌ Cancelled.")
                         return 0
 
                 result = client.delete_quota_config(quota_name, include_default=bool(parsed_obj.default))
 
-                print(f"✅ Deleted quotas for config: {quota_name}")
-                for deleted in result.get('deleted', []):
-                    print(f"   - Namespace: {deleted['namespace']}")
+                if args.json:
+                    print(json.dumps(result, indent=2))
+                else:
+                    print(f"✅ Deleted quotas for config: {quota_name}")
+                    for deleted in result.get('deleted', []):
+                        print(f"   - Namespace: {deleted['namespace']}")
 
-                if result.get('failed'):
-                    print(f"❌ Failed to delete:")
-                    for failed in result['failed']:
-                        print(f"   - Namespace: {failed['namespace']}, Error: {failed['error']}")
+                    if result.get('failed'):
+                        print(f"❌ Failed to delete:")
+                        for failed in result['failed']:
+                            print(f"   - Namespace: {failed['namespace']}, Error: {failed['error']}")
 
             except ParserError as e:
-                print(f"❌ Parser error: {e}")
+                error = {"error": f"Parser error: {str(e)}"}
+                if args.json:
+                    print(json.dumps(error, indent=2))
+                else:
+                    print(f"❌ Parser error: {e}")
                 return 1
         elif args.namespace_name:
-            print(f"⚠️  Warning: About to delete namespace '{args.namespace_name}' and all resources within")
-
-            if not args.force:
+            if not args.force and not args.json:
+                print(f"⚠️  Warning: About to delete namespace '{args.namespace_name}' and all resources within")
                 confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
                 if confirm != 'Y':
-                    print("❌ Cancelled.")
+                    result = {"status": "cancelled", "message": "Operation cancelled by user"}
+                    if args.json:
+                        print(json.dumps(result, indent=2))
+                    else:
+                        print("❌ Cancelled.")
                     return 0
 
             success = client.delete_quota(args.namespace_name)
             if success:
-                print(f"✅ Successfully deleted quota for namespace: {args.namespace_name}")
+                result = {"status": "success", "message": f"Successfully deleted quota for namespace: {args.namespace_name}"}
+                if args.json:
+                    print(json.dumps(result, indent=2))
+                else:
+                    print(f"✅ Successfully deleted quota for namespace: {args.namespace_name}")
             else:
-                print(f"❌ Quota not found for namespace: {args.namespace_name}")
+                result = {"error": f"Quota not found for namespace: {args.namespace_name}"}
+                if args.json:
+                    print(json.dumps(result, indent=2))
+                else:
+                    print(f"❌ Quota not found for namespace: {args.namespace_name}")
                 return 1
         else:
-            print("❌ Must provide YAML file path (-f/--file) or namespace name")
+            result = {"error": "Must provide YAML file path (-f/--file) or namespace name"}
+            if args.json:
+                print(json.dumps(result, indent=2))
+            else:
+                print("❌ Must provide YAML file path (-f/--file) or namespace name")
             return 1
 
         return 0
     except Exception as e:
-        print(f"❌ Error deleting quota: {e}")
+        error = {"error": str(e)}
+        if args.json:
+            import json
+            print(json.dumps(error, indent=2))
+        else:
+            print(f"❌ Error deleting quota: {e}")
         return 1

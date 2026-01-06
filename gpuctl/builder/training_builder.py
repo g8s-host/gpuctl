@@ -46,7 +46,7 @@ class TrainingBuilder(BaseBuilder):
         )
 
         metadata = client.V1ObjectMeta(
-            name=f"g8s-host-training-{training_job.job.name}",
+            name=f"{training_job.job.name}",
             labels={
                 "g8s.host/job-type": "training",
                 "g8s.host/priority": training_job.job.priority,
