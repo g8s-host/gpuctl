@@ -415,7 +415,8 @@ def get_jobs_command(args):
             labels["g8s.host/job-type"] = args.kind
         
         # Call API to get jobs list with filter criteria
-        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=False)
+        # 使用 include_pods=True 获取 Pod 资源，而不是 Deployment 或 StatefulSet 等高级资源
+        jobs = client.list_jobs(args.namespace, labels=labels, include_pods=True)
         
         # Helper function to calculate AGE
         def calculate_age(created_at_str):
@@ -440,112 +441,73 @@ def get_jobs_command(args):
             else:
                 return f"{int(seconds/86400)}d"
         
-        # Calculate column widths dynamically
-        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'AGE']
-        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'age': 10}
-        
-        # First pass: collect all data and calculate max widths
-        job_rows = []
+        # 处理作业数据，计算最终状态
+        processed_jobs = []
         for job in jobs:
+            # 当 include_pods=True 时，job 实际上是一个 Pod 资源
             age = calculate_age(job.get('creation_timestamp'))
             job_type = job['labels'].get('g8s.host/job-type', 'unknown')
             job_namespace = job.get('namespace', 'default')
             status_dict = job.get("status", {})
             
-            # Check if this is a Pod, Job, Deployment, or StatefulSet
-            job_name = job['name']
-            status = "Unknown"
+            # Pod 本身的状态就是最终状态
+            status = status_dict.get("phase", "Unknown")
             
-            if "phase" in status_dict:
-                # This is a Pod
-                pod_phase = status_dict.get("phase", "Unknown")
-                
-                phase_to_status = {
-                    "Pending": "Pending",
-                    "Running": "Running",
-                    "Succeeded": "Succeeded",
-                    "Failed": "Failed",
-                    "Unknown": "Unknown",
-                    "Completed": "Completed",
-                    "Terminating": "Terminating",
-                    "Deleting": "Deleting"
-                }
-                
-                if pod_phase in phase_to_status:
-                    status = phase_to_status[pod_phase]
-                else:
-                    status = pod_phase
-                
-                container_statuses = status_dict.get("container_statuses", [])
-                if container_statuses:
-                    for cs in container_statuses:
-                        if cs.state and cs.state.waiting:
-                            waiting_reason = cs.state.waiting.reason
-                            if waiting_reason in ["ImagePullBackOff", "CrashLoopBackOff", "ErrImagePull"]:
-                                status = waiting_reason
-                                break
-            elif "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
-                # This is a Job
-                if status_dict["succeeded"] > 0:
-                    status = "Succeeded"
-                elif status_dict["failed"] > 0:
-                    status = "Failed"
-                elif status_dict["active"] > 0:
-                    status = "Running"
-                else:
-                    status = "Pending"
-            elif "ready_replicas" in status_dict and "unavailable_replicas" in status_dict:
-                # This is a Deployment
-                ready_replicas = status_dict.get("ready_replicas", 0)
-                unavailable_replicas = status_dict.get("unavailable_replicas", 0)
-                
-                if ready_replicas > 0 and unavailable_replicas == 0:
-                    status = "Running"
-                elif ready_replicas == 0 and unavailable_replicas > 0:
-                    status = "Failed"
-                else:
-                    status = "Pending"
-            elif "ready_replicas" in status_dict and "replicas" in status_dict:
-                # This is a StatefulSet
-                ready_replicas = status_dict.get("ready_replicas", 0)
-                replicas = status_dict.get("replicas", 0)
-                
-                if ready_replicas == replicas and replicas > 0:
-                    status = "Running"
-                elif ready_replicas < replicas and ready_replicas > 0:
-                    status = "Running"
-                else:
-                    status = "Pending"
+            # 提取 Pod 名称并去除前缀
+            pod_name = job['name']
+            simplified_name = remove_prefix(pod_name)
             
-            base_name = remove_prefix(job['name'])
-            display_job_id = base_name
+            # NAME 列只保留实际的作业名称，去除随机字符串和后缀
+            # 例如：test-nginx-848cbf4cf5-2h4ss -> test-nginx
+            final_name = simplified_name
+            parts = simplified_name.split('-')
+            if len(parts) >= 3:
+                third_part = parts[2] if len(parts) >= 3 else ''
+                if third_part.isalnum() and len(third_part) >= 5:
+                    final_name = '-'.join(parts[:2])
             
-            job_rows.append({
-                'job_id': display_job_id,
-                'name': base_name,
+            processed_jobs.append({
+                'job_id': simplified_name,  # 使用去除前缀的完整 Pod 名称作为 Job ID
+                'name': final_name,  # 使用简化后的作业名称作为 NAME 列
                 'namespace': job_namespace,
                 'kind': job_type,
                 'status': status,
                 'age': age
             })
-            
-            col_widths['job_id'] = max(col_widths['job_id'], len(display_job_id))
-            col_widths['name'] = max(col_widths['name'], len(base_name))
-            col_widths['namespace'] = max(col_widths['namespace'], len(job_namespace))
-            col_widths['kind'] = max(col_widths['kind'], len(job_type))
-            col_widths['status'] = max(col_widths['status'], len(status))
-            col_widths['age'] = max(col_widths['age'], len(age))
+        
+        # 如果指定了 --json 参数，输出 JSON 格式
+        if args.json:
+            import json
+            print(json.dumps(processed_jobs, indent=2))
+            return 0
+        
+        # Calculate column widths dynamically for text output
+        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'AGE']
+        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'age': 10}
+        
+        # First pass: calculate max widths
+        for row in processed_jobs:
+            col_widths['job_id'] = max(col_widths['job_id'], len(row['job_id']))
+            col_widths['name'] = max(col_widths['name'], len(row['name']))
+            col_widths['namespace'] = max(col_widths['namespace'], len(row['namespace']))
+            col_widths['kind'] = max(col_widths['kind'], len(row['kind']))
+            col_widths['status'] = max(col_widths['status'], len(row['status']))
+            col_widths['age'] = max(col_widths['age'], len(row['age']))
         
         # Print header
-        print(f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['age']}}")
+        header_line = f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['age']}}"
+        print(header_line)
+        print("-" * len(header_line))
         
         # Print rows
-        for row in job_rows:
+        for row in processed_jobs:
             print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['age']:<{col_widths['age']}}")
         
         return 0
     except Exception as e:
         print(f"❌ Error getting jobs: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
 
 
@@ -808,9 +770,90 @@ def describe_job_command(args):
                         break
                 
                 if not found:
-                    print(f"❌ Job not found: {args.job_id}")
+                    if args.json:
+                        import json
+                        print(json.dumps({"error": f"Job not found: {args.job_id}"}, indent=2))
+                    else:
+                        print(f"❌ Job not found: {args.job_id}")
                     return 1
             
+        # 输出 JSON 格式
+        if args.json:
+            import json
+            # 处理作业数据，移除 prefix
+            processed_job = {
+                "job_id": remove_prefix(job.get('name', 'N/A')),
+                "name": remove_prefix(job.get('name', 'N/A')),
+                "namespace": job.get('namespace', 'default'),
+                "kind": job.get('labels', {}).get('g8s.host/job-type', 'unknown'),
+                "status": "Unknown",
+                "age": calculate_age(job.get('creation_timestamp')),
+                "started": job.get('start_time', 'N/A'),
+                "completed": job.get('completion_time', 'N/A'),
+                "priority": job.get('labels', {}).get('g8s.host/priority', 'medium'),
+                "pool": job.get('labels', {}).get('g8s.host/pool', 'default'),
+                "resources": job.get('resources', {}),
+                "metrics": job.get('metrics', {})
+            }
+            
+            # 计算状态
+            status_dict = job.get('status', {})
+            pods = job.get('pods', [])
+            
+            if pods:
+                # 统计不同状态的 Pod 数量
+                pod_status_count = {}
+                for pod in pods:
+                    pod_phase = pod.get('status', {}).get('phase', 'Unknown')
+                    pod_status_count[pod_phase] = pod_status_count.get(pod_phase, 0) + 1
+                
+                # 基于 Pod 状态更新作业状态，与 kubectl 对齐
+                if pod_status_count.get('Running', 0) > 0:
+                    processed_job['status'] = "Running"
+                elif pod_status_count.get('Pending', 0) > 0:
+                    processed_job['status'] = "Pending"
+                elif pod_status_count.get('Succeeded', 0) > 0:
+                    processed_job['status'] = "Succeeded"
+                elif pod_status_count.get('Failed', 0) > 0:
+                    processed_job['status'] = "Failed"
+            else:
+                # 如果没有 Pod 信息，再根据资源类型判断状态
+                if "phase" in status_dict:
+                    processed_job['status'] = status_dict.get("phase", "Unknown")
+                elif "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
+                    if status_dict["succeeded"] > 0:
+                        processed_job['status'] = "Succeeded"
+                    elif status_dict["failed"] > 0:
+                        processed_job['status'] = "Failed"
+                    elif status_dict["active"] > 0:
+                        processed_job['status'] = "Running"
+                    else:
+                        processed_job['status'] = "Pending"
+                elif "ready_replicas" in status_dict:
+                    ready_replicas = status_dict.get("ready_replicas", 0)
+                    if "unavailable_replicas" in status_dict:
+                        unavailable_replicas = status_dict.get("unavailable_replicas", 0)
+                        total_replicas = ready_replicas + unavailable_replicas
+                        if total_replicas == 0:
+                            processed_job['status'] = "Pending"
+                        elif ready_replicas > 0:
+                            processed_job['status'] = "Running"
+                        else:
+                            processed_job['status'] = "Pending"
+                    else:
+                        current_replicas = status_dict.get("current_replicas", 0)
+                        replicas = status_dict.get("replicas", 0)
+                        if ready_replicas == replicas and replicas > 0:
+                            processed_job['status'] = "Running"
+                        elif ready_replicas > 0:
+                            processed_job['status'] = "Running"
+                        else:
+                            processed_job['status'] = "Pending"
+            
+            print(json.dumps(processed_job, indent=2))
+            return 0
+        
+        # 输出文本格式
         # Print job details with prefix removed
         display_name = remove_prefix(job.get('name', 'N/A'))
         print(f"📋 Job Details: {display_name}")
@@ -871,8 +914,8 @@ def describe_job_command(args):
                         break
         
         # Calculate AGE
-        from datetime import datetime, timezone
         def calculate_age(created_at_str):
+            from datetime import datetime, timezone
             if not created_at_str:
                 return "N/A"
             created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
@@ -1060,5 +1103,9 @@ def describe_job_command(args):
         
         return 0
     except Exception as e:
-        print(f"❌ Error describing job: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error describing job: {e}")
         return 1

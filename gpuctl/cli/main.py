@@ -18,6 +18,7 @@ def main():
     create_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can be specified multiple times)')
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+    create_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
 
@@ -38,29 +39,35 @@ def main():
         action="store_true",
         help="Show pod-level information instead of deployment/statefulset level"
     )
+    jobs_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # get pools
     pools_parser = get_subparsers.add_parser('pools', help='Get resource pools')
+    pools_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # get nodes
     nodes_parser = get_subparsers.add_parser('nodes', help='Get nodes')
     nodes_parser.add_argument('--pool', help='Filter by resource pool')
     nodes_parser.add_argument('--gpu-type', help='Filter by GPU type')
+    nodes_parser.add_argument('--json', action='store_true', help='Output in JSON format')
     
     # get labels
     labels_parser = get_subparsers.add_parser('labels', help='Get node labels')
     labels_parser.add_argument('node_name', help='Node name')
     labels_parser.add_argument('--key', help='Label key to filter')
+    labels_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # get quotas
     quotas_parser = get_subparsers.add_parser('quotas', help='Get resource quotas')
     quotas_parser.add_argument('namespace', nargs='?', help='Filter by namespace name')
+    quotas_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # apply command
     apply_parser = subparsers.add_parser('apply', help='Apply a resource configuration (create or update)')
     apply_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can specify multiple)')
     apply_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+    apply_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a resource')
@@ -71,6 +78,7 @@ def main():
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
     delete_parser.add_argument('--force', action='store_true', help='Force delete resource')
+    delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
     
     # delete job
     job_delete_parser = delete_subparsers.add_parser('job', help='Delete a job')
@@ -78,12 +86,14 @@ def main():
     job_delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                   help='Kubernetes namespace')
     job_delete_parser.add_argument('--force', action='store_true', help='Force delete job')
+    job_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # delete quota
     quota_delete_parser = delete_subparsers.add_parser('quota', help='Delete a quota')
     quota_delete_parser.add_argument('namespace_name', nargs='?', help='Namespace name to delete quota for')
     quota_delete_parser.add_argument('-f', '--file', help='Quota YAML file path to delete all quotas in file')
     quota_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
+    quota_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
 
@@ -96,6 +106,7 @@ def main():
                              help='Kubernetes namespace')
     logs_parser.add_argument('-f', '--follow', action='store_true',
                              help='Follow log output')
+    logs_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # label command
     label_parser = subparsers.add_parser('label', help='Manage node labels')
@@ -107,6 +118,7 @@ def main():
     node_label_parser.add_argument('node_name', nargs='+', help='Node name(s)')
     node_label_parser.add_argument('--delete', action='store_true', help='Delete label')
     node_label_parser.add_argument('--overwrite', action='store_true', help='Overwrite existing label')
+    node_label_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # add node to pool
     add_parser = subparsers.add_parser('add', help='Add resources to pool')
@@ -114,6 +126,7 @@ def main():
     add_node_parser = add_subparsers.add_parser('node', help='Add node to pool')
     add_node_parser.add_argument('node_name', nargs='+', help='Node name(s)')
     add_node_parser.add_argument('--pool', required=True, help='Resource pool name')
+    add_node_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # remove node from pool
     remove_parser = subparsers.add_parser('remove', help='Remove resources from pool')
@@ -121,6 +134,7 @@ def main():
     remove_node_parser = remove_subparsers.add_parser('node', help='Remove node from pool')
     remove_node_parser.add_argument('node_name', nargs='+', help='Node name(s)')
     remove_node_parser.add_argument('--pool', required=True, help='Resource pool name')
+    remove_node_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe command
     describe_parser = subparsers.add_parser('describe', help='Describe resource details')
@@ -130,18 +144,22 @@ def main():
     job_describe_parser = describe_subparsers.add_parser('job', help='Describe job details')
     job_describe_parser.add_argument('job_id', help='Job ID')
     job_describe_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
+    job_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe pool
     pool_describe_parser = describe_subparsers.add_parser('pool', help='Describe pool details')
     pool_describe_parser.add_argument('pool_name', help='Resource pool name')
+    pool_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe node
     node_describe_parser = describe_subparsers.add_parser('node', help='Describe node details')
     node_describe_parser.add_argument('node_name', help='Node name')
+    node_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe quota
     quota_describe_parser = describe_subparsers.add_parser('quota', help='Describe quota details')
     quota_describe_parser.add_argument('namespace_name', help='Namespace name')
+    quota_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     args = parser.parse_args()
 

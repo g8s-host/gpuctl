@@ -7,6 +7,12 @@ def get_pools_command(args):
         client = PoolClient()
         pools = client.list_pools()
         
+        if args.json:
+            import json
+            # 直接输出原始数据，或根据需要进行处理
+            print(json.dumps(pools, indent=2))
+            return 0
+        
         # Calculate column widths dynamically
         headers = ['POOL NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'NODE COUNT']
         col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'count': 10}
@@ -38,7 +44,11 @@ def get_pools_command(args):
         
         return 0
     except Exception as e:
-        print(f"❌ Error getting pools: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error getting pools: {e}")
         return 1
 
 
@@ -56,13 +66,23 @@ def create_pool_command(args):
         }
         
         result = client.create_pool(pool_config)
+        
+        if args.json:
+            import json
+            print(json.dumps(result, indent=2))
+            return 0
+        
         print(f"✅ Successfully created pool: {result['name']}")
         print(f"📊 Status: {result['status']}")
         print(f"📦 Message: {result['message']}")
         
         return 0
     except Exception as e:
-        print(f"❌ Error creating pool: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error creating pool: {e}")
         return 1
 
 
@@ -72,6 +92,14 @@ def delete_pool_command(args):
         client = PoolClient()
         success = client.delete_pool(args.pool_name)
         
+        if args.json:
+            import json
+            if success:
+                print(json.dumps({"success": True, "message": f"Successfully deleted pool: {args.pool_name}"}, indent=2))
+            else:
+                print(json.dumps({"success": False, "error": f"Pool not found: {args.pool_name}"}, indent=2))
+            return 0 if success else 1
+        
         if success:
             print(f"✅ Successfully deleted pool: {args.pool_name}")
             return 0
@@ -79,7 +107,11 @@ def delete_pool_command(args):
             print(f"❌ Pool not found: {args.pool_name}")
             return 1
     except Exception as e:
-        print(f"❌ Error deleting pool: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error deleting pool: {e}")
         return 1
 
 
@@ -88,6 +120,11 @@ def describe_pool_command(args):
     try:
         client = PoolClient()
         pool = client.get_pool(args.pool_name)
+        
+        if args.json:
+            import json
+            print(json.dumps(pool, indent=2))
+            return 0
         
         # Print resource pool details
         print(f"📋 Pool Details: {args.pool_name}")
@@ -118,5 +155,9 @@ def describe_pool_command(args):
         
         return 0
     except Exception as e:
-        print(f"❌ Error describing pool: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error describing pool: {e}")
         return 1

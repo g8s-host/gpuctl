@@ -88,7 +88,8 @@ class JobClient(KubernetesClient):
 
             # 如果没有指定labels，添加默认过滤器，只返回gpuctl创建的资源
             # 所有gpuctl创建的资源都会带有g8s.host/job-type标签
-            if not labels:
+            if not labels and not include_pods:
+                # 当include_pods=True时，不要使用gpuctl_filter，因为Pod资源可能没有g8s.host/job-type标签
                 use_gpuctl_filter = True
             else:
                 use_gpuctl_filter = False

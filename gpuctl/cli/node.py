@@ -16,11 +16,8 @@ def get_nodes_command(args):
         # Call API to get nodes list with filter criteria
         nodes = client.list_nodes(filters=filters)
         
-        # Calculate column widths dynamically
-        headers = ['NODE NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'POOL']
-        col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'pool': 15}
-        
-        node_rows = []
+        # Process node data
+        processed_nodes = []
         for node in nodes:
             name = node.get('name', 'N/A')
             status = node.get('status', 'unknown')
@@ -30,32 +27,49 @@ def get_nodes_command(args):
             gpu_types = ', '.join(node.get('gpu_types', []))
             pool = node.get('labels', {}).get('g8s.host/pool', 'default')
             
-            node_rows.append({
+            processed_nodes.append({
                 'name': name,
                 'status': status,
-                'total': str(gpu_total),
-                'used': str(gpu_used),
-                'free': str(gpu_free),
-                'type': gpu_types,
+                'gpu_total': gpu_total,
+                'gpu_used': gpu_used,
+                'gpu_free': gpu_free,
+                'gpu_types': gpu_types,
                 'pool': pool
             })
+        
+        # Output in JSON format if requested
+        if args.json:
+            import json
+            print(json.dumps(processed_nodes, indent=2))
+        else:
+            # Calculate column widths dynamically
+            headers = ['NODE NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'POOL']
+            col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'pool': 15}
             
-            col_widths['name'] = max(col_widths['name'], len(name))
-            col_widths['status'] = max(col_widths['status'], len(status))
-            col_widths['total'] = max(col_widths['total'], len(str(gpu_total)))
-            col_widths['used'] = max(col_widths['used'], len(str(gpu_used)))
-            col_widths['free'] = max(col_widths['free'], len(str(gpu_free)))
-            col_widths['type'] = max(col_widths['type'], len(gpu_types))
-            col_widths['pool'] = max(col_widths['pool'], len(pool))
-        
-        print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['pool']}}")
-        
-        for row in node_rows:
-            print(f"{row['name']:<{col_widths['name']}}  {row['status']:<{col_widths['status']}}  {row['total']:<{col_widths['total']}}  {row['used']:<{col_widths['used']}}  {row['free']:<{col_widths['free']}}  {row['type']:<{col_widths['type']}}  {row['pool']:<{col_widths['pool']}}")
+            # First pass: calculate max widths
+            for node in processed_nodes:
+                col_widths['name'] = max(col_widths['name'], len(node['name']))
+                col_widths['status'] = max(col_widths['status'], len(node['status']))
+                col_widths['total'] = max(col_widths['total'], len(str(node['gpu_total'])))
+                col_widths['used'] = max(col_widths['used'], len(str(node['gpu_used'])))
+                col_widths['free'] = max(col_widths['free'], len(str(node['gpu_free'])))
+                col_widths['type'] = max(col_widths['type'], len(node['gpu_types']))
+                col_widths['pool'] = max(col_widths['pool'], len(node['pool']))
+            
+            # Print header
+            header_line = f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['pool']}}"
+            print(header_line)
+            print("-" * len(header_line))
+            
+            # Print rows
+            for node in processed_nodes:
+                print(f"{node['name']:<{col_widths['name']}}  {node['status']:<{col_widths['status']}}  {node['gpu_total']:<{col_widths['total']}}  {node['gpu_used']:<{col_widths['used']}}  {node['gpu_free']:<{col_widths['free']}}  {node['gpu_types']:<{col_widths['type']}}  {node['pool']:<{col_widths['pool']}}")
         
         return 0
     except Exception as e:
         print(f"❌ Error getting nodes: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
 
 
@@ -70,21 +84,28 @@ def get_labels_command(args):
         # Get node labels
         labels = node.get('labels', {})
         
-        # If key is specified, only print that key's label
-        if args.key:
-            if args.key in labels:
-                print(f"{args.node_name} {args.key}: {labels[args.key]}")
-            else:
-                print(f"❌ Label {args.key} not found on node {args.node_name}")
+        # Output in JSON format if requested
+        if args.json:
+            import json
+            print(json.dumps(labels, indent=2))
         else:
-            # Print all labels
-            print(f"🏷️  Labels for node {args.node_name}:")
-            for key, value in labels.items():
-                print(f"   {key}: {value}")
+            # If key is specified, only print that key's label
+            if args.key:
+                if args.key in labels:
+                    print(f"{args.node_name} {args.key}: {labels[args.key]}")
+                else:
+                    print(f"❌ Label {args.key} not found on node {args.node_name}")
+            else:
+                # Print all labels
+                print(f"🏷️  Labels for node {args.node_name}:")
+                for key, value in labels.items():
+                    print(f"   {key}: {value}")
         
         return 0
     except Exception as e:
         print(f"❌ Error getting labels: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
 
 
@@ -92,6 +113,7 @@ def label_node_command(args):
     """Add label to node command"""
     try:
         client = PoolClient()
+        results = []
         
         for node_name in args.node_name:
             if args.delete:
@@ -99,23 +121,57 @@ def label_node_command(args):
                 if args.label:
                     key = args.label.split('=')[0]
                     client._remove_node_label(node_name, key)
-                    print(f"✅ Successfully removed label {key} from node {node_name}")
+                    result = {
+                        "node": node_name,
+                        "operation": "delete",
+                        "label": key,
+                        "success": True,
+                        "message": f"Successfully removed label {key} from node {node_name}"
+                    }
+                    results.append(result)
+                    if not args.json:
+                        print(f"✅ Successfully removed label {key} from node {node_name}")
                 else:
-                    print(f"❌ Must specify label to delete")
+                    error = "Must specify label to delete"
+                    if args.json:
+                        print(json.dumps({"error": error}, indent=2))
+                    else:
+                        print(f"❌ {error}")
                     return 1
             else:
                 # Add or update label
                 if args.label:
                     key, value = args.label.split('=')
                     client._label_node(node_name, key, value)
-                    print(f"✅ Successfully labeled node {node_name} with {key}={value}")
+                    result = {
+                        "node": node_name,
+                        "operation": "add",
+                        "label": {key: value},
+                        "success": True,
+                        "message": f"Successfully labeled node {node_name} with {key}={value}"
+                    }
+                    results.append(result)
+                    if not args.json:
+                        print(f"✅ Successfully labeled node {node_name} with {key}={value}")
                 else:
-                    print(f"❌ Must specify label in key=value format")
+                    error = "Must specify label in key=value format"
+                    if args.json:
+                        print(json.dumps({"error": error}, indent=2))
+                    else:
+                        print(f"❌ {error}")
                     return 1
+        
+        if args.json:
+            import json
+            print(json.dumps(results, indent=2))
         
         return 0
     except Exception as e:
-        print(f"❌ Error labeling node: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error labeling node: {e}")
         return 1
 
 
@@ -125,16 +181,24 @@ def add_node_to_pool_command(args):
         client = PoolClient()
         result = client.add_nodes_to_pool(args.pool, args.node_name)
         
-        if result['success']:
-            print(f"✅ Successfully added nodes {', '.join(result['success'])} to pool {args.pool}")
-        
-        if result['failed']:
-            for failure in result['failed']:
-                print(f"❌ Failed to add node {failure['node']}: {failure['error']}")
+        if args.json:
+            import json
+            print(json.dumps(result, indent=2))
+        else:
+            if result['success']:
+                print(f"✅ Successfully added nodes {', '.join(result['success'])} to pool {args.pool}")
+            
+            if result['failed']:
+                for failure in result['failed']:
+                    print(f"❌ Failed to add node {failure['node']}: {failure['error']}")
         
         return 0
     except Exception as e:
-        print(f"❌ Error adding node to pool: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error adding node to pool: {e}")
         return 1
 
 
@@ -144,16 +208,24 @@ def remove_node_from_pool_command(args):
         client = PoolClient()
         result = client.remove_nodes_from_pool(args.pool, args.node_name)
         
-        if result['success']:
-            print(f"✅ Successfully removed nodes {', '.join(result['success'])} from pool {args.pool}")
-        
-        if result['failed']:
-            for failure in result['failed']:
-                print(f"❌ Failed to remove node {failure['node']}: {failure['error']}")
+        if args.json:
+            import json
+            print(json.dumps(result, indent=2))
+        else:
+            if result['success']:
+                print(f"✅ Successfully removed nodes {', '.join(result['success'])} from pool {args.pool}")
+            
+            if result['failed']:
+                for failure in result['failed']:
+                    print(f"❌ Failed to remove node {failure['node']}: {failure['error']}")
         
         return 0
     except Exception as e:
-        print(f"❌ Error removing node from pool: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error removing node from pool: {e}")
         return 1
 
 
@@ -162,6 +234,12 @@ def describe_node_command(args):
     try:
         client = PoolClient()
         node = client.get_node(args.node_name)
+        
+        # Output in JSON format if requested
+        if args.json:
+            import json
+            print(json.dumps(node, indent=2))
+            return 0
         
         # Print node details
         print(f"📋 Node Details: {args.node_name}")
@@ -278,5 +356,9 @@ def describe_node_command(args):
         
         return 0
     except Exception as e:
-        print(f"❌ Error describing node: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error describing node: {e}")
         return 1
