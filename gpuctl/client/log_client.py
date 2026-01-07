@@ -122,13 +122,10 @@ class LogClient(KubernetesClient):
                 if e.status != 404:
                     self.handle_api_exception(e, f"check pod {job_name}")
             
-            # 对于compute任务，完整的作业名称应该是g8s-host-compute-{job_name}
-            # 所以我们需要尝试多种标签选择器
-            # 同时处理带前缀和不带前缀的情况
+            # 简化标签选择器，只使用基础名称和标准标签
+            # 去掉g8s-host-前缀兼容逻辑
             base_name = job_name
-            if job_name.startswith("g8s-host-"):
-                base_name = job_name.split("-", 3)[3] if "-" in job_name else job_name
-            elif "-" in job_name:
+            if "-" in job_name:
                 # 如果是Pod名称，去掉后缀获取基础名称
                 parts = job_name.split("-")
                 if len(parts) >= 3:
@@ -140,14 +137,8 @@ class LogClient(KubernetesClient):
                 f"app={job_name}",
                 f"job-name={base_name}",
                 f"app={base_name}",
-                f"job-name=g8s-host-compute-{job_name}",
-                f"app=g8s-host-compute-{job_name}",
-                f"job-name=g8s-host-compute-{base_name}",
-                f"app=g8s-host-compute-{base_name}",
                 f"app.kubernetes.io/name={base_name}",
-                f"app.kubernetes.io/instance={base_name}",
-                f"app.kubernetes.io/name=g8s-host-compute-{base_name}",
-                f"app.kubernetes.io/instance=g8s-host-compute-{base_name}"
+                f"app.kubernetes.io/instance={base_name}"
             ]
             
             for selector in selectors:

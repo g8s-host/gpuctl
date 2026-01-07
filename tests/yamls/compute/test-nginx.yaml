@@ -2,6 +2,7 @@ kind: compute
 version: v1
 job:
   name: test-nginx
+  namespace: test
   description: A simple Nginx test
 
 environment:

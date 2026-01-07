@@ -75,24 +75,11 @@ def _format_event_age(timestamp_str: str) -> str:
 # Helper function: handle g8s-host prefix
 
 def remove_prefix(name):
-    """Remove g8s-host prefix from name, show only the original name from YAML file"""
-    # 处理旧格式的带有g8s-host-前缀的名称，保持向后兼容
-    if name.startswith("g8s-host-training-"):
-        return name.split("g8s-host-training-")[1]
-    elif name.startswith("g8s-host-inference-"):
-        return name.split("g8s-host-inference-")[1]
-    elif name.startswith("g8s-host-notebook-"):
-        return name.split("g8s-host-notebook-")[1]
-    elif name.startswith("g8s-host-compute-"):
-        return name.split("g8s-host-compute-")[1]
-    elif name.startswith("g8s-host-"):
-        return name.split("g8s-host-")[1]
-    # 对于新格式的没有前缀的名称，直接返回
+    """Return the original name without any prefix"""
     return name
 
 def add_prefix(name, job_type):
-    """Add g8s-host prefix to name"""
-    # 不再添加g8s-host-前缀，直接返回原始名称
+    """Return the original name without adding any prefix"""
     return name
 
 
@@ -178,7 +165,7 @@ def create_job_command(args):
                         # Get Service info - use the actual namespace from result
                         service_namespace = result.get('namespace', 'default')
                         service_base_name = result['name']
-                        service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {service_namespace} -o json"
+                        service_cmd = f"kubectl get svc svc-{service_base_name} -n {service_namespace} -o json"
                         service_output = subprocess.check_output(service_cmd, shell=True, text=True)
                         service_data = json.loads(service_output)
                         
@@ -230,7 +217,7 @@ def create_job_command(args):
                         # Get Service info - use the actual namespace from result
                         service_namespace = result.get('namespace', 'default')
                         service_base_name = result['name']
-                        service_cmd = f"kubectl get svc g8s-host-svc-{service_base_name} -n {service_namespace} -o json"
+                        service_cmd = f"kubectl get svc svc-{service_base_name} -n {service_namespace} -o json"
                         service_output = subprocess.check_output(service_cmd, shell=True, text=True)
                         service_data = json.loads(service_output)
                         
@@ -918,31 +905,8 @@ def logs_job_command(args):
         log_client = LogClient()
         job_client = JobClient()
         
-        # Handle Pod name, ensure full name with prefix is used
+        # Use the provided pod name directly
         pod_name = args.job_name
-        
-        # If Pod name doesn't have prefix, try to find the full Pod name
-        if not pod_name.startswith("g8s-host-"):
-            # Get all Pods to find matching full name
-            import subprocess
-            import json
-            
-            try:
-                # Get full info of all Pods
-                cmd = f"kubectl get pods -n {args.namespace} -o json"
-                output = subprocess.check_output(cmd, shell=True, text=True)
-                pods_data = json.loads(output)
-                
-                # Find matching Pod
-                for pod in pods_data['items']:
-                    full_pod_name = pod['metadata']['name']
-                    # Check if contains user-provided name
-                    if pod_name in full_pod_name:
-                        pod_name = full_pod_name
-                        break
-            except Exception as e:
-                # If lookup fails, continue with original name
-                pass
         
         if args.follow:
             # Use streaming logs, continuously fetch
@@ -1000,11 +964,6 @@ def describe_job_command(args):
     try:
         client = JobClient()
         job = None
-        
-        # Check if resource name is already full name (with prefix)
-        is_full_name = False
-        if args.job_id.startswith("g8s-host-"):
-            is_full_name = True
         
         # Try to get job directly
         job = client.get_job(args.job_id, args.namespace)
