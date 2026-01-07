@@ -14,8 +14,8 @@ def get_pools_command(args):
             return 0
         
         # Calculate column widths dynamically
-        headers = ['POOL NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'NODE COUNT']
-        col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'count': 10}
+        headers = ['POOL NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'NODE COUNT']
+        col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'count': 10}
         
         pool_rows = []
         for pool in pools:
@@ -25,7 +25,6 @@ def get_pools_command(args):
                 'total': str(pool['gpu_total']),
                 'used': str(pool['gpu_used']),
                 'free': str(pool['gpu_free']),
-                'type': ', '.join(pool['gpu_types']),
                 'count': str(len(pool['nodes']))
             })
             
@@ -34,13 +33,12 @@ def get_pools_command(args):
             col_widths['total'] = max(col_widths['total'], len(str(pool['gpu_total'])))
             col_widths['used'] = max(col_widths['used'], len(str(pool['gpu_used'])))
             col_widths['free'] = max(col_widths['free'], len(str(pool['gpu_free'])))
-            col_widths['type'] = max(col_widths['type'], len(', '.join(pool['gpu_types'])))
             col_widths['count'] = max(col_widths['count'], len(str(len(pool['nodes']))))
         
-        print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['count']}}")
+        print(f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['count']}}")
         
         for row in pool_rows:
-            print(f"{row['name']:<{col_widths['name']}}  {row['status']:<{col_widths['status']}}  {row['total']:<{col_widths['total']}}  {row['used']:<{col_widths['used']}}  {row['free']:<{col_widths['free']}}  {row['type']:<{col_widths['type']}}  {row['count']:<{col_widths['count']}}")
+            print(f"{row['name']:<{col_widths['name']}}  {row['status']:<{col_widths['status']}}  {row['total']:<{col_widths['total']}}  {row['used']:<{col_widths['used']}}  {row['free']:<{col_widths['free']}}  {row['count']:<{col_widths['count']}}")
         
         return 0
     except Exception as e:
