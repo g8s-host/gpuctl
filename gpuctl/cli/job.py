@@ -123,10 +123,30 @@ def create_job_command(args):
                 "results": []
             }
 
+            # Determine the final namespace: use YAML-specified first, then CLI arg, then default
+            # 1. Check if namespace is specified in YAML (job.metadata.namespace)
+            yaml_namespace = getattr(parsed_obj, 'job', None) and getattr(parsed_obj.job, 'namespace', None)
+            # 2. Use CLI-specified namespace if no YAML namespace
+            final_namespace = yaml_namespace or args.namespace
+            
+            # Check if namespace has quota configured (except for quota and pool/resource kinds)
+            if parsed_obj.kind not in ["quota", "pool", "resource"]:
+                from gpuctl.client.quota_client import QuotaClient
+                quota_client = QuotaClient()
+                if not quota_client.namespace_has_quota(final_namespace):
+                    error = {"error": f"Namespace '{final_namespace}' does not have quota configured. Please create quota for this namespace first."}
+                    file_result["results"].append(error)
+                    if args.json:
+                        import json
+                        print(json.dumps(error, indent=2))
+                    else:
+                        print(f"❌ Namespace '{final_namespace}' does not have quota configured. Please create quota for this namespace first.")
+                    return 1
+            
             # Create appropriate handler based on type
             if parsed_obj.kind == "training":
                 handler = TrainingKind()
-                result = handler.create_training_job(parsed_obj, args.namespace)
+                result = handler.create_training_job(parsed_obj, final_namespace)
                 # Display job_id with prefix removed
                 display_job_id = remove_prefix(result['job_id'])
                 file_result["results"].append(result)
@@ -138,7 +158,7 @@ def create_job_command(args):
                         print(f"🖥️  Resources: {result['resources']}")
             elif parsed_obj.kind == "inference":
                 handler = InferenceKind()
-                result = handler.create_inference_service(parsed_obj, args.namespace)
+                result = handler.create_inference_service(parsed_obj, final_namespace)
                 # Display job_id with prefix removed
                 display_job_id = remove_prefix(result['job_id'])
                 file_result["results"].append(result)
@@ -190,7 +210,7 @@ def create_job_command(args):
                         print(f"      - Access methods information not available yet")
             elif parsed_obj.kind == "notebook":
                 handler = NotebookKind()
-                result = handler.create_notebook(parsed_obj, args.namespace)
+                result = handler.create_notebook(parsed_obj, final_namespace)
                 # Display job_id with prefix removed
                 display_job_id = remove_prefix(result['job_id'])
                 file_result["results"].append(result)
@@ -243,7 +263,7 @@ def create_job_command(args):
             elif parsed_obj.kind == "compute":
                 from gpuctl.kind.compute_kind import ComputeKind
                 handler = ComputeKind()
-                result = handler.create_compute_service(parsed_obj, args.namespace)
+                result = handler.create_compute_service(parsed_obj, final_namespace)
                 # Display job_id with prefix removed
                 display_job_id = remove_prefix(result['job_id'])
                 file_result["results"].append(result)
@@ -383,6 +403,24 @@ def apply_job_command(args):
                 "kind": parsed_obj.kind,
                 "results": []
             }
+            
+            # Determine the final namespace: use YAML-specified first, then CLI arg, then default
+            yaml_namespace = getattr(parsed_obj, 'job', None) and getattr(parsed_obj.job, 'namespace', None)
+            final_namespace = yaml_namespace or args.namespace
+            
+            # Check if namespace has quota configured (except for quota and pool/resource kinds)
+            if parsed_obj.kind not in ["quota", "pool", "resource"]:
+                from gpuctl.client.quota_client import QuotaClient
+                quota_client = QuotaClient()
+                if not quota_client.namespace_has_quota(final_namespace):
+                    error = {"error": f"Namespace '{final_namespace}' does not have quota configured. Please create quota for this namespace first."}
+                    file_result["results"].append(error)
+                    if args.json:
+                        import json
+                        print(json.dumps(error, indent=2))
+                    else:
+                        print(f"❌ Namespace '{final_namespace}' does not have quota configured. Please create quota for this namespace first.")
+                    return 1
             
             if parsed_obj.kind == "training":
                 from gpuctl.kind.training_kind import TrainingKind
@@ -627,15 +665,8 @@ def get_jobs_command(args):
                                 status = "Error"
                                 break
             
-            # Check pod conditions for Unschedulable status
-            if status == "Pending":
-                pod_conditions = status_dict.get("conditions", [])
-                for condition in pod_conditions:
-                    if hasattr(condition, 'type') and condition.type == "PodScheduled" and hasattr(condition, 'status') and condition.status == "False":
-                        reason = getattr(condition, 'reason', "") or ""
-                        if "Unschedulable" in reason or "SchedulingDisabled" in reason:
-                            status = "Unschedulable"
-                            break
+            # For get jobs command, keep the original phase status to match kubectl output
+            # Only describe command should show detailed status like Unschedulable
             
             # 提取 Pod 名称并去除前缀
             pod_name = job['name']
@@ -1057,34 +1088,9 @@ def describe_job_command(args):
                 
                 status = phase_to_status.get(pod_phase, pod_phase)
                 
-                # Check for special conditions in container statuses
-                container_statuses = status_dict.get("container_statuses", [])
-                if container_statuses:
-                    for cs in container_statuses:
-                        if hasattr(cs, 'state') and cs.state:
-                            if hasattr(cs.state, 'waiting') and cs.state.waiting:
-                                waiting_reason = cs.state.waiting.reason
-                                waiting_message = cs.state.waiting.message or ""
-                                status = _get_detailed_status(waiting_reason, waiting_message)
-                                break
-                            if hasattr(cs.state, 'terminated') and cs.state.terminated:
-                                terminated_reason = cs.state.terminated.reason
-                                if terminated_reason == "OOMKilled":
-                                    status = "OOMKilled"
-                                    break
-                                elif terminated_reason == "Error":
-                                    status = "Error"
-                                    break
-                
-                # Check pod conditions for Unschedulable status
-                if status == "Pending":
-                    pod_conditions = status_dict.get("conditions", [])
-                    for condition in pod_conditions:
-                        if hasattr(condition, 'type') and condition.type == "PodScheduled" and hasattr(condition, 'status') and condition.status == "False":
-                            reason = getattr(condition, 'reason', "") or ""
-                            if "Unschedulable" in reason or "SchedulingDisabled" in reason:
-                                status = "Unschedulable"
-                                break
+                # For describe job command, keep the original phase status to match kubectl output
+                # No need to show detailed status like Unschedulable
+                # Skip container status checking to maintain original phase
             elif pods:
                 # 处理多个 Pod 情况
                 # 统计不同状态的 Pod 数量
@@ -1171,36 +1177,10 @@ def describe_job_command(args):
             status = pod_phase
         
         # Check for special conditions
-        container_statuses = status_dict.get("container_statuses", [])
-        pod_conditions = status_dict.get("conditions", [])
-        
-        if container_statuses:
-            for cs in container_statuses:
-                if cs.state:
-                    if cs.state.waiting:
-                        waiting_reason = cs.state.waiting.reason
-                        waiting_message = cs.state.waiting.message or ""
-                        status = _get_detailed_status(waiting_reason, waiting_message)
-                        break
-                    if cs.state.terminated:
-                        terminated_reason = cs.state.terminated.reason
-                        if terminated_reason == "OOMKilled":
-                            status = "OOMKilled"
-                            break
-                        elif terminated_reason == "Error":
-                            status = "Error"
-                            break
-        
-        # Check pod conditions
-        if status == "Pending":
-            for condition in pod_conditions:
-                if condition.type == "PodScheduled" and condition.status == "False":
-                    reason = condition.reason or ""
-                    if "Unschedulable" in reason or "SchedulingDisabled" in reason:
-                        status = "Unschedulable"
-                        break
-        
         # Calculate AGE
+        # For describe job command, keep the original phase status to match kubectl output
+        # No need to show detailed status like Unschedulable
+        # Skip all status modifications, just use the original phase
         def calculate_age(created_at_str):
             from datetime import datetime, timezone
             if not created_at_str:

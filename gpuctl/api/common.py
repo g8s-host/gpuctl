@@ -43,6 +43,7 @@ class JobMetadata(BaseModel):
     priority: Priority = Priority.MEDIUM
     epochs: Optional[int] = Field(default=None, ge=1)
     batch_size: Optional[int] = Field(default=None, ge=1)
+    namespace: Optional[str] = None
 
 
 class StorageConfig(BaseModel):
