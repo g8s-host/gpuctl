@@ -3,7 +3,7 @@ import sys
 from gpuctl import DEFAULT_NAMESPACE
 from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, apply_job_command
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
-from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, add_node_to_pool_command, remove_node_from_pool_command, describe_node_command
+from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, describe_node_command
 from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
 from gpuctl.client.priority_client import PriorityClient
 from gpuctl.parser.base_parser import BaseParser
@@ -120,21 +120,7 @@ def main():
     node_label_parser.add_argument('--overwrite', action='store_true', help='Overwrite existing label')
     node_label_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
-    # add node to pool
-    add_parser = subparsers.add_parser('add', help='Add resources to pool')
-    add_subparsers = add_parser.add_subparsers(dest='resource', help='Resource type')
-    add_node_parser = add_subparsers.add_parser('node', help='Add node to pool')
-    add_node_parser.add_argument('node_name', nargs='+', help='Node name(s)')
-    add_node_parser.add_argument('--pool', required=True, help='Resource pool name')
-    add_node_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
-    # remove node from pool
-    remove_parser = subparsers.add_parser('remove', help='Remove resources from pool')
-    remove_subparsers = remove_parser.add_subparsers(dest='resource', help='Resource type')
-    remove_node_parser = remove_subparsers.add_parser('node', help='Remove node from pool')
-    remove_node_parser.add_argument('node_name', nargs='+', help='Node name(s)')
-    remove_node_parser.add_argument('--pool', required=True, help='Resource pool name')
-    remove_node_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe command
     describe_parser = subparsers.add_parser('describe', help='Describe resource details')
@@ -210,10 +196,6 @@ def main():
 
         elif args.command == 'label' and args.action == 'node':
             return label_node_command(args)
-        elif args.command == 'add' and args.resource == 'node':
-            return add_node_to_pool_command(args)
-        elif args.command == 'remove' and args.resource == 'node':
-            return remove_node_from_pool_command(args)
 
         elif args.command == 'describe':
             if args.resource == 'job':

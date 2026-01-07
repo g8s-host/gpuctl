@@ -175,58 +175,7 @@ def label_node_command(args):
         return 1
 
 
-def add_node_to_pool_command(args):
-    """Add node to pool command"""
-    try:
-        client = PoolClient()
-        result = client.add_nodes_to_pool(args.pool, args.node_name)
-        
-        if args.json:
-            import json
-            print(json.dumps(result, indent=2))
-        else:
-            if result['success']:
-                print(f"✅ Successfully added nodes {', '.join(result['success'])} to pool {args.pool}")
-            
-            if result['failed']:
-                for failure in result['failed']:
-                    print(f"❌ Failed to add node {failure['node']}: {failure['error']}")
-        
-        return 0
-    except Exception as e:
-        if args.json:
-            import json
-            print(json.dumps({"error": str(e)}, indent=2))
-        else:
-            print(f"❌ Error adding node to pool: {e}")
-        return 1
 
-
-def remove_node_from_pool_command(args):
-    """Remove node from pool command"""
-    try:
-        client = PoolClient()
-        result = client.remove_nodes_from_pool(args.pool, args.node_name)
-        
-        if args.json:
-            import json
-            print(json.dumps(result, indent=2))
-        else:
-            if result['success']:
-                print(f"✅ Successfully removed nodes {', '.join(result['success'])} from pool {args.pool}")
-            
-            if result['failed']:
-                for failure in result['failed']:
-                    print(f"❌ Failed to remove node {failure['node']}: {failure['error']}")
-        
-        return 0
-    except Exception as e:
-        if args.json:
-            import json
-            print(json.dumps({"error": str(e)}, indent=2))
-        else:
-            print(f"❌ Error removing node from pool: {e}")
-        return 1
 
 
 def describe_node_command(args):
