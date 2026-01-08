@@ -388,11 +388,15 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl create -f train-job.yaml` | Submit a training task |
 | `gpuctl create -f task1.yaml -f task2.yaml` | Batch submit multiple tasks |
 | `gpuctl get jobs` | List all tasks (training/inference) and core metrics |
+| `gpuctl get jobs -n <namespace>` | List tasks in a specified namespace |
 | `gpuctl get jobs --pool training-pool` | List tasks in a specified resource pool |
-| `gpuctl get jobs --type training` | List tasks of a specific type |
+| `gpuctl get jobs --kind training` | List tasks of a specific type |
+| `gpuctl get jobs --pods` | Show pod-level information instead of deployment/statefulset level |
 | `gpuctl describe job <job-id>` | View detailed task information and resource usage curves |
 | `gpuctl logs <job-id> -f` | View real-time task logs, supports keyword filtering |
 | `gpuctl delete -f job.yaml` | Delete/stop a task, supports --force for forced deletion |
+| `gpuctl delete job <job-name>` | Delete a specific job by name |
+| `gpuctl apply -f job.yaml` | Apply a resource configuration (create or update) |
 
 ### Resource Pool Management
 
@@ -402,8 +406,6 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl create -f pool.yaml` | Create a new resource pool |
 | `gpuctl delete -f pool.yaml` | Delete a resource pool |
 | `gpuctl describe pool <pool-name>` | View detailed resource pool information |
-| `gpuctl add node <node-name> --pool <pool-name>` | Add nodes to a resource pool |
-| `gpuctl remove node <node-name> --pool <pool-name>` | Remove nodes from a resource pool |
 
 ### Node Management
 
@@ -415,7 +417,8 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl describe node <node-name>` | View detailed information of a single node (CPU/GPU resources, GPU type/quantity, label list, bound resource pools, K8s node details) |
 | `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | Mark GPU type label for a specific node (default label key) |
 | `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | Mark a label for a specific node, supports overwriting existing labels with the same key |
-| `gpuctl get label <node-name> --key=g8s.host/gpu-type` | Query the value of a specific GPU type label for a node |
+| `gpuctl get labels <node-name>` | Query all labels for a node |
+| `gpuctl get labels <node-name> --key=g8s.host/gpu-type` | Query the value of a specific GPU type label for a node |
 | `gpuctl label node <node-name> <label-key> --delete` | Delete a specific label from a node |
 
 ### Resource Quota Management
@@ -427,6 +430,19 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl get quotas <namespace-name>` | View quota for a specific namespace |
 | `gpuctl describe quota <namespace-name>` | View detailed quota usage (used/total) |
 | `gpuctl delete -f quota.yaml` | Delete resource quota |
+| `gpuctl delete quota <namespace-name>` | Delete quota for a specific namespace |
+
+### Namespace Management
+
+| Command Example | Description |
+|---------|---------|
+| `gpuctl get ns` | List all namespaces |
+| `gpuctl get namespaces` | List all namespaces (full command) |
+| `gpuctl describe ns <namespace-name>` | View detailed information of a namespace |
+| `gpuctl describe namespace <namespace-name>` | View detailed information of a namespace (full command) |
+| `gpuctl delete ns <namespace-name>` | Delete a namespace |
+| `gpuctl delete namespace <namespace-name>` | Delete a namespace (full command) |
+| `gpuctl delete ns <namespace-name> --force` | Force delete a namespace |
 
 ## API Documentation
 

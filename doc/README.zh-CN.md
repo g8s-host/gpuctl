@@ -387,13 +387,15 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl create -f train-job.yaml`                | 提交一个训练任务 |
 | `gpuctl create -f task1.yaml -f task2.yaml`      | 批量提交多个任务 |
 | `gpuctl get jobs`                                | 列出所有任务（训练/推理）及核心指标 |
+| `gpuctl get jobs -n <命名空间>`                  | 列出指定命名空间的任务 |
 | `gpuctl get jobs --pool training-pool`           | 列出指定资源池的任务 |
-| `gpuctl get jobs --pods`                         | 显示Pod实例级别信息 |
-| `gpuctl get jobs --type training`                | 按任务类型过滤 |
+| `gpuctl get jobs --kind training`                | 按任务类型过滤 |
+| `gpuctl get jobs --pods`                         | 显示Pod实例级别信息，而非deployment/statefulset级别 |
 | `gpuctl describe job <job-id>`                   | 查看任务详细信息及资源使用曲线 |
 | `gpuctl logs <job-id> -f`                        | 实时查看任务日志，支持按关键词过滤 |
 | `gpuctl delete -f job.yaml`                      | 删除/停止任务，支持--force强制删除 |
 | `gpuctl delete job <job-name>`                   | 直接通过任务名称删除任务 |
+| `gpuctl apply -f job.yaml`                       | 应用资源配置（创建或更新） |
 
 ### 资源池管理
 
@@ -403,8 +405,6 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl create -f pool.yaml`                     | 创建新的资源池 |
 | `gpuctl delete -f pool.yaml`                     | 删除资源池 |
 | `gpuctl describe pool <pool-name>`               | 查看资源池详细信息 |
-| `gpuctl add node <node-name> --pool <pool-name>` | 将节点添加到资源池 |
-| `gpuctl remove node <node-name> --pool <pool-name>` | 从资源池移除节点 |
 
 ### 节点管理
 
@@ -416,7 +416,8 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl describe node <node-name>`                          | 查看单个节点的详细信息（CPU/GPU资源、GPU类型/数量、Label列表、绑定资源池、K8s节点详情） |
 | `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | 给指定节点标记GPU类型Label（默认Label键） |
 | `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | 给指定节点标记Label，支持覆盖已有同键Label |
-| `gpuctl get label <node-name> --key=g8s.host/gpu-type`     | 查询指定节点的指定GPU类型Label值 |
+| `gpuctl get labels <node-name>`                           | 查询节点的所有标签 |
+| `gpuctl get labels <node-name> --key=g8s.host/gpu-type`     | 查询指定节点的指定GPU类型Label值 |
 | `gpuctl label node <node-name> <label-key> --delete`       | 删除指定节点的指定Label |
 
 ### 资源配额管理
@@ -428,6 +429,19 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl get quotas <命名空间名>` | 查看指定命名空间的配额 |
 | `gpuctl describe quota <命名空间名>` | 查看配额使用率（已用/总量） |
 | `gpuctl delete -f quota.yaml` | 删除资源配额 |
+| `gpuctl delete quota <命名空间名>` | 删除指定命名空间的配额 |
+
+### 命名空间管理
+
+| 命令示例 | 功能描述 |
+|----------|---------|
+| `gpuctl get ns` | 列出所有命名空间 |
+| `gpuctl get namespaces` | 列出所有命名空间（完整命令） |
+| `gpuctl describe ns <命名空间名>` | 查看命名空间详细信息 |
+| `gpuctl describe namespace <命名空间名>` | 查看命名空间详细信息（完整命令） |
+| `gpuctl delete ns <命名空间名>` | 删除命名空间 |
+| `gpuctl delete namespace <命名空间名>` | 删除命名空间（完整命令） |
+| `gpuctl delete ns <命名空间名> --force` | 强制删除命名空间 |
 
 ## API 文档
 
