@@ -4,7 +4,7 @@ from gpuctl import DEFAULT_NAMESPACE
 from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_command, logs_job_command, describe_job_command, apply_job_command
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, describe_node_command
-from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command
+from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command, get_namespaces_command, describe_namespace_command, delete_namespace_command
 from gpuctl.client.priority_client import PriorityClient
 from gpuctl.parser.base_parser import BaseParser
 
@@ -61,6 +61,13 @@ def main():
     quotas_parser = get_subparsers.add_parser('quotas', help='Get resource quotas')
     quotas_parser.add_argument('namespace', nargs='?', help='Filter by namespace name')
     quotas_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    # get namespaces
+    ns_parser = get_subparsers.add_parser('ns', help='Get namespaces (alias for namespaces)')
+    ns_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    namespaces_parser = get_subparsers.add_parser('namespaces', help='Get namespaces')
+    namespaces_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # apply command
     apply_parser = subparsers.add_parser('apply', help='Apply a resource configuration (create or update)')
@@ -94,6 +101,17 @@ def main():
     quota_delete_parser.add_argument('-f', '--file', help='Quota YAML file path to delete all quotas in file')
     quota_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
     quota_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    # delete namespace
+    ns_delete_parser = delete_subparsers.add_parser('ns', help='Delete a namespace (alias for namespace)')
+    ns_delete_parser.add_argument('namespace_name', help='Namespace name to delete')
+    ns_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
+    ns_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    namespace_delete_parser = delete_subparsers.add_parser('namespace', help='Delete a namespace')
+    namespace_delete_parser.add_argument('namespace_name', help='Namespace name to delete')
+    namespace_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
+    namespace_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
 
@@ -146,6 +164,15 @@ def main():
     quota_describe_parser = describe_subparsers.add_parser('quota', help='Describe quota details')
     quota_describe_parser.add_argument('namespace_name', help='Namespace name')
     quota_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    # describe namespace
+    ns_describe_parser = describe_subparsers.add_parser('ns', help='Describe namespace details (alias for namespace)')
+    ns_describe_parser.add_argument('namespace_name', help='Namespace name')
+    ns_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    namespace_describe_parser = describe_subparsers.add_parser('namespace', help='Describe namespace details')
+    namespace_describe_parser.add_argument('namespace_name', help='Namespace name')
+    namespace_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     args = parser.parse_args()
 
@@ -169,6 +196,8 @@ def main():
                 return get_labels_command(args)
             elif args.resource == 'quotas':
                 return get_quotas_command(args)
+            elif args.resource == 'ns' or args.resource == 'namespaces':
+                return get_namespaces_command(args)
             else:
                 print(f"Unknown resource type: {args.resource}")
                 return 1
@@ -185,6 +214,8 @@ def main():
                 return delete_job_command(args)
             elif args.resource == 'quota':
                 return delete_quota_command(args)
+            elif args.resource == 'ns' or args.resource == 'namespace':
+                return delete_namespace_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")
                 delete_parser.print_help()
@@ -206,6 +237,8 @@ def main():
                 return describe_node_command(args)
             elif args.resource == 'quota':
                 return describe_quota_command(args)
+            elif args.resource == 'ns' or args.resource == 'namespace':
+                return describe_namespace_command(args)
             else:
                 print(f"Unknown resource type: {args.resource}")
                 return 1

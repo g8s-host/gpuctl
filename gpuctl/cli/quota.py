@@ -426,3 +426,163 @@ def delete_quota_command(args):
         else:
             print(f"❌ Error deleting quota: {e}")
         return 1
+
+
+def get_namespaces_command(args):
+    """Get namespaces command"""
+    try:
+        client = QuotaClient()
+        
+        # Get all namespaces created by this CLI (with g8s.host/namespace or g8s.host/user-namespace label)
+        namespaces = client.core_v1.list_namespace(
+            label_selector="g8s.host/namespace=true,g8s.host/user-namespace=true"
+        )
+        
+        # If no namespaces found with the combined label selector, try individual ones
+        if not namespaces.items:
+            namespaces = client.core_v1.list_namespace(
+                label_selector="g8s.host/namespace=true"
+            )
+        
+        if not namespaces.items:
+            namespaces = client.core_v1.list_namespace(
+                label_selector="g8s.host/user-namespace=true"
+            )
+        
+        # Process namespace data
+        processed_namespaces = []
+        for ns in namespaces.items:
+            name = ns.metadata.name
+            status = ns.status.phase
+            age = ns.metadata.creation_timestamp
+            
+            processed_namespaces.append({
+                "name": name,
+                "status": status,
+                "age": age
+            })
+        
+        # Output in JSON format if requested
+        if args.json:
+            import json
+            print(json.dumps(processed_namespaces, default=str, indent=2))
+        else:
+            # Print table format similar to kubectl get ns
+            headers = ["NAME", "STATUS", "AGE"]
+            print(f"{headers[0]:<30} {headers[1]:<10} {headers[2]:<20}")
+            print("-" * 60)
+            for ns in processed_namespaces:
+                print(f"{ns['name']:<30} {ns['status']:<10} {ns['age']:%Y-%m-%d %H:%M:%S}")
+        
+        return 0
+    except Exception as e:
+        error = {"error": str(e)}
+        if args.json:
+            import json
+            print(json.dumps(error, indent=2))
+        else:
+            print(f"❌ Error getting namespaces: {e}")
+        return 1
+
+
+def describe_namespace_command(args):
+    """Describe namespace command"""
+    try:
+        client = QuotaClient()
+        
+        # Get namespace details
+        namespace = client.core_v1.read_namespace(args.namespace_name)
+        
+        # Verify it's a namespace created by this CLI
+        labels = namespace.metadata.labels or {}
+        if not (labels.get("g8s.host/namespace") == "true" or labels.get("g8s.host/user-namespace") == "true"):
+            raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
+        
+        # Get quota information for this namespace
+        quota = client.get_quota(args.namespace_name)
+        
+        # Output in JSON format if requested
+        if args.json:
+            import json
+            result = {
+                "name": namespace.metadata.name,
+                "status": namespace.status.phase,
+                "age": namespace.metadata.creation_timestamp,
+                "labels": labels,
+                "quota": quota
+            }
+            print(json.dumps(result, default=str, indent=2))
+        else:
+            # Print detailed information
+            print(f"📋 Namespace Details: {namespace.metadata.name}")
+            print(f"📊 Name: {namespace.metadata.name}")
+            print(f"📈 Status: {namespace.status.phase}")
+            print(f"⏰ Age: {namespace.metadata.creation_timestamp:%Y-%m-%d %H:%M:%S}")
+            print(f"🏷️  Labels: {labels}")
+            
+            if quota:
+                print("\n💾 Resource Quota:")
+                print(f"   Name: {quota['name']}")
+                print(f"   CPU: {quota['hard']['cpu']}")
+                print(f"   Memory: {quota['hard']['memory']}")
+                print(f"   GPU: {quota['hard']['nvidia.com/gpu']}")
+                
+                if quota.get('used'):
+                    print("\n📊 Quota Usage:")
+                    print(f"   CPU: {quota['used']['cpu']}/{quota['hard']['cpu']}")
+                    print(f"   Memory: {quota['used']['memory']}/{quota['hard']['memory']}")
+                    print(f"   GPU: {quota['used']['nvidia.com/gpu']}/{quota['hard']['nvidia.com/gpu']}")
+        
+        return 0
+    except Exception as e:
+        error = {"error": str(e)}
+        if args.json:
+            import json
+            print(json.dumps(error, indent=2))
+        else:
+            print(f"❌ Error describing namespace: {e}")
+        return 1
+
+
+def delete_namespace_command(args):
+    """Delete namespace command"""
+    try:
+        client = QuotaClient()
+        
+        # Verify namespace exists and was created by this CLI
+        namespace = client.core_v1.read_namespace(args.namespace_name)
+        labels = namespace.metadata.labels or {}
+        
+        if not (labels.get("g8s.host/namespace") == "true" or labels.get("g8s.host/user-namespace") == "true"):
+            raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
+        
+        # Confirm deletion if not forced
+        if not args.force and not args.json:
+            confirm = input(f"⚠️  Warning: About to delete namespace '{args.namespace_name}' and all resources within. Are you sure you want to continue? (Y/n): ").strip().upper()
+            if confirm != 'Y':
+                print("❌ Cancelled.")
+                return 0
+        
+        # Delete the namespace
+        client.core_v1.delete_namespace(args.namespace_name)
+        
+        # Output result
+        if args.json:
+            import json
+            result = {
+                "status": "success",
+                "message": f"Successfully deleted namespace: {args.namespace_name}"
+            }
+            print(json.dumps(result, indent=2))
+        else:
+            print(f"✅ Successfully deleted namespace: {args.namespace_name}")
+        
+        return 0
+    except Exception as e:
+        error = {"error": str(e)}
+        if args.json:
+            import json
+            print(json.dumps(error, indent=2))
+        else:
+            print(f"❌ Error deleting namespace: {e}")
+        return 1
