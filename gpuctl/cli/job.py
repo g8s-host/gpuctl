@@ -160,25 +160,38 @@ def create_job_command(args):
                     print("\n🌐 Access Methods:")
                     
                     try:
-                        import subprocess
+                        from gpuctl.client.base_client import KubernetesClient
+                        
+                        # Create Kubernetes client to get service and node info
+                        k8s_client = KubernetesClient()
                         
                         # Get Service info - use the actual namespace from result
                         service_namespace = result.get('namespace', 'default')
                         service_base_name = result['name']
-                        service_cmd = f"kubectl get svc svc-{service_base_name} -n {service_namespace} -o json"
-                        service_output = subprocess.check_output(service_cmd, shell=True, text=True)
-                        service_data = json.loads(service_output)
+                        
+                        # Get Service
+                        service = k8s_client.core_v1.read_namespaced_service(
+                            name=f"svc-{service_base_name}",
+                            namespace=service_namespace
+                        )
+                        service_data = service.to_dict()
                         
                         # Get Node IP
-                        node_cmd = f"kubectl get nodes -o json"
-                        node_output = subprocess.check_output(node_cmd, shell=True, text=True)
-                        node_data = json.loads(node_output)
-                        node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                        nodes = k8s_client.core_v1.list_node()
+                        node_items = nodes.items
+                        node_ip = 'N/A'
+                        if node_items:
+                            node_dict = node_items[0].to_dict()
+                            node_addresses = node_dict.get('status', {}).get('addresses', [])
+                            for addr in node_addresses:
+                                if addr.get('type') == 'InternalIP':
+                                    node_ip = addr.get('address')
+                                    break
                         
                         # Get Service port info
-                        node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                        node_port = service_data['spec']['ports'][0]['node_port'] if service_data['spec']['ports'] and 'node_port' in service_data['spec']['ports'][0] else 'N/A'
                         service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
-                        target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                        target_port = service_data['spec']['ports'][0]['target_port'] if service_data['spec']['ports'] else 'N/A'
                         
                         # Method 1: Access via Pod IP
                         print(f"   1. Pod IP Access:")
@@ -212,25 +225,38 @@ def create_job_command(args):
                     print("\n🌐 Access Methods:")
                     
                     try:
-                        import subprocess
+                        from gpuctl.client.base_client import KubernetesClient
+                        
+                        # Create Kubernetes client to get service and node info
+                        k8s_client = KubernetesClient()
                         
                         # Get Service info - use the actual namespace from result
                         service_namespace = result.get('namespace', 'default')
                         service_base_name = result['name']
-                        service_cmd = f"kubectl get svc svc-{service_base_name} -n {service_namespace} -o json"
-                        service_output = subprocess.check_output(service_cmd, shell=True, text=True)
-                        service_data = json.loads(service_output)
+                        
+                        # Get Service
+                        service = k8s_client.core_v1.read_namespaced_service(
+                            name=f"svc-{service_base_name}",
+                            namespace=service_namespace
+                        )
+                        service_data = service.to_dict()
                         
                         # Get Node IP
-                        node_cmd = f"kubectl get nodes -o json"
-                        node_output = subprocess.check_output(node_cmd, shell=True, text=True)
-                        node_data = json.loads(node_output)
-                        node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                        nodes = k8s_client.core_v1.list_node()
+                        node_items = nodes.items
+                        node_ip = 'N/A'
+                        if node_items:
+                            node_dict = node_items[0].to_dict()
+                            node_addresses = node_dict.get('status', {}).get('addresses', [])
+                            for addr in node_addresses:
+                                if addr.get('type') == 'InternalIP':
+                                    node_ip = addr.get('address')
+                                    break
                         
                         # Get Service port info
-                        node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                        node_port = service_data['spec']['ports'][0]['node_port'] if service_data['spec']['ports'] and 'node_port' in service_data['spec']['ports'][0] else 'N/A'
                         service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
-                        target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                        target_port = service_data['spec']['ports'][0]['target_port'] if service_data['spec']['ports'] else 'N/A'
                         
                         # Method 1: Access via Pod IP
                         print(f"   1. Pod IP Access:")
@@ -265,25 +291,38 @@ def create_job_command(args):
                     print("\n🌐 Access Methods:")
                     
                     try:
-                        import subprocess
+                        from gpuctl.client.base_client import KubernetesClient
+                        
+                        # Create Kubernetes client to get service and node info
+                        k8s_client = KubernetesClient()
                         
                         # Get Service info - use the actual namespace from result
                         service_namespace = result.get('namespace', 'default')
                         service_base_name = result['name']
-                        service_cmd = f"kubectl get svc svc-{service_base_name} -n {service_namespace} -o json"
-                        service_output = subprocess.check_output(service_cmd, shell=True, text=True)
-                        service_data = json.loads(service_output)
+                        
+                        # Get Service
+                        service = k8s_client.core_v1.read_namespaced_service(
+                            name=f"svc-{service_base_name}",
+                            namespace=service_namespace
+                        )
+                        service_data = service.to_dict()
                         
                         # Get Node IP
-                        node_cmd = f"kubectl get nodes -o json"
-                        node_output = subprocess.check_output(node_cmd, shell=True, text=True)
-                        node_data = json.loads(node_output)
-                        node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                        nodes = k8s_client.core_v1.list_node()
+                        node_items = nodes.items
+                        node_ip = 'N/A'
+                        if node_items:
+                            node_dict = node_items[0].to_dict()
+                            node_addresses = node_dict.get('status', {}).get('addresses', [])
+                            for addr in node_addresses:
+                                if addr.get('type') == 'InternalIP':
+                                    node_ip = addr.get('address')
+                                    break
                         
                         # Get Service port info
-                        node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                        node_port = service_data['spec']['ports'][0]['node_port'] if service_data['spec']['ports'] and 'node_port' in service_data['spec']['ports'][0] else 'N/A'
                         service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
-                        target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                        target_port = service_data['spec']['ports'][0]['target_port'] if service_data['spec']['ports'] else 'N/A'
                         
                         # Method 1: Access via Pod IP
                         print(f"   1. Pod IP Access:")
@@ -806,60 +845,79 @@ def delete_job_command(args):
         # Handle job deletion
         success = False
         
-        # Get all jobs list to query actual job type
-        all_jobs = client.list_jobs(args.namespace, include_pods=False)
-        found_job = None
+        # Extract base job name from full pod name
+        # Format: base-name-deployment-hash-pod-suffix -> base-name
+        base_resource_name = resource_name
+        parts = resource_name.split("-")
+        if len(parts) >= 3:
+            third_part = parts[2] if len(parts) >= 3 else ''
+            if third_part.isalnum() and len(third_part) >= 5:
+                base_resource_name = '-'.join(parts[:2])
         
-        # Find matching job in all jobs
-        for job in all_jobs:
-            job_name = job['name']
-            # Check if matches original name (without prefix)
-            if remove_prefix(job_name) == resource_name:
-                found_job = job
-                break
+        # Get all namespaces to search
+        namespaces_to_search = [args.namespace] + [ns for ns in client._get_all_gpuctl_namespaces() if ns != args.namespace]
         
-        if found_job:
-            # Get actual job type and name from found job
-            actual_job_type = found_job['labels'].get('g8s.host/job-type', 'unknown')
-            actual_job_name = found_job['name']
+        for ns in namespaces_to_search:
+            # Get all jobs list in current namespace to query actual job type
+            all_jobs = client.list_jobs(ns, include_pods=False)
+            found_job = None
             
-            # Call appropriate delete method based on actual job type (delete entire Deployment/StatefulSet/Job)
-            if actual_job_type == "training":
-                # Training job: delete Job
-                success = client.delete_job(actual_job_name, args.namespace, force)
-            elif actual_job_type == "inference" or actual_job_type == "compute":
-                # Inference or Compute job: delete Deployment and Service
-                # Generate complete Service name
-                service_name = f"svc-{resource_name}"
-                # Delete Deployment
-                deployment_deleted = client.delete_deployment(actual_job_name, args.namespace, force)
-                # Delete Service
-                service_deleted = client.delete_service(service_name, args.namespace)
-                success = deployment_deleted and service_deleted
-            elif actual_job_type == "notebook":
-                # Notebook job: delete StatefulSet and Service
-                # Generate complete Service name
-                service_name = f"svc-{resource_name}"
-                # Delete StatefulSet
-                statefulset_deleted = client.delete_statefulset(actual_job_name, args.namespace, force)
-                # Delete Service
-                service_deleted = client.delete_service(service_name, args.namespace)
-                success = statefulset_deleted and service_deleted
-        else:
-            # Try all possible prefixes
-            job_types = ["training", "inference", "compute", "notebook"]
-            for job_type in job_types:
-                full_name = resource_name
-                if job_type == "training":
-                    success = client.delete_job(full_name, args.namespace, force)
-                elif job_type == "inference" or job_type == "compute":
-                    deployment_deleted = client.delete_deployment(full_name, args.namespace, force)
-                    service_deleted = client.delete_service(f"svc-{resource_name}", args.namespace)
+            # Find matching job in all jobs
+            for job in all_jobs:
+                job_name = job['name']
+                # Check if matches original name or base name (without prefix)
+                if remove_prefix(job_name) == resource_name or remove_prefix(job_name) == base_resource_name:
+                    found_job = job
+                    break
+            
+            if found_job:
+                # Get actual job type and name from found job
+                actual_job_type = found_job['labels'].get('g8s.host/job-type', 'unknown')
+                actual_job_name = found_job['name']
+                
+                # Call appropriate delete method based on actual job type (delete entire Deployment/StatefulSet/Job)
+                if actual_job_type == "training":
+                    # Training job: delete Job
+                    success = client.delete_job(actual_job_name, ns, force)
+                elif actual_job_type == "inference" or actual_job_type == "compute":
+                    # Inference or Compute job: delete Deployment and Service
+                    # Generate complete Service name
+                    service_name = f"svc-{base_resource_name}"
+                    # Delete Deployment
+                    deployment_deleted = client.delete_deployment(actual_job_name, ns, force)
+                    # Delete Service
+                    service_deleted = client.delete_service(service_name, ns)
                     success = deployment_deleted and service_deleted
-                elif job_type == "notebook":
-                    statefulset_deleted = client.delete_statefulset(full_name, args.namespace, force)
-                    service_deleted = client.delete_service(f"svc-{resource_name}", args.namespace)
+                elif actual_job_type == "notebook":
+                    # Notebook job: delete StatefulSet and Service
+                    # Generate complete Service name
+                    service_name = f"svc-{base_resource_name}"
+                    # Delete StatefulSet
+                    statefulset_deleted = client.delete_statefulset(actual_job_name, ns, force)
+                    # Delete Service
+                    service_deleted = client.delete_service(service_name, ns)
                     success = statefulset_deleted and service_deleted
+                
+                if success:
+                    break
+            else:
+                # Try all possible prefixes in current namespace
+                job_types = ["training", "inference", "compute", "notebook"]
+                for job_type in job_types:
+                    full_name = base_resource_name
+                    if job_type == "training":
+                        success = client.delete_job(full_name, ns, force)
+                    elif job_type == "inference" or job_type == "compute":
+                        deployment_deleted = client.delete_deployment(full_name, ns, force)
+                        service_deleted = client.delete_service(f"svc-{base_resource_name}", ns)
+                        success = deployment_deleted and service_deleted
+                    elif job_type == "notebook":
+                        statefulset_deleted = client.delete_statefulset(full_name, ns, force)
+                        service_deleted = client.delete_service(f"svc-{base_resource_name}", ns)
+                        success = statefulset_deleted and service_deleted
+                    
+                    if success:
+                        break
                 
                 if success:
                     break
@@ -902,18 +960,124 @@ def delete_job_command(args):
 def logs_job_command(args):
     """Get job logs command"""
     try:
-        log_client = LogClient()
-        job_client = JobClient()
+        # Get the actual pod name from deployment/replicaset
+        job_name = args.job_name
+        namespace = args.namespace
         
-        # Use the provided pod name directly
-        pod_name = args.job_name
+        # First, try to use the provided name as a direct Pod name
+        def try_direct_pod(ns):
+            """Try to use the provided name as a direct Pod name"""
+            try:
+                from gpuctl.client.job_client import JobClient
+                job_client = JobClient()
+                
+                # Get all pods in the namespace with the exact name
+                try:
+                    pods = job_client.list_pods(ns)
+                    for pod in pods:
+                        if pod.get('name') == job_name:
+                            return pod, ns
+                except FileNotFoundError:
+                    # No pods found in this namespace, which is expected
+                    pass
+                except Exception as e:
+                    # Ignore other errors (e.g., permission denied)
+                    pass
+                return None, None
+            except Exception as e:
+                return None, None
+        
+        # Extract base job name from full pod name
+        # Format: base-name-deployment-hash-pod-suffix -> base-name
+        base_job_name = job_name
+        parts = job_name.split("-")
+        if len(parts) >= 3:
+            third_part = parts[2] if len(parts) >= 3 else ''
+            if third_part.isalnum() and len(third_part) >= 5:
+                base_job_name = '-'.join(parts[:2])
+        
+        # Helper function to get pod in a specific namespace using label
+        def get_pod_by_label(ns):
+            """Try to get pod in the specified namespace using label"""
+            try:
+                from gpuctl.client.job_client import JobClient
+                job_client = JobClient()
+                
+                # Get all pods in the namespace with the matching label
+                pods = job_client.list_pods(ns, labels={"app": base_job_name})
+                
+                # Get first running pod
+                running_pod = None
+                for pod in pods:
+                    if pod.get('status', {}).get('phase') == 'Running':
+                        running_pod = pod
+                        break
+                
+                if not running_pod:
+                    # If no running pod, get the first pending pod
+                    for pod in pods:
+                        running_pod = pod
+                        break
+                
+                if running_pod:
+                    return running_pod, ns
+                
+                return None, None
+            except Exception as e:
+                # Ignore errors for now, we'll try other namespaces
+                return None, None
+        
+        # Try to get pod
+        running_pod = None
+        actual_namespace = None
+        
+        # 1. First try direct pod name in specified namespace
+        running_pod, actual_namespace = try_direct_pod(namespace)
+        
+        if not running_pod:
+            # 2. If not found, try by label in specified namespace
+            running_pod, actual_namespace = get_pod_by_label(namespace)
+        
+        if not running_pod:
+            # 3. If not found, get all gpuctl-managed namespaces and try each one
+            try:
+                from gpuctl.client.job_client import JobClient
+                job_client = JobClient()
+                gpuctl_namespaces = job_client._get_all_gpuctl_namespaces()
+                
+                for ns in gpuctl_namespaces:
+                    if ns == namespace:
+                        continue  # Skip the namespace we already tried
+                    
+                    # Try direct pod name first
+                    running_pod, actual_namespace = try_direct_pod(ns)
+                    if running_pod:
+                        break
+                    
+                    # If not found, try by label
+                    running_pod, actual_namespace = get_pod_by_label(ns)
+                    if running_pod:
+                        break
+            except Exception as e:
+                pass
+        
+        if not running_pod:
+            print(f"❌ No pods found for job: {args.job_name}")
+            return 1
+        
+        actual_pod_name = running_pod['name']
+        
+        log_client = LogClient()
         
         if args.follow:
             # Use streaming logs, continuously fetch
             try:
-                logs = log_client.stream_job_logs(pod_name, namespace=args.namespace, pod_name=pod_name)
+                logs = log_client.stream_job_logs(actual_pod_name, namespace=actual_namespace, pod_name=actual_pod_name)
                 has_logs = False
                 for log in logs:
+                    if log == "No pods found for this job":
+                        # We already know the pod exists, so ignore this message
+                        continue
                     print(log)
                     has_logs = True
                 if not has_logs:
@@ -921,14 +1085,21 @@ def logs_job_command(args):
             except KeyboardInterrupt:
                 print(f"\n👋 Log streaming stopped by user")
                 return 0
+            except Exception as e:
+                # If there's any other error, assume no logs available
+                print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
         else:
             # Get logs once
-            logs = log_client.get_job_logs(pod_name, namespace=args.namespace, tail=100, pod_name=pod_name)
-            if not logs:
+            try:
+                logs = log_client.get_job_logs(actual_pod_name, namespace=actual_namespace, tail=100, pod_name=actual_pod_name)
+                if not logs or logs == ["No pods found for this job"]:
+                    print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+                else:
+                    for log in logs:
+                        print(log)
+            except Exception as e:
+                # If there's any error, assume no logs available
                 print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
-            else:
-                for log in logs:
-                    print(log)
         
         return 0
     except KeyboardInterrupt:
@@ -962,6 +1133,7 @@ def describe_job_command(args):
             return f"{int(seconds/86400)}d"
     
     try:
+        from gpuctl.client.job_client import JobClient
         client = JobClient()
         job = None
         
@@ -984,23 +1156,72 @@ def describe_job_command(args):
             if found_job:
                 job = found_job
             else:
-                # Try adding different prefixes again
-                job_types = ["training", "inference", "notebook", "compute"]
-                found = False
-                for job_type in job_types:
-                    prefixed_job_id = add_prefix(args.job_id, job_type)
-                    job = client.get_job(prefixed_job_id, args.namespace)
-                    if job:
-                        found = True
-                        break
+                # If still not found, get all gpuctl-managed namespaces and try each one
+                try:
+                    from gpuctl.client.job_client import JobClient
+                    k8s_client = JobClient()
+                    
+                    # Get all gpuctl-managed namespaces
+                    gpuctl_namespaces = k8s_client._get_all_gpuctl_namespaces()
+                    
+                    # Try to find the pod by exact name in gpuctl-managed namespaces
+                    for ns in gpuctl_namespaces:
+                        try:
+                            # Try direct pod lookup in gpuctl-managed namespace
+                            pod = k8s_client.core_v1.read_namespaced_pod(args.job_id, ns)
+                            # Convert pod to dict format
+                            pod_dict = k8s_client._pod_to_dict(pod)
+                            job = pod_dict
+                            break
+                        except Exception:
+                            # Pod not found in this namespace, continue searching
+                            pass
+                except Exception:
+                    pass
                 
-                if not found:
-                    if args.json:
-                        import json
-                        print(json.dumps({"error": f"Job not found: {args.job_id}"}, indent=2))
-                    else:
-                        print(f"❌ Job not found: {args.job_id}")
-                    return 1
+                if not job:
+                    # If still not found, check if it's a full pod name with hash suffix
+                    # Format: base-name-deployment-hash-pod-suffix -> extract base-name
+                    parts = args.job_id.split("-")
+                    if len(parts) >= 3:
+                        third_part = parts[2] if len(parts) >= 3 else ''
+                        if third_part.isalnum() and len(third_part) >= 5:
+                            # This is likely a full pod name, extract base name
+                            base_job_name = '-'.join(parts[:2])
+                            
+                            # Try to get job with base name
+                            job = client.get_job(base_job_name, args.namespace)
+                            
+                            if not job:
+                                # Try with prefixes for base name
+                                job_types = ["training", "inference", "notebook", "compute"]
+                                found = False
+                                for job_type in job_types:
+                                    prefixed_job_id = add_prefix(base_job_name, job_type)
+                                    job = client.get_job(prefixed_job_id, args.namespace)
+                                    if job:
+                                        found = True
+                                        break
+                                
+                                if not found:
+                                    # Also check all_jobs for base name match
+                                    for job_item in all_jobs:
+                                        job_name = job_item['name']
+                                        # Check if job_item's name contains base_job_name
+                                        if base_job_name in job_name or remove_prefix(job_name) == base_job_name:
+                                            found_job = job_item
+                                            break
+                                    
+                                    if found_job:
+                                        job = found_job
+            
+            if not job:
+                if args.json:
+                    import json
+                    print(json.dumps({"error": f"Job not found: {args.job_id}"}, indent=2))
+                else:
+                    print(f"❌ Job not found: {args.job_id}")
+                return 1
             
         # 输出 JSON 格式
         if args.json:
@@ -1169,34 +1390,43 @@ def describe_job_command(args):
         
         full_job_name = job.get('name', '')
         if full_job_name:
-            import subprocess
-            import json
             try:
-                events_cmd = f"kubectl get events -n {args.namespace} --field-selector involvedObject.name={full_job_name},involvedObject.kind=Pod -o json"
-                events_output = subprocess.check_output(events_cmd, shell=True, text=True)
-                events_data = json.loads(events_output)
+                # Create Kubernetes client to get events
+                from gpuctl.client.base_client import KubernetesClient
+                k8s_client = KubernetesClient()
                 
-                if events_data.get('items'):
+                # Get events for this pod
+                field_selector = f"involvedObject.name={full_job_name},involvedObject.kind=Pod"
+                events = k8s_client.core_v1.list_namespaced_event(
+                    namespace=args.namespace,
+                    field_selector=field_selector,
+                    limit=10
+                )
+                
+                if events.items:
                     print(f"\n📋 Events:")
                     
-                    for i, event in enumerate(events_data['items'][:10]):
-                        event_type = event.get('type', 'Normal')
-                        reason = event.get('reason', '-')
+                    for i, event in enumerate(events.items):
+                        event_type = event.type or 'Normal'
+                        reason = event.reason or '-'
                         
-                        timestamp = event.get('lastTimestamp') or event.get('firstTimestamp') or event.get('eventTime')
+                        timestamp = event.last_timestamp or event.first_timestamp or event.event_time
                         if timestamp:
-                            if isinstance(timestamp, str) and '.' in timestamp:
-                                timestamp = timestamp.split('.')[0] + 'Z'
-                        age = _format_event_age(timestamp)
+                            timestamp_str = timestamp.isoformat()
+                            if '.' in timestamp_str:
+                                timestamp_str = timestamp_str.split('.')[0] + 'Z'
+                        else:
+                            timestamp_str = None
+                        age = _format_event_age(timestamp_str)
                         
-                        source = event.get('source', {}).get('component', '-') or event.get('reportingComponent', '-')
-                        message = event.get('message', '-')
+                        source = event.source.component if event.source and event.source.component else '-'
+                        message = event.message or '-'
                         
                         print(f"  [{age}] {event_type} {reason}")
                         print(f"    From: {source}")
                         print(f"    Message: {message}")
                         
-                        if i < len(events_data['items']) - 1:
+                        if i < len(events.items) - 1:
                             print()
             except Exception:
                 pass
@@ -1221,9 +1451,20 @@ def describe_job_command(args):
         if job_type in ['inference', 'compute', 'notebook']:
             print("\n🌐 Access Methods:")
             
-            # Get full job name
+            # Get full job name and actual namespace from the job
             full_job_name = job.get('name', '')
+            actual_namespace = job.get('namespace', args.namespace)
+            
+            # Extract base job name
             base_job_name = remove_prefix(full_job_name)
+            
+            # If this is a full pod name, extract the base name correctly
+            parts = base_job_name.split('-')
+            if len(parts) >= 3:
+                third_part = parts[2] if len(parts) >= 3 else ''
+                if third_part.isalnum() and len(third_part) >= 5:
+                    # This is likely a full pod name, extract base name
+                    base_job_name = '-'.join(parts[:2])
             
             # Extract service base name
             service_base_name = base_job_name
@@ -1243,34 +1484,40 @@ def describe_job_command(args):
             service_data = None
             service_found = True
             try:
-                import subprocess
-                import json
+                # Create Kubernetes client to get service
+                from gpuctl.client.base_client import KubernetesClient
+                k8s_client = KubernetesClient()
                 
-                service_cmd = f"kubectl get svc svc-{service_base_name} -n {args.namespace} -o json"
-                service_output = subprocess.check_output(service_cmd, shell=True, text=True)
-                service_data = json.loads(service_output)
+                # Get Service using actual namespace
+                service = k8s_client.core_v1.read_namespaced_service(
+                    name=f"svc-{service_base_name}",
+                    namespace=actual_namespace
+                )
+                service_data = service.to_dict()
             except Exception as e:
                 service_found = False
             
             # Method 1: Access via Pod IP
             print(f"   1. Pod IP Access:")
             try:
-                import subprocess
-                import json
+                # Create Kubernetes client to get pods
+                from gpuctl.client.base_client import KubernetesClient
+                k8s_client = KubernetesClient()
                 
-                # Get specific Pod info directly instead of all matching Pods
-                pod_cmd = f"kubectl get pod {full_job_name} -n {args.namespace} -o json"
-                pod_output = subprocess.check_output(pod_cmd, shell=True, text=True)
-                pod_data = json.loads(pod_output)
+                # Get the specific pod we're describing by exact name and namespace
+                pod = k8s_client.core_v1.read_namespaced_pod(
+                    name=full_job_name,
+                    namespace=actual_namespace
+                )
                 
-                # Check Pod status
-                pod_status = pod_data['status']['phase']
+                pod_dict = pod.to_dict()
+                pod_status = pod_dict.get('status', {}).get('phase', 'Unknown')
+                
                 if pod_status == 'Running':
-                    # Only get and display Pod IP in Running state
-                    pod_ip = pod_data['status'].get('podIP', 'N/A')
+                    pod_ip = pod_dict['status'].get('pod_ip', 'N/A')
                     if service_found and service_data:
                         # Get Service port info
-                        target_port = service_data['spec']['ports'][0]['targetPort'] if service_data['spec']['ports'] else 'N/A'
+                        target_port = service_data['spec']['ports'][0]['target_port'] if service_data['spec']['ports'] else 'N/A'
                         service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
                         pod_port = target_port if target_port != 'N/A' else service_port
                         print(f"      - Pod IP: {pod_ip}")
@@ -1279,10 +1526,8 @@ def describe_job_command(args):
                     else:
                         print(f"      - Pod IP: {pod_ip}")
                 else:
-                    # Pod not in Running state, don't show IP
-                    print(f"      - Pod is {pod_status}, no IP available")
-            except subprocess.CalledProcessError:
-                print(f"      - Pod {full_job_name} not found")
+                    # Pod is not running, no IP available
+                    print(f"      - Pod is {pod_status}, IP not available yet")
             except Exception as e:
                 print(f"      - Failed to get pod info: {e}")
             
@@ -1293,26 +1538,34 @@ def describe_job_command(args):
                 print(f"      - Service not available for this job")
             else:
                 try:
-                    import subprocess
-                    import json
-                    
                     if service_data:
                         # Get Service port info
-                        node_port = service_data['spec']['ports'][0]['nodePort'] if service_data['spec']['ports'] and 'nodePort' in service_data['spec']['ports'][0] else 'N/A'
+                        node_port = service_data['spec']['ports'][0]['node_port'] if service_data['spec']['ports'] and 'node_port' in service_data['spec']['ports'][0] else 'N/A'
                         
                         # Get Node IP
-                        node_cmd = f"kubectl get nodes -o json"
-                        node_output = subprocess.check_output(node_cmd, shell=True, text=True)
-                        node_data = json.loads(node_output)
-                        node_ip = node_data['items'][0]['status']['addresses'][0]['address'] if node_data['items'] else 'N/A'
+                        from gpuctl.client.base_client import KubernetesClient
+                        k8s_client = KubernetesClient()
                         
-                        # Check Pod status, if Pod is not Running, NodePort access is not available
-                        pod_cmd = f"kubectl get pod {full_job_name} -n {args.namespace} -o json"
-                        pod_output = subprocess.check_output(pod_cmd, shell=True, text=True)
-                        pod_data = json.loads(pod_output)
-                        pod_status = pod_data['status']['phase']
+                        nodes = k8s_client.core_v1.list_node()
+                        node_items = nodes.items
+                        node_ip = 'N/A'
+                        if node_items:
+                            node_dict = node_items[0].to_dict()
+                            node_addresses = node_dict.get('status', {}).get('addresses', [])
+                            for addr in node_addresses:
+                                if addr.get('type') == 'InternalIP':
+                                    node_ip = addr.get('address')
+                                    break
                         
-                        if pod_status == 'Running':
+                        # Check the specific pod's status
+                        pod = k8s_client.core_v1.read_namespaced_pod(
+                            name=full_job_name,
+                            namespace=actual_namespace
+                        )
+                        pod_dict = pod.to_dict()
+                        any_running = pod_dict.get('status', {}).get('phase') == 'Running'
+                        
+                        if any_running:
                             print(f"      - Node IP: {node_ip}")
                             print(f"      - NodePort: {node_port}")
                             if node_port != 'N/A':
@@ -1320,8 +1573,8 @@ def describe_job_command(args):
                             else:
                                 print(f"      - NodePort not available")
                         else:
-                            # Pod not in Running state, NodePort access not available
-                            print(f"      - Pod is {pod_status}, NodePort access unavailable")
+                            # No running pods, NodePort access not available yet
+                            print(f"      - No running pods, NodePort access unavailable")
                     else:
                         print(f"      - No service found for this job")
                 except Exception as e:

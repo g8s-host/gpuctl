@@ -249,56 +249,60 @@ def describe_node_command(args):
             for job in node['running_jobs']:
                 print(f"   - {job.get('name', 'N/A')} (GPU: {job.get('gpu', 0)})")
         
-        import subprocess
-        import json
         try:
-            events_cmd = f"kubectl get events -n default --field-selector involvedObject.name={args.node_name},involvedObject.kind=Node -o json"
-            events_output = subprocess.check_output(events_cmd, shell=True, text=True)
-            events_data = json.loads(events_output)
+            # Create Kubernetes client to get events
+            from gpuctl.client.base_client import KubernetesClient
+            from datetime import datetime, timezone
             
-            if events_data.get('items'):
+            k8s_client = KubernetesClient()
+            
+            # Get events for this node
+            field_selector = f"involvedObject.name={args.node_name},involvedObject.kind=Node"
+            events = k8s_client.core_v1.list_namespaced_event(
+                namespace="default",
+                field_selector=field_selector,
+                limit=10
+            )
+            
+            if events.items:
                 print(f"\n📋 Events:")
                 
-                for i, event in enumerate(events_data['items'][:10]):
-                    event_type = event.get('type', 'Normal')
-                    reason = event.get('reason', '-')
+                def format_event_age(timestamp):
+                    if not timestamp:
+                        return "-"
+                    try:
+                        event_time = timestamp
+                        now = datetime.now(timezone.utc)
+                        delta = now - event_time
+                        seconds = delta.total_seconds()
+                        if seconds < 0:
+                            seconds = 0
+                        if seconds < 60:
+                            return f"{int(seconds)}s"
+                        elif seconds < 3600:
+                            return f"{int(seconds/60)}m"
+                        elif seconds < 86400:
+                            return f"{int(seconds/3600)}h"
+                        else:
+                            return f"{int(seconds/86400)}d"
+                    except Exception:
+                        return "-"
+                
+                for i, event in enumerate(events.items):
+                    event_type = event.type or 'Normal'
+                    reason = event.reason or '-'
                     
-                    timestamp = event.get('lastTimestamp') or event.get('firstTimestamp') or event.get('eventTime')
-                    if timestamp:
-                        if isinstance(timestamp, str) and '.' in timestamp:
-                            timestamp = timestamp.split('.')[0] + 'Z'
-                    
-                    from datetime import datetime, timezone
-                    def format_event_age(ts):
-                        if not ts:
-                            return "-"
-                        try:
-                            event_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
-                            now = datetime.now(timezone.utc)
-                            delta = now - event_time
-                            seconds = delta.total_seconds()
-                            if seconds < 0:
-                                seconds = 0
-                            if seconds < 60:
-                                return f"{int(seconds)}s"
-                            elif seconds < 3600:
-                                return f"{int(seconds/60)}m"
-                            elif seconds < 86400:
-                                return f"{int(seconds/3600)}h"
-                            else:
-                                return f"{int(seconds/86400)}d"
-                        except Exception:
-                            return "-"
-                    
+                    timestamp = event.last_timestamp or event.first_timestamp or event.event_time
                     age = format_event_age(timestamp)
-                    source = event.get('source', {}).get('component', '-') or event.get('reportingComponent', '-')
-                    message = event.get('message', '-')
+                    
+                    source = event.source.component if event.source and event.source.component else '-'  
+                    message = event.message or '-'
                     
                     print(f"  [{age}] {event_type} {reason}")
                     print(f"    From: {source}")
                     print(f"    Message: {message}")
                     
-                    if i < len(events_data['items']) - 1:
+                    if i < len(events.items) - 1:
                         print()
         except Exception:
             pass

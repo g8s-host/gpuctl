@@ -52,32 +52,55 @@ class JobClient(KubernetesClient):
             self.handle_api_exception(e, f"update job {name}")
 
     def get_job(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> Optional[Dict[str, Any]]:
-        """获取作业资源信息，包括Job、Deployment和StatefulSet"""
-        try:
+        """获取作业资源信息，包括Job、Deployment和StatefulSet
+        
+        如果在指定命名空间中未找到资源，会自动搜索所有gpuctl管理的命名空间
+        """
+        def _try_get_in_namespace(ns: str) -> Optional[Dict[str, Any]]:
+            """在指定命名空间中尝试获取作业资源"""
             # 先尝试获取Job资源
-            job = self.batch_v1.read_namespaced_job(name, namespace)
-            return self._job_to_dict(job)
-        except ApiException as e:
-            if e.status != 404:
-                self.handle_api_exception(e, f"get job {name}")
+            try:
+                job = self.batch_v1.read_namespaced_job(name, ns)
+                return self._job_to_dict(job)
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"get job {name} in namespace {ns}")
 
-        try:
             # 再尝试获取Deployment资源
-            deployment = self.apps_v1.read_namespaced_deployment(name, namespace)
-            return self._deployment_to_dict(deployment)
-        except ApiException as e:
-            if e.status != 404:
-                self.handle_api_exception(e, f"get deployment {name}")
+            try:
+                deployment = self.apps_v1.read_namespaced_deployment(name, ns)
+                return self._deployment_to_dict(deployment)
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"get deployment {name} in namespace {ns}")
 
-        try:
             # 最后尝试获取StatefulSet资源
-            statefulset = self.apps_v1.read_namespaced_stateful_set(name, namespace)
-            return self._statefulset_to_dict(statefulset)
-        except ApiException as e:
-            if e.status != 404:
-                self.handle_api_exception(e, f"get statefulset {name}")
+            try:
+                statefulset = self.apps_v1.read_namespaced_stateful_set(name, ns)
+                return self._statefulset_to_dict(statefulset)
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"get statefulset {name} in namespace {ns}")
 
-        # 所有类型都未找到
+            # 当前命名空间中未找到
+            return None
+        
+        # 1. 优先在指定命名空间中查找
+        result = _try_get_in_namespace(namespace)
+        if result:
+            return result
+        
+        # 2. 如果在指定命名空间中未找到，搜索所有gpuctl管理的命名空间
+        all_namespaces = self._get_all_gpuctl_namespaces()
+        for ns in all_namespaces:
+            if ns == namespace:
+                continue  # 跳过已经检查过的命名空间
+            
+            result = _try_get_in_namespace(ns)
+            if result:
+                return result
+        
+        # 所有命名空间中都未找到
         return None
 
     def list_jobs(self, namespace: str = None,
