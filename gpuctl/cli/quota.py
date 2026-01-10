@@ -433,21 +433,10 @@ def get_namespaces_command(args):
     try:
         client = QuotaClient()
         
-        # Get all namespaces created by this CLI (with g8s.host/namespace or g8s.host/user-namespace label)
+        # Get all namespaces created by this CLI (with g8s.host/namespace label)
         namespaces = client.core_v1.list_namespace(
-            label_selector="g8s.host/namespace=true,g8s.host/user-namespace=true"
+            label_selector="g8s.host/namespace=true"
         )
-        
-        # If no namespaces found with the combined label selector, try individual ones
-        if not namespaces.items:
-            namespaces = client.core_v1.list_namespace(
-                label_selector="g8s.host/namespace=true"
-            )
-        
-        if not namespaces.items:
-            namespaces = client.core_v1.list_namespace(
-                label_selector="g8s.host/user-namespace=true"
-            )
         
         # Process namespace data
         processed_namespaces = []
@@ -495,7 +484,7 @@ def describe_namespace_command(args):
         
         # Verify it's a namespace created by this CLI
         labels = namespace.metadata.labels or {}
-        if not (labels.get("g8s.host/namespace") == "true" or labels.get("g8s.host/user-namespace") == "true"):
+        if not labels.get("g8s.host/namespace") == "true":
             raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
         
         # Get quota information for this namespace
@@ -553,7 +542,7 @@ def delete_namespace_command(args):
         namespace = client.core_v1.read_namespace(args.namespace_name)
         labels = namespace.metadata.labels or {}
         
-        if not (labels.get("g8s.host/namespace") == "true" or labels.get("g8s.host/user-namespace") == "true"):
+        if not labels.get("g8s.host/namespace") == "true":
             raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
         
         # Confirm deletion if not forced
