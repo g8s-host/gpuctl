@@ -1,0 +1,40 @@
+kind: training
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: single-gpu-training
+  priority: "medium"
+  description: "单GPU训练任务，用于图像分类模型训练"
+
+# 环境与镜像
+environment:
+  image: pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
+  command: ["python", "-m", "torch.distributed.launch", "--nproc_per_node=1", "train.py"]
+  args:
+    - "--dataset" 
+    - "cifar10"
+    - "--model" 
+    - "resnet50"
+    - "--epochs" 
+    - "10"
+    - "--batch-size" 
+    - "32"
+    - "--lr" 
+    - "0.001"
+
+# 资源需求声明
+resources:
+  pool: training-pool
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 8
+  memory: 32Gi
+  gpu-share: 2Gi
+
+# 数据与模型配置
+storage:
+  workdirs:
+    - path: /data/cifar10
+    - path: /models
+    - path: /output
