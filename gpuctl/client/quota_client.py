@@ -28,12 +28,8 @@ class QuotaClient(KubernetesClient):
             if namespace_name == "default":
                 return True
             namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/user-namespace=true"
-            )
-            if not namespaces.items:
-                namespaces = self.core_v1.list_namespace(
-                    label_selector="g8s.host/namespace=true"
-                )
+            label_selector="g8s.host/namespace=true"
+        )
             for ns in namespaces.items:
                 if ns.metadata.name == namespace_name:
                     return True
@@ -395,12 +391,8 @@ class QuotaClient(KubernetesClient):
                         })
 
             namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/user-namespace=true"
+                label_selector="g8s.host/namespace=true"
             )
-            if not namespaces.items:
-                namespaces = self.core_v1.list_namespace(
-                    label_selector="g8s.host/namespace=true"
-                )
 
             for ns in namespaces.items:
                 ns_name = ns.metadata.name
