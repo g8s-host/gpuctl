@@ -1,0 +1,156 @@
+name: Build Linux Binary
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+        python-version: [3.12]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0 pyinstaller
+        pip list
+
+    - name: Build binary with PyInstaller (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        # Determine architecture and build binary
+        if [ "${{ matrix.os }}" = "ubuntu-22.04" ]; then
+          OUTPUT_NAME="gpuctl-linux-amd64"
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          OUTPUT_NAME="gpuctl-macos-amd64"
+        fi
+        
+        echo "Building $OUTPUT_NAME for ${{ matrix.os }}"
+        pyinstaller --onefile --name="$OUTPUT_NAME" --hidden-import=yaml --hidden-import=PyYAML main.py
+        
+        # List built files
+        echo "Built files:"
+        ls -la dist/
+    
+    - name: Build binary with PyInstaller (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        $OUTPUT_NAME = "gpuctl-windows-amd64.exe"
+        
+        echo "Building $OUTPUT_NAME for ${{ matrix.os }}"
+        pyinstaller --onefile --name="$OUTPUT_NAME" --hidden-import=yaml --hidden-import=PyYAML main.py
+        
+        # List built files
+        echo "Built files:"
+        dir dist/
+
+    - name: Verify binary (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        if [ "${{ matrix.os }}" = "ubuntu-22.04" ]; then
+          BINARY_NAME="gpuctl-linux-amd64"
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          BINARY_NAME="gpuctl-macos-amd64"
+        fi
+        
+        chmod +x dist/$BINARY_NAME
+        ./dist/$BINARY_NAME --help
+    
+    - name: Verify binary (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        $BINARY_NAME = "gpuctl-windows-amd64.exe"
+        & dist\$BINARY_NAME --help
+
+    - name: Upload binary as artifact (Linux)
+      if: matrix.os == 'ubuntu-22.04'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gpuctl-linux-amd64
+        path: dist/gpuctl-linux-amd64
+    
+
+    
+    - name: Upload binary as artifact (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gpuctl-macos-amd64
+        path: dist/gpuctl-macos-amd64
+    
+    - name: Upload binary as artifact (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: gpuctl-windows-amd64
+        path: dist/gpuctl-windows-amd64.exe
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./dist
+    
+    - name: List downloaded files
+      run: |
+        ls -la ./dist
+        find ./dist -type f
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          ./dist/gpuctl-linux-amd64/gpuctl-linux-amd64
+          ./dist/gpuctl-macos-amd64/gpuctl-macos-amd64
+          ./dist/gpuctl-windows-amd64/gpuctl-windows-amd64.exe
+        name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        body: |
+          ## 🚀 gpuctl ${{ github.ref_name }} 发布
+          
+          ### 可执行文件
+          - [gpuctl-linux-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-amd64) - Linux x86_64 二进制包
+          - [gpuctl-macos-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-amd64) - macOS x86_64 二进制包
+          - [gpuctl-windows-amd64.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-windows-amd64.exe) - Windows x86_64 二进制包
+          
+          ### 使用方式
+          ```bash
+          # Linux x86_64架构
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-linux-amd64 -O gpuctl
+          
+          # macOS x86_64架构
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-macos-amd64 -o gpuctl
+          
+          chmod +x gpuctl
+          sudo mv gpuctl /usr/local/bin/
+          gpuctl --help
+          ```
+          
+          ```powershell
+          # Windows x86_64架构
+          Invoke-WebRequest -Uri https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/gpuctl-windows-amd64.exe -OutFile gpuctl.exe
+          
+          # 将gpuctl.exe添加到系统PATH中，然后运行
+          gpuctl.exe --help
+          ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

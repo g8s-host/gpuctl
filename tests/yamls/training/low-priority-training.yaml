@@ -1,0 +1,32 @@
+kind: training
+version: v0.1
+
+# 任务标识与描述
+job:
+  name: low-priority-training-job
+  priority: "low"
+  description: "低优先级训练任务"
+
+# 环境与镜像
+environment:
+  image: hiyouga/llamafactory:0.9.4
+  command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft"]
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
+
+# 资源需求声明
+resources:
+  pool: training-pool
+  gpu: 1
+  gpu-type: a10-24g
+  cpu: 4
+  memory: 16Gi
+  gpu-share: 2Gi
+
+# 数据与模型配置
+storage:
+  workdirs:
+    - path: /datasets/alpaca-qwen.json
+    - path: /models/qwen2-7b    
+    - path: /output/qwen2-sft

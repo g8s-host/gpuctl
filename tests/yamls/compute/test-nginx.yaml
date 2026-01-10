@@ -1,0 +1,28 @@
+kind: compute
+version: v1
+job:
+  name: test-nginx
+  namespace: test
+  description: A simple Nginx test
+
+environment:
+  image: nginx:latest
+  command: ["nginx", "-g", "daemon off;"]
+
+service:
+  replicas: 2
+  port: 80
+  targetPort: 80
+  protocol: TCP
+  type: NodePort
+
+resources:
+  pool: test-pool
+  gpu: 0
+  cpu: 1
+  memory: 2Gi
+
+storage:
+  data:
+    mountPath: /usr/share/nginx/html
+    size: 1Gi
