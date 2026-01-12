@@ -59,7 +59,6 @@ def get_nodes_command(args):
             # Print header
             header_line = f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['pool']}}"
             print(header_line)
-            print("-" * len(header_line))
             
             # Print rows
             for node in processed_nodes:

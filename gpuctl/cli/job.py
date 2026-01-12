@@ -738,7 +738,6 @@ def get_jobs_command(args):
         # Print header
         header_line = f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['age']}}"
         print(header_line)
-        print("-" * len(header_line))
         
         # Print rows
         for row in processed_jobs:
