@@ -459,7 +459,6 @@ def get_namespaces_command(args):
             # Print table format similar to kubectl get ns
             headers = ["NAME", "STATUS", "AGE"]
             print(f"{headers[0]:<30} {headers[1]:<10} {headers[2]:<20}")
-            print("-" * 60)
             for ns in processed_namespaces:
                 print(f"{ns['name']:<30} {ns['status']:<10} {ns['age']:%Y-%m-%d %H:%M:%S}")
         
