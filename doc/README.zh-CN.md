@@ -143,7 +143,7 @@ python main.py --help
 kind: pool
 version: v0.1
 
-metadata:
+pool:
   name: training-pool
   description: "训练任务专用资源池"
 
@@ -236,7 +236,7 @@ environment:
 service:
   replicas: 2
   port: 8000
-  health_check: /health
+  healthCheck: /health
 
 # 资源规格（新增pool字段）
 resources:
@@ -319,7 +319,7 @@ environment:
 service:
   replicas: 2
   port: 80
-  health_check: /health
+  healthCheck: /health
 
 # 资源规格
 resources:
@@ -346,7 +346,7 @@ gpuctl create -f nginx-job.yaml
 kind: quota
 version: v0.1
 
-metadata:
+quota:
   name: team-resource-quota
   description: "团队资源配额配置"
 

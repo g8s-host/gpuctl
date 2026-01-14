@@ -150,7 +150,7 @@ Ensure `kubectl` is properly configured and can access the target Kubernetes clu
 kind: pool
 version: v0.1
 
-metadata:
+pool:
   name: training-pool
   description: "Resource pool dedicated to training tasks"
 
@@ -243,7 +243,7 @@ environment:
 service:
   replicas: 2
   port: 8000
-  health_check: /health
+  healthCheck: /health
 
 # Resource specifications (added pool field)
 resources:
@@ -347,7 +347,7 @@ gpuctl create -f compute-job.yaml
 kind: quota
 version: v0.1
 
-metadata:
+quota:
   name: team-resource-quota
   description: "Team resource quota configuration"
 

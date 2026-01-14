@@ -3,10 +3,10 @@ from typing import Dict, List, Optional
 
 
 class NodeConfig(BaseModel):
-    gpu_type: str = Field(..., alias="gpu-type")
+    gpu_type: str = Field(..., alias="gpuType")
 
 
-class Metadata(BaseModel):
+class PoolInfo(BaseModel):
     name: str
     description: Optional[str] = None
 
@@ -14,7 +14,7 @@ class Metadata(BaseModel):
 class ResourcePool(BaseModel):
     kind: str = "pool"
     version: str = "v0.1"
-    metadata: Metadata
+    pool: PoolInfo
     nodes: Dict[str, NodeConfig] = Field(default_factory=dict)
 
     model_config = {
