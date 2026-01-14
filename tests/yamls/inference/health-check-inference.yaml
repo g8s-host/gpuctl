@@ -11,22 +11,25 @@ job:
 environment:
   image: tiangolo/uvicorn-gunicorn-fastapi:latest
   command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
 
 # 服务配置
 service:
   replicas: 3
   port: 8000
-  health_check: /api/health
+  healthCheck: /api/health
   timeout: 30s
 
 # 资源规格
 resources:
   pool: training-pool
   gpu: 1
-  gpu-type: a10-24g
+  gpuType: a10-24g
   cpu: 6
   memory: 24Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:

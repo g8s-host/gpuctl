@@ -15,7 +15,7 @@ resources:
   gpu: 1
   cpu: 4
   memory: 16Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:

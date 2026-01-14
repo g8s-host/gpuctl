@@ -20,7 +20,7 @@ environment:
 service:
   replicas: 1
   port: 6379
-  health_check: /health
+  healthCheck: /health
 
 # 资源规格
 resources:

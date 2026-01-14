@@ -20,10 +20,10 @@ environment:
 resources:
   pool: training-pool
   gpu: 1
-  gpu-type: a10-24g
+  gpuType: a10-24g
   cpu: 8
   memory: 32Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:

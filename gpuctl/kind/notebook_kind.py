@@ -27,7 +27,7 @@ class NotebookKind:
             "namespace": namespace,
             "resources": {
                 "gpu": notebook_job.resources.gpu,
-                "gpu_type": notebook_job.resources.gpu_type,
+                "gpuType": notebook_job.resources.gpuType,
                 "pool": notebook_job.resources.pool,
                 "service_port": 8888
             },
