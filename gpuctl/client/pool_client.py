@@ -374,8 +374,8 @@ class PoolClient(KubernetesClient):
                 selector_parts = []
                 if filters.get("pool"):
                     selector_parts.append(f"g8s.host/pool={filters['pool']}")
-                if filters.get("gpu_type"):
-                    selector_parts.append(f"nvidia.com/gpu-type={filters['gpu_type']}")
+                if filters.get("gpuType"):
+                    selector_parts.append(f"nvidia.com/gpuType={filters['gpuType']}")
                 if selector_parts:
                     label_selector = ",".join(selector_parts)
 

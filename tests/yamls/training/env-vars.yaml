@@ -26,15 +26,19 @@ environment:
       value: "16"
     - name: LEARNING_RATE
       value: "2e-5"
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
+    - name: LLAMA_FACTORY_CACHE
+      value: "/cache/llama-factory"
 
 # 资源需求声明
 resources:
   pool: training-pool
   gpu: 1
-  gpu-type: a10-24g
+  gpuType: a10-24g
   cpu: 8
   memory: 32Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 # 数据与模型配置
 storage:

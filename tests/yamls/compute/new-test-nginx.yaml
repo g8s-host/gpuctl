@@ -1,16 +1,16 @@
 kind: compute
 version: v1
 job:
-  name: test-nginx
+  name: new-test-nginx
   namespace: test
-  description: A simple Nginx test
+  description: A new simple Nginx test
 
 environment:
   image: nginx:latest
   command: ["nginx", "-g", "daemon off;"]
 
 service:
-  replicas: 2
+  replicas: 1
   port: 8000
   healthCheck: /health
 

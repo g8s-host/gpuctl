@@ -11,21 +11,24 @@ job:
 environment:
   image: pytorch/torchserve:0.9.0-cuda12.1-cudnn8-runtime
   command: ["torchserve", "--start", "--ncs", "--model-store", "/models", "--models", "resnet50.mar"]
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
 
 # 服务配置
 service:
   replicas: 1
   port: 8080
-  health_check: /ping
+  healthCheck: /ping
 
 # 资源规格
 resources:
   pool: training-pool
   gpu: 1
-  gpu-type: a10-24g
+  gpuType: a10-24g
   cpu: 4
   memory: 16Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:

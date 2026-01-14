@@ -16,21 +16,24 @@ environment:
     - "/home/data/models/llama3-8b"
     - "--tensor-parallel-size"
     - "1"
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
 
 # 服务配置
 service:
   replicas: 1
   port: 8000
-  health_check: /health
+  healthCheck: /health
 
 # 资源规格
 resources:
   #pool: training-pool
   #gpu: 1
-  #gpu-type: a10-24g
+  #gpuType: a10-24g
   cpu: 1
   memory: 2Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:

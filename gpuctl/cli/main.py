@@ -48,7 +48,7 @@ def main():
     # get nodes
     nodes_parser = get_subparsers.add_parser('nodes', help='Get nodes')
     nodes_parser.add_argument('--pool', help='Filter by resource pool')
-    nodes_parser.add_argument('--gpu-type', help='Filter by GPU type')
+    nodes_parser.add_argument('--gpuType', help='Filter by GPU type')
     nodes_parser.add_argument('--json', action='store_true', help='Output in JSON format')
     
     # get labels

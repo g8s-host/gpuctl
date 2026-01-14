@@ -14,7 +14,7 @@ class TrainingBuilder(BaseBuilder):
         container = cls.build_container_spec(training_job.environment, training_job.resources, workdirs)
 
         pod_spec_extras = {}
-        if training_job.environment.image_pull_secret:
+        if training_job.environment.imagePullSecret:
             pod_spec_extras['image_pull_secrets'] = [
                 client.V1LocalObjectReference(name=training_job.environment.image_pull_secret)
             ]
@@ -23,7 +23,7 @@ class TrainingBuilder(BaseBuilder):
         if training_job.resources.pool:
             node_selector["g8s.host/pool"] = training_job.resources.pool
         if training_job.resources.gpu_type:
-            node_selector["g8s.host/gpu-type"] = training_job.resources.gpu_type
+            node_selector["g8s.host/gpuType"] = training_job.resources.gpuType
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 
