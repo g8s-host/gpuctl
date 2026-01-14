@@ -156,9 +156,9 @@ metadata:
 
 nodes:
   node1:
-    gpu-type: A100-100G
+    gpuType: A100-100G
   node2:
-    gpu-type: A800-20G
+    gpuType: A800-20G
 ```
 
 ```bash
@@ -194,10 +194,10 @@ environment:
 resources:
   pool: training-pool
   gpu: 4
-  gpu-type: A100-100G # Optional, if not filled, k8s scheduling is used
+  gpuType: A100-100G # Optional, if not filled, k8s scheduling is used
   cpu: 32
   memory: 128Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 # Data and model configuration
 storage:
@@ -249,10 +249,10 @@ service:
 resources:
   pool: inference-pool # Dedicated inference resource pool, default is default
   gpu: 1
-  gpu-type: A100-100G # Optional, if not filled, k8s scheduling is used
+  gpuType: A100-100G # Optional, if not filled, k8s scheduling is used
   cpu: 8
   memory: 32Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:
@@ -286,10 +286,10 @@ service:
 resources:
   pool: dev-pool # Default is default
   gpu: 1
-  gpu-type: a10-24g # Optional, if not filled, k8s scheduling is used
+  gpuType: a10-24g # Optional, if not filled, k8s scheduling is used
   cpu: 8
   memory: 32Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
 
 storage:
   workdirs:
@@ -324,10 +324,10 @@ environment:
 resources:
   pool: default
   gpu: 1
-  gpu-type: a10-24g
+  gpuType: a10-24g
   cpu: 4
   memory: 16Gi
-  gpu-share: 2Gi
+  gpuShare: 2Gi
   pods: 3
 
 storage:
@@ -413,7 +413,7 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 |---------|---------|
 | `gpuctl get nodes` | List basic information of all cluster nodes (name, status, total GPUs, bound resource pools) |
 | `gpuctl get nodes --pool <pool-name>` | Filter nodes bound to a specific resource pool |
-| `gpuctl get nodes --gpu-type <gpu-type>` | Filter nodes with a specific GPU type |
+| `gpuctl get nodes --gpuType <gpuType>` | Filter nodes with a specific GPU type |
 | `gpuctl describe node <node-name>` | View detailed information of a single node (CPU/GPU resources, GPU type/quantity, label list, bound resource pools, K8s node details) |
 | `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | Mark GPU type label for a specific node (default label key) |
 | `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | Mark a label for a specific node, supports overwriting existing labels with the same key |

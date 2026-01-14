@@ -7,8 +7,8 @@ metadata:
 
 nodes: 
   node1: # 节点主机名
-    gpu-type: a100-80g
+    gpuType: a100-80g
   node2: # 节点主机名
     gpu-type: a100-80g
   node3: # 节点主机名
-    gpu-type: a100-40g
+    gpuType: a100-40g
