@@ -16,7 +16,7 @@ class InferenceBuilder(BaseBuilder):
         container = cls.build_container_spec(inference_job.environment, inference_job.resources, workdirs)
 
         pod_spec_extras = {}
-        if inference_job.environment.imagePullSecret:
+        if inference_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
                 client.V1LocalObjectReference(name=inference_job.environment.image_pull_secret)
             ]
@@ -25,7 +25,7 @@ class InferenceBuilder(BaseBuilder):
         if inference_job.resources.pool:
             node_selector["g8s.host/pool"] = inference_job.resources.pool
         if inference_job.resources.gpu_type:
-            node_selector["g8s.host/gpuType"] = inference_job.resources.gpuType
+            node_selector["g8s.host/gpuType"] = inference_job.resources.gpu_type
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 

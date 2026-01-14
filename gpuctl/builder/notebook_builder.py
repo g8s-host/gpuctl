@@ -16,7 +16,7 @@ class NotebookBuilder(BaseBuilder):
         container.ports = [client.V1ContainerPort(container_port=8888)]
 
         pod_spec_extras = {}
-        if notebook_job.environment.imagePullSecret:
+        if notebook_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
                 client.V1LocalObjectReference(name=notebook_job.environment.image_pull_secret)
             ]
@@ -25,7 +25,7 @@ class NotebookBuilder(BaseBuilder):
         if notebook_job.resources.pool:
             node_selector["g8s.host/pool"] = notebook_job.resources.pool
         if notebook_job.resources.gpu_type:
-            node_selector["g8s.host/gpuType"] = notebook_job.resources.gpuType
+            node_selector["g8s.host/gpuType"] = notebook_job.resources.gpu_type
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 

@@ -16,7 +16,7 @@ class ComputeBuilder(BaseBuilder):
         container = cls.build_container_spec(compute_job.environment, compute_job.resources, workdirs)
 
         pod_spec_extras = {}
-        if compute_job.environment.imagePullSecret:
+        if compute_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
                 client.V1LocalObjectReference(name=compute_job.environment.image_pull_secret)
             ]
@@ -25,7 +25,7 @@ class ComputeBuilder(BaseBuilder):
         if compute_job.resources.pool:
             node_selector["g8s.host/pool"] = compute_job.resources.pool
         if compute_job.resources.gpu_type:
-            node_selector["g8s.host/gpuType"] = compute_job.resources.gpuType
+            node_selector["g8s.host/gpuType"] = compute_job.resources.gpu_type
         if node_selector:
             pod_spec_extras['node_selector'] = node_selector
 

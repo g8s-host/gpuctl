@@ -1,10 +1,10 @@
 kind: pool
 version: v0.1
 
-metadata:
+pool:
   name: basic-pool
   description: "基础资源池，最小配置"
 
 nodes: 
   vm-0-12-ubuntu: # 节点主机名
-    gpu-type: a10-24g
+    gpuType: a10-24g

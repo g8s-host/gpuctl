@@ -1,7 +1,7 @@
 kind: pool
 version: v0.1
 
-metadata:
+pool:
   name: gpu-constrained-pool
   description: "带GPU类型约束的资源池，只允许A100 GPU节点"
 
@@ -9,6 +9,6 @@ nodes:
   node1: # 节点主机名
     gpuType: a100-80g
   node2: # 节点主机名
-    gpu-type: a100-80g
+    gpuType: a100-80g
   node3: # 节点主机名
     gpuType: a100-40g

@@ -24,7 +24,7 @@ class UserQuota(BaseModel):
         return str(self.gpu)
 
 
-class QuotaMetadata(BaseModel):
+class QuotaInfo(BaseModel):
     name: str
     description: Optional[str] = None
 
@@ -32,7 +32,7 @@ class QuotaMetadata(BaseModel):
 class QuotaConfig(BaseModel):
     kind: str = "quota"
     version: str = "v0.1"
-    metadata: QuotaMetadata
+    quota: QuotaInfo
     namespace: Dict[str, UserQuota] = Field(default_factory=dict)
     default: Optional[UserQuota] = None
 
