@@ -27,7 +27,7 @@ class InferenceKind:
             "namespace": namespace,
             "resources": {
                 "gpu": inference_job.resources.gpu,
-                "gpuType": inference_job.resources.gpuType,
+                "gpuType": inference_job.resources.gpu_type,
                 "pool": inference_job.resources.pool,
                 "service_port": inference_job.service.port
             },

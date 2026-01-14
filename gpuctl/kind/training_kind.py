@@ -25,7 +25,7 @@ class TrainingKind:
             "namespace": namespace,
             "resources": {
                 "gpu": training_job.resources.gpu,
-                "gpuType": training_job.resources.gpuType,
+                "gpuType": training_job.resources.gpu_type,
                 "pool": training_job.resources.pool
             }
         }

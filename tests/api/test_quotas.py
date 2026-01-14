@@ -39,7 +39,7 @@ def test_create_quota(mock_quota_client, mock_parse_yaml):
     response = client.post(
         "/api/v1/quotas",
         json={
-            "yamlContent": "kind: quota\nversion: v0.1\nmetadata:\n  name: test-quota\n  description: Test quota\nnamespace:\n  team-a:\n    cpu: 10\n    memory: 20Gi\n    gpu: 4"
+            "yamlContent": "kind: quota\nversion: v0.1\nquota:\n  name: test-quota\n  description: Test quota\nnamespace:\n  team-a:\n    cpu: 10\n    memory: 20Gi\n    gpu: 4"
         },
         headers={"Authorization": "Bearer test-token"}
     )
