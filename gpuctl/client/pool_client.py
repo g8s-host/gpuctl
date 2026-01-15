@@ -129,58 +129,34 @@ class PoolClient(KubernetesClient):
             raise ValueError(f"Nodes not found: {', '.join(invalid_nodes)}")
 
     def delete_pool(self, pool_name: str) -> bool:
-        """Delete resource pool, including cascading deletion of associated jobs"""
+        """Delete resource pool, check if there are associated jobs first"""
         try:
             from gpuctl.client.job_client import JobClient
-            from kubernetes.client import V1DeleteOptions
             
-            # 1. Delete all associated jobs
+            # 1. Check if there are any associated jobs
             job_client = JobClient()
             # Get all jobs, then filter jobs belonging to this resource pool
             all_jobs = job_client.list_jobs()
             
+            associated_jobs = []
             for job in all_jobs:
                 # Check if job belongs to this resource pool
                 job_pool = job.get('labels', {}).get('g8s.host/pool')
                 if job_pool == pool_name:
-                    # Build delete options
-                    delete_options = V1DeleteOptions(propagation_policy="Foreground", grace_period_seconds=0)
-                    
-                    # Get job name
-                    job_name = job['name']
-                    
-                    # Attempt to delete job resources
-                    try:
-                        # First try to delete Job resources
-                        job_client.batch_v1.delete_namespaced_job(job_name, job.get('namespace', 'g8s-host'), body=delete_options)
-                    except Exception:
-                        pass
-                    
-                    try:
-                        # Then try to delete Deployment resources
-                        job_client.apps_v1.delete_namespaced_deployment(job_name, job.get('namespace', 'g8s-host'), body=delete_options)
-                    except Exception:
-                        pass
-                    
-                    try:
-                        # Finally try to delete StatefulSet resources
-                        job_client.apps_v1.delete_namespaced_stateful_set(job_name, job.get('namespace', 'g8s-host'), body=delete_options)
-                    except Exception:
-                        pass
-                    
-                    try:
-                        # Attempt to delete related Service
-                        # Use original job name to build service name
-                        service_name = f"svc-{job_name}"
-                        job_client.core_v1.delete_namespaced_service(service_name, job.get('namespace', 'default'), body=delete_options)
-                    except Exception:
-                        pass
+                    associated_jobs.append(job['name'])
+            
+            if associated_jobs:
+                raise ValueError(f"Cannot delete pool '{pool_name}' because it has associated jobs: {', '.join(associated_jobs)}. Please delete these jobs first.")
             
             # 2. Remove resource pool labels
             # Get all nodes of resource pool
             nodes = self.core_v1.list_node(
                 label_selector=f"g8s.host/pool={pool_name}"
             )
+
+            if not nodes.items:
+                # Pool doesn't exist or has no nodes
+                return False
 
             # Remove resource pool labels
             for node in nodes.items:

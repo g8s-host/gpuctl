@@ -63,3 +63,45 @@ class ComputeKind:
             "pods": pods,
             "deployment_info": deployment_info
         }
+        
+    def update_compute_service(self, compute_job: ComputeJob, namespace: str = "default") -> Dict[str, Any]:
+        """Update compute job"""
+        deployment = self.builder.build_deployment(compute_job)
+        service = self.builder.build_service(compute_job)
+        
+        deployment_name = deployment["metadata"]["name"]
+        service_name = service["metadata"]["name"]
+        
+        # Check if deployment exists
+        existing_deployment = self.client.get_deployment(deployment_name, namespace)
+        if existing_deployment:
+            # Update existing deployment
+            deployment_result = self.client.update_deployment(deployment, namespace)
+        else:
+            # Create new deployment if it doesn't exist
+            deployment_result = self.client.create_deployment(deployment, namespace)
+        
+        # Check if service exists
+        existing_service = self.client.get_service(service_name, namespace)
+        if existing_service:
+            # Update existing service
+            service_result = self.client.update_service(service, namespace)
+        else:
+            # Create new service if it doesn't exist
+            service_result = self.client.create_service(service, namespace)
+        
+        return {
+            "job_id": deployment_result["name"],
+            "name": compute_job.job.name,
+            "status": "updated",
+            "namespace": namespace,
+            "resources": {
+                "cpu": compute_job.resources.cpu,
+                "memory": compute_job.resources.memory,
+                "pool": compute_job.resources.pool
+            },
+            "service": {
+                "name": service_result["name"],
+                "port": compute_job.service.port
+            }
+        }
