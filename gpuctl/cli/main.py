@@ -112,6 +112,12 @@ def main():
     namespace_delete_parser.add_argument('namespace_name', help='Namespace name to delete')
     namespace_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
     namespace_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    
+    # delete pool
+    pool_delete_parser = delete_subparsers.add_parser('pool', help='Delete a resource pool')
+    pool_delete_parser.add_argument('pool_name', help='Resource pool name to delete')
+    pool_delete_parser.add_argument('--force', action='store_true', help='Force delete resource pool')
+    pool_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
 
@@ -128,15 +134,11 @@ def main():
 
     # label command
     label_parser = subparsers.add_parser('label', help='Manage node labels')
-    label_subparsers = label_parser.add_subparsers(dest='action', help='Label action')
-    
-    # label node
-    node_label_parser = label_subparsers.add_parser('node', help='Manage node labels')
-    node_label_parser.add_argument('label', help='Label key=value pair or key for deletion')
-    node_label_parser.add_argument('node_name', nargs='+', help='Node name(s)')
-    node_label_parser.add_argument('--delete', action='store_true', help='Delete label')
-    node_label_parser.add_argument('--overwrite', action='store_true', help='Overwrite existing label')
-    node_label_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+    label_parser.add_argument('node_name', nargs='+', help='Node name(s)')
+    label_parser.add_argument('label', help='Label key=value pair or key for deletion (e.g., gpuType=a100-80g)')
+    label_parser.add_argument('--delete', action='store_true', help='Delete label')
+    label_parser.add_argument('--overwrite', action='store_true', help='Overwrite existing label')
+    label_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
 
@@ -208,6 +210,16 @@ def main():
                 parsed_obj = BaseParser.parse_yaml_file(args.file)
                 if parsed_obj.kind == "quota":
                     return delete_quota_command(args)
+                elif parsed_obj.kind == "pool":
+                    # For pool deletion from file, we need to extract pool name first
+                    import yaml
+                    with open(args.file, 'r') as f:
+                        pool_config = yaml.safe_load(f)
+                    args.pool_name = pool_config.get('pool', {}).get('name') or pool_config.get('name')
+                    if not args.pool_name:
+                        print("Error: Could not extract pool name from file")
+                        return 1
+                    return delete_pool_command(args)
                 else:
                     return delete_job_command(args)
             elif args.resource == 'job':
@@ -216,6 +228,8 @@ def main():
                 return delete_quota_command(args)
             elif args.resource == 'ns' or args.resource == 'namespace':
                 return delete_namespace_command(args)
+            elif args.resource == 'pool':
+                return delete_pool_command(args)
             else:
                 print("Error: Must specify either -f/--file or resource type (e.g., 'delete job <job_name>')")
                 delete_parser.print_help()
@@ -225,7 +239,7 @@ def main():
         elif args.command == 'logs':
             return logs_job_command(args)
 
-        elif args.command == 'label' and args.action == 'node':
+        elif args.command == 'label':
             return label_node_command(args)
 
         elif args.command == 'describe':

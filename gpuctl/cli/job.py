@@ -532,6 +532,35 @@ def apply_job_command(args):
                     if 'resources' in result:
                         print(f"🖥️  Resources: {result['resources']}")
                     
+            elif parsed_obj.kind == "compute":
+                from gpuctl.kind.compute_kind import ComputeKind
+                handler = ComputeKind()
+                job_client = JobClient()
+                
+                job_name = add_prefix(parsed_obj.job.name, "compute")
+                existing = job_client.get_job(job_name, args.namespace)
+                
+                if existing:
+                    action = "update"
+                    if not args.json:
+                        print(f"🔄 Updating {parsed_obj.kind} service: {remove_prefix(job_name)}")
+                    # ComputeKind doesn't have update method, use create_compute_service which is idempotent
+                    result = handler.create_compute_service(parsed_obj, args.namespace)
+                else:
+                    action = "create"
+                    if not args.json:
+                        print(f"✅ Creating {parsed_obj.kind} service: {remove_prefix(job_name)}")
+                    result = handler.create_compute_service(parsed_obj, args.namespace)
+                
+                display_job_id = remove_prefix(result['job_id'])
+                result["action"] = action
+                file_result["results"].append(result)
+                if not args.json:
+                    print(f"📊 Name: {result['name']}")
+                    print(f"📦 Namespace: {result['namespace']}")
+                    if 'resources' in result:
+                        print(f"🖥️  Resources: {result['resources']}")
+                    
             elif parsed_obj.kind == "pool" or parsed_obj.kind == "resource":
                 from gpuctl.client.pool_client import PoolClient
                 client = PoolClient()

@@ -114,25 +114,39 @@ def label_node_command(args):
         client = PoolClient()
         results = []
         
+        # Helper function to convert camelCase to kebab-case and add prefix
+        def process_label_key(key):
+            # Convert camelCase to kebab-case
+            kebab_key = ''
+            for i, char in enumerate(key):
+                if char.isupper() and i > 0:
+                    kebab_key += '-' + char.lower()
+                else:
+                    kebab_key += char.lower()
+            # Add g8s.host/ prefix
+            return f"g8s.host/{kebab_key}"
+        
         for node_name in args.node_name:
             if args.delete:
                 # Remove label
                 if args.label:
-                    key = args.label.split('=')[0]
-                    client._remove_node_label(node_name, key)
+                    raw_key = args.label.split('=')[0] if '=' in args.label else args.label
+                    processed_key = process_label_key(raw_key)
+                    client._remove_node_label(node_name, processed_key)
                     result = {
                         "node": node_name,
                         "operation": "delete",
-                        "label": key,
+                        "label": processed_key,
                         "success": True,
-                        "message": f"Successfully removed label {key} from node {node_name}"
+                        "message": f"Successfully removed label {processed_key} from node {node_name}"
                     }
                     results.append(result)
                     if not args.json:
-                        print(f"✅ Successfully removed label {key} from node {node_name}")
+                        print(f"✅ Successfully removed label {processed_key} from node {node_name}")
                 else:
                     error = "Must specify label to delete"
                     if args.json:
+                        import json
                         print(json.dumps({"error": error}, indent=2))
                     else:
                         print(f"❌ {error}")
@@ -140,21 +154,32 @@ def label_node_command(args):
             else:
                 # Add or update label
                 if args.label:
-                    key, value = args.label.split('=')
-                    client._label_node(node_name, key, value)
+                    if '=' not in args.label:
+                        error = "Must specify label in key=value format"
+                        if args.json:
+                            import json
+                            print(json.dumps({"error": error}, indent=2))
+                        else:
+                            print(f"❌ {error}")
+                        return 1
+                    
+                    raw_key, value = args.label.split('=', 1)
+                    processed_key = process_label_key(raw_key)
+                    client._label_node(node_name, processed_key, value)
                     result = {
                         "node": node_name,
                         "operation": "add",
-                        "label": {key: value},
+                        "label": {processed_key: value},
                         "success": True,
-                        "message": f"Successfully labeled node {node_name} with {key}={value}"
+                        "message": f"Successfully labeled node {node_name} with {processed_key}={value}"
                     }
                     results.append(result)
                     if not args.json:
-                        print(f"✅ Successfully labeled node {node_name} with {key}={value}")
+                        print(f"✅ Successfully labeled node {node_name} with {processed_key}={value}")
                 else:
                     error = "Must specify label in key=value format"
                     if args.json:
+                        import json
                         print(json.dumps({"error": error}, indent=2))
                     else:
                         print(f"❌ {error}")
