@@ -48,7 +48,7 @@ def main():
     # get nodes
     nodes_parser = get_subparsers.add_parser('nodes', help='Get nodes')
     nodes_parser.add_argument('--pool', help='Filter by resource pool')
-    nodes_parser.add_argument('--gpuType', help='Filter by GPU type')
+    nodes_parser.add_argument('--gpu-type', help='Filter by GPU type')
     nodes_parser.add_argument('--json', action='store_true', help='Output in JSON format')
     
     # get labels
@@ -97,7 +97,7 @@ def main():
 
     # delete quota
     quota_delete_parser = delete_subparsers.add_parser('quota', help='Delete a quota')
-    quota_delete_parser.add_argument('namespace_name', nargs='?', help='Namespace name to delete quota for')
+    quota_delete_parser.add_argument('quota_name', nargs='?', help='Quota name to delete all quotas with this name')
     quota_delete_parser.add_argument('-f', '--file', help='Quota YAML file path to delete all quotas in file')
     quota_delete_parser.add_argument('--force', action='store_true', help='Skip confirmation prompt')
     quota_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')

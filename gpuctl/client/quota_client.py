@@ -261,11 +261,11 @@ class QuotaClient(KubernetesClient):
                 quota_list = self.core_v1.list_namespaced_resource_quota(ns_name)
 
                 for quota in quota_list.items:
-                    if quota.metadata.labels.get("g8s.host/quota"):
+                    if quota.metadata.labels and quota.metadata.labels.get("g8s.host/quota"):
                         if quota_name and quota.metadata.labels.get("g8s.host/quota") != quota_name:
                             continue
 
-                        namespace_name = quota.metadata.labels.get("g8s.host/namespace", ns_name)
+                        namespace_name = quota.metadata.labels.get("g8s.host/namespace", ns_name) if quota.metadata.labels else ns_name
                         quota_info = self._build_quota_info(quota, namespace_name, ns_name)
                         quotas.append(quota_info)
 
@@ -339,7 +339,7 @@ class QuotaClient(KubernetesClient):
             }
 
         return {
-            "name": quota.metadata.labels.get("g8s.host/quota", "default"),
+            "name": quota.metadata.labels.get("g8s.host/quota", "default") if quota.metadata.labels else "default",
             "namespace": namespace,
             "hard": hard_limits,
             "used": used,
