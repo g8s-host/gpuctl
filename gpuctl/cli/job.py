@@ -991,6 +991,32 @@ def logs_job_command(args):
         job_name = args.job_name
         namespace = args.namespace
         
+        # Check if the specified namespace exists
+        def namespace_exists(ns):
+            """Check if the specified namespace exists"""
+            try:
+                from gpuctl.client.base_client import KubernetesClient
+                k8s_client = KubernetesClient()
+                # Try to get the namespace directly
+                k8s_client.core_v1.read_namespace(ns)
+                return True
+            except Exception as e:
+                # Check if the error is about namespace not existing
+                error_msg = str(e).lower()
+                if "namespace not found" in error_msg or "namespaces \"" + ns + "\" not found" in error_msg or "not found" in error_msg:
+                    return False
+                # For other errors, assume namespace exists
+                return True
+        
+        # Check if the specified namespace exists
+        if not namespace_exists(namespace):
+            if args.json:
+                import json
+                print(json.dumps({"error": f"Namespace '{namespace}' not found"}, indent=2))
+            else:
+                print(f"❌ Namespace '{namespace}' not found")
+            return 1
+        
         # First, try to use the provided name as a direct Pod name
         def try_direct_pod(ns):
             """Try to use the provided name as a direct Pod name"""
