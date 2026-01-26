@@ -356,8 +356,8 @@ def create_job_command(args):
                 
                 # Build resource pool configuration
                 pool_config = {
-                    "name": parsed_obj.metadata.name,
-                    "description": parsed_obj.metadata.description,
+                    "name": parsed_obj.pool.name,
+                    "description": parsed_obj.pool.description,
                     "nodes": list(parsed_obj.nodes.keys())
                 }
                 
@@ -366,7 +366,7 @@ def create_job_command(args):
                 file_result["results"].append(result)
                 if not args.json:
                     print(f"✅ Successfully created resource pool: {result['name']}")
-                    print(f"📊 Description: {parsed_obj.metadata.description}")
+                    print(f"📊 Description: {parsed_obj.pool.description}")
                     print(f"📦 Node count: {len(parsed_obj.nodes)}")
                     print(f"📋 Status: {result['status']}")
             elif parsed_obj.kind == "quota":
@@ -544,8 +544,7 @@ def apply_job_command(args):
                     action = "update"
                     if not args.json:
                         print(f"🔄 Updating {parsed_obj.kind} service: {remove_prefix(job_name)}")
-                    # ComputeKind doesn't have update method, use create_compute_service which is idempotent
-                    result = handler.create_compute_service(parsed_obj, args.namespace)
+                    result = handler.update_compute_service(parsed_obj, args.namespace)
                 else:
                     action = "create"
                     if not args.json:
@@ -565,23 +564,23 @@ def apply_job_command(args):
                 from gpuctl.client.pool_client import PoolClient
                 client = PoolClient()
                 
-                existing = client.get_pool(parsed_obj.metadata.name)
+                existing = client.get_pool(parsed_obj.pool.name)
                 
                 pool_config = {
-                    "name": parsed_obj.metadata.name,
-                    "description": parsed_obj.metadata.description,
+                    "name": parsed_obj.pool.name,
+                    "description": parsed_obj.pool.description,
                     "nodes": list(parsed_obj.nodes.keys())
                 }
                 
                 if existing:
                     action = "update"
                     if not args.json:
-                        print(f"🔄 Updating resource pool: {parsed_obj.metadata.name}")
+                        print(f"🔄 Updating resource pool: {parsed_obj.pool.name}")
                     result = client.update_pool(pool_config)
                 else:
                     action = "create"
                     if not args.json:
-                        print(f"✅ Creating resource pool: {parsed_obj.metadata.name}")
+                        print(f"✅ Creating resource pool: {parsed_obj.pool.name}")
                     result = client.create_pool(pool_config)
                 
                 result["action"] = action
@@ -1090,7 +1089,11 @@ def logs_job_command(args):
                 pass
         
         if not running_pod:
-            print(f"❌ No pods found for job: {args.job_name}")
+            if args.json:
+                import json
+                print(json.dumps({"error": f"No pods found for job: {args.job_name}"}, indent=2))
+            else:
+                print(f"❌ No pods found for job: {args.job_name}")
             return 1
         
         actual_pod_name = running_pod['name']
@@ -1109,31 +1112,66 @@ def logs_job_command(args):
                     print(log)
                     has_logs = True
                 if not has_logs:
-                    print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+                    if args.json:
+                        import json
+                        print(json.dumps({"message": f"No logs available for {args.job_name}. The Pod might be starting up or has no log output."}, indent=2))
+                    else:
+                        print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
             except KeyboardInterrupt:
-                print(f"\n👋 Log streaming stopped by user")
+                if args.json:
+                    import json
+                    print(json.dumps({"message": "Log streaming stopped by user"}, indent=2))
+                else:
+                    print(f"\n👋 Log streaming stopped by user")
                 return 0
             except Exception as e:
                 # If there's any other error, assume no logs available
-                print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+                if args.json:
+                    import json
+                    print(json.dumps({"message": f"No logs available for {args.job_name}. The Pod might be starting up or has no log output."}, indent=2))
+                else:
+                    print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
         else:
             # Get logs once
             try:
                 logs = log_client.get_job_logs(actual_pod_name, namespace=actual_namespace, tail=100, pod_name=actual_pod_name)
                 if not logs or logs == ["No pods found for this job"]:
-                    print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+                    if args.json:
+                        import json
+                        print(json.dumps({"message": f"No logs available for {args.job_name}. The Pod might be starting up or has no log output."}, indent=2))
+                    else:
+                        print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
                 else:
-                    for log in logs:
-                        print(log)
+                    if args.json:
+                        import json
+                        print(json.dumps({
+                            "logs": logs,
+                            "pod_name": actual_pod_name,
+                            "namespace": actual_namespace
+                        }, indent=2))
+                    else:
+                        for log in logs:
+                            print(log)
             except Exception as e:
                 # If there's any error, assume no logs available
-                print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
+                if args.json:
+                    import json
+                    print(json.dumps({"message": f"No logs available for {args.job_name}. The Pod might be starting up or has no log output."}, indent=2))
+                else:
+                    print(f"ℹ️  No logs available for {args.job_name}. The Pod might be starting up or has no log output.")
         
         return 0
     except KeyboardInterrupt:
+        if args.json:
+            import json
+            print(json.dumps({"message": "Log streaming stopped by user"}, indent=2))
         return 0
     except Exception as e:
-        print(f"❌ Error getting logs: {e}")
+        if args.json:
+            import json
+            print(json.dumps({"error": str(e)}, indent=2))
+        else:
+            print(f"❌ Error getting logs: {e}")
         return 1
 
 

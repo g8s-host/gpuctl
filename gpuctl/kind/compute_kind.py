@@ -69,23 +69,21 @@ class ComputeKind:
         deployment = self.builder.build_deployment(compute_job)
         service = self.builder.build_service(compute_job)
         
-        deployment_name = deployment["metadata"]["name"]
-        service_name = service["metadata"]["name"]
+        deployment_name = deployment.metadata.name
+        service_name = service.metadata.name
         
         # Check if deployment exists
-        existing_deployment = self.client.get_deployment(deployment_name, namespace)
-        if existing_deployment:
+        if self.client._is_deployment_exists(deployment_name, namespace):
             # Update existing deployment
-            deployment_result = self.client.update_deployment(deployment, namespace)
+            deployment_result = self.client.update_deployment(deployment_name, namespace, deployment)
         else:
             # Create new deployment if it doesn't exist
             deployment_result = self.client.create_deployment(deployment, namespace)
         
         # Check if service exists
-        existing_service = self.client.get_service(service_name, namespace)
-        if existing_service:
+        if self.client._is_service_exists(service_name, namespace):
             # Update existing service
-            service_result = self.client.update_service(service, namespace)
+            service_result = self.client.update_service(service_name, namespace, service)
         else:
             # Create new service if it doesn't exist
             service_result = self.client.create_service(service, namespace)

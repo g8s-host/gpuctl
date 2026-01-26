@@ -26,8 +26,8 @@ def create_quota_command(args):
                     continue
 
                 quota_config = {
-                    "name": parsed_obj.metadata.name,
-                    "description": parsed_obj.metadata.description,
+                    "name": parsed_obj.quota.name,
+                    "description": parsed_obj.quota.description,
                     "namespace": {}
                 }
 
@@ -115,7 +115,7 @@ def apply_quota_command(args):
                         print(f"❌ Unsupported kind: {parsed_obj.kind}")
                     continue
 
-                quota_name = parsed_obj.metadata.name
+                quota_name = parsed_obj.quota.name
                 namespaces = parsed_obj.namespace or {}
                 default_quota = parsed_obj.default
 
@@ -336,7 +336,7 @@ def delete_quota_command(args):
                         print(f"❌ Unsupported kind: {parsed_obj.kind}")
                     return 1
 
-                quota_name = parsed_obj.metadata.name
+                quota_name = parsed_obj.quota.name
                 namespaces_to_delete = list(parsed_obj.namespace.keys())
 
                 namespaces_to_delete_result = []
