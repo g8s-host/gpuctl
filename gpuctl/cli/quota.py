@@ -383,9 +383,9 @@ def delete_quota_command(args):
                 else:
                     print(f"❌ Parser error: {e}")
                 return 1
-        elif args.namespace_name:
+        elif args.quota_name:
             if not args.force and not args.json:
-                print(f"⚠️  Warning: About to delete namespace '{args.namespace_name}' and all resources within")
+                print(f"⚠️  Warning: About to delete all quotas with name: '{args.quota_name}'")
                 confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
                 if confirm != 'Y':
                     result = {"status": "cancelled", "message": "Operation cancelled by user"}
@@ -395,26 +395,24 @@ def delete_quota_command(args):
                         print("❌ Cancelled.")
                     return 0
 
-            success = client.delete_quota(args.namespace_name)
-            if success:
-                result = {"status": "success", "message": f"Successfully deleted quota for namespace: {args.namespace_name}"}
-                if args.json:
-                    print(json.dumps(result, indent=2))
-                else:
-                    print(f"✅ Successfully deleted quota for namespace: {args.namespace_name}")
-            else:
-                result = {"error": f"Quota not found for namespace: {args.namespace_name}"}
-                if args.json:
-                    print(json.dumps(result, indent=2))
-                else:
-                    print(f"❌ Quota not found for namespace: {args.namespace_name}")
-                return 1
-        else:
-            result = {"error": "Must provide YAML file path (-f/--file) or namespace name"}
+            result = client.delete_quota_config(args.quota_name)
             if args.json:
                 print(json.dumps(result, indent=2))
             else:
-                print("❌ Must provide YAML file path (-f/--file) or namespace name")
+                print(f"✅ Deleted quotas for config: {args.quota_name}")
+                for deleted in result.get('deleted', []):
+                    print(f"   - Namespace: {deleted['namespace']}")
+
+                if result.get('failed'):
+                    print(f"❌ Failed to delete:")
+                    for failed in result['failed']:
+                        print(f"   - Namespace: {failed['namespace']}, Error: {failed['error']}")
+        else:
+            result = {"error": "Must provide YAML file path (-f/--file) or quota name"}
+            if args.json:
+                print(json.dumps(result, indent=2))
+            else:
+                print("❌ Must provide YAML file path (-f/--file) or quota name")
             return 1
 
         return 0
