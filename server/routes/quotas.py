@@ -24,7 +24,7 @@ async def create_quota(request: JobCreateRequest, token: str = Depends(AuthValid
         # 解析YAML
         logger.debug("正在解析YAML配置")
         parsed_obj = BaseParser.parse_yaml(request.yamlContent)
-        logger.debug(f"YAML解析成功，配额名称: {parsed_obj.metadata.name}")
+        logger.debug(f"YAML解析成功，配额名称: {parsed_obj.quota.name}")
 
         if parsed_obj.kind != "quota":
             raise HTTPException(status_code=400, detail=f"Unsupported kind: {parsed_obj.kind}")
@@ -32,8 +32,8 @@ async def create_quota(request: JobCreateRequest, token: str = Depends(AuthValid
         # 创建配额
         client = QuotaClient()
         quota_config = {
-            "name": parsed_obj.metadata.name,
-            "description": parsed_obj.metadata.description,
+            "name": parsed_obj.quota.name,
+            "description": parsed_obj.quota.description,
             "namespace": {}
         }
 
@@ -55,7 +55,7 @@ async def create_quota(request: JobCreateRequest, token: str = Depends(AuthValid
 
         return {
             "message": "配额创建成功",
-            "name": parsed_obj.metadata.name,
+            "name": parsed_obj.quota.name,
             "created": results
         }
 
