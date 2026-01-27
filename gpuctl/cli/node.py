@@ -218,6 +218,16 @@ def describe_node_command(args):
         client = PoolClient()
         node = client.get_node(args.node_name)
         
+        # Check if node exists
+        if node is None:
+            error = f"Node '{args.node_name}' not found"
+            if args.json:
+                import json
+                print(json.dumps({"error": error}, indent=2))
+            else:
+                print(f"❌ {error}")
+            return 1
+        
         # Output in JSON format if requested
         if args.json:
             import json
