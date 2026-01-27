@@ -119,6 +119,16 @@ def describe_pool_command(args):
         client = PoolClient()
         pool = client.get_pool(args.pool_name)
         
+        # Check if pool exists
+        if pool is None:
+            error = f"Resource pool '{args.pool_name}' not found"
+            if args.json:
+                import json
+                print(json.dumps({"error": error}, indent=2))
+            else:
+                print(f"❌ {error}")
+            return 1
+        
         if args.json:
             import json
             print(json.dumps(pool, indent=2))
