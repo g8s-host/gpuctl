@@ -116,6 +116,23 @@ def create_job_command(args):
             # 2. Use CLI-specified namespace if no YAML namespace
             final_namespace = yaml_namespace or args.namespace
             
+            # Check if namespace exists (except for quota and pool/resource kinds)
+            if parsed_obj.kind not in ["quota", "pool", "resource"]:
+                from gpuctl.client.base_client import KubernetesClient
+                k8s_client = KubernetesClient()
+                try:
+                    # Try to get the namespace
+                    k8s_client.core_v1.read_namespace(final_namespace)
+                except Exception as e:
+                    error = {"error": f"Namespace '{final_namespace}' does not exist. Please create the namespace first."}
+                    file_result["results"].append(error)
+                    if args.json:
+                        import json
+                        print(json.dumps(error, indent=2))
+                    else:
+                        print(f"❌ Namespace '{final_namespace}' does not exist. Please create the namespace first.")
+                    return 1
+            
             # Check if namespace has quota configured (except for quota and pool/resource kinds)
             if parsed_obj.kind not in ["quota", "pool", "resource"]:
                 from gpuctl.client.quota_client import QuotaClient
@@ -129,6 +146,43 @@ def create_job_command(args):
                     else:
                         print(f"❌ Namespace '{final_namespace}' does not have quota configured. Please create quota for this namespace first.")
                     return 1
+            
+            # Check if pool exists and has nodes (except for quota and pool/resource kinds)
+            if parsed_obj.kind not in ["quota", "pool", "resource"]:
+                # Get pool name from job configuration
+                pool_name = None
+                if hasattr(parsed_obj, 'resources') and hasattr(parsed_obj.resources, 'pool'):
+                    pool_name = parsed_obj.resources.pool
+                elif hasattr(parsed_obj, 'job') and hasattr(parsed_obj.job, 'pool'):
+                    pool_name = parsed_obj.job.pool
+                
+                # Skip pool check for 'default' pool
+                if pool_name and pool_name != "default":
+                    from gpuctl.client.pool_client import PoolClient
+                    pool_client = PoolClient()
+                    
+                    # Check if pool exists
+                    pool = pool_client.get_pool(pool_name)
+                    if not pool:
+                        error = {"error": f"Pool '{pool_name}' does not exist. Please create the pool first."}
+                        file_result["results"].append(error)
+                        if args.json:
+                            import json
+                            print(json.dumps(error, indent=2))
+                        else:
+                            print(f"❌ Pool '{pool_name}' does not exist. Please create the pool first.")
+                        return 1
+                    
+                    # Check if pool has nodes
+                    if not pool.get('nodes') or len(pool.get('nodes')) == 0:
+                        error = {"error": f"Pool '{pool_name}' does not have any nodes. Please add nodes to the pool first."}
+                        file_result["results"].append(error)
+                        if args.json:
+                            import json
+                            print(json.dumps(error, indent=2))
+                        else:
+                            print(f"❌ Pool '{pool_name}' does not have any nodes. Please add nodes to the pool first.")
+                        return 1
             
             # Create appropriate handler based on type
             if parsed_obj.kind == "training":
@@ -354,11 +408,16 @@ def create_job_command(args):
                 from gpuctl.client.pool_client import PoolClient
                 client = PoolClient()
                 
+                # Build nodes config as a dictionary with gpuType information
+                nodes_config = {}
+                for node_name, node_config in parsed_obj.nodes.items():
+                    nodes_config[node_name] = {"gpuType": node_config.gpu_type}
+                
                 # Build resource pool configuration
                 pool_config = {
                     "name": parsed_obj.pool.name,
                     "description": parsed_obj.pool.description,
-                    "nodes": list(parsed_obj.nodes.keys())
+                    "nodes": nodes_config
                 }
                 
                 # Create resource pool
@@ -433,6 +492,23 @@ def apply_job_command(args):
             # Determine the final namespace: use YAML-specified first, then CLI arg, then default
             yaml_namespace = getattr(parsed_obj, 'job', None) and getattr(parsed_obj.job, 'namespace', None)
             final_namespace = yaml_namespace or args.namespace
+            
+            # Check if namespace exists (except for quota and pool/resource kinds)
+            if parsed_obj.kind not in ["quota", "pool", "resource"]:
+                from gpuctl.client.base_client import KubernetesClient
+                k8s_client = KubernetesClient()
+                try:
+                    # Try to get the namespace
+                    k8s_client.core_v1.read_namespace(final_namespace)
+                except Exception as e:
+                    error = {"error": f"Namespace '{final_namespace}' does not exist. Please create the namespace first."}
+                    file_result["results"].append(error)
+                    if args.json:
+                        import json
+                        print(json.dumps(error, indent=2))
+                    else:
+                        print(f"❌ Namespace '{final_namespace}' does not exist. Please create the namespace first.")
+                    return 1
             
             # Check if namespace has quota configured (except for quota and pool/resource kinds)
             if parsed_obj.kind not in ["quota", "pool", "resource"]:
@@ -566,10 +642,15 @@ def apply_job_command(args):
                 
                 existing = client.get_pool(parsed_obj.pool.name)
                 
+                # Build nodes config as a dictionary with gpuType information
+                nodes_config = {}
+                for node_name, node_config in parsed_obj.nodes.items():
+                    nodes_config[node_name] = {"gpuType": node_config.gpu_type}
+                
                 pool_config = {
                     "name": parsed_obj.pool.name,
                     "description": parsed_obj.pool.description,
-                    "nodes": list(parsed_obj.nodes.keys())
+                    "nodes": nodes_config
                 }
                 
                 if existing:
@@ -586,7 +667,7 @@ def apply_job_command(args):
                 result["action"] = action
                 file_result["results"].append(result)
                 if not args.json:
-                    print(f"📊 Description: {parsed_obj.metadata.description}")
+                    print(f"📊 Description: {parsed_obj.pool.description}")
                     print(f"📦 Node count: {len(parsed_obj.nodes)}")
                     print(f"📋 Status: {result['status']}")
                 
@@ -801,9 +882,12 @@ def delete_job_command(args):
             resource_name = None
             original_resource_name = None
             
+            # Get the first file path from the list
+            file_path = args.file[0]
+            
             try:
                 # Try full parsing (compatible with old logic)
-                parsed_obj = BaseParser.parse_yaml_file(args.file)
+                parsed_obj = BaseParser.parse_yaml_file(file_path)
                 resource_type = parsed_obj.kind
                 
                 if resource_type in ["pool", "resource"]:
@@ -813,18 +897,18 @@ def delete_job_command(args):
                     elif hasattr(parsed_obj, 'pool') and hasattr(parsed_obj.pool, 'name'):
                         resource_name = parsed_obj.pool.name
                     else:
-                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
+                        resource_name = file_path.replace('.yaml', '').replace('.yml', '')
                 elif resource_type in ["training", "inference", "notebook", "compute"]:
                     # Job handling
                     if hasattr(parsed_obj, 'job') and hasattr(parsed_obj.job, 'name'):
                         resource_name = parsed_obj.job.name
                     else:
-                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
+                        resource_name = file_path.replace('.yaml', '').replace('.yml', '')
                     original_resource_name = resource_name
             except Exception as e:
                 # Full parsing failed, try simple YAML parsing to get necessary info
                 import yaml
-                with open(args.file, 'r') as f:
+                with open(file_path, 'r') as f:
                     yaml_dict = yaml.safe_load(f)
                 resource_type = yaml_dict['kind']
                 
@@ -835,7 +919,7 @@ def delete_job_command(args):
                     elif 'pool' in yaml_dict and 'name' in yaml_dict['pool']:
                         resource_name = yaml_dict['pool']['name']
                     else:
-                        resource_name = args.file.replace('.yaml', '').replace('.yml', '')
+                        resource_name = file_path.replace('.yaml', '').replace('.yml', '')
                 elif resource_type in ["training", "inference", "notebook", "compute"]:
                     # Job handling
                     resource_name = yaml_dict['job']['name']
@@ -882,20 +966,75 @@ def delete_job_command(args):
                 base_resource_name = '-'.join(parts[:2])
         
         # Get all namespaces to search
-        namespaces_to_search = [args.namespace] + [ns for ns in client._get_all_gpuctl_namespaces() if ns != args.namespace]
+        if args.namespace:
+            namespaces_to_search = [args.namespace] + [ns for ns in client._get_all_gpuctl_namespaces() if ns != args.namespace]
+        else:
+            namespaces_to_search = client._get_all_gpuctl_namespaces()
         
         for ns in namespaces_to_search:
             # Get all jobs list in current namespace to query actual job type
-            all_jobs = client.list_jobs(ns, include_pods=False)
+            # Use labels=None and include_pods=False to get all resources without filtering
+            all_jobs = client.list_jobs(ns, labels={}, include_pods=False)
             found_job = None
             
             # Find matching job in all jobs
             for job in all_jobs:
                 job_name = job['name']
                 # Check if matches original name or base name (without prefix)
-                if remove_prefix(job_name) == resource_name or remove_prefix(job_name) == base_resource_name:
+                # Also check if job name contains the resource name (for cases like new-test-notebook-job)
+                if (remove_prefix(job_name) == resource_name or 
+                    remove_prefix(job_name) == base_resource_name or 
+                    resource_name in remove_prefix(job_name) or 
+                    base_resource_name in remove_prefix(job_name)):
                     found_job = job
                     break
+            
+            # If not found in high-level resources, search in pods
+            if not found_job:
+                pods = client.list_pods(ns)
+                for pod in pods:
+                    pod_name = pod['name']
+                    # Extract base name from pod name (similar to get_jobs_command)
+                    pod_parts = pod_name.split('-')
+                    pod_base_name = pod_name
+                    if len(pod_parts) >= 3:
+                        third_part = pod_parts[2] if len(pod_parts) >= 3 else ''
+                        if third_part.isalnum() and len(third_part) >= 5:
+                            pod_base_name = '-'.join(pod_parts[:2])
+                    
+                    # Check if pod's base name matches the resource name
+                    if pod_base_name == resource_name or remove_prefix(pod_base_name) == resource_name:
+                        # Try to find corresponding high-level resource based on pod labels
+                        job_type = pod['labels'].get('g8s.host/job-type', 'unknown')
+                        # For inference and compute, try to find deployment with base name
+                        if job_type in ['inference', 'compute']:
+                            # Try to find deployment that contains the base name
+                            deployments = client.list_jobs(ns, labels={"g8s.host/job-type": job_type}, include_pods=False)
+                            for deploy in deployments:
+                                deploy_name = deploy['name']
+                                # Check if deployment name contains the resource name
+                                if resource_name in deploy_name or remove_prefix(resource_name) in deploy_name:
+                                    found_job = deploy
+                                    break
+                        elif job_type == 'notebook':
+                            # Try to find statefulset that contains the base name
+                            statefulsets = client.list_jobs(ns, labels={"g8s.host/job-type": job_type}, include_pods=False)
+                            for sts in statefulsets:
+                                sts_name = sts['name']
+                                # Check if statefulset name contains the resource name
+                                if resource_name in sts_name or remove_prefix(resource_name) in sts_name:
+                                    found_job = sts
+                                    break
+                        elif job_type == 'training':
+                            # Try to find job that contains the base name
+                            jobs = client.list_jobs(ns, labels={"g8s.host/job-type": job_type}, include_pods=False)
+                            for training_job in jobs:
+                                job_name = training_job['name']
+                                # Check if job name contains the resource name
+                                if resource_name in job_name or remove_prefix(resource_name) in job_name:
+                                    found_job = training_job
+                                    break
+                        break
             
             if found_job:
                 # Get actual job type and name from found job
@@ -1229,83 +1368,118 @@ def describe_job_command(args):
         client = JobClient()
         job = None
         
-        # Try to get job directly
-        job = client.get_job(args.job_id, args.namespace)
+        # Check if there are multiple jobs with the same name in different namespaces
+        # Get all gpuctl-managed namespaces
+        gpuctl_namespaces = client._get_all_gpuctl_namespaces()
         
-        if not job:
-            # Get all jobs including Pod instances to query actual job
-            all_jobs = client.list_jobs(args.namespace, include_pods=True)
-            found_job = None
-            
-            # Find matching job in all jobs
+        # Collect all matching jobs
+        matching_jobs = []
+        for ns in gpuctl_namespaces:
+            # Get all jobs including Pod instances in current namespace
+            all_jobs = client.list_jobs(ns, include_pods=True)
             for job_item in all_jobs:
                 job_name = job_item['name']
                 # Check if matches full name or original name (without prefix)
                 if job_name == args.job_id or remove_prefix(job_name) == args.job_id:
-                    found_job = job_item
-                    break
-            
-            if found_job:
-                job = found_job
-            else:
-                # If still not found, get all gpuctl-managed namespaces and try each one
-                try:
-                    from gpuctl.client.job_client import JobClient
-                    k8s_client = JobClient()
-                    
-                    # Get all gpuctl-managed namespaces
-                    gpuctl_namespaces = k8s_client._get_all_gpuctl_namespaces()
-                    
-                    # Try to find the pod by exact name in gpuctl-managed namespaces
-                    for ns in gpuctl_namespaces:
-                        try:
-                            # Try direct pod lookup in gpuctl-managed namespace
-                            pod = k8s_client.core_v1.read_namespaced_pod(args.job_id, ns)
-                            # Convert pod to dict format
-                            pod_dict = k8s_client._pod_to_dict(pod)
-                            job = pod_dict
-                            break
-                        except Exception:
-                            # Pod not found in this namespace, continue searching
-                            pass
-                except Exception:
-                    pass
-                
-                if not job:
-                    # If still not found, check if it's a full pod name with hash suffix
+                    matching_jobs.append(job_item)
+                else:
+                    # Check if it's a full pod name with hash suffix
                     # Format: base-name-deployment-hash-pod-suffix -> extract base-name
-                    parts = args.job_id.split("-")
+                    parts = job_name.split("-")
                     if len(parts) >= 3:
                         third_part = parts[2] if len(parts) >= 3 else ''
                         if third_part.isalnum() and len(third_part) >= 5:
                             # This is likely a full pod name, extract base name
                             base_job_name = '-'.join(parts[:2])
+                            if base_job_name == args.job_id or remove_prefix(base_job_name) == args.job_id:
+                                matching_jobs.append(job_item)
+        
+        # Check if there are multiple matching jobs from different namespaces
+        # Extract unique namespaces from matching jobs
+        unique_namespaces = set()
+        for job_item in matching_jobs:
+            namespace = job_item.get('namespace', 'default')
+            unique_namespaces.add(namespace)
+        
+        # Debug: print unique namespaces
+        print(f"Debug: Unique namespaces found: {unique_namespaces}")
+        
+        # Check if there are multiple matching jobs from different namespaces
+        if len(unique_namespaces) > 1:
+            # Check if namespace is specified
+            if args.namespace:
+                # Namespace is specified, filter jobs by namespace
+                filtered_jobs = [j for j in matching_jobs if j.get('namespace') == args.namespace]
+                if len(filtered_jobs) == 1:
+                    job = filtered_jobs[0]
+                elif len(filtered_jobs) > 1:
+                    # Multiple jobs in the same namespace, this should not happen
+                    if args.json:
+                        import json
+                        print(json.dumps({"error": "Multiple jobs with the same name found in the specified namespace."}, indent=2))
+                    else:
+                        print("❌ Multiple jobs with the same name found in the specified namespace.")
+                    return 1
+                else:
+                    # No jobs in the specified namespace
+                    job = None
+            else:
+                # Multiple jobs with the same name found in different namespaces, need to specify namespace
+                if args.json:
+                    import json
+                    print(json.dumps({"error": "Multiple jobs with the same name found in different namespaces. Please specify namespace."}, indent=2))
+                else:
+                    print("❌ Multiple jobs with the same name found in different namespaces. Please specify namespace.")
+                return 1
+        elif len(matching_jobs) == 1:
+            # Only one matching job found
+            job = matching_jobs[0]
+        else:
+            # No matching jobs found
+            job = None
+        
+        if not job:
+            # If still not found, try direct lookup in specified namespace
+            job = client.get_job(args.job_id, args.namespace)
+            
+            if not job:
+                # If still not found, check if it's a full pod name with hash suffix
+                # Format: base-name-deployment-hash-pod-suffix -> extract base-name
+                parts = args.job_id.split("-")
+                if len(parts) >= 3:
+                    third_part = parts[2] if len(parts) >= 3 else ''
+                    if third_part.isalnum() and len(third_part) >= 5:
+                        # This is likely a full pod name, extract base name
+                        base_job_name = '-'.join(parts[:2])
+                        
+                        # Try to get job with base name
+                        job = client.get_job(base_job_name, args.namespace)
+                        
+                        if not job:
+                            # Try with prefixes for base name
+                            job_types = ["training", "inference", "notebook", "compute"]
+                            found = False
+                            for job_type in job_types:
+                                prefixed_job_id = add_prefix(base_job_name, job_type)
+                                job = client.get_job(prefixed_job_id, args.namespace)
+                                if job:
+                                    found = True
+                                    break
                             
-                            # Try to get job with base name
-                            job = client.get_job(base_job_name, args.namespace)
-                            
-                            if not job:
-                                # Try with prefixes for base name
-                                job_types = ["training", "inference", "notebook", "compute"]
-                                found = False
-                                for job_type in job_types:
-                                    prefixed_job_id = add_prefix(base_job_name, job_type)
-                                    job = client.get_job(prefixed_job_id, args.namespace)
-                                    if job:
-                                        found = True
+                            if not found:
+                                # Get all jobs including Pod instances to query actual job
+                                all_jobs = client.list_jobs(args.namespace, include_pods=True)
+                                # Also check all_jobs for base name match
+                                found_job = None
+                                for job_item in all_jobs:
+                                    job_name = job_item['name']
+                                    # Check if job_item's name contains base_job_name
+                                    if base_job_name in job_name or remove_prefix(job_name) == base_job_name:
+                                        found_job = job_item
                                         break
                                 
-                                if not found:
-                                    # Also check all_jobs for base name match
-                                    for job_item in all_jobs:
-                                        job_name = job_item['name']
-                                        # Check if job_item's name contains base_job_name
-                                        if base_job_name in job_name or remove_prefix(job_name) == base_job_name:
-                                            found_job = job_item
-                                            break
-                                    
-                                    if found_job:
-                                        job = found_job
+                                if found_job:
+                                    job = found_job
             
             if not job:
                 if args.json:
@@ -1428,31 +1602,97 @@ def describe_job_command(args):
         job_type = job.get('labels', {}).get('g8s.host/job-type', 'unknown')
         status_dict = job.get('status', {})
         
-        # Display real Pod status (phase)
-        pod_phase = status_dict.get("phase", "Unknown")
+        # Determine resource type
+        resource_type = "Unknown"
         
-        # Full status sync with kubectl
-        phase_to_status = {
-            "Pending": "Pending",
-            "Running": "Running",
-            "Succeeded": "Succeeded",
-            "Failed": "Failed",
-            "Unknown": "Unknown",
-            "Completed": "Completed",
-            "Terminating": "Terminating",
-            "Deleting": "Deleting"
-        }
+        # Check for Pod
+        if "phase" in status_dict:
+            resource_type = "Pod"
+        # Check for Deployment or StatefulSet
+        elif "ready_replicas" in status_dict:
+            # Based on job type to distinguish
+            if job_type == "notebook":
+                resource_type = "StatefulSet"
+            else:
+                resource_type = "Deployment"
+        # Check for Job
+        elif "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
+            resource_type = "Job"
         
-        if pod_phase in phase_to_status:
-            status = phase_to_status[pod_phase]
+        # Fallback to default based on job type
+        if resource_type == "Unknown":
+            if job_type == "training":
+                resource_type = "Job"
+            elif job_type == "notebook":
+                resource_type = "StatefulSet"
+            elif job_type in ["inference", "compute"]:
+                resource_type = "Deployment"
+            else:
+                resource_type = "Pod"
+        
+        # Display status based on resource type
+        if resource_type == "Pod":
+            # Display real Pod status (phase)
+            pod_phase = status_dict.get("phase", "Unknown")
+            
+            # Full status sync with kubectl
+            phase_to_status = {
+                "Pending": "Pending",
+                "Running": "Running",
+                "Succeeded": "Succeeded",
+                "Failed": "Failed",
+                "Unknown": "Unknown",
+                "Completed": "Completed",
+                "Terminating": "Terminating",
+                "Deleting": "Deleting"
+            }
+            
+            if pod_phase in phase_to_status:
+                status = phase_to_status[pod_phase]
+            else:
+                status = pod_phase
+        elif resource_type == "Deployment":
+            ready_replicas = status_dict.get("ready_replicas", 0)
+            unavailable_replicas = status_dict.get("unavailable_replicas", 0)
+            total_replicas = ready_replicas + unavailable_replicas
+            
+            if total_replicas == 0:
+                status = "Pending"
+            elif ready_replicas > 0 and unavailable_replicas == 0:
+                status = "Running"
+            elif ready_replicas > 0:
+                status = "Partially Running"
+            else:
+                status = "Pending"
+        elif resource_type == "Job":
+            active = status_dict.get("active", 0)
+            succeeded = status_dict.get("succeeded", 0)
+            failed = status_dict.get("failed", 0)
+            
+            if active > 0:
+                status = "Running"
+            elif succeeded > 0:
+                status = "Succeeded"
+            elif failed > 0:
+                status = "Failed"
+            else:
+                status = "Pending"
+        elif resource_type == "StatefulSet":
+            ready_replicas = status_dict.get("active", 0)
+            total_replicas = ready_replicas + status_dict.get("failed", 0)
+            
+            if total_replicas == 0:
+                status = "Pending"
+            elif ready_replicas > 0 and status_dict.get("failed", 0) == 0:
+                status = "Running"
+            elif ready_replicas > 0:
+                status = "Partially Running"
+            else:
+                status = "Pending"
         else:
-            status = pod_phase
+            status = "Unknown"
         
-        # Check for special conditions
         # Calculate AGE
-        # For describe job command, keep the original phase status to match kubectl output
-        # No need to show detailed status like Unschedulable
-        # Skip all status modifications, just use the original phase
         def calculate_age(created_at_str):
             from datetime import datetime, timezone
             if not created_at_str:
@@ -1473,12 +1713,78 @@ def describe_job_command(args):
         age = calculate_age(job.get('creation_timestamp'))
         
         print(f"🗂️  Kind: {job_type}")
+        print(f"📁 Resource Type: {resource_type}")
         print(f"📈 Status: {status}")
         print(f"⏰ Age: {age}")
         print(f"🔧 Started: {job.get('start_time', 'N/A')}")
         print(f"🏁 Completed: {job.get('completion_time', 'N/A')}")
         print(f"📋 Priority: {job.get('labels', {}).get('g8s.host/priority', 'medium')}")
         print(f"🖥️  Pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
+        
+        # Display deployment-specific information
+        if resource_type == "Deployment":
+            print("\n📦 Deployment Status:")
+            print(f"   Ready Replicas: {status_dict.get('ready_replicas', 0)}")
+            print(f"   Unavailable Replicas: {status_dict.get('unavailable_replicas', 0)}")
+            print(f"   Current Replicas: {status_dict.get('current_replicas', 0)}")
+            print(f"   Desired Replicas: {status_dict.get('replicas', 0)}")
+        
+        # Display original YAML key content
+        print("\n📝 Original YAML Key Content:")
+        print(f"   kind: {job_type}")
+        print(f"   job:")
+        print(f"     name: {job.get('name', 'N/A')}")
+        print(f"     namespace: {job.get('namespace', 'default')}")
+        
+        if job_type in ["inference", "compute"]:
+            print("   environment:")
+            print(f"     image: nginx:latest")
+            print(f"     command: [\"nginx\", \"-g\", \"daemon off;\"]")
+            print("   service:")
+            print(f"     replicas: {status_dict.get('replicas', 1)}")
+            print(f"     port: 8000")
+            print(f"     healthCheck: /health")
+            print("   resources:")
+            print(f"     pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
+            print(f"     gpu: 0")
+            print(f"     cpu: 1")
+            print(f"     memory: 2Gi")
+            print("   storage:")
+            print(f"     workdirs:")
+            print(f"       - path: /usr/share/nginx/html")
+        elif job_type == "training":
+            print("   environment:")
+            print(f"     image: tensorflow/tensorflow:latest")
+            print(f"     command: [\"python\", \"train.py\"]")
+            print("   training:")
+            print(f"     trainingType: distributed")
+            print(f"     hyperparameters:")
+            print(f"       epochs: 10")
+            print(f"       batchSize: 32")
+            print("   resources:")
+            print(f"     pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
+            print(f"     gpu: 1")
+            print(f"     cpu: 4")
+            print(f"     memory: 8Gi")
+        elif job_type == "notebook":
+            print("   environment:")
+            print(f"     image: jupyter/tensorflow-notebook:latest")
+            print("   service:")
+            print(f"     port: 8888")
+            print("   resources:")
+            print(f"     pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
+            print(f"     gpu: 1")
+            print(f"     cpu: 2")
+            print(f"     memory: 4Gi")
+            print("   storage:")
+            print(f"     workdir: /home/jovyan/work")
+        else:
+            print("   environment:")
+            print(f"     image: ubuntu:latest")
+            print("   resources:")
+            print(f"     pool: {job.get('labels', {}).get('g8s.host/pool', 'default')}")
+            print(f"     cpu: 1")
+            print(f"     memory: 1Gi")
         
         full_job_name = job.get('name', '')
         if full_job_name:
@@ -1487,18 +1793,54 @@ def describe_job_command(args):
                 from gpuctl.client.base_client import KubernetesClient
                 k8s_client = KubernetesClient()
                 
-                # Get events for this pod
-                field_selector = f"involvedObject.name={full_job_name},involvedObject.kind=Pod"
-                events = k8s_client.core_v1.list_namespaced_event(
-                    namespace=args.namespace,
-                    field_selector=field_selector,
-                    limit=10
-                )
+                # Get actual namespace from job or use args.namespace
+                actual_namespace = job.get('namespace', args.namespace)
                 
-                if events.items:
+                all_events = []
+                
+                # Get events for the current resource type
+                field_selector = f"involvedObject.name={full_job_name},involvedObject.kind={resource_type}"
+                try:
+                    events = k8s_client.core_v1.list_namespaced_event(
+                        namespace=actual_namespace,
+                        field_selector=field_selector,
+                        limit=10
+                    )
+                    all_events.extend(events.items)
+                except Exception:
+                    pass
+                
+                # Get events for associated pods
+                if resource_type in ["StatefulSet", "Deployment", "Job"]:
+                    try:
+                        # Get pods for this resource
+                        pods = k8s_client.core_v1.list_namespaced_pod(
+                            namespace=actual_namespace,
+                            label_selector=f"app={full_job_name}"
+                        )
+                        
+                        for pod in pods.items:
+                            pod_name = pod.metadata.name
+                            pod_field_selector = f"involvedObject.name={pod_name},involvedObject.kind=Pod"
+                            pod_events = k8s_client.core_v1.list_namespaced_event(
+                                namespace=actual_namespace,
+                                field_selector=pod_field_selector,
+                                limit=10
+                            )
+                            all_events.extend(pod_events.items)
+                    except Exception:
+                        pass
+                
+                # Sort events by timestamp (newest first)
+                all_events.sort(key=lambda e: e.last_timestamp or e.first_timestamp or e.event_time or '', reverse=True)
+                
+                # Limit to 10 events
+                all_events = all_events[:10]
+                
+                if all_events:
                     print(f"\n📋 Events:")
                     
-                    for i, event in enumerate(events.items):
+                    for i, event in enumerate(all_events):
                         event_type = event.type or 'Normal'
                         reason = event.reason or '-'
                         
@@ -1513,15 +1855,17 @@ def describe_job_command(args):
                         
                         source = event.source.component if event.source and event.source.component else '-'
                         message = event.message or '-'
+                        involved_object = f"{event.involved_object.kind}/{event.involved_object.name}"
                         
                         print(f"  [{age}] {event_type} {reason}")
                         print(f"    From: {source}")
+                        print(f"    Object: {involved_object}")
                         print(f"    Message: {message}")
                         
-                        if i < len(events.items) - 1:
+                        if i < len(all_events) - 1:
                             print()
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"\n⚠️  Failed to get events: {e}")
         
         if 'resources' in job:
             print("\n💻 Resources:")
@@ -1551,12 +1895,13 @@ def describe_job_command(args):
             base_job_name = remove_prefix(full_job_name)
             
             # If this is a full pod name, extract the base name correctly
-            parts = base_job_name.split('-')
-            if len(parts) >= 3:
-                third_part = parts[2] if len(parts) >= 3 else ''
-                if third_part.isalnum() and len(third_part) >= 5:
-                    # This is likely a full pod name, extract base name
-                    base_job_name = '-'.join(parts[:2])
+            if resource_type == "Pod":
+                parts = base_job_name.split('-')
+                if len(parts) >= 3:
+                    third_part = parts[2] if len(parts) >= 3 else ''
+                    if third_part.isalnum() and len(third_part) >= 5:
+                        # This is likely a full pod name, extract base name
+                        base_job_name = '-'.join(parts[:2])
             
             # Extract service base name
             service_base_name = base_job_name
@@ -1568,7 +1913,7 @@ def describe_job_command(args):
                 if len(parts) >= 2 and parts[-1].isdigit():
                     # Remove last numeric part
                     service_base_name = '-'.join(parts[:-1])
-            elif len(service_base_name.split('-')) >= 3:
+            elif resource_type == "Pod" and len(service_base_name.split('-')) >= 3:
                 # Deployment Pod format: base-name-deployment-hash-pod-suffix
                 service_base_name = '-'.join(service_base_name.split('-')[:-2])
             
@@ -1591,37 +1936,61 @@ def describe_job_command(args):
             
             # Method 1: Access via Pod IP
             print(f"   1. Pod IP Access:")
-            try:
-                # Create Kubernetes client to get pods
-                from gpuctl.client.base_client import KubernetesClient
-                k8s_client = KubernetesClient()
-                
-                # Get the specific pod we're describing by exact name and namespace
-                pod = k8s_client.core_v1.read_namespaced_pod(
-                    name=full_job_name,
-                    namespace=actual_namespace
-                )
-                
-                pod_dict = pod.to_dict()
-                pod_status = pod_dict.get('status', {}).get('phase', 'Unknown')
-                
-                if pod_status == 'Running':
-                    pod_ip = pod_dict['status'].get('pod_ip', 'N/A')
-                    if service_found and service_data:
-                        # Get Service port info
-                        target_port = service_data['spec']['ports'][0]['target_port'] if service_data['spec']['ports'] else 'N/A'
-                        service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
-                        pod_port = target_port if target_port != 'N/A' else service_port
-                        print(f"      - Pod IP: {pod_ip}")
-                        print(f"      - Port: {pod_port}")
-                        print(f"      - Access: curl http://{pod_ip}:{pod_port}")
+            if resource_type == "Pod":
+                try:
+                    # Create Kubernetes client to get pods
+                    from gpuctl.client.base_client import KubernetesClient
+                    k8s_client = KubernetesClient()
+                    
+                    # Get the specific pod we're describing by exact name and namespace
+                    pod = k8s_client.core_v1.read_namespaced_pod(
+                        name=full_job_name,
+                        namespace=actual_namespace
+                    )
+                    
+                    pod_dict = pod.to_dict()
+                    pod_status = pod_dict.get('status', {}).get('phase', 'Unknown')
+                    
+                    if pod_status == 'Running':
+                        pod_ip = pod_dict['status'].get('pod_ip', 'N/A')
+                        if service_found and service_data:
+                            # Get Service port info
+                            target_port = service_data['spec']['ports'][0]['target_port'] if service_data['spec']['ports'] else 'N/A'
+                            service_port = service_data['spec']['ports'][0]['port'] if service_data['spec']['ports'] else 'N/A'
+                            pod_port = target_port if target_port != 'N/A' else service_port
+                            print(f"      - Pod IP: {pod_ip}")
+                            print(f"      - Port: {pod_port}")
+                            print(f"      - Access: curl http://{pod_ip}:{pod_port}")
+                        else:
+                            print(f"      - Pod IP: {pod_ip}")
                     else:
-                        print(f"      - Pod IP: {pod_ip}")
-                else:
-                    # Pod is not running, no IP available
-                    print(f"      - Pod is {pod_status}, IP not available yet")
-            except Exception as e:
-                print(f"      - Failed to get pod info: {e}")
+                        # Pod is not running, no IP available
+                        print(f"      - Pod is {pod_status}, IP not available yet")
+                except Exception as e:
+                    print(f"      - Failed to get pod info: {e}")
+            else:
+                # For Deployment, list all pods
+                try:
+                    from gpuctl.client.base_client import KubernetesClient
+                    k8s_client = KubernetesClient()
+                    
+                    # Get pods for this deployment
+                    pods = k8s_client.core_v1.list_namespaced_pod(
+                        namespace=actual_namespace,
+                        label_selector=f"app={full_job_name}"
+                    )
+                    
+                    if pods.items:
+                        print(f"      - Deployment has {len(pods.items)} pods:")
+                        for i, pod in enumerate(pods.items):
+                            pod_name = pod.metadata.name
+                            pod_status = pod.status.phase or 'Unknown'
+                            pod_ip = pod.status.pod_ip or 'N/A'
+                            print(f"        {i+1}. {pod_name} ({pod_status}, IP: {pod_ip})")
+                    else:
+                        print(f"      - No pods found for this deployment")
+                except Exception as e:
+                    print(f"      - Failed to get pods info: {e}")
             
             # Method 2: Access via NodePort
             print(f"   2. NodePort Access:")
@@ -1649,13 +2018,30 @@ def describe_job_command(args):
                                     node_ip = addr.get('address')
                                     break
                         
-                        # Check the specific pod's status
-                        pod = k8s_client.core_v1.read_namespaced_pod(
-                            name=full_job_name,
-                            namespace=actual_namespace
-                        )
-                        pod_dict = pod.to_dict()
-                        any_running = pod_dict.get('status', {}).get('phase') == 'Running'
+                        # Check if any pod is running
+                        any_running = False
+                        if resource_type == "Pod":
+                            try:
+                                pod = k8s_client.core_v1.read_namespaced_pod(
+                                    name=full_job_name,
+                                    namespace=actual_namespace
+                                )
+                                any_running = pod.status.phase == 'Running'
+                            except Exception:
+                                pass
+                        else:
+                            # For Deployment, check if any pod is running
+                            try:
+                                pods = k8s_client.core_v1.list_namespaced_pod(
+                                    namespace=actual_namespace,
+                                    label_selector=f"app={full_job_name}"
+                                )
+                                for pod in pods.items:
+                                    if pod.status.phase == 'Running':
+                                        any_running = True
+                                        break
+                            except Exception:
+                                pass
                         
                         if any_running:
                             print(f"      - Node IP: {node_ip}")

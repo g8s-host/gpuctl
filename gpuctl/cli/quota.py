@@ -325,64 +325,72 @@ def delete_quota_command(args):
         import json
 
         if args.file:
-            try:
-                parsed_obj = BaseParser.parse_yaml_file(args.file)
+            all_results = []
+            for file_path in args.file:
+                try:
+                    parsed_obj = BaseParser.parse_yaml_file(file_path)
 
-                if parsed_obj.kind != "quota":
-                    error = {"error": f"Unsupported kind: {parsed_obj.kind}"}
+                    if parsed_obj.kind != "quota":
+                        error = {"error": f"Unsupported kind: {parsed_obj.kind}"}
+                        all_results.append({"file": file_path, "error": error})
+                        if args.json:
+                            import json
+                            print(json.dumps(error, indent=2))
+                        else:
+                            print(f"❌ Unsupported kind: {parsed_obj.kind}")
+                        continue
+
+                    quota_name = parsed_obj.quota.name
+                    namespaces_to_delete = list(parsed_obj.namespace.keys())
+
+                    namespaces_to_delete_result = []
+                    for ns in namespaces_to_delete:
+                        namespaces_to_delete_result.append(ns)
+
+                    if parsed_obj.default:
+                        namespaces_to_delete_result.append("default")
+
+                    unique_namespaces = list(set(namespaces_to_delete_result))
+
+                    if not args.force and not args.json:
+                        print(f"⚠️  Warning: About to delete {len(unique_namespaces)} namespaces and all resources within:")
+                        for ns in unique_namespaces:
+                            print(f"   - {ns}")
+
+                        confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
+                        if confirm != 'Y':
+                            result = {"status": "cancelled", "message": "Operation cancelled by user"}
+                            if args.json:
+                                import json
+                                print(json.dumps(result, indent=2))
+                            else:
+                                print("❌ Cancelled.")
+                            return 0
+
+                    result = client.delete_quota_config(quota_name, include_default=bool(parsed_obj.default))
+                    all_results.append({"file": file_path, "result": result})
+
                     if args.json:
+                        import json
+                        print(json.dumps(result, indent=2))
+                    else:
+                        print(f"✅ Deleted quotas for config: {quota_name}")
+                        for deleted in result.get('deleted', []):
+                            print(f"   - Namespace: {deleted['namespace']}")
+
+                        if result.get('failed'):
+                            print(f"❌ Failed to delete:")
+                            for failed in result['failed']:
+                                print(f"   - Namespace: {failed['namespace']}, Error: {failed['error']}")
+                except ParserError as e:
+                    error = {"error": f"Parser error: {str(e)}"}
+                    all_results.append({"file": file_path, "error": error})
+                    if args.json:
+                        import json
                         print(json.dumps(error, indent=2))
                     else:
-                        print(f"❌ Unsupported kind: {parsed_obj.kind}")
-                    return 1
-
-                quota_name = parsed_obj.quota.name
-                namespaces_to_delete = list(parsed_obj.namespace.keys())
-
-                namespaces_to_delete_result = []
-                for ns in namespaces_to_delete:
-                    namespaces_to_delete_result.append(ns)
-
-                if parsed_obj.default:
-                    namespaces_to_delete_result.append("default")
-
-                unique_namespaces = list(set(namespaces_to_delete_result))
-
-                if not args.force and not args.json:
-                    print(f"⚠️  Warning: About to delete {len(unique_namespaces)} namespaces and all resources within:")
-                    for ns in unique_namespaces:
-                        print(f"   - {ns}")
-
-                    confirm = input("\nAre you sure you want to continue? (Y/n): ").strip().upper()
-                    if confirm != 'Y':
-                        result = {"status": "cancelled", "message": "Operation cancelled by user"}
-                        if args.json:
-                            print(json.dumps(result, indent=2))
-                        else:
-                            print("❌ Cancelled.")
-                        return 0
-
-                result = client.delete_quota_config(quota_name, include_default=bool(parsed_obj.default))
-
-                if args.json:
-                    print(json.dumps(result, indent=2))
-                else:
-                    print(f"✅ Deleted quotas for config: {quota_name}")
-                    for deleted in result.get('deleted', []):
-                        print(f"   - Namespace: {deleted['namespace']}")
-
-                    if result.get('failed'):
-                        print(f"❌ Failed to delete:")
-                        for failed in result['failed']:
-                            print(f"   - Namespace: {failed['namespace']}, Error: {failed['error']}")
-
-            except ParserError as e:
-                error = {"error": f"Parser error: {str(e)}"}
-                if args.json:
-                    print(json.dumps(error, indent=2))
-                else:
-                    print(f"❌ Parser error: {e}")
-                return 1
+                        print(f"❌ Parser error: {e}")
+                    continue
         elif args.quota_name:
             if not args.force and not args.json:
                 print(f"⚠️  Warning: About to delete all quotas with name: '{args.quota_name}'")

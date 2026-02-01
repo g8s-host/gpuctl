@@ -62,14 +62,20 @@ class PoolClient(KubernetesClient):
         """Create resource pool"""
         try:
             pool_name = pool_config["name"]
-            node_names = pool_config.get("nodes", [])
+            node_configs = pool_config.get("nodes", {})
+            node_names = list(node_configs.keys())
 
             # Validate all nodes exist
             self._validate_nodes_exist(node_names)
 
             # Add resource pool labels to nodes
-            for node_name in node_names:
+            for node_name, node_config in node_configs.items():
                 self._label_node(node_name, "g8s.host/pool", pool_name)
+                # Add GPU type label if specified
+                if "gpu_type" in node_config:
+                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpu_type"])
+                elif "gpuType" in node_config:
+                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpuType"])
 
             return {
                 "name": pool_name,
@@ -84,14 +90,14 @@ class PoolClient(KubernetesClient):
         """Update resource pool"""
         try:
             pool_name = pool_config["name"]
-            node_names = pool_config.get("nodes", [])
+            node_configs = pool_config.get("nodes", {})
+            new_nodes = set(node_configs.keys())
 
             existing_pool = self.get_pool(pool_name)
             if not existing_pool:
                 raise ValueError(f"Pool {pool_name} does not exist")
 
             old_nodes = set(existing_pool.get("nodes", []))
-            new_nodes = set(node_names)
 
             nodes_to_add = new_nodes - old_nodes
             nodes_to_remove = old_nodes - new_nodes
@@ -100,10 +106,24 @@ class PoolClient(KubernetesClient):
                 self._validate_nodes_exist(list(nodes_to_add))
                 for node_name in nodes_to_add:
                     self._label_node(node_name, "g8s.host/pool", pool_name)
+                    # Add GPU type label if specified
+                    node_config = node_configs.get(node_name, {})
+                    if "gpu_type" in node_config:
+                        self._label_node(node_name, "g8s.host/gpu-type", node_config["gpu_type"])
+                    elif "gpuType" in node_config:
+                        self._label_node(node_name, "g8s.host/gpu-type", node_config["gpuType"])
 
             if nodes_to_remove:
                 for node_name in nodes_to_remove:
                     self._unlabel_node(node_name, "g8s.host/pool")
+
+            # Update existing nodes' GPU type labels
+            for node_name in old_nodes & new_nodes:
+                node_config = node_configs.get(node_name, {})
+                if "gpu_type" in node_config:
+                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpu_type"])
+                elif "gpuType" in node_config:
+                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpuType"])
 
             return {
                 "name": pool_name,
@@ -291,7 +311,8 @@ class PoolClient(KubernetesClient):
     def _get_node_gpu_type(self, node) -> Optional[str]:
         """Get node GPU type"""
         labels = node.metadata.labels or {}
-        return labels.get("nvidia.com/gpu-type")
+        # Try to get GPU type from different label names
+        return labels.get("nvidia.com/gpu-type") or labels.get("nvidia.com/gpuType") or labels.get("g8s.host/gpu-type")
 
     def _get_all_nodes_used_gpu_count(self) -> Dict[str, int]:
         """Batch get all nodes used GPU count"""
