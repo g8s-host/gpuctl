@@ -551,6 +551,19 @@ class JobClient(KubernetesClient):
 
     def _deployment_to_dict(self, deployment: client.V1Deployment) -> Dict[str, Any]:
         """将Deployment对象转换为字典"""
+        status_dict = {
+            "active": deployment.status.ready_replicas or 0,
+            "succeeded": 0,
+            "failed": deployment.status.unavailable_replicas or 0,
+            "ready_replicas": deployment.status.ready_replicas or 0,
+            "unavailable_replicas": deployment.status.unavailable_replicas or 0,
+            "replicas": deployment.status.replicas or 0
+        }
+        
+        # 只添加存在的属性
+        if hasattr(deployment.status, 'current_replicas'):
+            status_dict["current_replicas"] = deployment.status.current_replicas or 0
+        
         return {
             "name": deployment.metadata.name,
             "namespace": deployment.metadata.namespace,
@@ -558,11 +571,7 @@ class JobClient(KubernetesClient):
             "creation_timestamp": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
             "start_time": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
             "completion_time": None,
-            "status": {
-                "active": deployment.status.ready_replicas or 0,
-                "succeeded": 0,
-                "failed": deployment.status.unavailable_replicas or 0
-            }
+            "status": status_dict
         }
 
 
@@ -581,7 +590,9 @@ class JobClient(KubernetesClient):
             "status": {
                 "active": ready_replicas,
                 "succeeded": 0,
-                "failed": replicas - ready_replicas
+                "failed": replicas - ready_replicas,
+                "ready_replicas": ready_replicas,
+                "replicas": replicas
             }
         }
 
