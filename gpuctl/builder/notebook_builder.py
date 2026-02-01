@@ -21,13 +21,35 @@ class NotebookBuilder(BaseBuilder):
                 client.V1LocalObjectReference(name=notebook_job.environment.image_pull_secret)
             ]
 
-        node_selector = {}
-        if notebook_job.resources.pool:
+        # 处理资源池选择
+        if notebook_job.resources.pool and notebook_job.resources.pool != "default":
+            # 对于非默认池，使用 node_selector
+            node_selector = {}
             node_selector["g8s.host/pool"] = notebook_job.resources.pool
-        if notebook_job.resources.gpu_type:
-            node_selector["g8s.host/gpuType"] = notebook_job.resources.gpu_type
-        if node_selector:
+            if notebook_job.resources.gpu_type:
+                node_selector["g8s.host/gpuType"] = notebook_job.resources.gpu_type
             pod_spec_extras['node_selector'] = node_selector
+        else:
+            # 对于默认池或未指定池，使用 node_affinity 实现反亲和性
+            # 确保 Pod 不会调度到带有 g8s.host/pool 标签的节点上
+            if notebook_job.resources.gpu_type:
+                # 如果指定了 GPU 类型，仍然使用 node_selector 来选择 GPU 类型
+                node_selector = {}
+                node_selector["g8s.host/gpuType"] = notebook_job.resources.gpu_type
+                pod_spec_extras['node_selector'] = node_selector
+            # 添加反亲和性规则
+            pod_spec_extras['affinity'] = client.V1Affinity(
+                node_affinity=client.V1NodeAffinity(
+                    required_during_scheduling_ignored_during_execution=client.V1NodeSelector(
+                        node_selector_terms=[client.V1NodeSelectorTerm(
+                            match_expressions=[client.V1NodeSelectorRequirement(
+                                key="g8s.host/pool",
+                                operator="DoesNotExist"
+                            )]
+                        )]
+                    )
+                )
+            )
 
         app_label = f"{notebook_job.job.name}"
         

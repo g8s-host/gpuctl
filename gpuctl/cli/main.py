@@ -15,7 +15,7 @@ def main():
 
     # create command
     create_parser = subparsers.add_parser('create', help='Create a job from YAML')
-    create_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can be specified multiple times)')
+    create_parser.add_argument('-f', '--file', required=True, nargs='+', help='YAML file path(s)')
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
     create_parser.add_argument('--json', action='store_true', help='Output in JSON format')
@@ -71,7 +71,7 @@ def main():
 
     # apply command
     apply_parser = subparsers.add_parser('apply', help='Apply a resource configuration (create or update)')
-    apply_parser.add_argument('-f', '--file', required=True, action='append', help='YAML file path (can specify multiple)')
+    apply_parser.add_argument('-f', '--file', required=True, nargs='+', help='YAML file path(s)')
     apply_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
     apply_parser.add_argument('--json', action='store_true', help='Output in JSON format')
@@ -81,7 +81,7 @@ def main():
     delete_subparsers = delete_parser.add_subparsers(dest='resource', help='Resource type to delete')
     
     # Support delete -f <yaml_file> format
-    delete_parser.add_argument('-f', '--file', help='YAML file path (alternative to specifying resource type)')
+    delete_parser.add_argument('-f', '--file', nargs='+', help='YAML file path(s) (alternative to specifying resource type)')
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
     delete_parser.add_argument('--force', action='store_true', help='Force delete resource')
@@ -207,21 +207,27 @@ def main():
             return apply_job_command(args)
         elif args.command == 'delete':
             if args.file:
-                parsed_obj = BaseParser.parse_yaml_file(args.file)
-                if parsed_obj.kind == "quota":
-                    return delete_quota_command(args)
-                elif parsed_obj.kind == "pool":
-                    # For pool deletion from file, we need to extract pool name first
-                    import yaml
-                    with open(args.file, 'r') as f:
-                        pool_config = yaml.safe_load(f)
-                    args.pool_name = pool_config.get('pool', {}).get('name') or pool_config.get('name')
-                    if not args.pool_name:
-                        print("Error: Could not extract pool name from file")
-                        return 1
-                    return delete_pool_command(args)
-                else:
-                    return delete_job_command(args)
+                # Handle multiple files
+                for file_path in args.file:
+                    parsed_obj = BaseParser.parse_yaml_file(file_path)
+                    if parsed_obj.kind == "quota":
+                        # Pass the current file path to args
+                        args.file = [file_path]
+                        return delete_quota_command(args)
+                    elif parsed_obj.kind == "pool":
+                        # For pool deletion from file, we need to extract pool name first
+                        import yaml
+                        with open(file_path, 'r') as f:
+                            pool_config = yaml.safe_load(f)
+                        args.pool_name = pool_config.get('pool', {}).get('name') or pool_config.get('name')
+                        if not args.pool_name:
+                            print("Error: Could not extract pool name from file")
+                            return 1
+                        return delete_pool_command(args)
+                    else:
+                        # Pass the current file path to args
+                        args.file = [file_path]
+                        return delete_job_command(args)
             elif args.resource == 'job':
                 return delete_job_command(args)
             elif args.resource == 'quota':
