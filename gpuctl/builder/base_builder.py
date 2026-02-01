@@ -97,6 +97,8 @@ class BaseBuilder:
                 spec.image_pull_secrets = pod_spec_extras['image_pull_secrets']
             if 'node_selector' in pod_spec_extras:
                 spec.node_selector = pod_spec_extras['node_selector']
+            if 'affinity' in pod_spec_extras:
+                spec.affinity = pod_spec_extras['affinity']
 
         if workdirs:
             spec.volumes = BaseBuilder.build_volumes(workdirs)
