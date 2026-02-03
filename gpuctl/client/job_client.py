@@ -504,13 +504,17 @@ class JobClient(KubernetesClient):
                 "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
                 "start_time": pod.status.start_time.isoformat() if pod.status and pod.status.start_time else (pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None),
                 "completion_time": None,
+                "spec": {
+                    "node_name": pod.spec.node_name
+                },
                 "status": {
                     "active": active,
                     "succeeded": succeeded,
                     "failed": failed,
                     "phase": pod_phase,
                     "conditions": pod_conditions,
-                    "container_statuses": container_statuses
+                    "container_statuses": container_statuses,
+                    "pod_ip": pod.status.pod_ip
                 }
             }
             
