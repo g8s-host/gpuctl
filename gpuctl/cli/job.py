@@ -723,14 +723,28 @@ def get_jobs_command(args):
         
         # Build label filter criteria
         labels = {}
-        if args.pool:
-            labels["g8s.host/pool"] = args.pool
         if args.kind:
             labels["g8s.host/job-type"] = args.kind
         
         # Call API to get jobs list with filter criteria
         # 使用 include_pods=True 获取 Pod 资源，而不是 Deployment 或 StatefulSet 等高级资源
         jobs = client.list_jobs(args.namespace, labels=labels, include_pods=True)
+        
+        # If pool is specified, filter jobs by nodes in the pool
+        if args.pool:
+            from gpuctl.client.pool_client import PoolClient
+            pool_client = PoolClient()
+            pool = pool_client.get_pool(args.pool)
+            
+            if pool:
+                pool_nodes = pool.get('nodes', [])
+                # Filter jobs that are running on nodes in the pool
+                filtered_jobs = []
+                for job in jobs:
+                    node_name = job.get('spec', {}).get('node_name')
+                    if node_name and node_name in pool_nodes:
+                        filtered_jobs.append(job)
+                jobs = filtered_jobs
         
         # Helper function to calculate AGE
         def calculate_age(created_at_str):
