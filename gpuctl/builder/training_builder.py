@@ -57,6 +57,11 @@ class TrainingBuilder(BaseBuilder):
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
+            labels={
+                "g8s.host/job-type": "training",
+                "g8s.host/priority": training_job.job.priority,
+                "g8s.host/pool": training_job.resources.pool or "default"
+            },
             workdirs=workdirs,
             priority_class_name=priority_class_name
         )

@@ -721,14 +721,32 @@ def get_jobs_command(args):
     try:
         client = JobClient()
         
-        # Build label filter criteria
+        # Build label filter criteria (exclude job-type for now to get all pods)
         labels = {}
-        if args.kind:
-            labels["g8s.host/job-type"] = args.kind
         
         # Call API to get jobs list with filter criteria
         # 使用 include_pods=True 获取 Pod 资源，而不是 Deployment 或 StatefulSet 等高级资源
         jobs = client.list_jobs(args.namespace, labels=labels, include_pods=True)
+        
+        # Filter jobs by kind if specified
+        if args.kind:
+            filtered_jobs = []
+            for job in jobs:
+                # Get job type from labels, or determine it like _pod_to_dict does
+                job_type = job.get('labels', {}).get('g8s.host/job-type', 'unknown')
+                
+                # If job_type is still unknown, determine it based on pod characteristics
+                if job_type == 'unknown':
+                    labels = job.get('labels', {})
+                    if "job-name" in labels:
+                        job_type = "training"
+                    else:
+                        # For pods without labels, default to 'inference' type
+                        job_type = "inference"
+                
+                if job_type == args.kind:
+                    filtered_jobs.append(job)
+            jobs = filtered_jobs
         
         # If pool is specified, filter jobs by nodes in the pool
         if args.pool:
@@ -981,11 +999,18 @@ def delete_job_command(args):
         # Extract base job name from full pod name
         # Format: base-name-deployment-hash-pod-suffix -> base-name
         base_resource_name = resource_name
-        parts = resource_name.split("-")
-        if len(parts) >= 3:
-            third_part = parts[2] if len(parts) >= 3 else ''
-            if third_part.isalnum() and len(third_part) >= 5:
-                base_resource_name = '-'.join(parts[:2])
+        
+        # If we're dealing with a notebook job, we need to preserve the full name
+        # because notebook jobs have a specific naming convention
+        # Format: base-name-notebook-job -> keep as is
+        if "-notebook-job" in resource_name:
+            base_resource_name = resource_name
+        else:
+            parts = resource_name.split("-")
+            if len(parts) >= 3:
+                third_part = parts[2] if len(parts) >= 3 else ''
+                if third_part.isalnum() and len(third_part) >= 5:
+                    base_resource_name = '-'.join(parts[:2])
         
         # Get all namespaces to search
         if args.namespace:
@@ -1093,16 +1118,30 @@ def delete_job_command(args):
                 job_types = ["training", "inference", "compute", "notebook"]
                 for job_type in job_types:
                     full_name = base_resource_name
-                    if job_type == "training":
+                    service_name = f"svc-{base_resource_name}"
+                    
+                    # For notebook jobs, try both the base name and the full name with suffix
+                    if job_type == "notebook":
+                        # Try with notebook job suffix
+                        notebook_full_name = f"{base_resource_name}-notebook-job"
+                        notebook_service_name = f"svc-{base_resource_name}-notebook-job"
+                        
+                        # First try the full name with suffix
+                        statefulset_deleted = client.delete_statefulset(notebook_full_name, ns, force)
+                        service_deleted = client.delete_service(notebook_service_name, ns)
+                        success = statefulset_deleted and service_deleted
+                        
+                        # If that fails, try the base name
+                        if not success:
+                            statefulset_deleted = client.delete_statefulset(full_name, ns, force)
+                            service_deleted = client.delete_service(service_name, ns)
+                            success = statefulset_deleted and service_deleted
+                    elif job_type == "training":
                         success = client.delete_job(full_name, ns, force)
                     elif job_type == "inference" or job_type == "compute":
                         deployment_deleted = client.delete_deployment(full_name, ns, force)
-                        service_deleted = client.delete_service(f"svc-{base_resource_name}", ns)
+                        service_deleted = client.delete_service(service_name, ns)
                         success = deployment_deleted and service_deleted
-                    elif job_type == "notebook":
-                        statefulset_deleted = client.delete_statefulset(full_name, ns, force)
-                        service_deleted = client.delete_service(f"svc-{base_resource_name}", ns)
-                        success = statefulset_deleted and service_deleted
                     
                     if success:
                         break
