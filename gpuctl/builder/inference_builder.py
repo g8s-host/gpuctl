@@ -80,7 +80,12 @@ class InferenceBuilder(BaseBuilder):
         template = cls.build_pod_template_spec(
             container, 
             pod_spec_extras, 
-            labels={"app": app_label}, 
+            labels={
+                "app": app_label,
+                "g8s.host/job-type": "inference",
+                "g8s.host/priority": inference_job.job.priority,
+                "g8s.host/pool": inference_job.resources.pool or "default"
+            }, 
             restart_policy="Always",
             workdirs=workdirs,
             priority_class_name=priority_class_name
