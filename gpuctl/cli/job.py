@@ -816,12 +816,18 @@ def get_jobs_command(args):
                 if third_part.isalnum() and len(third_part) >= 5:
                     final_name = '-'.join(parts[:2])
             
+            # 获取节点名称和 IP 地址
+            node_name = job.get('spec', {}).get('node_name') or 'N/A'
+            pod_ip = job.get('status', {}).get('pod_ip') or 'N/A'
+            
             processed_jobs.append({
                 'job_id': simplified_name,  # 使用去除前缀的完整 Pod 名称作为 Job ID
                 'name': final_name,  # 使用简化后的作业名称作为 NAME 列
                 'namespace': job_namespace,
                 'kind': job_type,
                 'status': status,
+                'node': node_name,
+                'ip': pod_ip,
                 'age': age
             })
         
@@ -832,8 +838,8 @@ def get_jobs_command(args):
             return 0
         
         # Calculate column widths dynamically for text output
-        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'AGE']
-        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'age': 10}
+        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'NODE', 'IP', 'AGE']
+        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'node': 10, 'ip': 15, 'age': 10}
         
         # First pass: calculate max widths
         for row in processed_jobs:
@@ -842,15 +848,17 @@ def get_jobs_command(args):
             col_widths['namespace'] = max(col_widths['namespace'], len(row['namespace']))
             col_widths['kind'] = max(col_widths['kind'], len(row['kind']))
             col_widths['status'] = max(col_widths['status'], len(row['status']))
+            col_widths['node'] = max(col_widths['node'], len(row['node']))
+            col_widths['ip'] = max(col_widths['ip'], len(row['ip']))
             col_widths['age'] = max(col_widths['age'], len(row['age']))
         
         # Print header
-        header_line = f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['age']}}"
+        header_line = f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['node']}}  {headers[6]:<{col_widths['ip']}}  {headers[7]:<{col_widths['age']}}"
         print(header_line)
         
         # Print rows
         for row in processed_jobs:
-            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['age']:<{col_widths['age']}}")
+            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['node']:<{col_widths['node']}}  {row['ip']:<{col_widths['ip']}}  {row['age']:<{col_widths['age']}}")
         
         return 0
     except Exception as e:
