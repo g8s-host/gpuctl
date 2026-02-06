@@ -105,10 +105,11 @@ def get_labels_command(args):
                 else:
                     print(f"❌ Label {args.key} not found on node {args.node_name}")
             else:
-                # Print all labels
+                # Print only g8s.host prefix labels
                 print(f"🏷️  Labels for node {args.node_name}:")
                 for key, value in labels.items():
-                    print(f"   {key}: {value}")
+                    if key.startswith('g8s.host'):
+                        print(f"   {key}: {value}")
         
         return 0
     except Exception as e:

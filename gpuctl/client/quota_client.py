@@ -46,6 +46,12 @@ class QuotaClient(KubernetesClient):
 
             self._ensure_namespace_exists(namespace)
 
+            # Check if namespace already has a quota with g8s.host/quota label
+            quota_list = self.core_v1.list_namespaced_resource_quota(namespace)
+            for existing_quota in quota_list.items:
+                if existing_quota.metadata.labels and existing_quota.metadata.labels.get("g8s.host/quota"):
+                    raise ValueError(f"Namespace {namespace} already has a quota '{existing_quota.metadata.labels.get('g8s.host/quota')}'. Only one quota is allowed per namespace.")
+
             hard_limits = {}
             if cpu:
                 hard_limits["cpu"] = cpu
@@ -191,6 +197,12 @@ class QuotaClient(KubernetesClient):
                                          memory: str = None, gpu: str = None) -> Dict[str, Any]:
         """Create or update ResourceQuota in default namespace"""
         try:
+            # Check if default namespace already has a quota with g8s.host/quota label
+            quota_list = self.core_v1.list_namespaced_resource_quota("default")
+            for existing_quota in quota_list.items:
+                if existing_quota.metadata.labels and existing_quota.metadata.labels.get("g8s.host/quota"):
+                    raise ValueError(f"Namespace default already has a quota '{existing_quota.metadata.labels.get('g8s.host/quota')}'. Only one quota is allowed per namespace.")
+
             hard_limits = {}
             if cpu:
                 hard_limits["cpu"] = cpu
