@@ -457,6 +457,21 @@ def get_namespaces_command(args):
                 "age": age
             })
         
+        # Add default namespace if not already in the list
+        try:
+            default_ns = client.core_v1.read_namespace("default")
+            # Check if default namespace is already in the list
+            default_exists = any(ns["name"] == "default" for ns in processed_namespaces)
+            if not default_exists:
+                processed_namespaces.append({
+                    "name": default_ns.metadata.name,
+                    "status": default_ns.status.phase,
+                    "age": default_ns.metadata.creation_timestamp
+                })
+        except Exception as e:
+            # Ignore error if default namespace cannot be read
+            pass
+        
         # Output in JSON format if requested
         if args.json:
             import json
