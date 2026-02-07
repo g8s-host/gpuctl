@@ -83,6 +83,7 @@ class BaseBuilder:
     def build_pod_template_spec(container: client.V1Container,
                                 pod_spec_extras: Dict[str, Any] = None,
                                 labels: Dict[str, str] = None,
+                                annotations: Dict[str, str] = None,
                                 restart_policy: str = "Never",
                                 workdirs: List[Dict[str, str]] = None,
                                 priority_class_name: str = None) -> client.V1PodTemplateSpec:
@@ -108,5 +109,5 @@ class BaseBuilder:
             spec.priority_class_name = priority_class_name
 
         pod_labels = labels or {"app": "gpuctl-job"}
-        metadata = client.V1ObjectMeta(labels=pod_labels)
+        metadata = client.V1ObjectMeta(labels=pod_labels, annotations=annotations)
         return client.V1PodTemplateSpec(metadata=metadata, spec=spec)

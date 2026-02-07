@@ -497,15 +497,46 @@ class JobClient(KubernetesClient):
                 pod_conditions = pod.status.conditions or []
                 container_statuses = pod.status.container_statuses or []
             
+            # 提取 containers 信息
+            containers = []
+            if pod.spec and pod.spec.containers:
+                for container in pod.spec.containers:
+                    container_dict = {
+                        "name": container.name,
+                        "image": container.image,
+                    }
+                    if container.command:
+                        container_dict["command"] = container.command
+                    if container.args:
+                        container_dict["args"] = container.args
+                    if container.env:
+                        container_dict["env"] = [
+                            {"name": env.name, "value": env.value}
+                            for env in container.env if env
+                        ]
+                    if container.resources:
+                        container_dict["resources"] = {
+                            "limits": container.resources.limits or {},
+                            "requests": container.resources.requests or {}
+                        }
+                    if container.ports:
+                        container_dict["ports"] = [
+                            {"containerPort": port.container_port}
+                            for port in container.ports if port
+                        ]
+                    containers.append(container_dict)
+            
             pod_dict = {
                 "name": pod.metadata.name,
                 "namespace": pod.metadata.namespace,
                 "labels": labels.copy(),
+                "annotations": pod.metadata.annotations or {},
                 "creation_timestamp": pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None,
                 "start_time": pod.status.start_time.isoformat() if pod.status and pod.status.start_time else (pod.metadata.creation_timestamp.isoformat() if pod.metadata.creation_timestamp else None),
                 "completion_time": None,
                 "spec": {
-                    "node_name": pod.spec.node_name
+                    "node_name": pod.spec.node_name,
+                    "containers": containers
                 },
                 "status": {
                     "active": active,
@@ -543,6 +574,7 @@ class JobClient(KubernetesClient):
             "name": job.metadata.name,
             "namespace": job.metadata.namespace,
             "labels": job.metadata.labels or {},
+            "annotations": job.metadata.annotations or {},
             "creation_timestamp": job.metadata.creation_timestamp.isoformat() if job.metadata.creation_timestamp else None,
             "start_time": job.status.start_time.isoformat() if job.status and job.status.start_time else None,
             "completion_time": job.status.completion_time.isoformat() if job.status and job.status.completion_time else None,
@@ -568,14 +600,55 @@ class JobClient(KubernetesClient):
         if hasattr(deployment.status, 'current_replicas'):
             status_dict["current_replicas"] = deployment.status.current_replicas or 0
         
+        # 提取 spec 信息（包含 containers）
+        spec_dict = {}
+        if deployment.spec and deployment.spec.template and deployment.spec.template.spec:
+            template_spec = deployment.spec.template.spec
+            spec_dict = {
+                "replicas": deployment.spec.replicas,
+                "template": {
+                    "spec": {
+                        "containers": []
+                    }
+                }
+            }
+            if template_spec.containers:
+                for container in template_spec.containers:
+                    container_dict = {
+                        "name": container.name,
+                        "image": container.image,
+                    }
+                    if container.command:
+                        container_dict["command"] = container.command
+                    if container.args:
+                        container_dict["args"] = container.args
+                    if container.env:
+                        container_dict["env"] = [
+                            {"name": env.name, "value": env.value}
+                            for env in container.env if env
+                        ]
+                    if container.resources:
+                        container_dict["resources"] = {
+                            "limits": container.resources.limits or {},
+                            "requests": container.resources.requests or {}
+                        }
+                    if container.ports:
+                        container_dict["ports"] = [
+                            {"containerPort": port.container_port}
+                            for port in container.ports if port
+                        ]
+                    spec_dict["template"]["spec"]["containers"].append(container_dict)
+        
         return {
             "name": deployment.metadata.name,
             "namespace": deployment.metadata.namespace,
             "labels": deployment.metadata.labels or {},
+            "annotations": deployment.metadata.annotations or {},
             "creation_timestamp": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
             "start_time": deployment.metadata.creation_timestamp.isoformat() if deployment.metadata.creation_timestamp else None,
             "completion_time": None,
-            "status": status_dict
+            "status": status_dict,
+            "spec": spec_dict
         }
 
 
@@ -588,6 +661,7 @@ class JobClient(KubernetesClient):
             "name": statefulset.metadata.name,
             "namespace": statefulset.metadata.namespace,
             "labels": statefulset.metadata.labels or {},
+            "annotations": statefulset.metadata.annotations or {},
             "creation_timestamp": statefulset.metadata.creation_timestamp.isoformat() if statefulset.metadata.creation_timestamp else None,
             "start_time": statefulset.metadata.creation_timestamp.isoformat() if statefulset.metadata.creation_timestamp else None,
             "completion_time": None,

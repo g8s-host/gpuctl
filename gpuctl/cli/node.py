@@ -26,6 +26,7 @@ def get_nodes_command(args):
             gpu_free = node.get('gpu_free', 0)
             gpu_types = ', '.join(node.get('gpu_types', []))
             pool = node.get('labels', {}).get('g8s.host/pool', 'default')
+            ip = node.get('ip', 'N/A')
             
             processed_nodes.append({
                 'name': name,
@@ -34,6 +35,7 @@ def get_nodes_command(args):
                 'gpu_used': gpu_used,
                 'gpu_free': gpu_free,
                 'gpu_types': gpu_types,
+                'ip': ip,
                 'pool': pool
             })
         
@@ -43,8 +45,8 @@ def get_nodes_command(args):
             print(json.dumps(processed_nodes, indent=2))
         else:
             # Calculate column widths dynamically
-            headers = ['NODE NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'POOL']
-            col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'pool': 15}
+            headers = ['NODE NAME', 'STATUS', 'GPU TOTAL', 'GPU USED', 'GPU FREE', 'GPU TYPE', 'IP', 'POOL']
+            col_widths = {'name': 15, 'status': 10, 'total': 10, 'used': 10, 'free': 10, 'type': 15, 'ip': 15, 'pool': 15}
             
             # First pass: calculate max widths
             for node in processed_nodes:
@@ -54,15 +56,16 @@ def get_nodes_command(args):
                 col_widths['used'] = max(col_widths['used'], len(str(node['gpu_used'])))
                 col_widths['free'] = max(col_widths['free'], len(str(node['gpu_free'])))
                 col_widths['type'] = max(col_widths['type'], len(node['gpu_types']))
+                col_widths['ip'] = max(col_widths['ip'], len(node['ip']))
                 col_widths['pool'] = max(col_widths['pool'], len(node['pool']))
             
             # Print header
-            header_line = f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['pool']}}"
+            header_line = f"{headers[0]:<{col_widths['name']}}  {headers[1]:<{col_widths['status']}}  {headers[2]:<{col_widths['total']}}  {headers[3]:<{col_widths['used']}}  {headers[4]:<{col_widths['free']}}  {headers[5]:<{col_widths['type']}}  {headers[6]:<{col_widths['ip']}}  {headers[7]:<{col_widths['pool']}}"
             print(header_line)
             
             # Print rows
             for node in processed_nodes:
-                print(f"{node['name']:<{col_widths['name']}}  {node['status']:<{col_widths['status']}}  {node['gpu_total']:<{col_widths['total']}}  {node['gpu_used']:<{col_widths['used']}}  {node['gpu_free']:<{col_widths['free']}}  {node['gpu_types']:<{col_widths['type']}}  {node['pool']:<{col_widths['pool']}}")
+                print(f"{node['name']:<{col_widths['name']}}  {node['status']:<{col_widths['status']}}  {node['gpu_total']:<{col_widths['total']}}  {node['gpu_used']:<{col_widths['used']}}  {node['gpu_free']:<{col_widths['free']}}  {node['gpu_types']:<{col_widths['type']}}  {node['ip']:<{col_widths['ip']}}  {node['pool']:<{col_widths['pool']}}")
         
         return 0
     except Exception as e:

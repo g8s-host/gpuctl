@@ -365,27 +365,33 @@ class PoolClient(KubernetesClient):
     def list_nodes(self, filters: Dict[str, str] = None) -> List[Dict[str, Any]]:
         """List all nodes with filtering support"""
         try:
-            # Build label selector
-            label_selector = None
-            if filters:
-                selector_parts = []
-                if filters.get("pool"):
-                    selector_parts.append(f"g8s.host/pool={filters['pool']}")
-                if filters.get("gpuType"):
-                    selector_parts.append(f"nvidia.com/gpuType={filters['gpuType']}")
-                if selector_parts:
-                    label_selector = ",".join(selector_parts)
-
-            # Get node list
-            nodes = self.core_v1.list_node(label_selector=label_selector)
+            # Get all nodes first
+            nodes = self.core_v1.list_node()
 
             # Batch get all nodes GPU usage
             node_used_gpus = self._get_all_nodes_used_gpu_count()
 
-            # Build node information
+            # Build node information and apply filters
             node_list = []
             for node in nodes.items:
                 node_info = self._build_node_info(node, node_used_gpus)
+                
+                # Apply filters
+                if filters:
+                    # Filter by pool
+                    if filters.get("pool"):
+                        node_pool = node_info.get('labels', {}).get('g8s.host/pool', 'default')
+                        if node_pool != filters['pool']:
+                            continue
+                    
+                    # Filter by GPU type
+                    if filters.get("gpu_type"):
+                        # Get node's GPU type
+                        node_gpu_type = self._get_node_gpu_type(node)
+                        # Check if node's GPU type matches the filter
+                        if not node_gpu_type or filters['gpu_type'] != node_gpu_type:
+                            continue
+                
                 node_list.append(node_info)
 
             return node_list
@@ -411,6 +417,14 @@ class PoolClient(KubernetesClient):
         gpu_count = self._get_node_gpu_count(node)
         gpu_type = self._get_node_gpu_type(node)
         
+        # Get node IP address
+        node_ip = "N/A"
+        if node.status and node.status.addresses:
+            for addr in node.status.addresses:
+                if addr.type == "InternalIP":
+                    node_ip = addr.address
+                    break
+        
         # If GPU usage not provided, call batch fetch method
         if node_used_gpus is None:
             node_used_gpus = self._get_all_nodes_used_gpu_count()
@@ -423,6 +437,7 @@ class PoolClient(KubernetesClient):
             "status": "active" if self._is_node_ready(node) else "not_ready",
             "k8s_status": node.status.conditions[-1].type if node.status.conditions else "unknown",
             "labels": labels,
+            "ip": node_ip,
             "created_at": node.metadata.creation_timestamp.isoformat() if node.metadata.creation_timestamp else None,
             "last_updated_at": node.status.conditions[-1].last_transition_time.isoformat() if node.status.conditions else None,
             "resources": {

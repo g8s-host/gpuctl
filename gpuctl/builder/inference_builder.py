@@ -77,15 +77,24 @@ class InferenceBuilder(BaseBuilder):
         priority_config = PriorityConfig.PRIORITY_CLASSES.get(inference_job.job.priority)
         priority_class_name = priority_config["name"] if priority_config else None
         
+        # 构建 labels
+        pod_labels = {
+            "app": app_label,
+            "g8s.host/job-type": "inference",
+            "g8s.host/priority": inference_job.job.priority,
+            "g8s.host/pool": inference_job.resources.pool or "default"
+        }
+
+        # 构建 annotations，包含 description
+        pod_annotations = {}
+        if inference_job.job.description:
+            pod_annotations["g8s.host/description"] = inference_job.job.description
+
         template = cls.build_pod_template_spec(
-            container, 
-            pod_spec_extras, 
-            labels={
-                "app": app_label,
-                "g8s.host/job-type": "inference",
-                "g8s.host/priority": inference_job.job.priority,
-                "g8s.host/pool": inference_job.resources.pool or "default"
-            }, 
+            container,
+            pod_spec_extras,
+            labels=pod_labels,
+            annotations=pod_annotations,
             restart_policy="Always",
             workdirs=workdirs,
             priority_class_name=priority_class_name
@@ -99,13 +108,22 @@ class InferenceBuilder(BaseBuilder):
             )
         )
 
+        # 构建 metadata labels
+        metadata_labels = {
+            "g8s.host/job-type": "inference",
+            "g8s.host/priority": inference_job.job.priority,
+            "g8s.host/pool": inference_job.resources.pool or "default"
+        }
+
+        # 构建 metadata annotations，包含 description
+        metadata_annotations = {}
+        if inference_job.job.description:
+            metadata_annotations["g8s.host/description"] = inference_job.job.description
+
         metadata = client.V1ObjectMeta(
             name=app_label,
-            labels={
-                "g8s.host/job-type": "inference",
-                "g8s.host/priority": inference_job.job.priority,
-                "g8s.host/pool": inference_job.resources.pool or "default"
-            }
+            labels=metadata_labels,
+            annotations=metadata_annotations
         )
 
         return client.V1Deployment(
