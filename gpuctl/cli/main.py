@@ -53,7 +53,7 @@ def main():
     
     # get labels
     labels_parser = get_subparsers.add_parser('labels', help='Get node labels')
-    labels_parser.add_argument('node_name', help='Node name')
+    labels_parser.add_argument('node_name', nargs='?', help='Node name (optional, if not specified, list labels from all nodes)')
     labels_parser.add_argument('--key', help='Label key to filter')
     labels_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 

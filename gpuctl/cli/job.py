@@ -875,12 +875,23 @@ def get_jobs_command(args):
             node_name = job.get('spec', {}).get('node_name') or 'N/A'
             pod_ip = job.get('status', {}).get('pod_ip') or 'N/A'
             
+            # 计算 READY 状态 (ready_containers/total_containers)
+            container_statuses = status_dict.get("container_statuses", [])
+            total_containers = len(container_statuses)
+            ready_containers = 0
+            if container_statuses:
+                for cs in container_statuses:
+                    if hasattr(cs, 'ready') and cs.ready:
+                        ready_containers += 1
+            ready_str = f"{ready_containers}/{total_containers}" if total_containers > 0 else "0/0"
+            
             processed_jobs.append({
                 'job_id': simplified_name,  # 使用去除前缀的完整 Pod 名称作为 Job ID
                 'name': final_name,  # 使用简化后的作业名称作为 NAME 列
                 'namespace': job_namespace,
                 'kind': job_type,
                 'status': status,
+                'ready': ready_str,
                 'node': node_name,
                 'ip': pod_ip,
                 'age': age
@@ -893,8 +904,8 @@ def get_jobs_command(args):
             return 0
         
         # Calculate column widths dynamically for text output
-        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'NODE', 'IP', 'AGE']
-        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'node': 10, 'ip': 15, 'age': 10}
+        headers = ['JOB ID', 'NAME', 'NAMESPACE', 'KIND', 'STATUS', 'READY', 'NODE', 'IP', 'AGE']
+        col_widths = {'job_id': 10, 'name': 10, 'namespace': 10, 'kind': 10, 'status': 10, 'ready': 8, 'node': 10, 'ip': 15, 'age': 10}
         
         # First pass: calculate max widths
         for row in processed_jobs:
@@ -903,17 +914,18 @@ def get_jobs_command(args):
             col_widths['namespace'] = max(col_widths['namespace'], len(row['namespace']))
             col_widths['kind'] = max(col_widths['kind'], len(row['kind']))
             col_widths['status'] = max(col_widths['status'], len(row['status']))
+            col_widths['ready'] = max(col_widths['ready'], len(row['ready']))
             col_widths['node'] = max(col_widths['node'], len(row['node']))
             col_widths['ip'] = max(col_widths['ip'], len(row['ip']))
             col_widths['age'] = max(col_widths['age'], len(row['age']))
         
         # Print header
-        header_line = f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['node']}}  {headers[6]:<{col_widths['ip']}}  {headers[7]:<{col_widths['age']}}"
+        header_line = f"{headers[0]:<{col_widths['job_id']}}  {headers[1]:<{col_widths['name']}}  {headers[2]:<{col_widths['namespace']}}  {headers[3]:<{col_widths['kind']}}  {headers[4]:<{col_widths['status']}}  {headers[5]:<{col_widths['ready']}}  {headers[6]:<{col_widths['node']}}  {headers[7]:<{col_widths['ip']}}  {headers[8]:<{col_widths['age']}}"
         print(header_line)
         
         # Print rows
         for row in processed_jobs:
-            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['node']:<{col_widths['node']}}  {row['ip']:<{col_widths['ip']}}  {row['age']:<{col_widths['age']}}")
+            print(f"{row['job_id']:<{col_widths['job_id']}}  {row['name']:<{col_widths['name']}}  {row['namespace']:<{col_widths['namespace']}}  {row['kind']:<{col_widths['kind']}}  {row['status']:<{col_widths['status']}}  {row['ready']:<{col_widths['ready']}}  {row['node']:<{col_widths['node']}}  {row['ip']:<{col_widths['ip']}}  {row['age']:<{col_widths['age']}}")
         
         return 0
     except Exception as e:
@@ -1057,11 +1069,9 @@ def delete_job_command(args):
             for job in all_jobs:
                 job_name = job['name']
                 # Check if matches original name or base name (without prefix)
-                # Also check if job name contains the resource name (for cases like new-test-notebook-job)
+                # Use exact match only to avoid deleting wrong jobs
                 if (remove_prefix(job_name) == resource_name or 
-                    remove_prefix(job_name) == base_resource_name or 
-                    resource_name in remove_prefix(job_name) or 
-                    base_resource_name in remove_prefix(job_name)):
+                    remove_prefix(job_name) == base_resource_name):
                     found_job = job
                     break
             
@@ -1084,30 +1094,30 @@ def delete_job_command(args):
                         job_type = pod['labels'].get('g8s.host/job-type', 'unknown')
                         # For inference and compute, try to find deployment with base name
                         if job_type in ['inference', 'compute']:
-                            # Try to find deployment that contains the base name
+                            # Try to find deployment that matches the resource name
                             deployments = client.list_jobs(ns, labels={"g8s.host/job-type": job_type}, include_pods=False)
                             for deploy in deployments:
                                 deploy_name = deploy['name']
-                                # Check if deployment name contains the resource name
-                                if resource_name in deploy_name or remove_prefix(resource_name) in deploy_name:
+                                # Use exact match only to avoid deleting wrong jobs
+                                if deploy_name == resource_name or remove_prefix(deploy_name) == resource_name:
                                     found_job = deploy
                                     break
                         elif job_type == 'notebook':
-                            # Try to find statefulset that contains the base name
+                            # Try to find statefulset that matches the resource name
                             statefulsets = client.list_jobs(ns, labels={"g8s.host/job-type": job_type}, include_pods=False)
                             for sts in statefulsets:
                                 sts_name = sts['name']
-                                # Check if statefulset name contains the resource name
-                                if resource_name in sts_name or remove_prefix(resource_name) in sts_name:
+                                # Use exact match only to avoid deleting wrong jobs
+                                if sts_name == resource_name or remove_prefix(sts_name) == resource_name:
                                     found_job = sts
                                     break
                         elif job_type == 'training':
-                            # Try to find job that contains the base name
+                            # Try to find job that matches the resource name
                             jobs = client.list_jobs(ns, labels={"g8s.host/job-type": job_type}, include_pods=False)
                             for training_job in jobs:
                                 job_name = training_job['name']
-                                # Check if job name contains the resource name
-                                if resource_name in job_name or remove_prefix(resource_name) in job_name:
+                                # Use exact match only to avoid deleting wrong jobs
+                                if job_name == resource_name or remove_prefix(job_name) == resource_name:
                                     found_job = training_job
                                     break
                         break
@@ -1151,45 +1161,34 @@ def delete_job_command(args):
                 if success:
                     break
             else:
-                # Try all possible prefixes in current namespace
-                job_types = ["training", "inference", "compute", "notebook"]
-                for job_type in job_types:
-                    full_name = base_resource_name
-                    service_name = f"svc-{base_resource_name}"
+                # Try to find job by exact resource name in current namespace
+                # Use resource_name (original name from YAML) for exact match
+                all_jobs = client.list_jobs(ns, labels={}, include_pods=False)
+                for job in all_jobs:
+                    job_name = job['name']
+                    if job_name == resource_name or remove_prefix(job_name) == resource_name:
+                        found_job = job
+                        break
+                
+                if found_job:
+                    actual_job_type = found_job['labels'].get('g8s.host/job-type', 'unknown')
+                    actual_job_name = found_job['name']
                     
-                    # For notebook jobs, try both the base name and the full name with suffix
-                    if job_type == "notebook":
-                        # If base_resource_name already ends with -notebook-job, use it directly
-                        # Otherwise, try adding the suffix
-                        if base_resource_name.endswith("-notebook-job"):
-                            notebook_full_name = base_resource_name
-                            notebook_service_name = f"svc-{base_resource_name}"
-                        else:
-                            notebook_full_name = f"{base_resource_name}-notebook-job"
-                            notebook_service_name = f"svc-{base_resource_name}-notebook-job"
-                        
-                        # First try the full name with suffix (or the base name if it already has the suffix)
-                        statefulset_deleted = client.delete_statefulset(notebook_full_name, ns, force)
-                        service_deleted = client.delete_service(notebook_service_name, ns)
-                        success = statefulset_deleted and service_deleted
-                        
-                        # If that fails, try the base name
-                        if not success:
-                            statefulset_deleted = client.delete_statefulset(full_name, ns, force)
-                            service_deleted = client.delete_service(service_name, ns)
-                            success = statefulset_deleted and service_deleted
-                    elif job_type == "training":
-                        success = client.delete_job(full_name, ns, force)
-                    elif job_type == "inference" or job_type == "compute":
-                        deployment_deleted = client.delete_deployment(full_name, ns, force)
+                    if actual_job_type == "training":
+                        success = client.delete_job(actual_job_name, ns, force)
+                    elif actual_job_type == "inference" or actual_job_type == "compute":
+                        service_name = f"svc-{actual_job_name}"
+                        deployment_deleted = client.delete_deployment(actual_job_name, ns, force)
                         service_deleted = client.delete_service(service_name, ns)
                         success = deployment_deleted and service_deleted
+                    elif actual_job_type == "notebook":
+                        service_name = f"svc-{actual_job_name}"
+                        statefulset_deleted = client.delete_statefulset(actual_job_name, ns, force)
+                        service_deleted = client.delete_service(service_name, ns)
+                        success = statefulset_deleted and service_deleted
                     
                     if success:
                         break
-                
-                if success:
-                    break
         
         if success:
             result = {
