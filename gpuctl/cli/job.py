@@ -156,12 +156,13 @@ def create_job_command(args):
                 elif hasattr(parsed_obj, 'job') and hasattr(parsed_obj.job, 'pool'):
                     pool_name = parsed_obj.job.pool
                 
-                # Skip pool check for 'default' pool
+                from gpuctl.client.pool_client import PoolClient
+                from gpuctl.client.base_client import KubernetesClient
+                pool_client = PoolClient()
+                k8s_client = KubernetesClient()
+                
                 if pool_name and pool_name != "default":
-                    from gpuctl.client.pool_client import PoolClient
-                    pool_client = PoolClient()
-                    
-                    # Check if pool exists
+                    # Check if specified pool exists
                     pool = pool_client.get_pool(pool_name)
                     if not pool:
                         error = {"error": f"Pool '{pool_name}' does not exist. Please create the pool first."}
@@ -182,6 +183,26 @@ def create_job_command(args):
                             print(json.dumps(error, indent=2))
                         else:
                             print(f"❌ Pool '{pool_name}' does not have any nodes. Please add nodes to the pool first.")
+                        return 1
+                else:
+                    # For default pool (not specified), check if there are nodes without g8s.host/pool label
+                    # These nodes can be used by default pool jobs
+                    nodes = k8s_client.core_v1.list_node()
+                    nodes_without_pool = []
+                    for node in nodes.items:
+                        labels = node.metadata.labels or {}
+                        if "g8s.host/pool" not in labels:
+                            nodes_without_pool.append(node.metadata.name)
+                    
+                    if len(nodes_without_pool) == 0:
+                        error = {"error": "Default pool has no available nodes. All nodes are assigned to specific pools. Please specify a pool in your YAML or add nodes without pool labels."}
+                        file_result["results"].append(error)
+                        if args.json:
+                            import json
+                            print(json.dumps(error, indent=2))
+                        else:
+                            print(f"❌ Default pool has no available nodes. All nodes are assigned to specific pools.")
+                            print(f"   Please specify a pool in your YAML or add nodes without pool labels.")
                         return 1
             
             # Create appropriate handler based on type
@@ -1002,11 +1023,17 @@ def delete_job_command(args):
         # Format: base-name-deployment-hash-pod-suffix -> base-name
         base_resource_name = resource_name
         
-        # If we're dealing with a notebook job, we need to preserve the full name
-        # because notebook jobs have a specific naming convention
-        # Format: base-name-notebook-job -> keep as is
+        # If we're dealing with a notebook job, we need to handle the naming convention
+        # StatefulSet name: base-name-notebook-job
+        # Pod name: base-name-notebook-job-0 (StatefulSet adds -0, -1, etc. for each replica)
         if "-notebook-job" in resource_name:
-            base_resource_name = resource_name
+            # Check if it looks like a StatefulSet Pod name (ends with -0, -1, etc.)
+            parts = resource_name.split("-")
+            if len(parts) >= 2 and parts[-1].isdigit():
+                # This is a Pod name from a StatefulSet, remove the replica suffix
+                base_resource_name = '-'.join(parts[:-1])
+            else:
+                base_resource_name = resource_name
         else:
             parts = resource_name.split("-")
             if len(parts) >= 3:
@@ -1132,11 +1159,16 @@ def delete_job_command(args):
                     
                     # For notebook jobs, try both the base name and the full name with suffix
                     if job_type == "notebook":
-                        # Try with notebook job suffix
-                        notebook_full_name = f"{base_resource_name}-notebook-job"
-                        notebook_service_name = f"svc-{base_resource_name}-notebook-job"
+                        # If base_resource_name already ends with -notebook-job, use it directly
+                        # Otherwise, try adding the suffix
+                        if base_resource_name.endswith("-notebook-job"):
+                            notebook_full_name = base_resource_name
+                            notebook_service_name = f"svc-{base_resource_name}"
+                        else:
+                            notebook_full_name = f"{base_resource_name}-notebook-job"
+                            notebook_service_name = f"svc-{base_resource_name}-notebook-job"
                         
-                        # First try the full name with suffix
+                        # First try the full name with suffix (or the base name if it already has the suffix)
                         statefulset_deleted = client.delete_statefulset(notebook_full_name, ns, force)
                         service_deleted = client.delete_service(notebook_service_name, ns)
                         success = statefulset_deleted and service_deleted
