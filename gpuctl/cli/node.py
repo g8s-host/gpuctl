@@ -80,39 +80,99 @@ def get_labels_command(args):
     try:
         client = PoolClient()
         
-        # Get node info
-        node = client.get_node(args.node_name)
-        
-        # Check if node exists
-        if node is None:
-            error = f"Node {args.node_name} not found"
+        # If node_name is specified, get labels for that node
+        if args.node_name:
+            # Get node info
+            node = client.get_node(args.node_name)
+            
+            # Check if node exists
+            if node is None:
+                error = f"Node {args.node_name} not found"
+                if args.json:
+                    import json
+                    print(json.dumps({"error": error}, indent=2))
+                else:
+                    print(f"❌ {error}")
+                return 1
+            
+            # Get node labels
+            labels = node.get('labels', {})
+            
+            # Output in JSON format if requested
             if args.json:
                 import json
-                print(json.dumps({"error": error}, indent=2))
+                print(json.dumps(labels, indent=2))
             else:
-                print(f"❌ {error}")
-            return 1
-        
-        # Get node labels
-        labels = node.get('labels', {})
-        
-        # Output in JSON format if requested
-        if args.json:
-            import json
-            print(json.dumps(labels, indent=2))
-        else:
-            # If key is specified, only print that key's label
-            if args.key:
-                if args.key in labels:
-                    print(f"{args.node_name} {args.key}: {labels[args.key]}")
+                # If key is specified, only print that key's label
+                if args.key:
+                    if args.key in labels:
+                        print(f"{args.node_name} {args.key}: {labels[args.key]}")
+                    else:
+                        print(f"❌ Label {args.key} not found on node {args.node_name}")
                 else:
-                    print(f"❌ Label {args.key} not found on node {args.node_name}")
+                    # Print only g8s.host prefix labels
+                    print(f"🏷️  Labels for node {args.node_name}:")
+                    for key, value in labels.items():
+                        if key.startswith('g8s.host'):
+                            print(f"   {key}: {value}")
+        else:
+            # Get labels from all nodes
+            nodes = client.list_nodes()
+            
+            # Build labels data for all nodes
+            all_labels = []
+            for node in nodes:
+                node_name = node.get('name', 'N/A')
+                labels = node.get('labels', {})
+                
+                # Filter labels if key is specified
+                if args.key:
+                    if args.key in labels:
+                        all_labels.append({
+                            'node': node_name,
+                            'label': f"{args.key}={labels[args.key]}"
+                        })
+                else:
+                    # Add all g8s.host prefix labels
+                    for key, value in labels.items():
+                        if key.startswith('g8s.host'):
+                            all_labels.append({
+                                'node': node_name,
+                                'label': f"{key}={value}"
+                            })
+            
+            # Output in JSON format if requested
+            if args.json:
+                import json
+                print(json.dumps(all_labels, indent=2))
             else:
-                # Print only g8s.host prefix labels
-                print(f"🏷️  Labels for node {args.node_name}:")
-                for key, value in labels.items():
-                    if key.startswith('g8s.host'):
-                        print(f"   {key}: {value}")
+                # Group labels by node
+                node_labels_map = {}
+                for item in all_labels:
+                    node_name = item['node']
+                    label = item['label']
+                    if node_name not in node_labels_map:
+                        node_labels_map[node_name] = []
+                    node_labels_map[node_name].append(label)
+                
+                # Calculate column widths dynamically
+                headers = ['NODE', 'LABELS']
+                col_widths = {'node': 10, 'labels': 50}
+                
+                # First pass: calculate max widths
+                for node_name, labels in node_labels_map.items():
+                    col_widths['node'] = max(col_widths['node'], len(node_name))
+                    labels_str = ', '.join(labels)
+                    col_widths['labels'] = max(col_widths['labels'], len(labels_str))
+                
+                # Print header
+                header_line = f"{headers[0]:<{col_widths['node']}}  {headers[1]:<{col_widths['labels']}}"
+                print(header_line)
+                
+                # Print rows - one row per node, labels separated by comma
+                for node_name, labels in node_labels_map.items():
+                    labels_str = ', '.join(labels)
+                    print(f"{node_name:<{col_widths['node']}}  {labels_str:<{col_widths['labels']}}")
         
         return 0
     except Exception as e:
