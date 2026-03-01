@@ -1648,6 +1648,7 @@ def describe_job_command(args):
             }
             
             # 计算状态
+            job_type = job.get('labels', {}).get('g8s.host/job-type', 'unknown')
             status_dict = job.get('status', {})
             pods = job.get('pods', [])
             
