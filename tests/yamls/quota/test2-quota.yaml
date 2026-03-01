@@ -1,0 +1,17 @@
+kind: quota
+version: v0.1
+
+quota:
+  name: test2-quota
+  description: "Test2 namespace resource quota configuration"
+
+default:
+  cpu: 10
+  memory: 20Gi
+  gpu: 2
+
+namespace:
+  test2:
+    cpu: 10
+    memory: 20Gi
+    gpu: 2

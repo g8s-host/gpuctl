@@ -1,0 +1,12 @@
+kind: quota
+version: v0.1
+
+quota:
+  name: test
+  description: "Test quota"
+
+namespace:
+  test:
+    cpu: 100
+    memory: 2000Gi
+    gpu: 2
