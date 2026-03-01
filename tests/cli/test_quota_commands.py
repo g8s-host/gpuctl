@@ -637,3 +637,56 @@ def test_describe_namespace_with_quota(mock_quota_client_class):
 
     assert result in (0, 1)
     mock_instance.get_quota.assert_called_once()
+
+
+# ── age 字段格式化回归测试 ────────────────────────────────────────────────────
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_get_namespaces_age_string_no_typeerror(mock_quota_client_class):
+    """回归测试：age 字段为字符串时不应抛出 TypeError（修复 %Y-%m-%d 格式化 bug）"""
+    mock_instance = MagicMock()
+    mock_core_v1 = MagicMock()
+
+    mock_ns = MagicMock()
+    mock_ns.metadata.name = "test-ns"
+    mock_ns.metadata.labels = {"g8s.host/namespace": "true"}
+    mock_ns.metadata.creation_timestamp = "2024-01-15T10:30:00Z"
+    mock_ns.status.phase = "Active"
+    mock_core_v1.list_namespace.return_value = MagicMock(items=[mock_ns])
+    mock_core_v1.read_namespace.return_value = mock_ns
+    mock_instance.core_v1 = mock_core_v1
+    mock_quota_client_class.return_value = mock_instance
+
+    args = MagicMock()
+    args.json = False
+
+    result = get_namespaces_command(args)
+    assert result == 0
+
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_describe_namespace_quota_missing_keys_no_keyerror(mock_quota_client_class):
+    """回归测试：quota 缺少 nvidia.com/gpu 时不应抛出 KeyError"""
+    mock_instance = MagicMock()
+    mock_core_v1 = MagicMock()
+
+    mock_ns = MagicMock()
+    mock_ns.metadata.name = "test-ns"
+    mock_ns.metadata.labels = {"g8s.host/namespace": "true"}
+    mock_ns.metadata.creation_timestamp = "2024-01-15T10:30:00Z"
+    mock_ns.status.phase = "Active"
+    mock_core_v1.read_namespace.return_value = mock_ns
+    mock_instance.core_v1 = mock_core_v1
+    mock_instance.get_quota.return_value = {
+        "name": "test-quota",
+        "hard": {"cpu": "4", "memory": "8Gi"},
+        "used": {"cpu": "1"}
+    }
+    mock_quota_client_class.return_value = mock_instance
+
+    args = MagicMock()
+    args.namespace_name = "test-ns"
+    args.json = False
+
+    result = describe_namespace_command(args)
+    assert result == 0

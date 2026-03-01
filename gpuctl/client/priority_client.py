@@ -1,13 +1,7 @@
 from kubernetes import client, config
 from typing import List, Dict, Any, Optional
-from enum import Enum
 from .base_client import KubernetesClient
-
-
-class PriorityLevel(str, Enum):
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
+from gpuctl.constants import Priority as PriorityLevel
 
 
 class PriorityConfig:

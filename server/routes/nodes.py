@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 import logging
 
 from gpuctl.client.pool_client import PoolClient
+from gpuctl.constants import Labels, DEFAULT_POOL
 
 from server.models import (
     NodeDetailResponse
@@ -29,7 +30,7 @@ async def get_nodes(
         for node in nodes:
             if pool:
                 labels = node.get("labels", {})
-                if labels.get("g8s.host/pool") != pool:
+                if labels.get(Labels.POOL) != pool:
                     continue
             
             if gpuType:
@@ -38,7 +39,7 @@ async def get_nodes(
                     continue
             
             labels = node.get("labels", {})
-            pool_name = labels.get("g8s.host/pool", "default")
+            pool_name = labels.get(Labels.POOL, "default")
             
             node_info = {
                 "nodeName": node["name"],
@@ -66,69 +67,6 @@ async def get_nodes(
 
     except Exception as e:
         logger.error(f"Failed to get nodes: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-@router.get("/{nodeName}", response_model=NodeDetailResponse)
-async def get_node_detail(nodeName: str):
-    """获取节点详情"""
-    try:
-        client = PoolClient.get_instance()
-        node = client.get_node(nodeName)
-        
-        if not node:
-            raise HTTPException(status_code=404, detail="Node not found")
-        
-        gpu_detail = []
-        gpu_count = node["gpu_total"]
-        for i in range(gpu_count):
-            gpu_detail.append({
-                "gpuId": f"gpu-{i}",
-                "type": node["gpu_types"][0] if node["gpu_types"] else "unknown",
-                "status": "free",
-                "utilization": 0.0,
-                "memoryUsage": "0Gi/0Gi"
-            })
-        
-        running_jobs = []
-        
-        labels = []
-        for key, value in node.get("labels", {}).items():
-            labels.append({"key": key, "value": value})
-        
-        bound_pools = []
-        if node.get("labels", {}).get("g8s.host/pool"):
-            bound_pools.append(node.get("labels", {}).get("g8s.host/pool"))
-        
-        return NodeDetailResponse(
-            nodeName=node["name"],
-            status=node["status"],
-            k8sStatus={
-                "conditions": [],
-                "kernelVersion": "unknown",
-                "osImage": "unknown"
-            },
-            resources={
-                "cpuTotal": 0,
-                "cpuUsed": 0,
-                "memoryTotal": "0",
-                "memoryUsed": "0",
-                "gpuTotal": gpu_count,
-                "gpuUsed": node["gpu_used"],
-                "gpuFree": node["gpu_free"]
-            },
-            gpuDetail=gpu_detail,
-            labels=labels,
-            boundPools=bound_pools,
-            runningJobs=running_jobs,
-            createdAt=None,
-            lastUpdatedAt=None
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to get node detail: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -172,6 +110,62 @@ async def get_nodes_gpu_detail(
 
     except Exception as e:
         logger.error(f"Failed to get nodes gpu detail: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/{nodeName}", response_model=NodeDetailResponse)
+async def get_node_detail(nodeName: str):
+    """获取节点详情"""
+    try:
+        client = PoolClient.get_instance()
+        node = client.get_node(nodeName)
+        
+        if not node:
+            raise HTTPException(status_code=404, detail="Node not found")
+        
+        gpu_detail = []
+        gpu_count = node["gpu_total"]
+        for i in range(gpu_count):
+            gpu_detail.append({
+                "gpuId": f"gpu-{i}",
+                "type": node["gpu_types"][0] if node["gpu_types"] else "unknown",
+                "status": "free",
+                "utilization": 0.0,
+                "memoryUsage": "0Gi/0Gi"
+            })
+        
+        running_jobs = []
+        
+        labels = []
+        for key, value in node.get("labels", {}).items():
+            labels.append({"key": key, "value": value})
+        
+        bound_pools = []
+        if node.get("labels", {}).get(Labels.POOL):
+            bound_pools.append(node.get("labels", {}).get(Labels.POOL))
+        
+        return NodeDetailResponse(
+            nodeName=node["name"],
+            status=node["status"],
+            resources={
+                "cpuTotal": 0,
+                "cpuUsed": 0,
+                "memoryTotal": "0",
+                "memoryUsed": "0",
+                "gpuTotal": gpu_count,
+                "gpuUsed": node["gpu_used"],
+                "gpuFree": node["gpu_free"]
+            },
+            labels=labels,
+            boundPools=bound_pools,
+            createdAt=None,
+            lastUpdatedAt=None
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get node detail: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

@@ -1,6 +1,7 @@
 from .base_client import KubernetesClient
 from kubernetes.client.rest import ApiException
 from typing import List, Dict, Any, Optional
+from gpuctl.constants import Labels, DEFAULT_POOL
 
 
 class PoolClient(KubernetesClient):
@@ -25,7 +26,7 @@ class PoolClient(KubernetesClient):
             pool_nodes = {}
             for node in nodes.items:
                 labels = node.metadata.labels or {}
-                pool_name = labels.get("g8s.host/pool", "default")
+                pool_name = labels.get(Labels.POOL, "default")
 
                 if pool_name not in pool_nodes:
                     pool_nodes[pool_name] = []
@@ -47,7 +48,7 @@ class PoolClient(KubernetesClient):
         try:
             # Get all nodes of this resource pool
             nodes = self.core_v1.list_node(
-                label_selector=f"g8s.host/pool={pool_name}"
+                label_selector=f"{Labels.POOL}={pool_name}"
             )
 
             if not nodes.items:
@@ -70,12 +71,12 @@ class PoolClient(KubernetesClient):
 
             # Add resource pool labels to nodes
             for node_name, node_config in node_configs.items():
-                self._label_node(node_name, "g8s.host/pool", pool_name)
+                self._label_node(node_name, Labels.POOL, pool_name)
                 # Add GPU type label if specified
                 if "gpu_type" in node_config:
-                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpu_type"])
+                    self._label_node(node_name, Labels.GPU_TYPE_KEBAB, node_config["gpu_type"])
                 elif "gpuType" in node_config:
-                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpuType"])
+                    self._label_node(node_name, Labels.GPU_TYPE_KEBAB, node_config["gpuType"])
 
             return {
                 "name": pool_name,
@@ -105,25 +106,25 @@ class PoolClient(KubernetesClient):
             if nodes_to_add:
                 self._validate_nodes_exist(list(nodes_to_add))
                 for node_name in nodes_to_add:
-                    self._label_node(node_name, "g8s.host/pool", pool_name)
+                    self._label_node(node_name, Labels.POOL, pool_name)
                     # Add GPU type label if specified
                     node_config = node_configs.get(node_name, {})
                     if "gpu_type" in node_config:
-                        self._label_node(node_name, "g8s.host/gpu-type", node_config["gpu_type"])
+                        self._label_node(node_name, Labels.GPU_TYPE_KEBAB, node_config["gpu_type"])
                     elif "gpuType" in node_config:
-                        self._label_node(node_name, "g8s.host/gpu-type", node_config["gpuType"])
+                        self._label_node(node_name, Labels.GPU_TYPE_KEBAB, node_config["gpuType"])
 
             if nodes_to_remove:
                 for node_name in nodes_to_remove:
-                    self._unlabel_node(node_name, "g8s.host/pool")
+                    self._unlabel_node(node_name, Labels.POOL)
 
             # Update existing nodes' GPU type labels
             for node_name in old_nodes & new_nodes:
                 node_config = node_configs.get(node_name, {})
                 if "gpu_type" in node_config:
-                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpu_type"])
+                    self._label_node(node_name, Labels.GPU_TYPE_KEBAB, node_config["gpu_type"])
                 elif "gpuType" in node_config:
-                    self._label_node(node_name, "g8s.host/gpu-type", node_config["gpuType"])
+                    self._label_node(node_name, Labels.GPU_TYPE_KEBAB, node_config["gpuType"])
 
             return {
                 "name": pool_name,
@@ -171,7 +172,7 @@ class PoolClient(KubernetesClient):
             # 2. Remove resource pool labels
             # Get all nodes of resource pool
             nodes = self.core_v1.list_node(
-                label_selector=f"g8s.host/pool={pool_name}"
+                label_selector=f"{Labels.POOL}={pool_name}"
             )
 
             if not nodes.items:
@@ -180,7 +181,7 @@ class PoolClient(KubernetesClient):
 
             # Remove resource pool labels
             for node in nodes.items:
-                self._remove_node_label(node.metadata.name, "g8s.host/pool")
+                self._remove_node_label(node.metadata.name, Labels.POOL)
 
             return True
 
@@ -200,7 +201,7 @@ class PoolClient(KubernetesClient):
 
             for node_name in node_names:
                 try:
-                    self._label_node(node_name, "g8s.host/pool", pool_name)
+                    self._label_node(node_name, Labels.POOL, pool_name)
                     success.append(node_name)
                 except Exception as e:
                     failed.append({"node": node_name, "error": str(e)})
@@ -223,7 +224,7 @@ class PoolClient(KubernetesClient):
 
             for node_name in node_names:
                 try:
-                    self._remove_node_label(node_name, "g8s.host/pool")
+                    self._remove_node_label(node_name, Labels.POOL)
                     success.append(node_name)
                 except Exception as e:
                     failed.append({"node": node_name, "error": str(e)})
@@ -312,7 +313,7 @@ class PoolClient(KubernetesClient):
         """Get node GPU type"""
         labels = node.metadata.labels or {}
         # Try to get GPU type from different label names
-        return labels.get("nvidia.com/gpu-type") or labels.get("nvidia.com/gpuType") or labels.get("g8s.host/gpu-type")
+        return labels.get("nvidia.com/gpu-type") or labels.get("nvidia.com/gpuType") or labels.get(Labels.GPU_TYPE_KEBAB)
 
     def _get_all_nodes_used_gpu_count(self) -> Dict[str, int]:
         """Batch get all nodes used GPU count"""

@@ -54,16 +54,15 @@ class KubernetesClient:
                 import json
                 error_body = json.loads(e.body)
                 detailed_msg = error_body.get("message", "Unknown resource")
-                raise FileNotFoundError(f"Resource not found for {operation}: {detailed_msg}")
-            except:
-                # If parsing fails, use the original error message
-                raise FileNotFoundError(f"Resource not found for {operation}: {e.body}")
+            except (json.JSONDecodeError, AttributeError, TypeError):
+                detailed_msg = str(e.body)
+            raise FileNotFoundError(f"Resource not found for {operation}: {detailed_msg}")
         else:
             # For other errors, include the detailed message from Kubernetes
             try:
                 import json
                 error_body = json.loads(e.body)
                 detailed_msg = error_body.get("message", str(e))
-                raise RuntimeError(f"Kubernetes API error during {operation}: {detailed_msg}")
-            except:
-                raise RuntimeError(f"Kubernetes API error during {operation}: {e}")
+            except (json.JSONDecodeError, AttributeError, TypeError):
+                detailed_msg = str(e)
+            raise RuntimeError(f"Kubernetes API error during {operation}: {detailed_msg}")

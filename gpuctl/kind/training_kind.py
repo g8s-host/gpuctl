@@ -14,7 +14,7 @@ class TrainingKind:
     def create_training_job(self, training_job: TrainingJob,
                             namespace: str = "default") -> Dict[str, Any]:
         """Create training job"""
-        k8s_job = self.builder.build_job(training_job)
+        k8s_job = self.builder.build_job(training_job, namespace)
 
         result = self.client.create_job(k8s_job, namespace)
 

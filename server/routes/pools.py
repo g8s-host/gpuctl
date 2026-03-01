@@ -87,17 +87,8 @@ async def create_pool(request: PoolCreateRequest):
 
 @router.put("/{poolName}")
 async def update_pool(poolName: str, request: PoolUpdateRequest):
-    """更新资源池"""
-    try:
-        return {
-            "name": poolName,
-            "status": "updated",
-            "message": "资源池更新成功"
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to update pool: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    """更新资源池（暂未实现）"""
+    raise HTTPException(status_code=501, detail="update_pool is not yet implemented")
 
 
 @router.delete("/{poolName}")

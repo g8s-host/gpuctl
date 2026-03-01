@@ -648,6 +648,194 @@ def test_create_job_custom_namespace(mock_pool_client_class, mock_quota_client_c
     assert result == 0
 
 
+# ── create duplicate check 测试 ────────────────────────────────────────────────
+
+@patch('gpuctl.cli.job.JobClient')
+@patch('gpuctl.cli.job.TrainingKind')
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.client.priority_client.PriorityClient')
+@patch('gpuctl.client.base_client.KubernetesClient')
+@patch('gpuctl.client.quota_client.QuotaClient')
+@patch('gpuctl.client.pool_client.PoolClient')
+def test_create_job_rejects_duplicate_same_kind(mock_pool_client_class, mock_quota_client_class,
+                                                mock_k8s_client_class, mock_priority_client_class,
+                                                mock_parse_yaml_file, mock_training_kind_class,
+                                                mock_job_client_class):
+    """回归测试：同 namespace、同 name 的 job 已存在时，create 应拒绝并提示用 apply"""
+    mocks = _setup_job_common_mocks()
+    mock_priority_client_class.return_value = mocks['priority_client']
+    mock_k8s_client_class.return_value = mocks['k8s_client']
+    mock_quota_client_class.return_value = mocks['quota_client']
+    mock_pool_client_class.return_value = mocks['pool_client']
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "training"
+    mock_job_obj = MagicMock()
+    type(mock_job_obj).name = PropertyMock(return_value="test-training-job")
+    mock_job_obj.namespace = "default"
+    mock_parsed_obj.job = mock_job_obj
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    mock_job_instance = MagicMock()
+    mock_job_instance.list_jobs.return_value = [
+        {
+            "name": "test-training-job",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "training"},
+        }
+    ]
+    mock_job_client_class.return_value = mock_job_instance
+
+    args = Namespace(file=["test.yaml"], namespace="default", json=False)
+    result = create_job_command(args)
+
+    assert result == 1, "create should fail when duplicate job exists"
+    mock_training_kind_class.return_value.create_training_job.assert_not_called()
+
+
+@patch('gpuctl.cli.job.JobClient')
+@patch('gpuctl.cli.job.InferenceKind')
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.client.priority_client.PriorityClient')
+@patch('gpuctl.client.base_client.KubernetesClient')
+@patch('gpuctl.client.quota_client.QuotaClient')
+@patch('gpuctl.client.pool_client.PoolClient')
+def test_create_inference_rejects_duplicate(mock_pool_client_class, mock_quota_client_class,
+                                            mock_k8s_client_class, mock_priority_client_class,
+                                            mock_parse_yaml_file, mock_inference_kind_class,
+                                            mock_job_client_class):
+    """回归测试：同名 inference job 已存在时，create 应拒绝"""
+    mocks = _setup_job_common_mocks()
+    mock_priority_client_class.return_value = mocks['priority_client']
+    mock_k8s_client_class.return_value = mocks['k8s_client']
+    mock_quota_client_class.return_value = mocks['quota_client']
+    mock_pool_client_class.return_value = mocks['pool_client']
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "inference"
+    mock_job_obj = MagicMock()
+    type(mock_job_obj).name = PropertyMock(return_value="new-test-inference-job")
+    mock_job_obj.namespace = "default"
+    mock_parsed_obj.job = mock_job_obj
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    mock_job_instance = MagicMock()
+    mock_job_instance.list_jobs.return_value = [
+        {
+            "name": "new-test-inference-job",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "inference"},
+        }
+    ]
+    mock_job_client_class.return_value = mock_job_instance
+
+    args = Namespace(file=["test.yaml"], namespace="default", json=False)
+    result = create_job_command(args)
+
+    assert result == 1, "create should fail when duplicate inference job exists"
+    mock_inference_kind_class.return_value.create_inference_service.assert_not_called()
+
+
+@patch('gpuctl.cli.job.JobClient')
+@patch('gpuctl.cli.job.InferenceKind')
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.client.priority_client.PriorityClient')
+@patch('gpuctl.client.base_client.KubernetesClient')
+@patch('gpuctl.client.quota_client.QuotaClient')
+@patch('gpuctl.client.pool_client.PoolClient')
+def test_create_inference_rejects_duplicate_json_output(mock_pool_client_class, mock_quota_client_class,
+                                                        mock_k8s_client_class, mock_priority_client_class,
+                                                        mock_parse_yaml_file, mock_inference_kind_class,
+                                                        mock_job_client_class, capsys):
+    """回归测试：重复创建时 --json 输出包含 error 字段"""
+    mocks = _setup_job_common_mocks()
+    mock_priority_client_class.return_value = mocks['priority_client']
+    mock_k8s_client_class.return_value = mocks['k8s_client']
+    mock_quota_client_class.return_value = mocks['quota_client']
+    mock_pool_client_class.return_value = mocks['pool_client']
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "inference"
+    mock_job_obj = MagicMock()
+    type(mock_job_obj).name = PropertyMock(return_value="new-test-inference-job")
+    mock_job_obj.namespace = "default"
+    mock_parsed_obj.job = mock_job_obj
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    mock_job_instance = MagicMock()
+    mock_job_instance.list_jobs.return_value = [
+        {
+            "name": "new-test-inference-job",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "inference"},
+        }
+    ]
+    mock_job_client_class.return_value = mock_job_instance
+
+    args = Namespace(file=["test.yaml"], namespace="default", json=True)
+    result = create_job_command(args)
+
+    assert result == 1
+    captured = capsys.readouterr()
+    import json as json_lib
+    output = json_lib.loads(captured.out)
+    assert "error" in output
+    assert "already exists" in output["error"]
+    assert "apply" in output["error"]
+
+
+@patch('gpuctl.cli.job.JobClient')
+@patch('gpuctl.cli.job.TrainingKind')
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.client.priority_client.PriorityClient')
+@patch('gpuctl.client.base_client.KubernetesClient')
+@patch('gpuctl.client.quota_client.QuotaClient')
+@patch('gpuctl.client.pool_client.PoolClient')
+def test_create_job_allows_different_name(mock_pool_client_class, mock_quota_client_class,
+                                          mock_k8s_client_class, mock_priority_client_class,
+                                          mock_parse_yaml_file, mock_training_kind_class,
+                                          mock_job_client_class):
+    """验证：不同名称的 job 可以正常创建（不触发重复检查）"""
+    mocks = _setup_job_common_mocks()
+    mock_priority_client_class.return_value = mocks['priority_client']
+    mock_k8s_client_class.return_value = mocks['k8s_client']
+    mock_quota_client_class.return_value = mocks['quota_client']
+    mock_pool_client_class.return_value = mocks['pool_client']
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "training"
+    mock_job_obj = MagicMock()
+    type(mock_job_obj).name = PropertyMock(return_value="brand-new-job")
+    mock_job_obj.namespace = "default"
+    mock_parsed_obj.job = mock_job_obj
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    mock_job_instance = MagicMock()
+    mock_job_instance.list_jobs.return_value = [
+        {
+            "name": "existing-other-job",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "training"},
+        }
+    ]
+    mock_job_client_class.return_value = mock_job_instance
+
+    mock_handler = MagicMock()
+    mock_handler.create_training_job.return_value = {
+        "job_id": "brand-new-job",
+        "name": "brand-new-job",
+        "namespace": "default",
+        "resources": {"gpu": 1, "cpu": 4}
+    }
+    mock_training_kind_class.return_value = mock_handler
+
+    args = Namespace(file=["test.yaml"], namespace="default", json=False)
+    result = create_job_command(args)
+
+    assert result == 0, "create should succeed when no duplicate exists"
+    mock_handler.create_training_job.assert_called_once()
+
+
 # ── apply_job_command 补充 ─────────────────────────────────────────────────────
 
 @patch('gpuctl.kind.inference_kind.InferenceKind')
@@ -937,3 +1125,344 @@ def test_describe_job_with_namespace(mock_job_client):
     result = describe_job_command(args)
 
     assert result == 0
+
+
+# ── StatefulSet 状态字段回归测试 ─────────────────────────────────────────────
+
+@patch('gpuctl.cli.job.JobClient')
+def test_statefulset_status_running(mock_job_client):
+    """回归测试：StatefulSet 使用 readyReplicas/currentReplicas 而非 active/failed"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "test-notebook-0",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "notebook"},
+            "status": {
+                "readyReplicas": 1,
+                "currentReplicas": 1,
+                "phase": "Running"
+            },
+            "resource_type": "StatefulSet",
+            "node": "node-1",
+            "ip": "10.42.0.5",
+            "creation_timestamp": None,
+            "ready": "1/1"
+        }
+    ]
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(namespace=None, pool=None, kind=None, pods=False, json=True)
+    result = get_jobs_command(args)
+
+    assert result == 0
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_statefulset_status_pending(mock_job_client):
+    """回归测试：StatefulSet readyReplicas=0/currentReplicas=0 应为 Pending"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "test-notebook-0",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "notebook"},
+            "status": {
+                "readyReplicas": 0,
+                "currentReplicas": 0,
+                "phase": "Pending"
+            },
+            "resource_type": "StatefulSet",
+            "node": "N/A",
+            "ip": "N/A",
+            "creation_timestamp": None,
+            "ready": "0/0"
+        }
+    ]
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(namespace=None, pool=None, kind=None, pods=False, json=True)
+    result = get_jobs_command(args)
+
+    assert result == 0
+
+
+# ── delete job 精确名称匹配与歧义回归测试 ─────────────────────────────────────
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_by_exact_name(mock_job_client):
+    """用 YAML job.name 精确匹配删除"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "new-test-inference-job",
+            "labels": {"g8s.host/job-type": "inference"},
+            "namespace": "default"
+        }
+    ]
+    mock_instance.delete_deployment.return_value = True
+    mock_instance.delete_service.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="new-test-inference-job",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0
+    mock_instance.delete_deployment.assert_called_once_with("new-test-inference-job", "default", False)
+    mock_instance.delete_service.assert_called_once_with("svc-new-test-inference-job", "default")
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_wrong_name_not_found(mock_job_client):
+    """用错误的名称（非 job.name）应返回 not found"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "new-test-inference-job",
+            "labels": {"g8s.host/job-type": "inference"},
+            "namespace": "default"
+        }
+    ]
+    mock_instance.list_pods.return_value = []
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="new-test",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 1, "partial name should not match"
+    mock_instance.delete_deployment.assert_not_called()
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_training_job_by_name(mock_job_client):
+    """training kind 用 job.name 删除 K8s Job"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "test-training-job",
+            "labels": {"g8s.host/job-type": "training"},
+            "namespace": "default"
+        }
+    ]
+    mock_instance.delete_job.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="test-training-job",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0
+    mock_instance.delete_job.assert_called_once_with("test-training-job", "default", False)
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_notebook_job_by_name(mock_job_client):
+    """notebook kind 用 job.name 删除 StatefulSet + Service"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = [
+        {
+            "name": "my-notebook-job",
+            "labels": {"g8s.host/job-type": "notebook"},
+            "namespace": "default"
+        }
+    ]
+    mock_instance.delete_statefulset.return_value = True
+    mock_instance.delete_service.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="my-notebook-job",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0
+    mock_instance.delete_statefulset.assert_called_once_with("my-notebook-job", "default", False)
+    mock_instance.delete_service.assert_called_once_with("svc-my-notebook-job", "default")
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_ambiguous_cross_namespace(mock_job_client):
+    """同名 job.name 在不同 namespace 时，无 --namespace 应报歧义"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default", "ml-team"]
+
+    def list_jobs_by_ns(ns, labels=None, include_pods=False):
+        if ns == "default":
+            return [{"name": "my-train-job", "labels": {"g8s.host/job-type": "training"}, "namespace": "default"}]
+        elif ns == "ml-team":
+            return [{"name": "my-train-job", "labels": {"g8s.host/job-type": "training"}, "namespace": "ml-team"}]
+        return []
+
+    mock_instance.list_jobs.side_effect = list_jobs_by_ns
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="my-train-job",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 1, "cross-namespace ambiguity should fail"
+    mock_instance.delete_job.assert_not_called()
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_disambiguate_by_namespace(mock_job_client):
+    """通过 --namespace 消除跨 namespace 歧义"""
+    mock_instance = MagicMock()
+
+    def list_jobs_by_ns(ns, labels=None, include_pods=False):
+        if ns == "ml-team":
+            return [{"name": "my-train-job", "labels": {"g8s.host/job-type": "training"}, "namespace": "ml-team"}]
+        return []
+
+    mock_instance.list_jobs.side_effect = list_jobs_by_ns
+    mock_instance.delete_job.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="my-train-job",
+                     namespace="ml-team", force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0
+    mock_instance.delete_job.assert_called_once_with("my-train-job", "ml-team", False)
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_ambiguous_json_output(mock_job_client, capsys):
+    """跨 namespace 歧义时 --json 应返回 JSON 格式错误"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default", "staging"]
+
+    def list_jobs_by_ns(ns, labels=None, include_pods=False):
+        return [{"name": "shared-job", "labels": {"g8s.host/job-type": "inference"}, "namespace": ns}]
+
+    mock_instance.list_jobs.side_effect = list_jobs_by_ns
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="shared-job",
+                     namespace=None, force=False, json=True)
+    result = delete_job_command(args)
+
+    assert result == 1
+    captured = capsys.readouterr()
+    import json as json_lib
+    output = json_lib.loads(captured.out)
+    assert "error" in output
+    assert "namespace" in output["error"].lower()
+
+
+# ── orphan pod deletion 回归测试 ─────────────────────────────────────────────
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_orphan_pods_no_parent_resource(mock_job_client):
+    """父资源已删除但 Pod 仍在时，用 job.name 能清理孤儿 Pod"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = []
+    mock_instance.list_pods.return_value = [
+        {
+            "name": "my-app-inference-job-854c6c5cd-kfh77",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+        },
+        {
+            "name": "my-app-inference-job-f49d5b86c-cgt6h",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+        },
+    ]
+    mock_instance.delete_pod.return_value = True
+    mock_instance.delete_service.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="my-app-inference-job",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0, "should succeed by deleting orphan pods"
+    assert mock_instance.delete_pod.call_count == 2
+    mock_instance.delete_deployment.assert_not_called()
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_orphan_pods_cleans_service(mock_job_client):
+    """孤儿 Pod 清理同时清理关联 Service"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = []
+    mock_instance.list_pods.return_value = [
+        {
+            "name": "my-app-inference-job-854c6c5cd-abc12",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+        },
+    ]
+    mock_instance.delete_pod.return_value = True
+    mock_instance.delete_service.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="my-app-inference-job",
+                     namespace=None, force=False, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0
+    mock_instance.delete_pod.assert_called_once()
+    mock_instance.delete_service.assert_called_once_with("svc-my-app-inference-job", "default")
+
+
+@patch('gpuctl.cli.job.JobClient')
+def test_delete_job_orphan_pods_with_force(mock_job_client):
+    """--force 传递给孤儿 Pod 删除"""
+    mock_instance = MagicMock()
+    mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
+    mock_instance.list_jobs.return_value = []
+    mock_instance.list_pods.return_value = [
+        {
+            "name": "my-app-inference-job-854c6c5cd-abc12",
+            "namespace": "default",
+            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+        },
+    ]
+    mock_instance.delete_pod.return_value = True
+    mock_instance.delete_service.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    args = Namespace(file=None, resource=None, job_name="my-app-inference-job",
+                     namespace=None, force=True, json=False)
+    result = delete_job_command(args)
+
+    assert result == 0
+    mock_instance.delete_pod.assert_called_once_with(
+        "my-app-inference-job-854c6c5cd-abc12", "default", True)
+
+
+# ── _get_job_name 函数单元测试 ───────────────────────────────────────────────
+
+from gpuctl.cli.job import _get_job_name
+
+
+def test_get_job_name_from_app_label():
+    """inference/notebook/compute Pod 通过 app label 获取 job.name"""
+    assert _get_job_name({"app": "new-test-inference-job", "g8s.host/job-type": "inference"}) == "new-test-inference-job"
+
+
+def test_get_job_name_from_job_name_label():
+    """training Pod 通过 job-name label 获取 job.name"""
+    assert _get_job_name({"job-name": "test-training-job", "g8s.host/job-type": "training"}) == "test-training-job"
+
+
+def test_get_job_name_app_takes_priority():
+    """app label 优先于 job-name label"""
+    assert _get_job_name({"app": "my-app", "job-name": "my-job"}) == "my-app"
+
+
+def test_get_job_name_empty_labels():
+    """无相关 label 时返回空字符串"""
+    assert _get_job_name({}) == ""
+    assert _get_job_name({"g8s.host/job-type": "compute"}) == ""

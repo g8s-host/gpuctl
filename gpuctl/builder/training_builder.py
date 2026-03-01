@@ -1,13 +1,14 @@
 from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.training import TrainingJob
+from gpuctl.constants import Labels, Kind, DEFAULT_POOL
 
 
 class TrainingBuilder(BaseBuilder):
     """Training job builder"""
 
     @classmethod
-    def build_job(cls, training_job: TrainingJob) -> client.V1Job:
+    def build_job(cls, training_job: TrainingJob, namespace: str = "default") -> client.V1Job:
         """Build K8s Job resource"""
         workdirs = training_job.storage.workdirs if hasattr(training_job.storage, 'workdirs') else []
         
@@ -20,12 +21,12 @@ class TrainingBuilder(BaseBuilder):
             ]
 
         # 处理资源池选择
-        if training_job.resources.pool and training_job.resources.pool != "default":
+        if training_job.resources.pool and training_job.resources.pool != DEFAULT_POOL:
             # 对于非默认池，使用 node_selector
             node_selector = {}
-            node_selector["g8s.host/pool"] = training_job.resources.pool
+            node_selector[Labels.POOL] = training_job.resources.pool
             if training_job.resources.gpu_type:
-                node_selector["g8s.host/gpuType"] = training_job.resources.gpu_type
+                node_selector[Labels.GPU_TYPE] = training_job.resources.gpu_type
             pod_spec_extras['node_selector'] = node_selector
         else:
             # 对于默认池或未指定池，使用 node_affinity 实现反亲和性
@@ -33,7 +34,7 @@ class TrainingBuilder(BaseBuilder):
             if training_job.resources.gpu_type:
                 # 如果指定了 GPU 类型，仍然使用 node_selector 来选择 GPU 类型
                 node_selector = {}
-                node_selector["g8s.host/gpuType"] = training_job.resources.gpu_type
+                node_selector[Labels.GPU_TYPE] = training_job.resources.gpu_type
                 pod_spec_extras['node_selector'] = node_selector
             # 添加反亲和性规则
             pod_spec_extras['affinity'] = client.V1Affinity(
@@ -41,7 +42,7 @@ class TrainingBuilder(BaseBuilder):
                     required_during_scheduling_ignored_during_execution=client.V1NodeSelector(
                         node_selector_terms=[client.V1NodeSelectorTerm(
                             match_expressions=[client.V1NodeSelectorRequirement(
-                                key="g8s.host/pool",
+                                key=Labels.POOL,
                                 operator="DoesNotExist"
                             )]
                         )]
@@ -56,15 +57,16 @@ class TrainingBuilder(BaseBuilder):
 
         # 构建 labels
         pod_labels = {
-            "g8s.host/job-type": "training",
-            "g8s.host/priority": training_job.job.priority,
-            "g8s.host/pool": training_job.resources.pool or "default"
+            Labels.JOB_TYPE: Kind.TRAINING,
+            Labels.PRIORITY: training_job.job.priority,
+            Labels.POOL: training_job.resources.pool or DEFAULT_POOL,
+            Labels.NAMESPACE: namespace
         }
 
         # 构建 annotations，包含 description
         pod_annotations = {}
         if training_job.job.description:
-            pod_annotations["g8s.host/description"] = training_job.job.description
+            pod_annotations[Labels.DESCRIPTION] = training_job.job.description
 
         template = cls.build_pod_template_spec(
             container,
@@ -83,15 +85,16 @@ class TrainingBuilder(BaseBuilder):
 
         # 构建 metadata labels
         metadata_labels = {
-            "g8s.host/job-type": "training",
-            "g8s.host/priority": training_job.job.priority,
-            "g8s.host/pool": training_job.resources.pool or "default"
+            Labels.JOB_TYPE: Kind.TRAINING,
+            Labels.PRIORITY: training_job.job.priority,
+            Labels.POOL: training_job.resources.pool or DEFAULT_POOL,
+            Labels.NAMESPACE: namespace
         }
 
         # 构建 metadata annotations，包含 description
         metadata_annotations = {}
         if training_job.job.description:
-            metadata_annotations["g8s.host/description"] = training_job.job.description
+            metadata_annotations[Labels.DESCRIPTION] = training_job.job.description
 
         metadata = client.V1ObjectMeta(
             name=f"{training_job.job.name}",

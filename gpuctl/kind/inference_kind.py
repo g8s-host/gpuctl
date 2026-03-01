@@ -14,8 +14,8 @@ class InferenceKind:
     def create_inference_service(self, inference_job: InferenceJob,
                                  namespace: str = "default") -> Dict[str, Any]:
         """Create inference service"""
-        deployment = self.builder.build_deployment(inference_job)
-        service = self.builder.build_service(inference_job)
+        deployment = self.builder.build_deployment(inference_job, namespace)
+        service = self.builder.build_service(inference_job, namespace)
 
         deployment_result = self.client.create_deployment(deployment, namespace)
         service_result = self.client.create_service(service, namespace)

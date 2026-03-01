@@ -142,3 +142,33 @@ def test_get_node_labels(mock_get_instance, client):
         "node": "node-1",
         "labels": {"g8s.host/pool": "test-pool", "gpu-type": "A100"}
     }
+
+
+# ── 路由顺序回归测试 ─────────────────────────────────────────────────────────
+
+@patch('server.routes.nodes.PoolClient.get_instance')
+def test_gpu_detail_route_reachable(mock_get_instance, client):
+    """回归测试：/api/v1/nodes/gpu-detail 不应被 /{nodeName} 拦截"""
+    mock_instance = MagicMock()
+    mock_instance.list_nodes.return_value = [
+        {
+            "name": "node-1",
+            "status": "Ready",
+            "gpu_total": 2,
+            "gpu_used": 1,
+            "gpu_free": 1,
+            "gpu_types": ["A100"],
+            "labels": {}
+        }
+    ]
+    mock_get_instance.return_value = mock_instance
+
+    response = client.get("/api/v1/nodes/gpu-detail")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "total" in data
+    assert "items" in data
+    assert data["total"] == 1
+    assert data["items"][0]["nodeName"] == "node-1"
+    assert "gpus" in data["items"][0]
