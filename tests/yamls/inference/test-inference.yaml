@@ -28,7 +28,7 @@ service:
 
 # 资源规格
 resources:
-  #pool: training-pool
+  pool: test-pool
   #gpu: 1
   #gpuType: a10-24g
   cpu: 1

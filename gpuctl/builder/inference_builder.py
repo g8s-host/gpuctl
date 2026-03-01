@@ -1,13 +1,14 @@
 from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.inference import InferenceJob
+from gpuctl.constants import Labels, Kind, DEFAULT_POOL, svc_name
 
 
 class InferenceBuilder(BaseBuilder):
     """Inference job builder"""
 
     @classmethod
-    def build_deployment(cls, inference_job: InferenceJob) -> client.V1Deployment:
+    def build_deployment(cls, inference_job: InferenceJob, namespace: str = "default") -> client.V1Deployment:
         """Build K8s Deployment resource"""
         workdirs = []
         if hasattr(inference_job, 'storage') and hasattr(inference_job.storage, 'workdirs'):
@@ -22,12 +23,12 @@ class InferenceBuilder(BaseBuilder):
             ]
 
         # 处理资源池选择
-        if inference_job.resources.pool and inference_job.resources.pool != "default":
+        if inference_job.resources.pool and inference_job.resources.pool != DEFAULT_POOL:
             # 对于非默认池，使用 node_selector
             node_selector = {}
-            node_selector["g8s.host/pool"] = inference_job.resources.pool
+            node_selector[Labels.POOL] = inference_job.resources.pool
             if inference_job.resources.gpu_type:
-                node_selector["g8s.host/gpuType"] = inference_job.resources.gpu_type
+                node_selector[Labels.GPU_TYPE] = inference_job.resources.gpu_type
             pod_spec_extras['node_selector'] = node_selector
         else:
             # 对于默认池或未指定池，使用 node_affinity 实现反亲和性
@@ -35,7 +36,7 @@ class InferenceBuilder(BaseBuilder):
             if inference_job.resources.gpu_type:
                 # 如果指定了 GPU 类型，仍然使用 node_selector 来选择 GPU 类型
                 node_selector = {}
-                node_selector["g8s.host/gpuType"] = inference_job.resources.gpu_type
+                node_selector[Labels.GPU_TYPE] = inference_job.resources.gpu_type
                 pod_spec_extras['node_selector'] = node_selector
             # 添加反亲和性规则
             pod_spec_extras['affinity'] = client.V1Affinity(
@@ -43,7 +44,7 @@ class InferenceBuilder(BaseBuilder):
                     required_during_scheduling_ignored_during_execution=client.V1NodeSelector(
                         node_selector_terms=[client.V1NodeSelectorTerm(
                             match_expressions=[client.V1NodeSelectorRequirement(
-                                key="g8s.host/pool",
+                                key=Labels.POOL,
                                 operator="DoesNotExist"
                             )]
                         )]
@@ -80,15 +81,16 @@ class InferenceBuilder(BaseBuilder):
         # 构建 labels
         pod_labels = {
             "app": app_label,
-            "g8s.host/job-type": "inference",
-            "g8s.host/priority": inference_job.job.priority,
-            "g8s.host/pool": inference_job.resources.pool or "default"
+            Labels.JOB_TYPE: Kind.INFERENCE,
+            Labels.PRIORITY: inference_job.job.priority,
+            Labels.POOL: inference_job.resources.pool or DEFAULT_POOL,
+            Labels.NAMESPACE: namespace
         }
 
         # 构建 annotations，包含 description
         pod_annotations = {}
         if inference_job.job.description:
-            pod_annotations["g8s.host/description"] = inference_job.job.description
+            pod_annotations[Labels.DESCRIPTION] = inference_job.job.description
 
         template = cls.build_pod_template_spec(
             container,
@@ -110,15 +112,16 @@ class InferenceBuilder(BaseBuilder):
 
         # 构建 metadata labels
         metadata_labels = {
-            "g8s.host/job-type": "inference",
-            "g8s.host/priority": inference_job.job.priority,
-            "g8s.host/pool": inference_job.resources.pool or "default"
+            Labels.JOB_TYPE: Kind.INFERENCE,
+            Labels.PRIORITY: inference_job.job.priority,
+            Labels.POOL: inference_job.resources.pool or DEFAULT_POOL,
+            Labels.NAMESPACE: namespace
         }
 
         # 构建 metadata annotations，包含 description
         metadata_annotations = {}
         if inference_job.job.description:
-            metadata_annotations["g8s.host/description"] = inference_job.job.description
+            metadata_annotations[Labels.DESCRIPTION] = inference_job.job.description
 
         metadata = client.V1ObjectMeta(
             name=app_label,
@@ -134,7 +137,7 @@ class InferenceBuilder(BaseBuilder):
         )
 
     @classmethod
-    def build_service(cls, inference_job: InferenceJob) -> client.V1Service:
+    def build_service(cls, inference_job: InferenceJob, namespace: str = "default") -> client.V1Service:
         """Build K8s Service resource"""
         app_label = f"{inference_job.job.name}"
         service_spec = client.V1ServiceSpec(
@@ -148,13 +151,14 @@ class InferenceBuilder(BaseBuilder):
 
         metadata_annotations = {}
         if inference_job.job.description:
-            metadata_annotations["g8s.host/description"] = inference_job.job.description
+            metadata_annotations[Labels.DESCRIPTION] = inference_job.job.description
 
         metadata = client.V1ObjectMeta(
-            name=f"svc-{inference_job.job.name}",
+            name=svc_name(inference_job.job.name),
             labels={
-                "g8s.host/job-type": "inference",
-                "g8s.host/pool": inference_job.resources.pool or "default"
+                Labels.JOB_TYPE: Kind.INFERENCE,
+                Labels.POOL: inference_job.resources.pool or DEFAULT_POOL,
+                Labels.NAMESPACE: namespace
             },
             annotations=metadata_annotations
         )

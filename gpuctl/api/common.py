@@ -2,11 +2,13 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any, Union
 from enum import Enum
 
+from gpuctl.constants import Kind, Priority
+
 
 class ResourceType(str, Enum):
-    TRAINING = "training"
-    INFERENCE = "inference"
-    NOTEBOOK = "notebook"
+    TRAINING = Kind.TRAINING
+    INFERENCE = Kind.INFERENCE
+    NOTEBOOK = Kind.NOTEBOOK
     POOL = "pool"
 
 
@@ -16,12 +18,6 @@ class GPUType(str, Enum):
     A10_24G = "a10-24g"
     T4 = "t4"
     V100 = "v100"
-
-
-class Priority(str, Enum):
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
 
 
 class ResourceRequest(BaseModel):

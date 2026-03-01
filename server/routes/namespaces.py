@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import logging
 
 from gpuctl.client.quota_client import QuotaClient
+from gpuctl.constants import Labels, NS_LABEL_SELECTOR
 
 router = APIRouter(prefix="/api/v1/namespaces", tags=["namespaces"])
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ async def list_namespaces():
         client = QuotaClient()
 
         namespaces = client.core_v1.list_namespace(
-            label_selector="g8s.host/namespace=true"
+            label_selector=NS_LABEL_SELECTOR
         )
 
         result = []
@@ -89,7 +90,7 @@ async def delete_namespace(
             raise HTTPException(status_code=404, detail="Namespace not found")
 
         labels = ns.metadata.labels or {}
-        if not labels.get("g8s.host/namespace") == "true":
+        if not labels.get(Labels.NS_MARKER) == "true":
             raise HTTPException(
                 status_code=403,
                 detail=f"Namespace '{namespaceName}' was not created by gpuctl and cannot be deleted via this API"

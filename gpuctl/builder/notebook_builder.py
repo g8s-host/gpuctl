@@ -1,13 +1,14 @@
 from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.notebook import NotebookJob
+from gpuctl.constants import Labels, Kind, DEFAULT_POOL, svc_name
 
 
 class NotebookBuilder(BaseBuilder):
     """Notebook job builder"""
 
     @classmethod
-    def build_statefulset(cls, notebook_job: NotebookJob) -> client.V1StatefulSet:
+    def build_statefulset(cls, notebook_job: NotebookJob, namespace: str = "default") -> client.V1StatefulSet:
         """Build K8s StatefulSet resource"""
         workdirs = notebook_job.storage.workdirs if hasattr(notebook_job.storage, 'workdirs') else []
         
@@ -22,12 +23,12 @@ class NotebookBuilder(BaseBuilder):
             ]
 
         # 处理资源池选择
-        if notebook_job.resources.pool and notebook_job.resources.pool != "default":
+        if notebook_job.resources.pool and notebook_job.resources.pool != DEFAULT_POOL:
             # 对于非默认池，使用 node_selector
             node_selector = {}
-            node_selector["g8s.host/pool"] = notebook_job.resources.pool
+            node_selector[Labels.POOL] = notebook_job.resources.pool
             if notebook_job.resources.gpu_type:
-                node_selector["g8s.host/gpuType"] = notebook_job.resources.gpu_type
+                node_selector[Labels.GPU_TYPE] = notebook_job.resources.gpu_type
             pod_spec_extras['node_selector'] = node_selector
         else:
             # 对于默认池或未指定池，使用 node_affinity 实现反亲和性
@@ -35,7 +36,7 @@ class NotebookBuilder(BaseBuilder):
             if notebook_job.resources.gpu_type:
                 # 如果指定了 GPU 类型，仍然使用 node_selector 来选择 GPU 类型
                 node_selector = {}
-                node_selector["g8s.host/gpuType"] = notebook_job.resources.gpu_type
+                node_selector[Labels.GPU_TYPE] = notebook_job.resources.gpu_type
                 pod_spec_extras['node_selector'] = node_selector
             # 添加反亲和性规则
             pod_spec_extras['affinity'] = client.V1Affinity(
@@ -43,7 +44,7 @@ class NotebookBuilder(BaseBuilder):
                     required_during_scheduling_ignored_during_execution=client.V1NodeSelector(
                         node_selector_terms=[client.V1NodeSelectorTerm(
                             match_expressions=[client.V1NodeSelectorRequirement(
-                                key="g8s.host/pool",
+                                key=Labels.POOL,
                                 operator="DoesNotExist"
                             )]
                         )]
@@ -61,15 +62,16 @@ class NotebookBuilder(BaseBuilder):
         # 构建 labels
         pod_labels = {
             "app": app_label,
-            "g8s.host/job-type": "notebook",
-            "g8s.host/priority": notebook_job.job.priority,
-            "g8s.host/pool": notebook_job.resources.pool or "default"
+            Labels.JOB_TYPE: Kind.NOTEBOOK,
+            Labels.PRIORITY: notebook_job.job.priority,
+            Labels.POOL: notebook_job.resources.pool or DEFAULT_POOL,
+            Labels.NAMESPACE: namespace
         }
 
         # 构建 annotations，包含 description
         pod_annotations = {}
         if notebook_job.job.description:
-            pod_annotations["g8s.host/description"] = notebook_job.job.description
+            pod_annotations[Labels.DESCRIPTION] = notebook_job.job.description
 
         template = cls.build_pod_template_spec(
             container,
@@ -81,7 +83,7 @@ class NotebookBuilder(BaseBuilder):
             priority_class_name=priority_class_name
         )
 
-        service_name = f"svc-{notebook_job.job.name}"
+        service_name = svc_name(notebook_job.job.name)
         statefulset_spec = client.V1StatefulSetSpec(
             replicas=1,
             template=template,
@@ -93,15 +95,16 @@ class NotebookBuilder(BaseBuilder):
 
         # 构建 metadata labels
         metadata_labels = {
-            "g8s.host/job-type": "notebook",
-            "g8s.host/priority": notebook_job.job.priority,
-            "g8s.host/pool": notebook_job.resources.pool or "default"
+            Labels.JOB_TYPE: Kind.NOTEBOOK,
+            Labels.PRIORITY: notebook_job.job.priority,
+            Labels.POOL: notebook_job.resources.pool or DEFAULT_POOL,
+            Labels.NAMESPACE: namespace
         }
 
         # 构建 metadata annotations，包含 description
         metadata_annotations = {}
         if notebook_job.job.description:
-            metadata_annotations["g8s.host/description"] = notebook_job.job.description
+            metadata_annotations[Labels.DESCRIPTION] = notebook_job.job.description
 
         metadata = client.V1ObjectMeta(
             name=app_label,
@@ -117,7 +120,7 @@ class NotebookBuilder(BaseBuilder):
         )
 
     @classmethod
-    def build_service(cls, notebook_job: NotebookJob) -> client.V1Service:
+    def build_service(cls, notebook_job: NotebookJob, namespace: str = "default") -> client.V1Service:
         """Build K8s Service resource"""
         app_label = f"{notebook_job.job.name}"
         service_spec = client.V1ServiceSpec(
@@ -131,13 +134,14 @@ class NotebookBuilder(BaseBuilder):
 
         metadata_annotations = {}
         if notebook_job.job.description:
-            metadata_annotations["g8s.host/description"] = notebook_job.job.description
+            metadata_annotations[Labels.DESCRIPTION] = notebook_job.job.description
 
         metadata = client.V1ObjectMeta(
-            name=f"svc-{notebook_job.job.name}",
+            name=svc_name(notebook_job.job.name),
             labels={
-                "g8s.host/job-type": "notebook",
-                "g8s.host/pool": notebook_job.resources.pool or "default"
+                Labels.JOB_TYPE: Kind.NOTEBOOK,
+                Labels.POOL: notebook_job.resources.pool or DEFAULT_POOL,
+                Labels.NAMESPACE: namespace
             },
             annotations=metadata_annotations
         )

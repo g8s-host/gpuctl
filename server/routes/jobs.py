@@ -12,6 +12,11 @@ from gpuctl.kind.notebook_kind import NotebookKind
 from gpuctl.kind.compute_kind import ComputeKind
 from gpuctl.client.job_client import JobClient
 from gpuctl.client.log_client import LogClient
+from gpuctl.constants import (
+    Kind, Labels, KINDS_WITH_SERVICE, DEFAULT_NAMESPACE, DEFAULT_POOL,
+    CONTAINER_WAITING_REASONS, get_detailed_status, infer_resource_type,
+    svc_name, DEFAULT_PRIORITY,
+)
 
 from server.models import (
     JobCreateRequest,
@@ -44,22 +49,22 @@ async def create_job(request: JobCreateRequest):
         logger.debug(f"YAML解析成功，任务类型: {parsed_obj.kind}")
 
         # 根据任务类型处理
-        if parsed_obj.kind == "training":
+        if parsed_obj.kind == Kind.TRAINING:
             logger.debug("处理训练任务")
             handler = TrainingKind()
-            result = handler.create_training_job(parsed_obj, namespace="default")
-        elif parsed_obj.kind == "inference":
+            result = handler.create_training_job(parsed_obj, namespace=DEFAULT_NAMESPACE)
+        elif parsed_obj.kind == Kind.INFERENCE:
             logger.debug("处理推理服务任务")
             handler = InferenceKind()
-            result = handler.create_inference_service(parsed_obj, namespace="default")
-        elif parsed_obj.kind == "notebook":
+            result = handler.create_inference_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
+        elif parsed_obj.kind == Kind.NOTEBOOK:
             logger.debug("处理Notebook任务")
             handler = NotebookKind()
-            result = handler.create_notebook(parsed_obj, namespace="default")
-        elif parsed_obj.kind == "compute":
+            result = handler.create_notebook(parsed_obj, namespace=DEFAULT_NAMESPACE)
+        elif parsed_obj.kind == Kind.COMPUTE:
             logger.debug("处理计算任务")
             handler = ComputeKind()
-            result = handler.create_compute_service(parsed_obj, namespace="default")
+            result = handler.create_compute_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
         else:
             logger.error(f"不支持的任务类型: {parsed_obj.kind}")
             raise HTTPException(status_code=400, detail=f"Unsupported job kind: {parsed_obj.kind}")
@@ -90,18 +95,18 @@ async def create_jobs_batch(request: BatchCreateRequest):
         try:
             parsed_obj = BaseParser.parse_yaml(yaml_content)
 
-            if parsed_obj.kind == "training":
+            if parsed_obj.kind == Kind.TRAINING:
                 handler = TrainingKind()
-                result = handler.create_training_job(parsed_obj, namespace="default")
-            elif parsed_obj.kind == "inference":
+                result = handler.create_training_job(parsed_obj, namespace=DEFAULT_NAMESPACE)
+            elif parsed_obj.kind == Kind.INFERENCE:
                 handler = InferenceKind()
-                result = handler.create_inference_service(parsed_obj, namespace="default")
-            elif parsed_obj.kind == "notebook":
+                result = handler.create_inference_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
+            elif parsed_obj.kind == Kind.NOTEBOOK:
                 handler = NotebookKind()
-                result = handler.create_notebook(parsed_obj, namespace="default")
-            elif parsed_obj.kind == "compute":
+                result = handler.create_notebook(parsed_obj, namespace=DEFAULT_NAMESPACE)
+            elif parsed_obj.kind == Kind.COMPUTE:
                 handler = ComputeKind()
-                result = handler.create_compute_service(parsed_obj, namespace="default")
+                result = handler.create_compute_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
             else:
                 failed.append({"index": i, "error": f"Unsupported kind: {parsed_obj.kind}"})
                 continue
@@ -137,18 +142,8 @@ def _calculate_age(created_at_str) -> str:
 
 
 def _get_detailed_status(waiting_reason: str, waiting_message: str) -> str:
-    """从容器等待原因获取详细状态"""
-    status_mapping = {
-        "ImagePullBackOff": "ImagePullBackOff",
-        "ErrImagePull": "ErrImagePull",
-        "CrashLoopBackOff": "CrashLoopBackOff",
-        "CreateContainerConfigError": "CreateContainerConfigError",
-        "ContainerCreating": "ContainerCreating",
-        "CreateContainerError": "CreateContainerError",
-    }
-    if waiting_reason in status_mapping:
-        return status_mapping[waiting_reason]
-    return waiting_reason if waiting_reason else "Waiting"
+    """从容器等待原因获取详细状态 (delegates to constants module)"""
+    return get_detailed_status(waiting_reason, waiting_message)
 
 
 @router.get("", response_model=JobListResponse)
@@ -166,9 +161,9 @@ async def get_jobs(
 
         labels = {}
         if kind:
-            labels["g8s.host/job-type"] = kind
+            labels[Labels.JOB_TYPE] = kind
         if pool:
-            labels["g8s.host/pool"] = pool
+            labels[Labels.POOL] = pool
 
         # 使用 include_pods=True 获取 Pod 级别数据，与 CLI 一致
         jobs = client.list_jobs(namespace=namespace, labels=labels, include_pods=True)
@@ -203,9 +198,9 @@ async def get_jobs(
         items = []
         for job in paginated_jobs:
             labels = job.get("labels", {})
-            job_type = labels.get("g8s.host/job-type", "unknown")
-            if job_type == "unknown" and "job-name" in labels:
-                job_type = "training"
+            job_type = labels.get(Labels.JOB_TYPE, "unknown")
+            if job_type == "unknown" and Labels.JOB_NAME in labels:
+                job_type = Kind.TRAINING
 
             status_dict = job.get("status", {})
             job_phase = status_dict.get("phase", "Unknown")
@@ -328,22 +323,8 @@ def _job_detail_compute_status(job_info: dict) -> str:
 
 
 def _compute_resource_type(job_info: dict, job_type: str) -> str:
-    """根据 status 字段推断 Kubernetes 资源类型"""
-    status_dict = job_info.get("status", {})
-    if "phase" in status_dict:
-        return "Pod"
-    if "ready_replicas" in status_dict:
-        return "StatefulSet" if job_type == "notebook" else "Deployment"
-    if "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
-        return "Job"
-    # 回退到 kind 推断
-    if job_type == "training":
-        return "Job"
-    if job_type == "notebook":
-        return "StatefulSet"
-    if job_type in ("inference", "compute"):
-        return "Deployment"
-    return "Pod"
+    """根据 status 字段推断 Kubernetes 资源类型 (delegates to constants module)"""
+    return infer_resource_type(job_info.get("status", {}), job_type)
 
 
 def _fetch_events(job_name: str, namespace: str, resource_type: str) -> list:
@@ -403,12 +384,11 @@ def _fetch_events(job_name: str, namespace: str, resource_type: str) -> list:
 
 def _fetch_access_methods(job_name: str, namespace: str, job_type: str, resource_type: str) -> Optional[Dict[str, Any]]:
     """获取 inference/compute/notebook 的访问方式"""
-    if job_type not in ("inference", "compute", "notebook"):
+    if job_type not in KINDS_WITH_SERVICE:
         return None
 
-    # 计算服务名
     svc_base = job_name
-    if job_type == "notebook":
+    if job_type == Kind.NOTEBOOK:
         parts = svc_base.split('-')
         if len(parts) >= 2 and parts[-1].isdigit():
             svc_base = '-'.join(parts[:-1])
@@ -428,7 +408,7 @@ def _fetch_access_methods(job_name: str, namespace: str, job_type: str, resource
         from gpuctl.client.base_client import KubernetesClient
         k8s = KubernetesClient()
         svc = k8s.core_v1.read_namespaced_service(
-            name=f"svc-{svc_base}", namespace=namespace
+            name=svc_name(svc_base), namespace=namespace
         ).to_dict()
         if svc["spec"]["ports"]:
             p = svc["spec"]["ports"][0]
@@ -505,7 +485,7 @@ async def get_job_detail(
             raise HTTPException(status_code=404, detail="Job not found")
 
         labels = job_info.get("labels", {})
-        job_type = labels.get("g8s.host/job-type", "unknown")
+        job_type = labels.get(Labels.JOB_TYPE, "unknown")
         actual_ns = job_info.get("namespace", "default")
         job_name = job_info.get("name", jobId)
 
@@ -531,8 +511,8 @@ async def get_job_detail(
             age=_job_detail_calculate_age(job_info.get("creation_timestamp")),
             started=job_info.get("start_time"),
             completed=job_info.get("completion_time"),
-            priority=labels.get("g8s.host/priority", "medium"),
-            pool=labels.get("g8s.host/pool", "default"),
+            priority=labels.get(Labels.PRIORITY, "medium"),
+            pool=labels.get(Labels.POOL, "default"),
             resources=job_info.get("resources", {}),
             metrics=job_info.get("metrics", {}),
             yaml_content=yaml_content,
@@ -595,6 +575,8 @@ async def get_job_logs(
             lastTimestamp=datetime.utcnow()
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to get job logs: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

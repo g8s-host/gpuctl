@@ -2,6 +2,7 @@ from .base_client import KubernetesClient
 from kubernetes.client.rest import ApiException
 from kubernetes.client import V1ResourceQuota, V1Namespace, V1ObjectMeta, V1LabelSelector
 from typing import List, Dict, Any, Optional
+from gpuctl.constants import Labels, NS_LABEL_SELECTOR, DEFAULT_NAMESPACE
 
 
 class QuotaClient(KubernetesClient):
@@ -28,7 +29,7 @@ class QuotaClient(KubernetesClient):
             if namespace_name == "default":
                 return True
             namespaces = self.core_v1.list_namespace(
-            label_selector="g8s.host/namespace=true"
+            label_selector=NS_LABEL_SELECTOR
         )
             for ns in namespaces.items:
                 if ns.metadata.name == namespace_name:
@@ -49,7 +50,7 @@ class QuotaClient(KubernetesClient):
             # Check if namespace already has a quota with g8s.host/quota label
             quota_list = self.core_v1.list_namespaced_resource_quota(namespace)
             for existing_quota in quota_list.items:
-                if existing_quota.metadata.labels and existing_quota.metadata.labels.get("g8s.host/quota"):
+                if existing_quota.metadata.labels and existing_quota.metadata.labels.get(Labels.QUOTA):
                     raise ValueError(f"Namespace {namespace} already has a quota '{existing_quota.metadata.labels.get('g8s.host/quota')}'. Only one quota is allowed per namespace.")
 
             hard_limits = {}
@@ -67,8 +68,8 @@ class QuotaClient(KubernetesClient):
                     name=f"{quota_name}-{namespace_name}",
                     namespace=namespace,
                     labels={
-                        "g8s.host/quota": quota_name,
-                        "g8s.host/namespace": namespace_name
+                        Labels.QUOTA: quota_name,
+                        Labels.NAMESPACE: namespace_name
                     }
                 ),
                 spec={"hard": hard_limits}
@@ -185,7 +186,7 @@ class QuotaClient(KubernetesClient):
                     metadata=V1ObjectMeta(
                         name=namespace_name,
                         labels={
-                            "g8s.host/namespace": "true"
+                            Labels.NAMESPACE: "true"
                         }
                     )
                 )
@@ -200,7 +201,7 @@ class QuotaClient(KubernetesClient):
             # Check if default namespace already has a quota with g8s.host/quota label
             quota_list = self.core_v1.list_namespaced_resource_quota("default")
             for existing_quota in quota_list.items:
-                if existing_quota.metadata.labels and existing_quota.metadata.labels.get("g8s.host/quota"):
+                if existing_quota.metadata.labels and existing_quota.metadata.labels.get(Labels.QUOTA):
                     raise ValueError(f"Namespace default already has a quota '{existing_quota.metadata.labels.get('g8s.host/quota')}'. Only one quota is allowed per namespace.")
 
             hard_limits = {}
@@ -218,8 +219,8 @@ class QuotaClient(KubernetesClient):
                     name=f"{quota_name}-default",
                     namespace="default",
                     labels={
-                        "g8s.host/quota": quota_name,
-                        "g8s.host/namespace": "default"
+                        Labels.QUOTA: quota_name,
+                        Labels.NAMESPACE: "default"
                     }
                 ),
                 spec={"hard": hard_limits}
@@ -273,11 +274,11 @@ class QuotaClient(KubernetesClient):
                 quota_list = self.core_v1.list_namespaced_resource_quota(ns_name)
 
                 for quota in quota_list.items:
-                    if quota.metadata.labels and quota.metadata.labels.get("g8s.host/quota"):
-                        if quota_name and quota.metadata.labels.get("g8s.host/quota") != quota_name:
+                    if quota.metadata.labels and quota.metadata.labels.get(Labels.QUOTA):
+                        if quota_name and quota.metadata.labels.get(Labels.QUOTA) != quota_name:
                             continue
 
-                        namespace_name = quota.metadata.labels.get("g8s.host/namespace", ns_name) if quota.metadata.labels else ns_name
+                        namespace_name = quota.metadata.labels.get(Labels.NAMESPACE, ns_name) if quota.metadata.labels else ns_name
                         quota_info = self._build_quota_info(quota, namespace_name, ns_name)
                         quotas.append(quota_info)
 
@@ -351,7 +352,7 @@ class QuotaClient(KubernetesClient):
             }
 
         return {
-            "name": quota.metadata.labels.get("g8s.host/quota", "default") if quota.metadata.labels else "default",
+            "name": quota.metadata.labels.get(Labels.QUOTA, "default") if quota.metadata.labels else "default",
             "namespace": namespace,
             "hard": hard_limits,
             "used": used,
@@ -388,7 +389,7 @@ class QuotaClient(KubernetesClient):
                     quota = self.core_v1.read_namespaced_resource_quota(
                         f"{quota_name}-default", "default"
                     )
-                    if quota.metadata.labels.get("g8s.host/quota") == quota_name:
+                    if quota.metadata.labels.get(Labels.QUOTA) == quota_name:
                         self.core_v1.delete_namespaced_resource_quota(
                             f"{quota_name}-default", "default"
                         )
@@ -403,7 +404,7 @@ class QuotaClient(KubernetesClient):
                         })
 
             namespaces = self.core_v1.list_namespace(
-                label_selector="g8s.host/namespace=true"
+                label_selector=NS_LABEL_SELECTOR
             )
 
             for ns in namespaces.items:
@@ -411,7 +412,7 @@ class QuotaClient(KubernetesClient):
                 quota_list = self.core_v1.list_namespaced_resource_quota(ns_name)
 
                 for quota in quota_list.items:
-                    if quota.metadata.labels.get("g8s.host/quota") == quota_name:
+                    if quota.metadata.labels.get(Labels.QUOTA) == quota_name:
                         try:
                             self.core_v1.delete_namespaced_resource_quota(
                                 quota.metadata.name,
@@ -419,12 +420,12 @@ class QuotaClient(KubernetesClient):
                             )
                             self.core_v1.delete_namespace(ns_name)
                             results["deleted"].append({
-                                "namespace": quota.metadata.labels.get("g8s.host/namespace"),
+                                "namespace": quota.metadata.labels.get(Labels.NAMESPACE),
                                 "original_namespace": ns_name
                             })
                         except Exception as e:
                             results["failed"].append({
-                                "namespace": quota.metadata.labels.get("g8s.host/namespace"),
+                                "namespace": quota.metadata.labels.get(Labels.NAMESPACE),
                                 "error": str(e)
                             })
 

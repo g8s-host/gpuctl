@@ -1,9 +1,9 @@
-from .. import DEFAULT_NAMESPACE
 from .base_client import KubernetesClient
 from kubernetes.client.rest import ApiException
 from kubernetes.stream import stream
 from typing import List, Optional
 import time
+from gpuctl.constants import Labels, DEFAULT_NAMESPACE, NS_LABEL_SELECTOR
 
 
 class LogClient(KubernetesClient):
@@ -19,7 +19,7 @@ class LogClient(KubernetesClient):
         try:
             # 获取带有g8s.host/namespace标签的命名空间
             labeled_ns = self.core_v1.list_namespace(
-                label_selector="g8s.host/namespace=true"
+                label_selector=NS_LABEL_SELECTOR
             )
             for ns in labeled_ns.items:
                 namespaces.add(ns.metadata.name)
@@ -29,9 +29,9 @@ class LogClient(KubernetesClient):
             for ns in all_ns.items:
                 ns_name = ns.metadata.name
                 
-                # 检查该命名空间下的job
+                # 检查该命名空间下的job（使用 key 存在性检查，g8s.host/job-type 是所有 gpuctl 资源的必有标签）
                 try:
-                    jobs = self.batch_v1.list_namespaced_job(ns_name, label_selector="g8s.host/")
+                    jobs = self.batch_v1.list_namespaced_job(ns_name, label_selector=Labels.JOB_TYPE)
                     if jobs.items:
                         namespaces.add(ns_name)
                         continue
@@ -40,7 +40,7 @@ class LogClient(KubernetesClient):
                 
                 # 检查该命名空间下的deployment
                 try:
-                    deployments = self.apps_v1.list_namespaced_deployment(ns_name, label_selector="g8s.host/")
+                    deployments = self.apps_v1.list_namespaced_deployment(ns_name, label_selector=Labels.JOB_TYPE)
                     if deployments.items:
                         namespaces.add(ns_name)
                         continue
@@ -49,7 +49,7 @@ class LogClient(KubernetesClient):
                 
                 # 检查该命名空间下的statefulset
                 try:
-                    statefulsets = self.apps_v1.list_namespaced_stateful_set(ns_name, label_selector="g8s.host/")
+                    statefulsets = self.apps_v1.list_namespaced_stateful_set(ns_name, label_selector=Labels.JOB_TYPE)
                     if statefulsets.items:
                         namespaces.add(ns_name)
                 except ApiException:

@@ -1,5 +1,6 @@
 from gpuctl.parser.base_parser import BaseParser, ParserError
 from gpuctl.client.quota_client import QuotaClient
+from gpuctl.constants import Labels, NS_LABEL_SELECTOR
 
 
 def create_quota_command(args):
@@ -441,7 +442,7 @@ def get_namespaces_command(args):
         
         # Get all namespaces created by this CLI (with g8s.host/namespace label)
         namespaces = client.core_v1.list_namespace(
-            label_selector="g8s.host/namespace=true"
+            label_selector=NS_LABEL_SELECTOR
         )
         
         # Process namespace data
@@ -481,7 +482,7 @@ def get_namespaces_command(args):
             headers = ["NAME", "STATUS", "AGE"]
             print(f"{headers[0]:<30} {headers[1]:<10} {headers[2]:<20}")
             for ns in processed_namespaces:
-                print(f"{ns['name']:<30} {ns['status']:<10} {ns['age']:%Y-%m-%d %H:%M:%S}")
+                print(f"{ns['name']:<30} {ns['status']:<10} {str(ns['age']):<20}")
         
         return 0
     except Exception as e:
@@ -504,7 +505,7 @@ def describe_namespace_command(args):
         
         # Verify it's a namespace created by this CLI
         labels = namespace.metadata.labels or {}
-        if not labels.get("g8s.host/namespace") == "true":
+        if not labels.get(Labels.NS_MARKER) == "true":
             raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
         
         # Get quota information for this namespace
@@ -526,21 +527,23 @@ def describe_namespace_command(args):
             print(f"📋 Namespace Details: {namespace.metadata.name}")
             print(f"📊 Name: {namespace.metadata.name}")
             print(f"📈 Status: {namespace.status.phase}")
-            print(f"⏰ Age: {namespace.metadata.creation_timestamp:%Y-%m-%d %H:%M:%S}")
+            print(f"⏰ Age: {str(namespace.metadata.creation_timestamp)}")
             print(f"🏷️  Labels: {labels}")
             
             if quota:
+                hard = quota.get('hard', {})
+                used = quota.get('used', {})
                 print("\n💾 Resource Quota:")
-                print(f"   Name: {quota['name']}")
-                print(f"   CPU: {quota['hard']['cpu']}")
-                print(f"   Memory: {quota['hard']['memory']}")
-                print(f"   GPU: {quota['hard']['nvidia.com/gpu']}")
+                print(f"   Name: {quota.get('name', 'N/A')}")
+                print(f"   CPU: {hard.get('cpu', 'N/A')}")
+                print(f"   Memory: {hard.get('memory', 'N/A')}")
+                print(f"   GPU: {hard.get('nvidia.com/gpu', 'N/A')}")
                 
-                if quota.get('used'):
+                if used:
                     print("\n📊 Quota Usage:")
-                    print(f"   CPU: {quota['used']['cpu']}/{quota['hard']['cpu']}")
-                    print(f"   Memory: {quota['used']['memory']}/{quota['hard']['memory']}")
-                    print(f"   GPU: {quota['used']['nvidia.com/gpu']}/{quota['hard']['nvidia.com/gpu']}")
+                    print(f"   CPU: {used.get('cpu', '0')}/{hard.get('cpu', 'N/A')}")
+                    print(f"   Memory: {used.get('memory', '0')}/{hard.get('memory', 'N/A')}")
+                    print(f"   GPU: {used.get('nvidia.com/gpu', '0')}/{hard.get('nvidia.com/gpu', 'N/A')}")
         
         return 0
     except Exception as e:
@@ -562,7 +565,7 @@ def delete_namespace_command(args):
         namespace = client.core_v1.read_namespace(args.namespace_name)
         labels = namespace.metadata.labels or {}
         
-        if not labels.get("g8s.host/namespace") == "true":
+        if not labels.get(Labels.NS_MARKER) == "true":
             raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
         
         # Confirm deletion if not forced

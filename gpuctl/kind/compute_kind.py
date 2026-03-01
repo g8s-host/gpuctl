@@ -1,6 +1,7 @@
 from gpuctl.builder.compute_builder import ComputeBuilder
 from gpuctl.client.job_client import JobClient
 from gpuctl.api.compute import ComputeJob
+from kubernetes.client.rest import ApiException
 from typing import Dict, Any
 
 
@@ -13,9 +14,9 @@ class ComputeKind:
 
     def create_compute_service(self, compute_job: ComputeJob, namespace: str = "default") -> Dict[str, Any]:
         """Create compute job"""
-        deployment = self.builder.build_deployment(compute_job)
+        deployment = self.builder.build_deployment(compute_job, namespace)
         
-        service = self.builder.build_service(compute_job)
+        service = self.builder.build_service(compute_job, namespace)
 
         deployment_result = self.client.create_deployment(deployment, namespace)
         
@@ -40,34 +41,38 @@ class ComputeKind:
     def get_compute_job_status(self, job_name: str, namespace: str = "default") -> Dict[str, Any]:
         """Get compute job status"""
         deployment_name = f"{job_name}"
-        deployment_info = self.client.get_deployment(deployment_name, namespace)
-        
-        if not deployment_info:
-            return {"status": "not_found"}
+        try:
+            raw = self.client.apps_v1.read_namespaced_deployment(deployment_name, namespace)
+        except ApiException as e:
+            if e.status == 404:
+                return {"status": "not_found"}
+            raise
+        deployment_status = raw.status or {}
+        ready_replicas = deployment_status.ready_replicas or 0
+        desired_replicas = raw.spec.replicas or 0
+        available_replicas = deployment_status.available_replicas or 0
 
-        pods = self.client.list_pods(namespace, labels={"app": deployment_name})
-
-        status = "pending"
-        ready_replicas = deployment_info.get("status", {}).get("ready_replicas", 0)
-        desired_replicas = deployment_info.get("spec", {}).get("replicas", 0)
-        
         if ready_replicas == desired_replicas and desired_replicas > 0:
             status = "running"
-        elif deployment_info.get("status", {}).get("available_replicas", 0) > 0:
+        elif available_replicas > 0:
             status = "partially_available"
+        else:
+            status = "pending"
 
+        pods = self.client.list_pods(namespace, labels={"app": deployment_name})
         return {
             "name": job_name,
             "status": status,
             "deployment_name": deployment_name,
             "pods": pods,
-            "deployment_info": deployment_info
+            "ready_replicas": ready_replicas,
+            "desired_replicas": desired_replicas
         }
         
     def update_compute_service(self, compute_job: ComputeJob, namespace: str = "default") -> Dict[str, Any]:
         """Update compute job"""
-        deployment = self.builder.build_deployment(compute_job)
-        service = self.builder.build_service(compute_job)
+        deployment = self.builder.build_deployment(compute_job, namespace)
+        service = self.builder.build_service(compute_job, namespace)
         
         deployment_name = deployment.metadata.name
         service_name = service.metadata.name
