@@ -68,7 +68,7 @@ class TestInferenceJobMapper(unittest.TestCase):
         self.assertEqual(result['service']['replicas'], 1)  # 默认值
         self.assertEqual(result['service']['port'], 8000)  # 默认值
         self.assertEqual(result['resources']['pool'], 'default')  # 默认值
-        self.assertEqual(result['resources']['cpu'], '1')
+        self.assertEqual(result['resources']['cpu'], 1)
         self.assertEqual(result['resources']['memory'], '2Gi')
         self.assertEqual(result['resources']['gpu'], 0)  # 默认值
         self.assertEqual(result['resources']['gpuShare'], '2Gi')  # 默认值
