@@ -135,4 +135,25 @@ def test_delete_pool(mock_get_instance, client):
     }
 
 
+@patch('server.routes.pools.PoolClient.get_instance')
+def test_update_pool(mock_get_instance, client):
+    """测试更新资源池API"""
+    mock_instance = MagicMock()
+    mock_instance.update_pool = MagicMock(return_value=True)
+    mock_get_instance.return_value = mock_instance
+
+    response = client.put(
+        "/api/v1/pools/test-pool",
+        json={
+            "description": "Updated description",
+            "nodes": ["node-1", "node-2", "node-3"]
+        },
+        headers={"Authorization": "Bearer test-token"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "updated"
+    assert response.json()["message"] == "资源池更新成功"
+
+
 
