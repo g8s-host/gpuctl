@@ -6,14 +6,9 @@ class AuthValidator:
     """认证验证器"""
 
     @staticmethod
-    async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())):
-        """验证Bearer Token"""
-        token = credentials.credentials
-        # 这里应该实现实际的token验证逻辑
-        # 为了方便测试，允许任何非空token
-        if not token:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        return token
+    async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False))):
+        """验证Bearer Token - 已禁用认证，始终返回 True"""
+        return True
 
 
 security = HTTPBearer()
