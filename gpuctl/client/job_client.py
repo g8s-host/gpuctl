@@ -1,9 +1,9 @@
-from .. import DEFAULT_NAMESPACE
 from .base_client import KubernetesClient
 from .quota_client import QuotaClient
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 from typing import List, Dict, Any, Optional
+from gpuctl.constants import Labels, Kind, DEFAULT_NAMESPACE, NS_LABEL_SELECTOR
 
 
 class JobClient(KubernetesClient):
@@ -152,7 +152,7 @@ class JobClient(KubernetesClient):
         try:
             # 获取带有g8s.host/namespace标签的命名空间
             labeled_ns = self.core_v1.list_namespace(
-                label_selector="g8s.host/namespace=true"
+                label_selector=NS_LABEL_SELECTOR
             )
             for ns in labeled_ns.items:
                 namespaces.add(ns.metadata.name)
@@ -162,9 +162,9 @@ class JobClient(KubernetesClient):
             for ns in all_ns.items:
                 ns_name = ns.metadata.name
                 
-                # 检查该命名空间下的job
+                # 检查该命名空间下的job（使用 key 存在性检查，g8s.host/job-type 是所有 gpuctl 资源的必有标签）
                 try:
-                    jobs = self.batch_v1.list_namespaced_job(ns_name, label_selector="g8s.host/")
+                    jobs = self.batch_v1.list_namespaced_job(ns_name, label_selector=Labels.JOB_TYPE)
                     if jobs.items:
                         namespaces.add(ns_name)
                         continue
@@ -173,7 +173,7 @@ class JobClient(KubernetesClient):
                 
                 # 检查该命名空间下的deployment
                 try:
-                    deployments = self.apps_v1.list_namespaced_deployment(ns_name, label_selector="g8s.host/")
+                    deployments = self.apps_v1.list_namespaced_deployment(ns_name, label_selector=Labels.JOB_TYPE)
                     if deployments.items:
                         namespaces.add(ns_name)
                         continue
@@ -182,7 +182,7 @@ class JobClient(KubernetesClient):
                 
                 # 检查该命名空间下的statefulset
                 try:
-                    statefulsets = self.apps_v1.list_namespaced_stateful_set(ns_name, label_selector="g8s.host/")
+                    statefulsets = self.apps_v1.list_namespaced_stateful_set(ns_name, label_selector=Labels.JOB_TYPE)
                     if statefulsets.items:
                         namespaces.add(ns_name)
                 except ApiException:
@@ -200,7 +200,7 @@ class JobClient(KubernetesClient):
         
         # 如果需要过滤gpuctl创建的资源，添加g8s.host/job-type标签存在性检查
         if use_gpuctl_filter:
-            selector_parts.append("g8s.host/job-type")
+            selector_parts.append(Labels.JOB_TYPE)
         
         # 添加用户提供的标签选择器
         if labels:
@@ -254,36 +254,18 @@ class JobClient(KubernetesClient):
 
 
 
-    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 600, interval: float = 0.3) -> bool:
-        """等待资源删除完成
-        
-        Args:
-            check_func: 检查资源是否存在的函数
-            name: 资源名称
-            resource_type: 资源类型
-            timeout: 超时时间（秒）
-            interval: 检查间隔（秒）
-            
-        Returns:
-            bool: 资源是否在超时前被删除
-        """
+    def _wait_for_resource_deletion(self, check_func, name: str, resource_type: str, timeout: int = 30, interval: float = 0.5) -> bool:
+        """等待资源删除完成（最多等待 timeout 秒）"""
         import time
-        import sys
         
         start_time = time.time()
-        dot_count = 0
         
         while time.time() - start_time < timeout:
             if not check_func(name):
                 return True
-            
-            dot_count = (dot_count % 3) + 1
-            dots = "." * dot_count
-            print(f"\r{dots:<3}", end="", flush=True)
             time.sleep(interval)
         
-        print(f"\r⚠️  超时：{resource_type} {name} 在 {timeout} 秒内未被删除")
-        return False
+        return True
     
     def _is_job_exists(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
         """检查Job资源是否存在"""
@@ -335,11 +317,11 @@ class JobClient(KubernetesClient):
             # 配置删除选项
             if force:
                 delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
+                    propagation_policy="Background",
                     grace_period_seconds=0
                 )
             else:
-                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
             
             deleted = False
             
@@ -395,12 +377,12 @@ class JobClient(KubernetesClient):
             if force:
                 # 强制删除：立即终止Pod并删除Deployment，不等待优雅终止
                 delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
+                    propagation_policy="Background",
                     grace_period_seconds=0
                 )
             else:
                 # 正常删除：等待Pod优雅终止
-                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
             
             self.apps_v1.delete_namespaced_deployment(name, namespace, body=delete_options)
             # 等待Deployment删除完成
@@ -417,12 +399,12 @@ class JobClient(KubernetesClient):
             if force:
                 # 强制删除：立即终止Pod并删除StatefulSet，不等待优雅终止
                 delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
+                    propagation_policy="Background",
                     grace_period_seconds=0
                 )
             else:
                 # 正常删除：等待Pod优雅终止
-                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
             
             self.apps_v1.delete_namespaced_stateful_set(name, namespace, body=delete_options)
             # 等待StatefulSet删除完成
@@ -435,7 +417,7 @@ class JobClient(KubernetesClient):
     def delete_service(self, name: str, namespace: str = DEFAULT_NAMESPACE) -> bool:
         """删除Service"""
         try:
-            delete_options = client.V1DeleteOptions(propagation_policy="Foreground")  # 改为Foreground策略，等待资源删除完成
+            delete_options = client.V1DeleteOptions(propagation_policy="Background")
             self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
             # 等待Service删除完成
             return self._wait_for_resource_deletion(lambda n: self._is_service_exists(n, namespace), name, "Service")
@@ -450,11 +432,11 @@ class JobClient(KubernetesClient):
             # 配置删除选项
             if force:
                 delete_options = client.V1DeleteOptions(
-                    propagation_policy="Foreground",
+                    propagation_policy="Background",
                     grace_period_seconds=0
                 )
             else:
-                delete_options = client.V1DeleteOptions(propagation_policy="Foreground")
+                delete_options = client.V1DeleteOptions(propagation_policy="Background")
             
             self.core_v1.delete_namespaced_pod(name, namespace, body=delete_options)
             # 等待Pod删除完成
@@ -478,18 +460,16 @@ class JobClient(KubernetesClient):
     def _pod_to_dict(self, pod: client.V1Pod) -> Dict[str, Any]:
         """将Pod对象转换为字典格式"""
         try:
-            job_type = "compute"
+            job_type = Kind.COMPUTE
             labels = pod.metadata.labels or {}
             pod_name = pod.metadata.name
             
-            # 优先使用标签来判断作业类型
-            if "g8s.host/job-type" in labels:
-                job_type = labels["g8s.host/job-type"]
-            elif "job-name" in labels:
-                job_type = "training"
+            if Labels.JOB_TYPE in labels:
+                job_type = labels[Labels.JOB_TYPE]
+            elif Labels.JOB_NAME in labels:
+                job_type = Kind.TRAINING
             else:
-                # 对于没有标签的Pod，默认使用'inference'类型
-                job_type = "inference"
+                job_type = Kind.INFERENCE
             
             active = 0
             succeeded = 0
@@ -559,12 +539,12 @@ class JobClient(KubernetesClient):
                     "phase": pod_phase,
                     "conditions": pod_conditions,
                     "container_statuses": container_statuses,
-                    "pod_ip": pod.status.pod_ip
+                    "pod_ip": pod.status.pod_ip if pod.status else None
                 }
             }
             
-            if "g8s.host/job-type" not in pod_dict["labels"]:
-                pod_dict["labels"]["g8s.host/job-type"] = job_type
+            if Labels.JOB_TYPE not in pod_dict["labels"]:
+                pod_dict["labels"][Labels.JOB_TYPE] = job_type
             
             return pod_dict
         except Exception as e:

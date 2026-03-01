@@ -109,13 +109,8 @@ def test_delete_pool(mock_get_instance, client):
     }
 
 
-@patch('server.routes.pools.PoolClient.get_instance')
-def test_update_pool(mock_get_instance, client):
-    """测试更新资源池API"""
-    mock_instance = MagicMock()
-    mock_instance.update_pool = MagicMock(return_value=True)
-    mock_get_instance.return_value = mock_instance
-
+def test_update_pool_returns_501(client):
+    """回归测试：update_pool 尚未实现，应返回 501 而非假装成功的 200"""
     response = client.put(
         "/api/v1/pools/test-pool",
         json={
@@ -124,6 +119,4 @@ def test_update_pool(mock_get_instance, client):
         }
     )
 
-    assert response.status_code == 200
-    assert response.json()["status"] == "updated"
-    assert response.json()["message"] == "资源池更新成功"
+    assert response.status_code == 501

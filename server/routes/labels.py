@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 import logging
 
 from gpuctl.client.pool_client import PoolClient
+from gpuctl.constants import Labels
 
 from server.models import (
     LabelRequest,
@@ -183,8 +184,8 @@ async def get_all_nodes_labels(
                 if key.startswith("nvidia.com/gpu-") or key.endswith("gpu-type") or key.endswith("gpu-model"):
                     gpu_labels.append({"key": key, "value": value})
                 
-            if "g8s.host/pool" in labels:
-                bound_pools.append(labels["g8s.host/pool"])
+            if Labels.POOL in labels:
+                bound_pools.append(labels[Labels.POOL])
             
             node_label_list.append({
                 "nodeName": node.metadata.name,

@@ -232,6 +232,21 @@ def test_get_job_logs(mock_log_client):
     }
 
 
+@patch('server.routes.jobs.LogClient')
+def test_get_job_logs_follow_returns_400_not_500(mock_log_client):
+    """回归测试：follow=True 时应返回 400，而非被 except Exception 吞掉后返回 500"""
+    mock_instance = MagicMock()
+    mock_log_client.return_value = mock_instance
+
+    response = client.get(
+        "/api/v1/jobs/test-job/logs?follow=true",
+        headers={"Authorization": "Bearer test-token"}
+    )
+
+    assert response.status_code == 400
+    assert "WebSocket" in response.json().get("error", "")
+
+
 @patch('server.routes.jobs.BaseParser.parse_yaml')
 @patch('server.routes.jobs.TrainingKind')
 def test_batch_create_jobs(mock_training_kind, mock_parse_yaml):

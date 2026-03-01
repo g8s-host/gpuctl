@@ -14,8 +14,8 @@ class NotebookKind:
     def create_notebook(self, notebook_job: NotebookJob,
                         namespace: str = "default") -> Dict[str, Any]:
         """Create Notebook service"""
-        statefulset = self.builder.build_statefulset(notebook_job)
-        service = self.builder.build_service(notebook_job)
+        statefulset = self.builder.build_statefulset(notebook_job, namespace)
+        service = self.builder.build_service(notebook_job, namespace)
 
         statefulset_result = self.client.create_statefulset(statefulset, namespace)
         service_result = self.client.create_service(service, namespace)
