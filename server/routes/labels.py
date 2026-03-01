@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional, Dict, Any
 import logging
 
@@ -8,24 +8,19 @@ from server.models import (
     LabelRequest,
     LabelResponse
 )
-from server.auth import AuthValidator, security
 
-# 节点标签相关路由
 router = APIRouter(prefix="/api/v1/nodes", tags=["labels"])
 
-# 全局标签相关路由
 global_labels_router = APIRouter(prefix="/api/v1", tags=["labels"])
 
 logger = logging.getLogger(__name__)
 
 
 @router.post("/{nodeName}/labels", response_model=LabelResponse)
-async def add_node_label(nodeName: str, request: LabelRequest, token: str = Depends(AuthValidator.validate_token)):
+async def add_node_label(nodeName: str, request: LabelRequest):
     """给指定节点添加Label"""
     try:
         client = PoolClient.get_instance()
-        
-        # 添加Label
         client._label_node(nodeName, request.key, request.value)
         
         return {
@@ -46,8 +41,7 @@ async def batch_add_node_labels(
         nodeNames: List[str] = Query(..., description="节点名称列表"),
         key: str = Query(..., description="Label键"),
         value: str = Query(..., description="Label值"),
-        overwrite: bool = Query(False, description="是否覆盖已有同键Label"),
-        token: str = Depends(AuthValidator.validate_token)
+        overwrite: bool = Query(False, description="是否覆盖已有同键Label")
 ):
     """批量给多个节点添加Label"""
     try:
@@ -58,16 +52,13 @@ async def batch_add_node_labels(
         
         for node_name in nodeNames:
             try:
-                # 检查节点是否存在
                 node = client.core_v1.read_node(node_name)
                 
-                # 检查Label是否已存在
                 existing_labels = node.metadata.labels or {}
                 if key in existing_labels and not overwrite:
                     failed.append({"nodeName": node_name, "error": f"Label {key} already exists"})
                     continue
                 
-                # 添加Label
                 client._label_node(node_name, key, value)
                 success.append(node_name)
             except Exception as e:
@@ -85,15 +76,13 @@ async def batch_add_node_labels(
 
 
 @router.get("/{nodeName}/labels/{key}", response_model=Dict[str, Any])
-async def get_node_label(nodeName: str, key: str, token: str = Depends(AuthValidator.validate_token)):
+async def get_node_label(nodeName: str, key: str):
     """查询指定节点的指定Label"""
     try:
         client = PoolClient.get_instance()
         
-        # 获取节点信息
         node = client.core_v1.read_node(nodeName)
         
-        # 获取Label值
         labels = node.metadata.labels or {}
         if key not in labels:
             raise HTTPException(status_code=404, detail=f"节点 {nodeName} 未找到键为 {key} 的 Label")
@@ -116,15 +105,13 @@ async def get_node_label(nodeName: str, key: str, token: str = Depends(AuthValid
 
 
 @router.get("/{nodeName}/labels", response_model=Dict[str, Any])
-async def get_node_labels(nodeName: str, token: str = Depends(AuthValidator.validate_token)):
+async def get_node_labels(nodeName: str):
     """查询指定节点的所有Label"""
     try:
         client = PoolClient.get_instance()
         
-        # 获取节点信息
         node = client.get_node(nodeName)
         
-        # 获取所有Label
         labels = node.get("labels", {})
         
         return {
@@ -143,17 +130,14 @@ async def get_node_labels(nodeName: str, token: str = Depends(AuthValidator.vali
 async def get_nodes_labels(
         key: str = Query(..., description="要查询的Label键"),
         page: int = Query(1, ge=1),
-        pageSize: int = Query(20, ge=1, le=100),
-        token: str = Depends(AuthValidator.validate_token)
+        pageSize: int = Query(20, ge=1, le=100)
 ):
     """查询所有节点的指定Label"""
     try:
         client = PoolClient.get_instance()
         
-        # 获取所有节点
         nodes = client.core_v1.list_node()
         
-        # 构建Label列表
         label_list = []
         for node in nodes.items:
             labels = node.metadata.labels or {}
@@ -164,7 +148,6 @@ async def get_nodes_labels(
                     "labelValue": labels[key]
                 })
         
-        # 分页
         start_idx = (page - 1) * pageSize
         end_idx = start_idx + pageSize
         paginated_labels = label_list[start_idx:end_idx]
@@ -182,29 +165,24 @@ async def get_nodes_labels(
 @router.get("/labels/all", response_model=Dict[str, Any])
 async def get_all_nodes_labels(
         page: int = Query(1, ge=1),
-        pageSize: int = Query(20, ge=1, le=100),
-        token: str = Depends(AuthValidator.validate_token)
+        pageSize: int = Query(20, ge=1, le=100)
 ):
     """列出所有节点的GPU相关Label及绑定资源池"""
     try:
         client = PoolClient.get_instance()
         
-        # 获取所有节点
         nodes = client.core_v1.list_node()
         
-        # 构建节点Label列表
         node_label_list = []
         for node in nodes.items:
             labels = node.metadata.labels or {}
             gpu_labels = []
             bound_pools = []
             
-            # 提取GPU相关Label
             for key, value in labels.items():
                 if key.startswith("nvidia.com/gpu-") or key.endswith("gpu-type") or key.endswith("gpu-model"):
                     gpu_labels.append({"key": key, "value": value})
                 
-            # 提取绑定的资源池
             if "g8s.host/pool" in labels:
                 bound_pools.append(labels["g8s.host/pool"])
             
@@ -214,7 +192,6 @@ async def get_all_nodes_labels(
                 "boundPools": bound_pools
             })
         
-        # 分页
         start_idx = (page - 1) * pageSize
         end_idx = start_idx + pageSize
         paginated_node_labels = node_label_list[start_idx:end_idx]
@@ -230,12 +207,11 @@ async def get_all_nodes_labels(
 
 
 @router.delete("/{nodeName}/labels/{key}")
-async def delete_node_label(nodeName: str, key: str, token: str = Depends(AuthValidator.validate_token)):
+async def delete_node_label(nodeName: str, key: str):
     """删除指定节点的指定Label"""
     try:
         client = PoolClient.get_instance()
         
-        # 删除Label
         client._remove_node_label(nodeName, key)
         
         return {
@@ -252,12 +228,11 @@ async def delete_node_label(nodeName: str, key: str, token: str = Depends(AuthVa
 
 
 @router.put("/{nodeName}/labels/{key}")
-async def update_node_label(nodeName: str, key: str, request: Dict[str, Any], token: str = Depends(AuthValidator.validate_token)):
+async def update_node_label(nodeName: str, key: str, request: Dict[str, Any]):
     """更新指定节点的指定Label"""
     try:
         client = PoolClient.get_instance()
         
-        # 更新Label
         value = request.get("value")
         if not value:
             raise HTTPException(status_code=400, detail="Label值不能为空")
@@ -278,15 +253,13 @@ async def update_node_label(nodeName: str, key: str, request: Dict[str, Any], to
 
 
 @global_labels_router.get("/labels")
-async def list_all_node_labels(token: str = Depends(AuthValidator.validate_token)):
+async def list_all_node_labels():
     """获取所有节点标签"""
     try:
         client = PoolClient.get_instance()
         
-        # 获取所有节点
         nodes = client.list_nodes()
         
-        # 构建标签统计
         label_stats = {}
         for node in nodes:
             labels = node.get("labels", {})
@@ -295,7 +268,6 @@ async def list_all_node_labels(token: str = Depends(AuthValidator.validate_token
                     label_stats[key] = set()
                 label_stats[key].add(value)
         
-        # 转换为列表格式
         result = {}
         for key, values in label_stats.items():
             result[key] = list(values)
@@ -307,5 +279,4 @@ async def list_all_node_labels(token: str = Depends(AuthValidator.validate_token
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-# 导出路由
 __all__ = ["router", "global_labels_router"]

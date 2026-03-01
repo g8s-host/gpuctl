@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import logging
@@ -24,17 +24,17 @@ from server.models import (
     BatchCreateResponse,
     LogResponse
 )
-from server.auth import AuthValidator, security
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 logger = logging.getLogger(__name__)
+
 
 # 存储WebSocket连接
 active_connections = []
 
 
 @router.post("", response_model=JobResponse, status_code=201)
-async def create_job(request: JobCreateRequest, token: str = Depends(AuthValidator.validate_token)):
+async def create_job(request: JobCreateRequest):
     """创建任务"""
     logger.debug(f"开始创建任务，请求内容: {request.yamlContent[:100]}...")
     try:
@@ -81,7 +81,7 @@ async def create_job(request: JobCreateRequest, token: str = Depends(AuthValidat
 
 
 @router.post("/batch", response_model=BatchCreateResponse, status_code=201)
-async def create_jobs_batch(request: BatchCreateRequest, token: str = Depends(AuthValidator.validate_token)):
+async def create_jobs_batch(request: BatchCreateRequest):
     """批量创建任务"""
     success = []
     failed = []
@@ -114,104 +114,156 @@ async def create_jobs_batch(request: BatchCreateRequest, token: str = Depends(Au
     return BatchCreateResponse(success=success, failed=failed)
 
 
+def _calculate_age(created_at_str) -> str:
+    """计算创建时间到现在的时长"""
+    if not created_at_str:
+        return "N/A"
+    try:
+        from datetime import timezone
+        created_at = datetime.fromisoformat(str(created_at_str).replace('Z', '+00:00'))
+        now = datetime.now(timezone.utc)
+        delta = now - created_at
+        seconds = delta.total_seconds()
+        if seconds < 60:
+            return f"{int(seconds)}s"
+        elif seconds < 3600:
+            return f"{int(seconds/60)}m"
+        elif seconds < 86400:
+            return f"{int(seconds/3600)}h"
+        else:
+            return f"{int(seconds/86400)}d"
+    except Exception:
+        return "N/A"
+
+
+def _get_detailed_status(waiting_reason: str, waiting_message: str) -> str:
+    """从容器等待原因获取详细状态"""
+    status_mapping = {
+        "ImagePullBackOff": "ImagePullBackOff",
+        "ErrImagePull": "ErrImagePull",
+        "CrashLoopBackOff": "CrashLoopBackOff",
+        "CreateContainerConfigError": "CreateContainerConfigError",
+        "ContainerCreating": "ContainerCreating",
+        "CreateContainerError": "CreateContainerError",
+    }
+    if waiting_reason in status_mapping:
+        return status_mapping[waiting_reason]
+    return waiting_reason if waiting_reason else "Waiting"
+
+
 @router.get("", response_model=JobListResponse)
 async def get_jobs(
         kind: Optional[str] = Query(None, description="任务类型过滤"),
         pool: Optional[str] = Query(None, description="资源池过滤"),
         status: Optional[str] = Query(None, description="状态过滤"),
+        namespace: Optional[str] = Query(None, description="命名空间过滤"),
         page: int = Query(1, ge=1),
-        pageSize: int = Query(20, ge=1, le=100),
-        token: str = Depends(AuthValidator.validate_token)
+        pageSize: int = Query(20, ge=1, le=100)
 ):
-    """获取任务列表"""
+    """获取任务列表（Pod级别，与CLI gpuctl get jobs 输出一致）"""
     try:
         client = JobClient()
 
-        # 构建标签选择器
         labels = {}
         if kind:
             labels["g8s.host/job-type"] = kind
         if pool:
             labels["g8s.host/pool"] = pool
 
-        jobs = client.list_jobs(labels=labels)
+        # 使用 include_pods=True 获取 Pod 级别数据，与 CLI 一致
+        jobs = client.list_jobs(namespace=namespace, labels=labels, include_pods=True)
 
         # 状态过滤
         if status:
+            status_lower = status.lower()
             filtered_jobs = []
             for job in jobs:
-                # 直接使用原始状态进行过滤，不再转换为简化字符串
-                if status:
-                    # 保留原有过滤逻辑，以便兼容现有API
-                    status_flag = "unknown"
-                    if job["status"]["succeeded"] > 0:
-                        status_flag = "succeeded"
-                    elif job["status"]["failed"] > 0:
-                        status_flag = "failed"
-                    elif job["status"]["active"] > 0:
-                        status_flag = "running"
-                    else:
-                        status_flag = "pending"
-                    
-                    if status_flag == status:
-                        filtered_jobs.append(job)
-                else:
+                status_dict = job.get("status", {})
+                job_phase = status_dict.get("phase", "Unknown")
+                phase_lower = job_phase.lower()
+                container_statuses = status_dict.get("container_statuses", [])
+                job_status_str = job_phase
+                if container_statuses:
+                    for cs in container_statuses:
+                        if hasattr(cs, 'state') and cs.state and hasattr(cs.state, 'waiting') and cs.state.waiting:
+                            job_status_str = _get_detailed_status(
+                                getattr(cs.state.waiting, 'reason', '') or '',
+                                getattr(cs.state.waiting, 'message', '') or ''
+                            )
+                            break
+                if phase_lower == status_lower or job_status_str.lower() == status_lower:
                     filtered_jobs.append(job)
             jobs = filtered_jobs
 
-        # 分页
         total = len(jobs)
         start_idx = (page - 1) * pageSize
         end_idx = start_idx + pageSize
         paginated_jobs = jobs[start_idx:end_idx]
 
-        # 转换为响应格式
         items = []
         for job in paginated_jobs:
-            # 获取任务状态，确保与k8s一致
-            status_dict = job["status"]
-            job_status = "pending"
-            
-            # 从标签中获取信息
             labels = job.get("labels", {})
             job_type = labels.get("g8s.host/job-type", "unknown")
-            
-            # 对于Job资源（Training任务）
-            if job_type == "training":
-                if status_dict["succeeded"] > 0:
-                    job_status = "succeeded"
-                elif status_dict["failed"] > 0:
-                    job_status = "failed"
-                elif status_dict["active"] > 0:
-                    job_status = "running"
-            # 对于Deployment资源（Inference服务）
-            elif job_type == "inference":
-                # Deployment的状态判断：
-                # - Running: 至少有一个可用副本
-                # - Pending: 没有可用副本（可能是Pending或Failed状态）
-                if status_dict["active"] > 0:
-                    job_status = "running"
-            # 对于其他类型
+            if job_type == "unknown" and "job-name" in labels:
+                job_type = "training"
+
+            status_dict = job.get("status", {})
+            job_phase = status_dict.get("phase", "Unknown")
+            job_status = job_phase
+
+            container_statuses = status_dict.get("container_statuses", [])
+            if container_statuses:
+                for cs in container_statuses:
+                    if hasattr(cs, 'state') and cs.state:
+                        if hasattr(cs.state, 'waiting') and cs.state.waiting:
+                            job_status = _get_detailed_status(
+                                getattr(cs.state.waiting, 'reason', '') or '',
+                                getattr(cs.state.waiting, 'message', '') or ''
+                            )
+                            break
+                        if hasattr(cs.state, 'terminated') and cs.state.terminated:
+                            reason = getattr(cs.state.terminated, 'reason', '') or ''
+                            if reason == "OOMKilled":
+                                job_status = "OOMKilled"
+                            elif reason == "Error":
+                                job_status = "Error"
+                            break
+
+            pod_name = job["name"]
+            simplified_name = pod_name
+            parts = simplified_name.split('-')
+            if len(parts) >= 3:
+                third_part = parts[2] if len(parts) >= 3 else ''
+                if third_part.isalnum() and len(third_part) >= 5:
+                    final_name = '-'.join(parts[:2])
+                else:
+                    final_name = simplified_name
             else:
-                if status_dict["succeeded"] > 0:
-                    job_status = "succeeded"
-                elif status_dict["failed"] > 0:
-                    job_status = "failed"
-                elif status_dict["active"] > 0:
-                    job_status = "running"
+                final_name = simplified_name
 
-            # 创建JobItem对象
+            node_name = job.get("spec", {}).get("node_name") or "N/A"
+            pod_ip = status_dict.get("pod_ip") or "N/A"
+
+            total_containers = len(container_statuses)
+            ready_containers = 0
+            if container_statuses:
+                for cs in container_statuses:
+                    if hasattr(cs, 'ready') and cs.ready:
+                        ready_containers += 1
+            ready_str = f"{ready_containers}/{total_containers}" if total_containers > 0 else "0/0"
+            age = _calculate_age(job.get("creation_timestamp"))
+
             job_item = JobItem(
-                jobId=job["name"],
-                name=job["name"].rsplit('-', 1)[0],  # 从名称中提取原始名称
+                jobId=pod_name,
+                name=final_name,
+                namespace=job.get("namespace", "default"),
                 kind=job_type,
-                pool=labels.get("g8s.host/pool", "default"),
-                status=job_status,  # 使用简洁的状态字符串
-                gpu=1,  # 需要从实际资源中获取
-                gpuType="unknown",  # 需要从实际资源中获取
-                startedAt=job.get("creation_timestamp")
+                status=job_status,
+                ready=ready_str,
+                node=node_name,
+                ip=pod_ip,
+                age=age
             )
-
             items.append(job_item)
 
         return JobListResponse(total=total, items=items)
@@ -221,63 +273,271 @@ async def get_jobs(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+def _job_detail_calculate_age(created_at_str) -> str:
+    """计算 age 字段"""
+    if not created_at_str:
+        return "N/A"
+    try:
+        from datetime import timezone
+        created_at = datetime.fromisoformat(str(created_at_str).replace('Z', '+00:00'))
+        now = datetime.now(timezone.utc)
+        delta = now - created_at
+        seconds = delta.total_seconds()
+        if seconds < 60:
+            return f"{int(seconds)}s"
+        elif seconds < 3600:
+            return f"{int(seconds/60)}m"
+        elif seconds < 86400:
+            return f"{int(seconds/3600)}h"
+        else:
+            return f"{int(seconds/86400)}d"
+    except Exception:
+        return "N/A"
+
+
+def _job_detail_compute_status(job_info: dict) -> str:
+    """计算任务状态，与 CLI describe 一致"""
+    status_dict = job_info.get("status", {})
+    # Pod 有 phase 字段
+    if "phase" in status_dict:
+        phase = status_dict.get("phase", "Unknown")
+        container_statuses = status_dict.get("container_statuses", [])
+        if container_statuses:
+            for cs in container_statuses:
+                if hasattr(cs, 'state') and cs.state:
+                    if hasattr(cs.state, 'waiting') and cs.state.waiting:
+                        reason = getattr(cs.state.waiting, 'reason', '') or ''
+                        return _get_detailed_status(reason, getattr(cs.state.waiting, 'message', '') or '')
+                    if hasattr(cs.state, 'terminated') and cs.state.terminated:
+                        reason = getattr(cs.state.terminated, 'reason', '') or ''
+                        if reason == "OOMKilled":
+                            return "OOMKilled"
+                        if reason == "Error":
+                            return "Error"
+        return phase
+    # Controller 有 active/succeeded/failed
+    if status_dict.get("succeeded", 0) > 0:
+        return "Succeeded"
+    if status_dict.get("failed", 0) > 0:
+        return "Failed"
+    if status_dict.get("active", 0) > 0:
+        return "Running"
+    if status_dict.get("ready_replicas", 0) > 0:
+        return "Running"
+    return "Pending"
+
+
+def _compute_resource_type(job_info: dict, job_type: str) -> str:
+    """根据 status 字段推断 Kubernetes 资源类型"""
+    status_dict = job_info.get("status", {})
+    if "phase" in status_dict:
+        return "Pod"
+    if "ready_replicas" in status_dict:
+        return "StatefulSet" if job_type == "notebook" else "Deployment"
+    if "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
+        return "Job"
+    # 回退到 kind 推断
+    if job_type == "training":
+        return "Job"
+    if job_type == "notebook":
+        return "StatefulSet"
+    if job_type in ("inference", "compute"):
+        return "Deployment"
+    return "Pod"
+
+
+def _fetch_events(job_name: str, namespace: str, resource_type: str) -> list:
+    """从 Kubernetes 获取资源事件列表"""
+    try:
+        from gpuctl.client.base_client import KubernetesClient
+        k8s = KubernetesClient()
+        evs = k8s.core_v1.list_namespaced_event(
+            namespace=namespace,
+            field_selector=f"involvedObject.name={job_name},involvedObject.kind={resource_type}",
+            limit=10
+        )
+        sorted_evs = sorted(
+            evs.items,
+            key=lambda e: e.last_timestamp or e.first_timestamp or e.event_time or '',
+            reverse=True
+        )[:10]
+
+        result = []
+        for ev in sorted_evs:
+            ts = ev.last_timestamp or ev.first_timestamp or ev.event_time
+            ts_str = None
+            if ts:
+                ts_str = ts.isoformat()
+                if '.' in ts_str:
+                    ts_str = ts_str.split('.')[0] + 'Z'
+            # 简单年龄格式化
+            age_str = "N/A"
+            if ts_str:
+                try:
+                    from datetime import timezone
+                    t = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+                    delta = datetime.now(timezone.utc) - t
+                    s = delta.total_seconds()
+                    if s < 60:
+                        age_str = f"{int(s)}s"
+                    elif s < 3600:
+                        age_str = f"{int(s/60)}m"
+                    elif s < 86400:
+                        age_str = f"{int(s/3600)}h"
+                    else:
+                        age_str = f"{int(s/86400)}d"
+                except Exception:
+                    age_str = ts_str
+            result.append({
+                "age": age_str,
+                "type": ev.type or "Normal",
+                "reason": ev.reason or "-",
+                "from": ev.source.component if ev.source and ev.source.component else "-",
+                "object": f"{ev.involved_object.kind}/{ev.involved_object.name}",
+                "message": ev.message or "-"
+            })
+        return result
+    except Exception:
+        return []
+
+
+def _fetch_access_methods(job_name: str, namespace: str, job_type: str, resource_type: str) -> Optional[Dict[str, Any]]:
+    """获取 inference/compute/notebook 的访问方式"""
+    if job_type not in ("inference", "compute", "notebook"):
+        return None
+
+    # 计算服务名
+    svc_base = job_name
+    if job_type == "notebook":
+        parts = svc_base.split('-')
+        if len(parts) >= 2 and parts[-1].isdigit():
+            svc_base = '-'.join(parts[:-1])
+    elif resource_type == "Pod":
+        parts = svc_base.split('-')
+        if len(parts) >= 3 and parts[2].isalnum() and len(parts[2]) >= 5:
+            svc_base = '-'.join(parts[:2])
+
+    target_port = None
+    service_port = None
+    node_port = None
+    node_ip = None
+    pod_ip = None
+    is_running = False
+
+    try:
+        from gpuctl.client.base_client import KubernetesClient
+        k8s = KubernetesClient()
+        svc = k8s.core_v1.read_namespaced_service(
+            name=f"svc-{svc_base}", namespace=namespace
+        ).to_dict()
+        if svc["spec"]["ports"]:
+            p = svc["spec"]["ports"][0]
+            target_port = p.get("target_port")
+            service_port = p.get("port")
+            node_port = p.get("node_port")
+    except Exception:
+        pass
+
+    try:
+        from gpuctl.client.base_client import KubernetesClient
+        k8s2 = KubernetesClient()
+        nodes = k8s2.core_v1.list_node().items
+        if nodes:
+            for addr in (nodes[0].to_dict().get("status", {}).get("addresses", [])):
+                if addr.get("type") == "InternalIP":
+                    node_ip = addr.get("address")
+                    break
+    except Exception:
+        pass
+
+    try:
+        from gpuctl.client.base_client import KubernetesClient
+        k8s3 = KubernetesClient()
+        if resource_type == "Pod":
+            pod = k8s3.core_v1.read_namespaced_pod(name=job_name, namespace=namespace)
+            is_running = pod.status.phase == "Running"
+            pod_ip = pod.status.pod_ip
+        else:
+            pods = k8s3.core_v1.list_namespaced_pod(
+                namespace=namespace, label_selector=f"app={job_name}"
+            )
+            for pod in pods.items:
+                if pod.status.phase == "Running":
+                    is_running = True
+                    pod_ip = pod.status.pod_ip
+                    break
+    except Exception:
+        pass
+
+    port = target_port or service_port
+    return {
+        "pod_ip_access": {
+            "pod_ip": pod_ip if is_running else None,
+            "port": port,
+            "url": f"http://{pod_ip}:{port}" if (is_running and pod_ip and port) else None
+        },
+        "node_port_access": {
+            "node_ip": node_ip,
+            "node_port": node_port,
+            "url": f"http://{node_ip}:{node_port}" if (node_ip and node_port) else None
+        }
+    }
+
+
 @router.get("/{jobId}", response_model=JobDetailResponse)
-async def get_job_detail(jobId: str, token: str = Depends(AuthValidator.validate_token)):
-    """获取任务详情"""
+async def get_job_detail(
+        jobId: str,
+        namespace: Optional[str] = Query(None, description="命名空间，不指定时搜索所有 gpuctl 命名空间")
+):
+    """获取任务详情，与 CLI describe job --json 输出一致（含 events / access_methods）"""
     try:
         client = JobClient()
-        job_info = client.get_job(jobId)
+        ns = namespace or "default"
+
+        # 先尝试按控制器名称查找 (Job/Deployment/StatefulSet)
+        job_info = client.get_job(jobId, ns)
+
+        # 若未找到，尝试按 Pod 名称查找（支持跨命名空间搜索）
+        if not job_info:
+            job_info = client.get_pod(jobId, namespace if namespace else None)
 
         if not job_info:
             raise HTTPException(status_code=404, detail="Job not found")
 
-        # 获取Pod信息
-        pods = client.list_pods(labels={"job-name": jobId})
-
-        # 构建响应
         labels = job_info.get("labels", {})
+        job_type = labels.get("g8s.host/job-type", "unknown")
+        actual_ns = job_info.get("namespace", "default")
+        job_name = job_info.get("name", jobId)
 
-        # 获取资源信息（简化版，实际需要从Pod中解析）
-        resources = {
-            "gpu": 1,
-            "gpuType": "unknown",
-            "cpu": "unknown",
-            "memory": "unknown"
-        }
+        resource_type = _compute_resource_type(job_info, job_type)
 
-        # 获取指标（简化版，实际需要从监控系统获取）
-        metrics = {
-            "gpuUtilization": 0.0,
-            "memoryUsage": "0Gi/0Gi",
-            "networkLatency": "0ms",
-            "throughput": "0 tokens/sec"
-        }
+        # yaml_content
+        try:
+            from gpuctl.cli.job_mapper import map_k8s_to_gpuctl
+            yaml_content = map_k8s_to_gpuctl(job_info)
+        except Exception:
+            yaml_content = {}
 
-        # 获取任务状态
-        job_status = "pending"
-        if job_info["status"]["succeeded"] > 0:
-            job_status = "succeeded"
-        elif job_info["status"]["failed"] > 0:
-            job_status = "failed"
-        elif job_info["status"]["active"] > 0:
-            job_status = "running"
+        events = _fetch_events(job_name, actual_ns, resource_type)
+        access_methods = _fetch_access_methods(job_name, actual_ns, job_type, resource_type)
 
         return JobDetailResponse(
-            jobId=jobId,
-            name=job_info["name"],
-            kind=labels.get("g8s.host/job-type", "unknown"),
-            version="v0.1",
-            yamlContent="",  # 实际需要从存储中获取原始YAML
-            status=job_status,
+            job_id=job_name,
+            name=job_name,
+            namespace=actual_ns,
+            kind=job_type,
+            resource_type=resource_type,
+            status=_job_detail_compute_status(job_info),
+            age=_job_detail_calculate_age(job_info.get("creation_timestamp")),
+            started=job_info.get("start_time"),
+            completed=job_info.get("completion_time"),
+            priority=labels.get("g8s.host/priority", "medium"),
             pool=labels.get("g8s.host/pool", "default"),
-            resources=resources,
-            metrics=metrics,
-            createdAt=job_info.get("creation_timestamp"),
-            startedAt=job_info.get("creation_timestamp"),
-            k8sResources={
-                "jobName": jobId,
-                "pods": [pod["name"] for pod in pods]
-            }
+            resources=job_info.get("resources", {}),
+            metrics=job_info.get("metrics", {}),
+            yaml_content=yaml_content,
+            events=events,
+            access_methods=access_methods
         )
 
     except HTTPException:
@@ -288,7 +548,7 @@ async def get_job_detail(jobId: str, token: str = Depends(AuthValidator.validate
 
 
 @router.delete("/{jobId}", response_model=DeleteResponse)
-async def delete_job(jobId: str, force: bool = Query(False, description="是否强制删除"), token: str = Depends(AuthValidator.validate_token)):
+async def delete_job(jobId: str, force: bool = Query(False, description="是否强制删除")):
     """删除任务"""
     try:
         client = JobClient()
@@ -318,8 +578,7 @@ async def get_job_logs(
         jobId: str,
         follow: bool = False,
         tail: int = Query(100, ge=1),
-        pod: Optional[str] = None,
-        token: str = Depends(AuthValidator.validate_token)
+        pod: Optional[str] = Query(None)
 ):
     """获取任务日志"""
     try:
@@ -338,40 +597,6 @@ async def get_job_logs(
 
     except Exception as e:
         logger.error(f"Failed to get job logs: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-@router.get("/{jobId}/metrics", response_model=Dict[str, Any])
-async def get_job_metrics(
-        jobId: str,
-        metric: Optional[str] = Query(None),
-        startTime: Optional[datetime] = Query(None),
-        endTime: Optional[datetime] = Query(None),
-        token: str = Depends(AuthValidator.validate_token)
-):
-    """获取任务指标"""
-    try:
-        # 模拟指标数据
-        metrics_data = {
-            "gpuUtilization": [
-                {"timestamp": (datetime.utcnow() - timedelta(minutes=10)).isoformat(), "value": 75.2},
-                {"timestamp": (datetime.utcnow() - timedelta(minutes=5)).isoformat(), "value": 89.2},
-                {"timestamp": datetime.utcnow().isoformat(), "value": 82.1}
-            ],
-            "memoryUsage": [
-                {"timestamp": (datetime.utcnow() - timedelta(minutes=10)).isoformat(), "value": 65},
-                {"timestamp": (datetime.utcnow() - timedelta(minutes=5)).isoformat(), "value": 68},
-                {"timestamp": datetime.utcnow().isoformat(), "value": 70}
-            ]
-        }
-
-        if metric:
-            return {metric: metrics_data.get(metric, [])}
-
-        return metrics_data
-
-    except Exception as e:
-        logger.error(f"Failed to get job metrics: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

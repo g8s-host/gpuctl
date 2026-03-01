@@ -2,8 +2,8 @@ from .jobs import router as jobs_router
 from .pools import router as pools_router
 from .nodes import router as nodes_router
 from .labels import router as labels_router, global_labels_router
-from .auth import router as auth_router
 from .quotas import router as quotas_router
+from .namespaces import router as namespaces_router
 
 __all__ = [
     "jobs_router",
@@ -11,6 +11,6 @@ __all__ = [
     "nodes_router",
     "labels_router",
     "global_labels_router",
-    "auth_router",
-    "quotas_router"
+    "quotas_router",
+    "namespaces_router"
 ]
