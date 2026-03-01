@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Dict, Any
 import logging
 
@@ -9,14 +9,13 @@ from server.models import (
     PoolCreateRequest,
     PoolUpdateRequest
 )
-from server.auth import AuthValidator, security
 
 router = APIRouter(prefix="/api/v1/pools", tags=["pools"])
 logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=List[PoolResponse])
-async def get_pools(token: str = Depends(AuthValidator.validate_token)):
+async def get_pools():
     """获取资源池列表"""
     try:
         client = PoolClient.get_instance()
@@ -42,7 +41,7 @@ async def get_pools(token: str = Depends(AuthValidator.validate_token)):
 
 
 @router.get("/{poolName}", response_model=Dict[str, Any])
-async def get_pool_detail(poolName: str, token: str = Depends(AuthValidator.validate_token)):
+async def get_pool_detail(poolName: str):
     """获取资源池详情"""
     try:
         client = PoolClient.get_instance()
@@ -61,11 +60,10 @@ async def get_pool_detail(poolName: str, token: str = Depends(AuthValidator.vali
 
 
 @router.post("", status_code=201)
-async def create_pool(request: PoolCreateRequest, token: str = Depends(AuthValidator.validate_token)):
+async def create_pool(request: PoolCreateRequest):
     """创建资源池"""
     try:
         client = PoolClient.get_instance()
-        # 构建资源池配置
         pool_config = {
             "name": request.name,
             "description": request.description,
@@ -88,10 +86,9 @@ async def create_pool(request: PoolCreateRequest, token: str = Depends(AuthValid
 
 
 @router.put("/{poolName}")
-async def update_pool(poolName: str, request: PoolUpdateRequest, token: str = Depends(AuthValidator.validate_token)):
+async def update_pool(poolName: str, request: PoolUpdateRequest):
     """更新资源池"""
     try:
-        # 这里需要实现资源池更新逻辑
         return {
             "name": poolName,
             "status": "updated",
@@ -104,7 +101,7 @@ async def update_pool(poolName: str, request: PoolUpdateRequest, token: str = De
 
 
 @router.delete("/{poolName}")
-async def delete_pool(poolName: str, token: str = Depends(AuthValidator.validate_token)):
+async def delete_pool(poolName: str):
     """删除资源池"""
     try:
         client = PoolClient.get_instance()

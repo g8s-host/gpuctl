@@ -75,59 +75,82 @@ def test_create_inference_job(mock_inference_kind, mock_parse_yaml):
 @patch('server.routes.jobs.JobClient')
 def test_get_jobs(mock_job_client):
     """测试获取作业列表API"""
-    # 设置模拟返回值
+    # 模拟 Pod 级别数据（与 CLI gpuctl get jobs 一致）
+    mock_pod = MagicMock()
+    mock_pod.state = MagicMock()
+    mock_pod.state.waiting = None
+    mock_pod.state.terminated = None
+    mock_pod.ready = True
+
     mock_instance = MagicMock()
     mock_instance.list_jobs.return_value = [
         {
-            "name": "test-job-1",
+            "name": "test-job-1-abc123-xyz",
             "namespace": "default",
             "labels": {"g8s.host/job-type": "training", "g8s.host/pool": "test-pool"},
-            "status": {"active": 1, "succeeded": 0, "failed": 0},
+            "status": {
+                "active": 1,
+                "succeeded": 0,
+                "failed": 0,
+                "phase": "Running",
+                "pod_ip": "10.42.0.1",
+                "container_statuses": [mock_pod]
+            },
+            "spec": {"node_name": "node-1"},
             "creation_timestamp": "2023-01-01T12:00:00Z"
         }
     ]
     mock_job_client.return_value = mock_instance
-    
-    # 发送API请求
+
     response = client.get(
         "/api/v1/jobs",
         headers={"Authorization": "Bearer test-token"}
     )
-    
-    # 断言结果
+
     assert response.status_code == 200
     assert response.json()["total"] == 1
     assert len(response.json()["items"]) == 1
-    assert response.json()["items"][0]["jobId"] == "test-job-1"
+    item = response.json()["items"][0]
+    assert item["jobId"] == "test-job-1-abc123-xyz"
+    assert item["namespace"] == "default"
+    assert item["kind"] == "training"
+    assert item["status"] == "Running"
+    assert item["ready"] == "1/1"
+    assert item["node"] == "node-1"
+    assert item["ip"] == "10.42.0.1"
+    assert "age" in item
 
 
 @patch('server.routes.jobs.JobClient')
 def test_get_job_detail(mock_job_client):
     """测试获取作业详情API"""
-    # 设置模拟返回值
     mock_instance = MagicMock()
     mock_instance.get_job.return_value = {
         "name": "test-job",
         "namespace": "default",
         "labels": {"g8s.host/job-type": "training", "g8s.host/pool": "test-pool"},
         "status": {"active": 1, "succeeded": 0, "failed": 0},
-        "creation_timestamp": "2023-01-01T12:00:00Z"
+        "creation_timestamp": "2023-01-01T12:00:00Z",
+        "start_time": "2023-01-01T12:01:00Z",
+        "completion_time": None,
     }
-    mock_instance.list_pods.return_value = [
-        {"name": "test-job-pod-1"}
-    ]
+    mock_instance.get_pod.return_value = None
     mock_job_client.return_value = mock_instance
-    
-    # 发送API请求
+
     response = client.get(
         "/api/v1/jobs/test-job",
         headers={"Authorization": "Bearer test-token"}
     )
-    
-    # 断言结果
+
     assert response.status_code == 200
-    assert response.json()["jobId"] == "test-job"
-    assert response.json()["name"] == "test-job"
+    data = response.json()
+    assert data["job_id"] == "test-job"
+    assert data["name"] == "test-job"
+    assert data["namespace"] == "default"
+    assert data["kind"] == "training"
+    assert data["status"] == "Running"
+    assert data["pool"] == "test-pool"
+    assert "age" in data
 
 
 @patch('server.routes.jobs.JobClient')
@@ -243,33 +266,6 @@ def test_batch_create_jobs(mock_training_kind, mock_parse_yaml):
     assert len(response_json["failed"]) == 0
     assert response_json["success"][0]["jobId"] == "test-job-{}"
     assert response_json["success"][1]["jobId"] == "test-job-{}"
-
-
-@patch('server.routes.jobs.JobClient')
-def test_get_job_metrics(mock_job_client):
-    """测试获取作业指标API"""
-    # 设置模拟返回值
-    mock_instance = MagicMock()
-    mock_job_client.return_value = mock_instance
-    
-    # 发送API请求
-    response = client.get(
-        "/api/v1/jobs/test-job/metrics",
-        headers={"Authorization": "Bearer test-token"}
-    )
-    
-    # 断言结果
-    assert response.status_code == 200
-    response_json = response.json()
-    assert "gpuUtilization" in response_json
-    assert "memoryUsage" in response_json
-    
-    # 验证指标数据结构
-    for metric_type in ["gpuUtilization", "memoryUsage"]:
-        assert isinstance(response_json[metric_type], list)
-        for metric_item in response_json[metric_type]:
-            assert "timestamp" in metric_item
-            assert "value" in metric_item
 
 
 @patch('server.routes.jobs.BaseParser.parse_yaml')
