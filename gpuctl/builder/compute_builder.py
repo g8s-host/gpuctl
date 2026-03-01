@@ -152,12 +152,17 @@ class ComputeBuilder(BaseBuilder):
             type="NodePort"
         )
 
+        metadata_annotations = {}
+        if compute_job.job.description:
+            metadata_annotations["g8s.host/description"] = compute_job.job.description
+
         metadata = client.V1ObjectMeta(
             name=f"svc-{compute_job.job.name}",
             labels={
                 "g8s.host/job-type": "compute",
                 "g8s.host/pool": compute_job.resources.pool or "default"
-            }
+            },
+            annotations=metadata_annotations
         )
 
         return client.V1Service(

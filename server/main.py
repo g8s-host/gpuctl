@@ -13,7 +13,6 @@ from server.routes import (
     labels_router,
     global_labels_router,
     auth_router,
-    permissions_router,
     quotas_router
 )
 
@@ -50,7 +49,6 @@ app.include_router(nodes_router)    # 后注册nodes_router
 app.include_router(quotas_router)  # 注册配额路由
 app.include_router(global_labels_router)
 app.include_router(auth_router)
-app.include_router(permissions_router)
 
 
 # 根路由

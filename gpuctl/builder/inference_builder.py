@@ -146,12 +146,17 @@ class InferenceBuilder(BaseBuilder):
             type="NodePort"
         )
 
+        metadata_annotations = {}
+        if inference_job.job.description:
+            metadata_annotations["g8s.host/description"] = inference_job.job.description
+
         metadata = client.V1ObjectMeta(
             name=f"svc-{inference_job.job.name}",
             labels={
                 "g8s.host/job-type": "inference",
                 "g8s.host/pool": inference_job.resources.pool or "default"
-            }
+            },
+            annotations=metadata_annotations
         )
 
         return client.V1Service(

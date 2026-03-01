@@ -129,12 +129,17 @@ class NotebookBuilder(BaseBuilder):
             type="NodePort"
         )
 
+        metadata_annotations = {}
+        if notebook_job.job.description:
+            metadata_annotations["g8s.host/description"] = notebook_job.job.description
+
         metadata = client.V1ObjectMeta(
             name=f"svc-{notebook_job.job.name}",
             labels={
                 "g8s.host/job-type": "notebook",
                 "g8s.host/pool": notebook_job.resources.pool or "default"
-            }
+            },
+            annotations=metadata_annotations
         )
 
         return client.V1Service(
