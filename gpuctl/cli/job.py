@@ -1727,7 +1727,153 @@ def describe_job_command(args):
             
             # 设置最终状态
             processed_job['status'] = status
-            
+
+            # ── resource_type ──────────────────────────────────────────────
+            rt = "Unknown"
+            if "phase" in status_dict:
+                rt = "Pod"
+            elif "ready_replicas" in status_dict:
+                rt = "StatefulSet" if job_type == "notebook" else "Deployment"
+            elif "active" in status_dict and "succeeded" in status_dict and "failed" in status_dict:
+                rt = "Job"
+            if rt == "Unknown":
+                if job_type == "training":
+                    rt = "Job"
+                elif job_type == "notebook":
+                    rt = "StatefulSet"
+                elif job_type in ["inference", "compute"]:
+                    rt = "Deployment"
+                else:
+                    rt = "Pod"
+            processed_job['resource_type'] = rt
+
+            # ── yaml_content ───────────────────────────────────────────────
+            try:
+                from gpuctl.cli.job_mapper import map_k8s_to_gpuctl
+                processed_job['yaml_content'] = map_k8s_to_gpuctl(job)
+            except Exception:
+                processed_job['yaml_content'] = {}
+
+            # ── events ─────────────────────────────────────────────────────
+            full_job_name = job.get('name', '')
+            actual_namespace = job.get('namespace', args.namespace)
+            events_list = []
+            try:
+                from gpuctl.client.base_client import KubernetesClient
+                _k8s = KubernetesClient()
+                _evs = _k8s.core_v1.list_namespaced_event(
+                    namespace=actual_namespace,
+                    field_selector=f"involvedObject.name={full_job_name},involvedObject.kind={rt}",
+                    limit=10
+                )
+                _sorted = sorted(
+                    _evs.items,
+                    key=lambda e: e.last_timestamp or e.first_timestamp or e.event_time or '',
+                    reverse=True
+                )[:10]
+                for _ev in _sorted:
+                    _ts = _ev.last_timestamp or _ev.first_timestamp or _ev.event_time
+                    _ts_str = None
+                    if _ts:
+                        _ts_str = _ts.isoformat()
+                        if '.' in _ts_str:
+                            _ts_str = _ts_str.split('.')[0] + 'Z'
+                    events_list.append({
+                        "age": _format_event_age(_ts_str),
+                        "type": _ev.type or 'Normal',
+                        "reason": _ev.reason or '-',
+                        "from": _ev.source.component if _ev.source and _ev.source.component else '-',
+                        "object": f"{_ev.involved_object.kind}/{_ev.involved_object.name}",
+                        "message": _ev.message or '-'
+                    })
+            except Exception:
+                pass
+            processed_job['events'] = events_list
+
+            # ── access_methods (inference / compute / notebook only) ────────
+            if job_type in ['inference', 'compute', 'notebook']:
+                _access = {}
+                # 计算服务名
+                _svc_base = remove_prefix(full_job_name)
+                if job_type == 'notebook':
+                    _parts = _svc_base.split('-')
+                    if len(_parts) >= 2 and _parts[-1].isdigit():
+                        _svc_base = '-'.join(_parts[:-1])
+                elif rt == "Pod":
+                    _parts = _svc_base.split('-')
+                    if len(_parts) >= 3 and _parts[2].isalnum() and len(_parts[2]) >= 5:
+                        _svc_base = '-'.join(_parts[:2])
+
+                # 获取 Service 端口
+                _target_port = None
+                _service_port = None
+                _node_port = None
+                try:
+                    from gpuctl.client.base_client import KubernetesClient
+                    _k8s2 = KubernetesClient()
+                    _svc = _k8s2.core_v1.read_namespaced_service(
+                        name=f"svc-{_svc_base}", namespace=actual_namespace
+                    ).to_dict()
+                    if _svc['spec']['ports']:
+                        _p = _svc['spec']['ports'][0]
+                        _target_port = _p.get('target_port')
+                        _service_port = _p.get('port')
+                        _node_port = _p.get('node_port')
+                except Exception:
+                    pass
+
+                # 获取 Node IP
+                _node_ip = None
+                try:
+                    from gpuctl.client.base_client import KubernetesClient
+                    _k8s3 = KubernetesClient()
+                    _nodes = _k8s3.core_v1.list_node().items
+                    if _nodes:
+                        for _addr in (_nodes[0].to_dict().get('status', {}).get('addresses', [])):
+                            if _addr.get('type') == 'InternalIP':
+                                _node_ip = _addr.get('address')
+                                break
+                except Exception:
+                    pass
+
+                # 获取 Pod IP
+                _pod_ip = None
+                _is_running = False
+                try:
+                    from gpuctl.client.base_client import KubernetesClient
+                    _k8s4 = KubernetesClient()
+                    if rt == "Pod":
+                        _pod = _k8s4.core_v1.read_namespaced_pod(
+                            name=full_job_name, namespace=actual_namespace
+                        )
+                        _is_running = _pod.status.phase == 'Running'
+                        _pod_ip = _pod.status.pod_ip
+                    else:
+                        _pods = _k8s4.core_v1.list_namespaced_pod(
+                            namespace=actual_namespace,
+                            label_selector=f"app={full_job_name}"
+                        )
+                        for _p2 in _pods.items:
+                            if _p2.status.phase == 'Running':
+                                _is_running = True
+                                _pod_ip = _p2.status.pod_ip
+                                break
+                except Exception:
+                    pass
+
+                _port = _target_port or _service_port
+                _access['pod_ip_access'] = {
+                    "pod_ip": _pod_ip if _is_running else None,
+                    "port": _port,
+                    "url": f"http://{_pod_ip}:{_port}" if (_is_running and _pod_ip and _port) else None
+                }
+                _access['node_port_access'] = {
+                    "node_ip": _node_ip,
+                    "node_port": _node_port,
+                    "url": f"http://{_node_ip}:{_node_port}" if (_node_ip and _node_port) else None
+                }
+                processed_job['access_methods'] = _access
+
             print(json.dumps(processed_job, indent=2))
             return 0
         

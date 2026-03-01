@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional, Dict, Any
 import logging
 
@@ -10,18 +10,16 @@ from server.models import (
     JobResponse,
     DeleteResponse
 )
-from server.auth import AuthValidator, security
 
 router = APIRouter(prefix="/api/v1/quotas", tags=["quotas"])
 logger = logging.getLogger(__name__)
 
 
 @router.post("", response_model=Dict[str, Any], status_code=201)
-async def create_quota(request: JobCreateRequest, token: str = Depends(AuthValidator.validate_token)):
+async def create_quota(request: JobCreateRequest):
     """创建资源配额"""
     logger.debug(f"开始创建资源配额，请求内容: {request.yamlContent[:100]}...")
     try:
-        # 解析YAML
         logger.debug("正在解析YAML配置")
         parsed_obj = BaseParser.parse_yaml(request.yamlContent)
         logger.debug(f"YAML解析成功，配额名称: {parsed_obj.quota.name}")
@@ -29,7 +27,6 @@ async def create_quota(request: JobCreateRequest, token: str = Depends(AuthValid
         if parsed_obj.kind != "quota":
             raise HTTPException(status_code=400, detail=f"Unsupported kind: {parsed_obj.kind}")
 
-        # 创建配额
         client = QuotaClient()
         quota_config = {
             "name": parsed_obj.quota.name,
@@ -67,10 +64,7 @@ async def create_quota(request: JobCreateRequest, token: str = Depends(AuthValid
 
 
 @router.get("", response_model=Dict[str, Any])
-async def get_quotas(
-        namespace: Optional[str] = Query(None, description="命名空间过滤"),
-        token: str = Depends(AuthValidator.validate_token)
-):
+async def get_quotas(namespace: Optional[str] = Query(None, description="命名空间过滤")):
     """获取资源配额列表"""
     try:
         client = QuotaClient()
@@ -94,7 +88,7 @@ async def get_quotas(
 
 
 @router.get("/{namespaceName}", response_model=Dict[str, Any])
-async def get_quota_detail(namespaceName: str, token: str = Depends(AuthValidator.validate_token)):
+async def get_quota_detail(namespaceName: str):
     """获取资源配额详情"""
     try:
         client = QuotaClient()
@@ -111,7 +105,7 @@ async def get_quota_detail(namespaceName: str, token: str = Depends(AuthValidato
 
 
 @router.delete("/{namespaceName}", response_model=DeleteResponse)
-async def delete_quota(namespaceName: str, force: bool = Query(False, description="是否强制删除"), token: str = Depends(AuthValidator.validate_token)):
+async def delete_quota(namespaceName: str, force: bool = Query(False, description="是否强制删除")):
     """删除资源配额"""
     try:
         client = QuotaClient()

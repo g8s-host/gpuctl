@@ -21,12 +21,13 @@ class JobResponse(BaseModel):
 class JobItem(BaseModel):
     jobId: str
     name: str
+    namespace: str
     kind: str
-    pool: str
     status: str
-    gpu: int
-    gpuType: str
-    startedAt: Optional[datetime] = None
+    ready: str
+    node: str
+    ip: str
+    age: str
 
 
 class JobListResponse(BaseModel):
@@ -43,38 +44,24 @@ class BatchCreateResponse(BaseModel):
     failed: List[Dict[str, str]]
 
 
-class ResourceDetail(BaseModel):
-    gpu: int
-    gpuType: str
-    cpu: str
-    memory: str
-
-
-class MetricsDetail(BaseModel):
-    gpuUtilization: float = Field(default=0.0)
-    memoryUsage: str = Field(default="0Gi/0Gi")
-    networkLatency: str = Field(default="0ms")
-    throughput: str = Field(default="0 tokens/sec")
-
-
-class K8sResources(BaseModel):
-    jobName: str
-    pods: List[str]
-
-
 class JobDetailResponse(BaseModel):
-    jobId: str
+    """任务详情响应，与 CLI describe job --json 输出一致"""
+    job_id: str
     name: str
+    namespace: str
     kind: str
-    version: str
-    yamlContent: Optional[str] = None
+    resource_type: str = "Unknown"
     status: str
-    pool: str
-    resources: ResourceDetail
-    metrics: MetricsDetail
-    createdAt: datetime
-    startedAt: Optional[datetime] = None
-    k8sResources: K8sResources
+    age: str
+    started: Optional[str] = None
+    completed: Optional[str] = None
+    priority: str = "medium"
+    pool: str = "default"
+    resources: Dict[str, Any] = Field(default_factory=dict)
+    metrics: Dict[str, Any] = Field(default_factory=dict)
+    yaml_content: Dict[str, Any] = Field(default_factory=dict)
+    events: List[Dict[str, Any]] = Field(default_factory=list)
+    access_methods: Optional[Dict[str, Any]] = None
 
 
 class DeleteResponse(BaseModel):
@@ -163,14 +150,3 @@ class LabelResponse(BaseModel):
 class LogResponse(BaseModel):
     logs: List[str]
     lastTimestamp: Optional[datetime] = None
-
-
-class AuthCheckRequest(BaseModel):
-    resource: str
-    action: str
-    pool: Optional[str] = None
-
-
-class AuthCheckResponse(BaseModel):
-    allowed: bool
-    message: str

@@ -103,6 +103,20 @@ class JobClient(KubernetesClient):
         # 所有命名空间中都未找到
         return None
 
+    def get_pod(self, name: str, namespace: str = None) -> Optional[Dict[str, Any]]:
+        """通过 Pod 名称获取 Pod 信息，支持跨命名空间搜索"""
+        namespaces_to_try = [namespace] if namespace else self._get_all_gpuctl_namespaces()
+        for ns in namespaces_to_try:
+            if not ns:
+                continue
+            try:
+                pod = self.core_v1.read_namespaced_pod(name, ns)
+                return self._pod_to_dict(pod)
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"get pod {name} in namespace {ns}")
+        return None
+
     def list_jobs(self, namespace: str = None,
                   labels: Dict[str, str] = None, include_pods: bool = False) -> List[Dict[str, Any]]:
         """列出所有作业资源，包括Job、Deployment和StatefulSet"""
