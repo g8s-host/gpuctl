@@ -1,0 +1,15 @@
+kind: compute
+job:
+  name: test-nginx
+  namespace: default
+resources:
+  pool: non-existent-pool
+  gpu: 0
+  cpu: 1
+  memory: 2Gi
+environment:
+  image: nginx:latest
+service:
+  replicas: 1
+  port: 8080
+  healthCheck: /

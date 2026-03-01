@@ -1,0 +1,8 @@
+kind: pool
+version: v0.1
+pool:
+  name: test-pool
+  description: Test pool with GPU type
+nodes:
+  leon-host:
+    gpuType: A100
