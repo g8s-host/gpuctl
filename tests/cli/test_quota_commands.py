@@ -420,3 +420,220 @@ def test_describe_nonexistent_namespace(mock_quota_client_class):
     result = describe_namespace_command(args)
     
     assert result in (0, 1)
+
+
+# ── delete_quota_command 补充 ──────────────────────────────────────────────────
+
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_delete_quota_via_file_with_force(mock_quota_client_class, mock_parse_yaml_file):
+    """测试用例: 通过 YAML 文件强制删除配额（-f --force）"""
+    mock_instance = MagicMock()
+    mock_instance.delete_quota_config.return_value = {
+        "deleted": [{"namespace": "test-namespace", "status": "deleted"}],
+        "failed": []
+    }
+    mock_quota_client_class.return_value = mock_instance
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "quota"
+    mock_parsed_obj.quota = MagicMock(name="test-quota")
+    mock_parsed_obj.namespace = {"test-namespace": MagicMock()}
+    mock_parsed_obj.default = None
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    args = Namespace(file=["test-quota.yaml"], quota_name=None, force=True, json=False)
+    result = delete_quota_command(args)
+
+    assert result in (0, 1)
+    mock_instance.delete_quota_config.assert_called_once()
+
+
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_delete_quota_via_file_with_json(mock_quota_client_class, mock_parse_yaml_file):
+    """测试用例: 通过 YAML 文件删除配额并以 JSON 格式输出（跳过确认）"""
+    mock_instance = MagicMock()
+    mock_instance.delete_quota_config.return_value = {
+        "deleted": [{"namespace": "test-namespace", "status": "deleted"}],
+        "failed": []
+    }
+    mock_quota_client_class.return_value = mock_instance
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "quota"
+    mock_parsed_obj.quota = MagicMock(name="test-quota")
+    mock_parsed_obj.namespace = {"test-namespace": MagicMock()}
+    mock_parsed_obj.default = None
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    args = Namespace(file=["test-quota.yaml"], quota_name=None, force=False, json=True)
+    result = delete_quota_command(args)
+
+    assert result in (0, 1)
+
+
+@patch('gpuctl.parser.base_parser.BaseParser.parse_yaml_file')
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_delete_quota_via_file_unsupported_kind(mock_quota_client_class, mock_parse_yaml_file):
+    """测试用例: YAML 文件的 kind 不是 quota 时报错"""
+    mock_instance = MagicMock()
+    mock_quota_client_class.return_value = mock_instance
+
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "pool"
+    mock_parse_yaml_file.return_value = mock_parsed_obj
+
+    args = Namespace(file=["test-pool.yaml"], quota_name=None, force=True, json=False)
+    result = delete_quota_command(args)
+
+    assert result in (0, 1)
+    mock_instance.delete_quota_config.assert_not_called()
+
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_delete_quota_by_name_with_json(mock_quota_client):
+    """测试用例: 通过名称删除配额并以 JSON 格式输出（跳过确认提示）"""
+    mock_instance = MagicMock()
+    mock_instance.delete_quota_config.return_value = {
+        "deleted": [{"namespace": "default", "status": "deleted"}],
+        "failed": []
+    }
+    mock_quota_client.return_value = mock_instance
+
+    args = Namespace(quota_name="test-quota", file=None, force=False, json=True)
+    result = delete_quota_command(args)
+
+    assert result in (0, 1)
+
+
+# ── delete_namespace_command 补充 ──────────────────────────────────────────────
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_delete_non_gpuctl_namespace(mock_quota_client_class):
+    """测试用例: 删除非 gpuctl 创建的命名空间应报错"""
+    mock_instance = MagicMock()
+    mock_core_v1 = MagicMock()
+
+    mock_ns = MagicMock()
+    mock_ns.metadata = MagicMock(name='kube-system', labels={})
+    mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
+
+    mock_instance.core_v1 = mock_core_v1
+    mock_quota_client_class.return_value = mock_instance
+
+    args = Namespace(namespace_name="kube-system", force=True, json=False)
+    result = delete_namespace_command(args)
+
+    assert result == 1
+    mock_core_v1.delete_namespace.assert_not_called()
+
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_delete_namespace_with_json(mock_quota_client_class):
+    """测试用例: JSON 格式输出删除命名空间（跳过确认提示）"""
+    mock_instance = MagicMock()
+    mock_core_v1 = MagicMock()
+
+    mock_ns = MagicMock()
+    mock_ns.metadata = MagicMock(name='test-ns', labels={"g8s.host/namespace": "true"})
+    mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
+    mock_core_v1.delete_namespace = MagicMock()
+
+    mock_instance.core_v1 = mock_core_v1
+    mock_quota_client_class.return_value = mock_instance
+
+    args = Namespace(namespace_name="test-ns", force=False, json=True)
+    result = delete_namespace_command(args)
+
+    assert result == 0
+    mock_core_v1.delete_namespace.assert_called_once_with("test-ns")
+
+
+# ── get_quotas_command 补充 ────────────────────────────────────────────────────
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_get_quotas_returns_data(mock_quota_client):
+    """测试用例: 配额列表返回实际数据时正常渲染"""
+    mock_instance = MagicMock()
+    mock_instance.list_quotas.return_value = [
+        {
+            "name": "g8s-quota",
+            "namespace": "default",
+            "status": "Active",
+            "hard": {"cpu": "4", "memory": "8Gi", "nvidia.com/gpu": "1"},
+            "used": {"cpu": "2", "memory": "4Gi", "nvidia.com/gpu": "0"}
+        },
+        {
+            "name": "g8s-quota",
+            "namespace": "test-ns",
+            "status": "Active",
+            "hard": {"cpu": "8", "memory": "16Gi", "nvidia.com/gpu": "2"},
+            "used": {"cpu": "0", "memory": "0", "nvidia.com/gpu": "0"}
+        }
+    ]
+    mock_quota_client.return_value = mock_instance
+
+    args = Namespace(namespace=None, json=False)
+    result = get_quotas_command(args)
+
+    assert result == 0
+
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_describe_quota_with_data(mock_quota_client):
+    """测试用例: 查看包含资源详情的配额"""
+    mock_instance = MagicMock()
+    mock_instance.describe_quota.return_value = {
+        "name": "g8s-quota",
+        "namespace": "default",
+        "hard": {
+            "cpu": "4",
+            "memory": "8Gi",
+            "nvidia.com/gpu": "1"
+        },
+        "used": {
+            "cpu": "2",
+            "memory": "3Gi",
+            "nvidia.com/gpu": "0"
+        }
+    }
+    mock_quota_client.return_value = mock_instance
+
+    args = Namespace(namespace_name="default", json=False)
+    result = describe_quota_command(args)
+
+    assert result in (0, 1)
+    mock_instance.describe_quota.assert_called_once_with("default")
+
+
+# ── describe_namespace_command 补充 ───────────────────────────────────────────
+
+@patch('gpuctl.cli.quota.QuotaClient')
+def test_describe_namespace_with_quota(mock_quota_client_class):
+    """测试用例: 查看包含配额信息的命名空间详情"""
+    mock_instance = MagicMock()
+    mock_core_v1 = MagicMock()
+
+    mock_ns = MagicMock()
+    mock_ns.metadata = MagicMock(
+        name='test-namespace',
+        creation_timestamp='2024-01-01T00:00:00Z',
+        labels={"g8s.host/namespace": "true"}
+    )
+    mock_ns.status = MagicMock(phase='Active')
+    mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
+
+    mock_instance.core_v1 = mock_core_v1
+    mock_instance.get_quota = MagicMock(return_value={
+        "namespace": "test-namespace",
+        "hard": {"cpu": "4", "memory": "8Gi"},
+        "used": {"cpu": "1", "memory": "2Gi"}
+    })
+    mock_quota_client_class.return_value = mock_instance
+
+    args = Namespace(namespace_name="test-namespace", json=False)
+    result = describe_namespace_command(args)
+
+    assert result in (0, 1)
+    mock_instance.get_quota.assert_called_once()

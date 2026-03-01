@@ -72,7 +72,7 @@ class TestTrainingJobMapper(unittest.TestCase):
         self.assertEqual(result['resources']['pool'], 'training-pool')  # 默认值
         self.assertEqual(result['resources']['gpu'], '2')
         self.assertEqual(result['resources']['gpuType'], 'a10-24g')
-        self.assertEqual(result['resources']['cpu'], '8')
+        self.assertEqual(result['resources']['cpu'], 8)
         self.assertEqual(result['resources']['memory'], '32Gi')
         self.assertEqual(result['resources']['gpuShare'], '2Gi')  # 默认值
 
