@@ -79,6 +79,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# MkDocs build output (run mkdocs build -f docs/mkdocs.yml to regenerate)
+site/
+
 # PyBuilder
 target/
 
