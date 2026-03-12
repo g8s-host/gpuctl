@@ -171,14 +171,12 @@ ls dist/
 # 安装文档依赖
 pip install mkdocs mkdocs-material
 
-# 在项目根目录执行：配置与构建产物均在 docs/ 下
-mkdocs serve -f docs/mkdocs.yml
-
-# 构建静态文件（输出到项目根 site/，因 MkDocs 限制不能放在 docs 内）
-mkdocs build -f docs/mkdocs.yml
+# 在项目根目录执行
+mkdocs serve   # 本地预览
+mkdocs build   # 构建静态文件（输出到 site/）
 ```
 
-文档源文件与 `mkdocs.yml` 配置均在 `docs/` 目录，便于统一管理；修改后提交 PR 即可更新官网。
+文档源文件位于 `docs/`，`mkdocs.yml` 配置在项目根目录，修改后提交 PR 即可更新官网。
 
 ---
 

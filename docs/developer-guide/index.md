@@ -33,7 +33,8 @@ gpuctl/
 │   └── routes/        路由分组
 ├── tests/             测试用例
 ├── doc/               原始设计文档
-└── docs/              文档站点（源文件与 mkdocs.yml 配置）
+├── mkdocs.yml         文档站点配置
+└── docs/              文档源文件（公开文档 + 内部设计文档）
 ```
 
 ---
