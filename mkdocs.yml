@@ -1,0 +1,105 @@
+docs_dir: docs
+site_dir: site
+
+site_name: gpuctl - AI 算力调度平台
+site_url: https://g8s-host.github.io/gpuctl
+site_description: 面向算法工程师的 AI 算力调度平台，通过声明式 YAML 和简单 CLI 命令高效管理 GPU 资源
+site_author: GPU Control Team
+repo_url: https://github.com/g8s-host/gpuctl
+repo_name: g8s-host/gpuctl
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: zh
+  icon:
+    logo: material/cpu-64-bit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+    - search.share
+    - toc.follow
+
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+
+nav:
+  - 首页: index.md
+  - 用户指南:
+    - 概览: user-guide/index.md
+    - 快速开始: user-guide/quickstart.md
+    - 训练任务: user-guide/training.md
+    - 推理服务: user-guide/inference.md
+    - Notebook 开发: user-guide/notebook.md
+    - 计算任务: user-guide/compute.md
+    - 资源池管理: user-guide/pool.md
+    - 配额与命名空间: user-guide/quota.md
+  - 开发者指南:
+    - 概览: developer-guide/index.md
+    - 系统架构: developer-guide/architecture.md
+    - REST API: developer-guide/api.md
+    - 贡献指南: developer-guide/contributing.md
+  - CLI 参考: cli/index.md
+  - 社区: community/index.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/g8s-host/gpuctl
+      name: GitHub
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+
+copyright: Copyright &copy; 2025 GPU Control Team - MIT License
