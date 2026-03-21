@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="zh" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -22,6 +22,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../zh/developer-guide/api/" hreflang="zh">
+        
       
       
       <link rel="icon" href="../../assets/gpuctl_logo.svg">
@@ -29,7 +33,7 @@
     
     
       
-        <title>REST API - GPUCTL - AI 算力调度工具</title>
+        <title>REST API - GPUCTL - AI GPU Scheduling Tool</title>
       
     
     
@@ -90,8 +94,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#rest-api" class="md-skip">
-          跳转至
+        <a href="#rest-api-reference" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -105,8 +109,8 @@
   
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-header__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-header__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
@@ -119,7 +123,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            GPUCTL - AI 算力调度工具
+            GPUCTL - AI GPU Scheduling Tool
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -162,6 +166,32 @@
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/developer-guide/api/" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
     
       
       
@@ -173,21 +203,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="查找">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -200,7 +230,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            正在初始化搜索引擎
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -212,7 +242,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -227,7 +257,7 @@
   
     
       
-<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -243,7 +273,7 @@
   
     
   
-  首页
+  Home
 
       </a>
     </li>
@@ -262,7 +292,7 @@
           
   
   
-  用户指南
+  User Guide
 
         </a>
       </li>
@@ -284,7 +314,7 @@
           
   
   
-  开发者指南
+  Developer Guide
 
         </a>
       </li>
@@ -304,7 +334,7 @@
   
     
   
-  CLI 参考
+  CLI Reference
 
       </a>
     </li>
@@ -323,7 +353,7 @@
   
     
   
-  社区
+  Community
 
       </a>
     </li>
@@ -356,18 +386,18 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-nav__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-nav__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
     </a>
-    GPUCTL - AI 算力调度工具
+    GPUCTL - AI GPU Scheduling Tool
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -394,7 +424,7 @@
   <span class="md-ellipsis">
     
   
-    首页
+    Home
   
 
     
@@ -439,7 +469,7 @@
   <span class="md-ellipsis">
     
   
-    用户指南
+    User Guide
   
 
     
@@ -455,7 +485,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    用户指南
+    User Guide
   
 
           </label>
@@ -475,7 +505,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -503,7 +533,7 @@
   <span class="md-ellipsis">
     
   
-    快速开始
+    Quickstart
   
 
     
@@ -531,7 +561,7 @@
   <span class="md-ellipsis">
     
   
-    训练任务
+    Training Jobs
   
 
     
@@ -559,7 +589,7 @@
   <span class="md-ellipsis">
     
   
-    推理服务
+    Inference Services
   
 
     
@@ -615,7 +645,7 @@
   <span class="md-ellipsis">
     
   
-    计算任务
+    Compute Jobs
   
 
     
@@ -643,7 +673,7 @@
   <span class="md-ellipsis">
     
   
-    资源池管理
+    Resource Pool
   
 
     
@@ -671,7 +701,7 @@
   <span class="md-ellipsis">
     
   
-    配额管理
+    Quota Management
   
 
     
@@ -727,7 +757,7 @@
   <span class="md-ellipsis">
     
   
-    开发者指南
+    Developer Guide
   
 
     
@@ -743,7 +773,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    开发者指南
+    Developer Guide
   
 
           </label>
@@ -763,7 +793,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -791,7 +821,7 @@
   <span class="md-ellipsis">
     
   
-    系统架构
+    Architecture
   
 
     
@@ -858,7 +888,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -867,15 +897,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#basic-information" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基础信息
+        Basic Information
       
     </span>
   </a>
@@ -883,10 +913,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api" class="md-nav__link">
+  <a href="#starting-the-api-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        启动 API 服务
+        Starting the API Server
       
     </span>
   </a>
@@ -894,15 +924,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#base-endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基础接口
+        Base Endpoints
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="基础接口">
+    <nav class="md-nav" aria-label="Base Endpoints">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -933,22 +963,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_1" class="md-nav__link">
+  <a href="#job-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        任务 API
+        Job API
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="任务 API">
+    <nav class="md-nav" aria-label="Job API">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#post-apiv1jobs" class="md-nav__link">
+  <a href="#post-apiv1jobs-create-job" class="md-nav__link">
     <span class="md-ellipsis">
       
-        POST /api/v1/jobs — 创建任务
+        POST /api/v1/jobs — Create Job
       
     </span>
   </a>
@@ -956,10 +986,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#post-apiv1jobsbatch" class="md-nav__link">
+  <a href="#post-apiv1jobsbatch-batch-create-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        POST /api/v1/jobs/batch — 批量创建任务
+        POST /api/v1/jobs/batch — Batch Create Jobs
       
     </span>
   </a>
@@ -967,10 +997,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-apiv1jobs" class="md-nav__link">
+  <a href="#get-apiv1jobs-list-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /api/v1/jobs — 查询任务列表
+        GET /api/v1/jobs — List Jobs
       
     </span>
   </a>
@@ -978,10 +1008,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-apiv1jobsjobid" class="md-nav__link">
+  <a href="#get-apiv1jobsjobid-get-job-details" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /api/v1/jobs/{jobId} — 查询任务详情
+        GET /api/v1/jobs/{jobId} — Get Job Details
       
     </span>
   </a>
@@ -989,10 +1019,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#delete-apiv1jobsjobid" class="md-nav__link">
+  <a href="#delete-apiv1jobsjobid-delete-job" class="md-nav__link">
     <span class="md-ellipsis">
       
-        DELETE /api/v1/jobs/{jobId} — 删除任务
+        DELETE /api/v1/jobs/{jobId} — Delete Job
       
     </span>
   </a>
@@ -1000,10 +1030,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-apiv1jobsjobidlogs" class="md-nav__link">
+  <a href="#get-apiv1jobsjobidlogs-get-logs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /api/v1/jobs/{jobId}/logs — 获取日志
+        GET /api/v1/jobs/{jobId}/logs — Get Logs
       
     </span>
   </a>
@@ -1011,10 +1041,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ws-apiv1jobsjobidlogsws-websocket" class="md-nav__link">
+  <a href="#ws-apiv1jobsjobidlogsws-websocket-streaming-logs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        WS /api/v1/jobs/{jobId}/logs/ws — WebSocket 实时日志
+        WS /api/v1/jobs/{jobId}/logs/ws — WebSocket Streaming Logs
       
     </span>
   </a>
@@ -1027,10 +1057,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_2" class="md-nav__link">
+  <a href="#resource-pool-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        资源池 API
+        Resource Pool API
       
     </span>
   </a>
@@ -1038,10 +1068,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_3" class="md-nav__link">
+  <a href="#node-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        节点 API
+        Node API
       
     </span>
   </a>
@@ -1049,10 +1079,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_4" class="md-nav__link">
+  <a href="#label-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        标签 API
+        Label API
       
     </span>
   </a>
@@ -1060,10 +1090,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_5" class="md-nav__link">
+  <a href="#quota-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        配额 API
+        Quota API
       
     </span>
   </a>
@@ -1071,10 +1101,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_6" class="md-nav__link">
+  <a href="#namespace-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        命名空间 API
+        Namespace API
       
     </span>
   </a>
@@ -1082,10 +1112,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#error-responses" class="md-nav__link">
     <span class="md-ellipsis">
       
-        错误响应
+        Error Responses
       
     </span>
   </a>
@@ -1115,7 +1145,7 @@
   <span class="md-ellipsis">
     
   
-    贡献指南
+    Contributing
   
 
     
@@ -1150,7 +1180,7 @@
   <span class="md-ellipsis">
     
   
-    CLI 参考
+    CLI Reference
   
 
     
@@ -1177,7 +1207,7 @@
   <span class="md-ellipsis">
     
   
-    社区
+    Community
   
 
     
@@ -1203,7 +1233,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1212,15 +1242,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#basic-information" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基础信息
+        Basic Information
       
     </span>
   </a>
@@ -1228,10 +1258,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api" class="md-nav__link">
+  <a href="#starting-the-api-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        启动 API 服务
+        Starting the API Server
       
     </span>
   </a>
@@ -1239,15 +1269,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#base-endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基础接口
+        Base Endpoints
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="基础接口">
+    <nav class="md-nav" aria-label="Base Endpoints">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1278,22 +1308,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_1" class="md-nav__link">
+  <a href="#job-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        任务 API
+        Job API
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="任务 API">
+    <nav class="md-nav" aria-label="Job API">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#post-apiv1jobs" class="md-nav__link">
+  <a href="#post-apiv1jobs-create-job" class="md-nav__link">
     <span class="md-ellipsis">
       
-        POST /api/v1/jobs — 创建任务
+        POST /api/v1/jobs — Create Job
       
     </span>
   </a>
@@ -1301,10 +1331,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#post-apiv1jobsbatch" class="md-nav__link">
+  <a href="#post-apiv1jobsbatch-batch-create-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        POST /api/v1/jobs/batch — 批量创建任务
+        POST /api/v1/jobs/batch — Batch Create Jobs
       
     </span>
   </a>
@@ -1312,10 +1342,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-apiv1jobs" class="md-nav__link">
+  <a href="#get-apiv1jobs-list-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /api/v1/jobs — 查询任务列表
+        GET /api/v1/jobs — List Jobs
       
     </span>
   </a>
@@ -1323,10 +1353,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-apiv1jobsjobid" class="md-nav__link">
+  <a href="#get-apiv1jobsjobid-get-job-details" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /api/v1/jobs/{jobId} — 查询任务详情
+        GET /api/v1/jobs/{jobId} — Get Job Details
       
     </span>
   </a>
@@ -1334,10 +1364,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#delete-apiv1jobsjobid" class="md-nav__link">
+  <a href="#delete-apiv1jobsjobid-delete-job" class="md-nav__link">
     <span class="md-ellipsis">
       
-        DELETE /api/v1/jobs/{jobId} — 删除任务
+        DELETE /api/v1/jobs/{jobId} — Delete Job
       
     </span>
   </a>
@@ -1345,10 +1375,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-apiv1jobsjobidlogs" class="md-nav__link">
+  <a href="#get-apiv1jobsjobidlogs-get-logs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /api/v1/jobs/{jobId}/logs — 获取日志
+        GET /api/v1/jobs/{jobId}/logs — Get Logs
       
     </span>
   </a>
@@ -1356,10 +1386,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ws-apiv1jobsjobidlogsws-websocket" class="md-nav__link">
+  <a href="#ws-apiv1jobsjobidlogsws-websocket-streaming-logs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        WS /api/v1/jobs/{jobId}/logs/ws — WebSocket 实时日志
+        WS /api/v1/jobs/{jobId}/logs/ws — WebSocket Streaming Logs
       
     </span>
   </a>
@@ -1372,10 +1402,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_2" class="md-nav__link">
+  <a href="#resource-pool-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        资源池 API
+        Resource Pool API
       
     </span>
   </a>
@@ -1383,10 +1413,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_3" class="md-nav__link">
+  <a href="#node-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        节点 API
+        Node API
       
     </span>
   </a>
@@ -1394,10 +1424,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_4" class="md-nav__link">
+  <a href="#label-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        标签 API
+        Label API
       
     </span>
   </a>
@@ -1405,10 +1435,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_5" class="md-nav__link">
+  <a href="#quota-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        配额 API
+        Quota API
       
     </span>
   </a>
@@ -1416,10 +1446,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api_6" class="md-nav__link">
+  <a href="#namespace-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        命名空间 API
+        Namespace API
       
     </span>
   </a>
@@ -1427,10 +1457,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#error-responses" class="md-nav__link">
     <span class="md-ellipsis">
       
-        错误响应
+        Error Responses
       
     </span>
   </a>
@@ -1457,14 +1487,14 @@
   
 
 
-<h1 id="rest-api">REST API 参考<a class="headerlink" href="#rest-api" title="Permanent link">&para;</a></h1>
-<p>gpuctl 提供完整的 RESTful API，基于 FastAPI 构建。启动后可通过 Swagger UI 进行交互式调试。</p>
-<h2 id="_1">基础信息<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h1 id="rest-api-reference">REST API Reference<a class="headerlink" href="#rest-api-reference" title="Permanent link">&para;</a></h1>
+<p>gpuctl provides a complete RESTful API built on FastAPI. Once started, you can use the Swagger UI for interactive exploration.</p>
+<h2 id="basic-information">Basic Information<a class="headerlink" href="#basic-information" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>项目</th>
-<th>值</th>
+<th>Item</th>
+<th>Value</th>
 </tr>
 </thead>
 <tbody>
@@ -1473,16 +1503,16 @@
 <td><code>http://localhost:8000</code></td>
 </tr>
 <tr>
-<td>API 前缀</td>
+<td>API Prefix</td>
 <td><code>/api/v1</code></td>
 </tr>
 <tr>
-<td>响应格式</td>
+<td>Response Format</td>
 <td>JSON</td>
 </tr>
 <tr>
-<td>错误格式</td>
-<td><code>{"error": "错误信息"}</code></td>
+<td>Error Format</td>
+<td><code>{"error": "error message"}</code></td>
 </tr>
 <tr>
 <td>Swagger UI</td>
@@ -1490,47 +1520,47 @@
 </tr>
 </tbody>
 </table>
-<h2 id="api">启动 API 服务<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
+<h2 id="starting-the-api-server">Starting the API Server<a class="headerlink" href="#starting-the-api-server" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>server/main.py
 </span></code></pre></div>
 <hr />
-<h2 id="_2">基础接口<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="base-endpoints">Base Endpoints<a class="headerlink" href="#base-endpoints" title="Permanent link">&para;</a></h2>
 <h3 id="get"><code>GET /</code><a class="headerlink" href="#get" title="Permanent link">&para;</a></h3>
-<p>返回服务基本信息。</p>
+<p>Returns basic service information.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GPU Control API&quot;</span><span class="p">,</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="get-health"><code>GET /health</code><a class="headerlink" href="#get-health" title="Permanent link">&para;</a></h3>
-<p>健康检查接口。</p>
+<p>Health check endpoint.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-01T00:00:00&quot;</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
-<h2 id="api_1">任务 API<a class="headerlink" href="#api_1" title="Permanent link">&para;</a></h2>
+<h2 id="job-api">Job API<a class="headerlink" href="#job-api" title="Permanent link">&para;</a></h2>
 <p>Base Path: <code>/api/v1/jobs</code></p>
-<h3 id="post-apiv1jobs"><code>POST /api/v1/jobs</code> — 创建任务<a class="headerlink" href="#post-apiv1jobs" title="Permanent link">&para;</a></h3>
-<p><strong>请求体：</strong>
+<h3 id="post-apiv1jobs-create-job"><code>POST /api/v1/jobs</code> — Create Job<a class="headerlink" href="#post-apiv1jobs-create-job" title="Permanent link">&para;</a></h3>
+<p><strong>Request body:</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;yamlContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kind: training\nversion: v0.1\njob:\n  name: my-job\n...&quot;</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
 </span></code></pre></div></p>
-<p><strong>响应 (201)：</strong>
+<p><strong>Response (201):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job&quot;</span><span class="p">,</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job&quot;</span><span class="p">,</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training&quot;</span><span class="p">,</span>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pending&quot;</span><span class="p">,</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-01T00:00:00&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;任务已提交至资源池&quot;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Job submitted to resource pool&quot;</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <hr />
-<h3 id="post-apiv1jobsbatch"><code>POST /api/v1/jobs/batch</code> — 批量创建任务<a class="headerlink" href="#post-apiv1jobsbatch" title="Permanent link">&para;</a></h3>
-<p><strong>请求体：</strong>
+<h3 id="post-apiv1jobsbatch-batch-create-jobs"><code>POST /api/v1/jobs/batch</code> — Batch Create Jobs<a class="headerlink" href="#post-apiv1jobsbatch-batch-create-jobs" title="Permanent link">&para;</a></h3>
+<p><strong>Request body:</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nt">&quot;yamlContents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="s2">&quot;kind: training\nversion: v0.1\n...&quot;</span><span class="p">,</span>
@@ -1538,7 +1568,7 @@
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="p">]</span>
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">}</span>
 </span></code></pre></div></p>
-<p><strong>响应 (201)：</strong>
+<p><strong>Response (201):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">        </span><span class="p">{</span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;job-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-1&quot;</span><span class="p">},</span>
@@ -1550,50 +1580,50 @@
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <hr />
-<h3 id="get-apiv1jobs"><code>GET /api/v1/jobs</code> — 查询任务列表<a class="headerlink" href="#get-apiv1jobs" title="Permanent link">&para;</a></h3>
-<p><strong>查询参数：</strong></p>
+<h3 id="get-apiv1jobs-list-jobs"><code>GET /api/v1/jobs</code> — List Jobs<a class="headerlink" href="#get-apiv1jobs-list-jobs" title="Permanent link">&para;</a></h3>
+<p><strong>Query parameters:</strong></p>
 <table>
 <thead>
 <tr>
-<th>参数</th>
-<th>类型</th>
-<th>说明</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>kind</code></td>
 <td>string</td>
-<td>任务类型过滤：training / inference / notebook / compute</td>
+<td>Filter by job type: training / inference / notebook / compute</td>
 </tr>
 <tr>
 <td><code>pool</code></td>
 <td>string</td>
-<td>资源池名称过滤</td>
+<td>Filter by resource pool name</td>
 </tr>
 <tr>
 <td><code>status</code></td>
 <td>string</td>
-<td>状态过滤</td>
+<td>Filter by status</td>
 </tr>
 <tr>
 <td><code>namespace</code></td>
 <td>string</td>
-<td>命名空间过滤</td>
+<td>Filter by namespace</td>
 </tr>
 <tr>
 <td><code>page</code></td>
 <td>int</td>
-<td>页码，默认 1</td>
+<td>Page number, default 1</td>
 </tr>
 <tr>
 <td><code>pageSize</code></td>
 <td>int</td>
-<td>每页数量，默认 20，最大 100</td>
+<td>Items per page, default 20, max 100</td>
 </tr>
 </tbody>
 </table>
-<p><strong>响应 (200)：</strong>
+<p><strong>Response (200):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -1612,10 +1642,10 @@
 </span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <hr />
-<h3 id="get-apiv1jobsjobid"><code>GET /api/v1/jobs/{jobId}</code> — 查询任务详情<a class="headerlink" href="#get-apiv1jobsjobid" title="Permanent link">&para;</a></h3>
-<p><strong>路径参数：</strong> <code>jobId</code> — 任务名称或 Pod 名称均可</p>
-<p><strong>查询参数：</strong> <code>namespace</code> — 可选，不指定则搜索所有 gpuctl 命名空间</p>
-<p><strong>响应 (200)：</strong>
+<h3 id="get-apiv1jobsjobid-get-job-details"><code>GET /api/v1/jobs/{jobId}</code> — Get Job Details<a class="headerlink" href="#get-apiv1jobsjobid-get-job-details" title="Permanent link">&para;</a></h3>
+<p><strong>Path parameter:</strong> <code>jobId</code> — accepts either the job name or Pod name</p>
+<p><strong>Query parameter:</strong> <code>namespace</code> — optional; searches all gpuctl namespaces if omitted</p>
+<p><strong>Response (200):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-notebook-job-0&quot;</span><span class="p">,</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-notebook-job-0&quot;</span><span class="p">,</span>
@@ -1657,282 +1687,282 @@
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul>
-<li><code>resource_type</code>：实际 K8s 资源类型（Pod / Job / Deployment / StatefulSet）</li>
-<li><code>yaml_content</code>：从 K8s 资源反映射回的 gpuctl YAML 结构</li>
-<li><code>access_methods</code>：仅 inference / compute / notebook 返回，training 为 null</li>
+<li><code>resource_type</code>: actual K8s resource type (Pod / Job / Deployment / StatefulSet)</li>
+<li><code>yaml_content</code>: gpuctl YAML structure reverse-mapped from the K8s resource</li>
+<li><code>access_methods</code>: only returned for inference / compute / notebook; null for training</li>
 </ul>
 </div>
 <hr />
-<h3 id="delete-apiv1jobsjobid"><code>DELETE /api/v1/jobs/{jobId}</code> — 删除任务<a class="headerlink" href="#delete-apiv1jobsjobid" title="Permanent link">&para;</a></h3>
-<p><strong>查询参数：</strong> <code>force=true</code> — 强制删除</p>
-<p><strong>响应 (200)：</strong>
+<h3 id="delete-apiv1jobsjobid-delete-job"><code>DELETE /api/v1/jobs/{jobId}</code> — Delete Job<a class="headerlink" href="#delete-apiv1jobsjobid-delete-job" title="Permanent link">&para;</a></h3>
+<p><strong>Query parameter:</strong> <code>force=true</code> — force delete</p>
+<p><strong>Response (200):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job&quot;</span><span class="p">,</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;terminating&quot;</span><span class="p">,</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;任务删除指令已下发&quot;</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Job deletion command issued&quot;</span>
 </span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <hr />
-<h3 id="get-apiv1jobsjobidlogs"><code>GET /api/v1/jobs/{jobId}/logs</code> — 获取日志<a class="headerlink" href="#get-apiv1jobsjobidlogs" title="Permanent link">&para;</a></h3>
-<p><strong>查询参数：</strong></p>
+<h3 id="get-apiv1jobsjobidlogs-get-logs"><code>GET /api/v1/jobs/{jobId}/logs</code> — Get Logs<a class="headerlink" href="#get-apiv1jobsjobidlogs-get-logs" title="Permanent link">&para;</a></h3>
+<p><strong>Query parameters:</strong></p>
 <table>
 <thead>
 <tr>
-<th>参数</th>
-<th>说明</th>
+<th>Parameter</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>tail</code></td>
-<td>返回最近 N 行，默认 100</td>
+<td>Return last N lines, default 100</td>
 </tr>
 <tr>
 <td><code>pod</code></td>
-<td>指定 Pod 名称（多 Pod 时使用）</td>
+<td>Specify Pod name (for multi-Pod jobs)</td>
 </tr>
 </tbody>
 </table>
-<p><strong>响应 (200)：</strong>
+<p><strong>Response (200):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nt">&quot;logs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;2024-01-01 00:00:00 Starting...&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">],</span>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">&quot;lastTimestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-01T00:05:00&quot;</span>
 </span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <hr />
-<h3 id="ws-apiv1jobsjobidlogsws-websocket"><code>WS /api/v1/jobs/{jobId}/logs/ws</code> — WebSocket 实时日志<a class="headerlink" href="#ws-apiv1jobsjobidlogsws-websocket" title="Permanent link">&para;</a></h3>
-<p>连接后持续推送日志，每条消息格式：</p>
+<h3 id="ws-apiv1jobsjobidlogsws-websocket-streaming-logs"><code>WS /api/v1/jobs/{jobId}/logs/ws</code> — WebSocket Streaming Logs<a class="headerlink" href="#ws-apiv1jobsjobidlogsws-websocket-streaming-logs" title="Permanent link">&para;</a></h3>
+<p>Streams logs continuously after connection. Each message format:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-01 00:00:10 Step 100/1000 loss=0.32&quot;</span><span class="p">}</span>
 </span></code></pre></div>
 <hr />
-<h2 id="api_2">资源池 API<a class="headerlink" href="#api_2" title="Permanent link">&para;</a></h2>
+<h2 id="resource-pool-api">Resource Pool API<a class="headerlink" href="#resource-pool-api" title="Permanent link">&para;</a></h2>
 <p>Base Path: <code>/api/v1/pools</code></p>
 <table>
 <thead>
 <tr>
-<th>方法</th>
-<th>路径</th>
-<th>功能</th>
+<th>Method</th>
+<th>Path</th>
+<th>Function</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/pools</code></td>
-<td>获取资源池列表</td>
+<td>List resource pools</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/pools/{poolName}</code></td>
-<td>获取资源池详情</td>
+<td>Get pool details</td>
 </tr>
 <tr>
 <td>POST</td>
 <td><code>/api/v1/pools</code></td>
-<td>创建资源池</td>
+<td>Create resource pool</td>
 </tr>
 <tr>
 <td>DELETE</td>
 <td><code>/api/v1/pools/{poolName}</code></td>
-<td>删除资源池</td>
+<td>Delete resource pool</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="api_3">节点 API<a class="headerlink" href="#api_3" title="Permanent link">&para;</a></h2>
+<h2 id="node-api">Node API<a class="headerlink" href="#node-api" title="Permanent link">&para;</a></h2>
 <p>Base Path: <code>/api/v1/nodes</code></p>
 <table>
 <thead>
 <tr>
-<th>方法</th>
-<th>路径</th>
-<th>功能</th>
+<th>Method</th>
+<th>Path</th>
+<th>Function</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes</code></td>
-<td>节点列表（支持 pool/gpuType/status 过滤）</td>
+<td>List nodes (supports pool/gpuType/status filters)</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes/{nodeName}</code></td>
-<td>节点详情（含 Labels、资源使用）</td>
+<td>Node details (labels, resource usage)</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes/gpu-detail</code></td>
-<td>所有节点 GPU 详细信息</td>
+<td>GPU details for all nodes</td>
 </tr>
 <tr>
 <td>POST</td>
 <td><code>/api/v1/nodes/{nodeName}/pools</code></td>
-<td>节点加入资源池</td>
+<td>Add node to a resource pool</td>
 </tr>
 <tr>
 <td>DELETE</td>
 <td><code>/api/v1/nodes/{nodeName}/pools/{poolName}</code></td>
-<td>节点离开资源池</td>
+<td>Remove node from a pool</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes/{nodeName}/labels</code></td>
-<td>获取节点所有标签</td>
+<td>Get all labels on a node</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="api_4">标签 API<a class="headerlink" href="#api_4" title="Permanent link">&para;</a></h2>
+<h2 id="label-api">Label API<a class="headerlink" href="#label-api" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>方法</th>
-<th>路径</th>
-<th>功能</th>
+<th>Method</th>
+<th>Path</th>
+<th>Function</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>POST</td>
 <td><code>/api/v1/nodes/{nodeName}/labels</code></td>
-<td>给节点添加标签</td>
+<td>Add label to a node</td>
 </tr>
 <tr>
 <td>POST</td>
 <td><code>/api/v1/nodes/labels/batch</code></td>
-<td>批量添加节点标签</td>
+<td>Batch add node labels</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes/{nodeName}/labels/{key}</code></td>
-<td>获取节点特定标签</td>
+<td>Get a specific label on a node</td>
 </tr>
 <tr>
 <td>PUT</td>
 <td><code>/api/v1/nodes/{nodeName}/labels/{key}</code></td>
-<td>更新节点标签</td>
+<td>Update a node label</td>
 </tr>
 <tr>
 <td>DELETE</td>
 <td><code>/api/v1/nodes/{nodeName}/labels/{key}</code></td>
-<td>删除节点标签</td>
+<td>Delete a node label</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/labels</code></td>
-<td>获取所有节点标签概览（按键聚合）</td>
+<td>Overview of all node labels (aggregated by key)</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes/labels</code></td>
-<td>查询所有节点的指定标签（需 key 参数）</td>
+<td>Query a specific label across all nodes (requires <code>key</code> param)</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/nodes/labels/all</code></td>
-<td>所有节点的 GPU 相关标签及绑定资源池</td>
+<td>GPU-related labels and pool bindings for all nodes</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="api_5">配额 API<a class="headerlink" href="#api_5" title="Permanent link">&para;</a></h2>
+<h2 id="quota-api">Quota API<a class="headerlink" href="#quota-api" title="Permanent link">&para;</a></h2>
 <p>Base Path: <code>/api/v1/quotas</code></p>
 <table>
 <thead>
 <tr>
-<th>方法</th>
-<th>路径</th>
-<th>功能</th>
+<th>Method</th>
+<th>Path</th>
+<th>Function</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>POST</td>
 <td><code>/api/v1/quotas</code></td>
-<td>创建配额（YAML 格式）</td>
+<td>Create quota (YAML format)</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/quotas</code></td>
-<td>获取配额列表（支持 namespace 过滤）</td>
+<td>List quotas (supports namespace filter)</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/quotas/{namespaceName}</code></td>
-<td>获取命名空间配额详情（含使用量）</td>
+<td>Get namespace quota details (with utilization)</td>
 </tr>
 <tr>
 <td>DELETE</td>
 <td><code>/api/v1/quotas/{namespaceName}</code></td>
-<td>删除命名空间配额</td>
+<td>Delete namespace quota</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="api_6">命名空间 API<a class="headerlink" href="#api_6" title="Permanent link">&para;</a></h2>
+<h2 id="namespace-api">Namespace API<a class="headerlink" href="#namespace-api" title="Permanent link">&para;</a></h2>
 <p>Base Path: <code>/api/v1/namespaces</code></p>
 <div class="admonition info">
-<p class="admonition-title">仅管理 gpuctl 创建的命名空间</p>
-<p>带有 <code>runwhere.ai/namespace=true</code> 标签的命名空间，以及 <code>default</code> 命名空间。</p>
+<p class="admonition-title">Manages only gpuctl-created namespaces</p>
+<p>Namespaces with the <code>runwhere.ai/namespace=true</code> label, and the <code>default</code> namespace.</p>
 </div>
 <table>
 <thead>
 <tr>
-<th>方法</th>
-<th>路径</th>
-<th>功能</th>
+<th>Method</th>
+<th>Path</th>
+<th>Function</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/namespaces</code></td>
-<td>获取命名空间列表</td>
+<td>List namespaces</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/api/v1/namespaces/{namespaceName}</code></td>
-<td>获取命名空间详情（含配额信息）</td>
+<td>Get namespace details (including quota info)</td>
 </tr>
 <tr>
 <td>DELETE</td>
 <td><code>/api/v1/namespaces/{namespaceName}</code></td>
-<td>删除命名空间</td>
+<td>Delete namespace</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_3">错误响应<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>所有 API 使用统一错误格式：</p>
+<h2 id="error-responses">Error Responses<a class="headerlink" href="#error-responses" title="Permanent link">&para;</a></h2>
+<p>All APIs use a unified error format:</p>
 <table>
 <thead>
 <tr>
-<th>HTTP 状态码</th>
-<th>含义</th>
+<th>HTTP Status</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>400</td>
-<td>请求参数无效（如 YAML 格式错误）</td>
+<td>Invalid request parameters (e.g. malformed YAML)</td>
 </tr>
 <tr>
 <td>404</td>
-<td>资源不存在</td>
+<td>Resource not found</td>
 </tr>
 <tr>
 <td>409</td>
-<td>资源冲突（如标签已存在且未设置 overwrite）</td>
+<td>Resource conflict (e.g. label already exists and overwrite not set)</td>
 </tr>
 <tr>
 <td>500</td>
-<td>服务器内部错误（如 K8s 集群异常）</td>
+<td>Internal server error (e.g. K8s cluster issue)</td>
 </tr>
 </tbody>
 </table>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;具体错误信息&quot;</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;specific error message&quot;</span>
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">}</span>
 </span></code></pre></div>
 
@@ -1960,7 +1990,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  回到页面顶部
+  Back to top
 </button>
         
       </main>
@@ -1969,33 +1999,33 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../architecture/" class="md-footer__link md-footer__link--prev" aria-label="上一页: 系统架构">
+          <a href="../architecture/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Architecture">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                上一页
+                Previous
               </span>
               <div class="md-ellipsis">
-                系统架构
+                Architecture
               </div>
             </div>
           </a>
         
         
           
-          <a href="../contributing/" class="md-footer__link md-footer__link--next" aria-label="下一页: 贡献指南">
+          <a href="../contributing/" class="md-footer__link md-footer__link--next" aria-label="Next: Contributing">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                下一页
+                Next
               </span>
               <div class="md-ellipsis">
-                贡献指南
+                Contributing
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2049,7 +2079,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>

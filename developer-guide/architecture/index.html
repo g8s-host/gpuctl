@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="zh" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -22,6 +22,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../zh/developer-guide/architecture/" hreflang="zh">
+        
       
       
       <link rel="icon" href="../../assets/gpuctl_logo.svg">
@@ -29,7 +33,7 @@
     
     
       
-        <title>系统架构 - GPUCTL - AI 算力调度工具</title>
+        <title>Architecture - GPUCTL - AI GPU Scheduling Tool</title>
       
     
     
@@ -90,8 +94,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
-          跳转至
+        <a href="#architecture" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -105,8 +109,8 @@
   
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-header__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-header__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
@@ -119,13 +123,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            GPUCTL - AI 算力调度工具
+            GPUCTL - AI GPU Scheduling Tool
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              系统架构
+              Architecture
             
           </span>
         </div>
@@ -162,6 +166,32 @@
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/developer-guide/architecture/" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
     
       
       
@@ -173,21 +203,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="查找">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -200,7 +230,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            正在初始化搜索引擎
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -212,7 +242,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -227,7 +257,7 @@
   
     
       
-<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -243,7 +273,7 @@
   
     
   
-  首页
+  Home
 
       </a>
     </li>
@@ -262,7 +292,7 @@
           
   
   
-  用户指南
+  User Guide
 
         </a>
       </li>
@@ -284,7 +314,7 @@
           
   
   
-  开发者指南
+  Developer Guide
 
         </a>
       </li>
@@ -304,7 +334,7 @@
   
     
   
-  CLI 参考
+  CLI Reference
 
       </a>
     </li>
@@ -323,7 +353,7 @@
   
     
   
-  社区
+  Community
 
       </a>
     </li>
@@ -356,18 +386,18 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-nav__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-nav__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
     </a>
-    GPUCTL - AI 算力调度工具
+    GPUCTL - AI GPU Scheduling Tool
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -394,7 +424,7 @@
   <span class="md-ellipsis">
     
   
-    首页
+    Home
   
 
     
@@ -439,7 +469,7 @@
   <span class="md-ellipsis">
     
   
-    用户指南
+    User Guide
   
 
     
@@ -455,7 +485,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    用户指南
+    User Guide
   
 
           </label>
@@ -475,7 +505,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -503,7 +533,7 @@
   <span class="md-ellipsis">
     
   
-    快速开始
+    Quickstart
   
 
     
@@ -531,7 +561,7 @@
   <span class="md-ellipsis">
     
   
-    训练任务
+    Training Jobs
   
 
     
@@ -559,7 +589,7 @@
   <span class="md-ellipsis">
     
   
-    推理服务
+    Inference Services
   
 
     
@@ -615,7 +645,7 @@
   <span class="md-ellipsis">
     
   
-    计算任务
+    Compute Jobs
   
 
     
@@ -643,7 +673,7 @@
   <span class="md-ellipsis">
     
   
-    资源池管理
+    Resource Pool
   
 
     
@@ -671,7 +701,7 @@
   <span class="md-ellipsis">
     
   
-    配额管理
+    Quota Management
   
 
     
@@ -727,7 +757,7 @@
   <span class="md-ellipsis">
     
   
-    开发者指南
+    Developer Guide
   
 
     
@@ -743,7 +773,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    开发者指南
+    Developer Guide
   
 
           </label>
@@ -763,7 +793,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -800,7 +830,7 @@
   <span class="md-ellipsis">
     
   
-    系统架构
+    Architecture
   
 
     
@@ -818,7 +848,7 @@
   <span class="md-ellipsis">
     
   
-    系统架构
+    Architecture
   
 
     
@@ -830,7 +860,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -839,15 +869,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#overall-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        整体架构
+        Overall Architecture
       
     </span>
   </a>
@@ -855,10 +885,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#kind-k8s" class="md-nav__link">
+  <a href="#kind-k8s-resource-mapping" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Kind → K8s 资源映射
+        Kind → K8s Resource Mapping
       
     </span>
   </a>
@@ -866,10 +896,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#naming-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        命名规则
+        Naming Rules
       
     </span>
   </a>
@@ -877,22 +907,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#label" class="md-nav__link">
+  <a href="#label-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Label 体系
+        Label System
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Label 体系">
+    <nav class="md-nav" aria-label="Label System">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#label-kind" class="md-nav__link">
+  <a href="#common-labels-all-kinds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        通用 Label（所有 Kind 共享）
+        Common Labels (all kinds)
       
     </span>
   </a>
@@ -900,10 +930,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#label-pod-jobname" class="md-nav__link">
+  <a href="#reverse-lookup-labels-pod-jobname" class="md-nav__link">
     <span class="md-ellipsis">
       
-        反查 Label（从 Pod 找回 job.name）
+        Reverse-Lookup Labels (Pod → job.name)
       
     </span>
   </a>
@@ -911,10 +941,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#label-gpu" class="md-nav__link">
+  <a href="#node-labels-resource-pool-gpu-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        节点 Label（资源池 &amp; GPU 型号）
+        Node Labels (resource pool &amp; GPU model)
       
     </span>
   </a>
@@ -927,10 +957,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#storage" class="md-nav__link">
+  <a href="#storage-mount-mechanism" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Storage 挂载机制
+        Storage Mount Mechanism
       
     </span>
   </a>
@@ -938,10 +968,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-jobs" class="md-nav__link">
+  <a href="#get-jobs-output-columns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        get jobs 输出列
+        get jobs Output Columns
       
     </span>
   </a>
@@ -949,10 +979,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#apply" class="md-nav__link">
+  <a href="#apply-semantics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        apply 语义
+        apply Semantics
       
     </span>
   </a>
@@ -960,10 +990,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#status-calculation-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        状态计算规则
+        Status Calculation Rules
       
     </span>
   </a>
@@ -971,10 +1001,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#constants-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        常量文件
+        Constants File
       
     </span>
   </a>
@@ -1032,7 +1062,7 @@
   <span class="md-ellipsis">
     
   
-    贡献指南
+    Contributing
   
 
     
@@ -1067,7 +1097,7 @@
   <span class="md-ellipsis">
     
   
-    CLI 参考
+    CLI Reference
   
 
     
@@ -1094,7 +1124,7 @@
   <span class="md-ellipsis">
     
   
-    社区
+    Community
   
 
     
@@ -1120,7 +1150,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1129,15 +1159,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#overall-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        整体架构
+        Overall Architecture
       
     </span>
   </a>
@@ -1145,10 +1175,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#kind-k8s" class="md-nav__link">
+  <a href="#kind-k8s-resource-mapping" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Kind → K8s 资源映射
+        Kind → K8s Resource Mapping
       
     </span>
   </a>
@@ -1156,10 +1186,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#naming-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        命名规则
+        Naming Rules
       
     </span>
   </a>
@@ -1167,22 +1197,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#label" class="md-nav__link">
+  <a href="#label-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Label 体系
+        Label System
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Label 体系">
+    <nav class="md-nav" aria-label="Label System">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#label-kind" class="md-nav__link">
+  <a href="#common-labels-all-kinds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        通用 Label（所有 Kind 共享）
+        Common Labels (all kinds)
       
     </span>
   </a>
@@ -1190,10 +1220,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#label-pod-jobname" class="md-nav__link">
+  <a href="#reverse-lookup-labels-pod-jobname" class="md-nav__link">
     <span class="md-ellipsis">
       
-        反查 Label（从 Pod 找回 job.name）
+        Reverse-Lookup Labels (Pod → job.name)
       
     </span>
   </a>
@@ -1201,10 +1231,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#label-gpu" class="md-nav__link">
+  <a href="#node-labels-resource-pool-gpu-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        节点 Label（资源池 &amp; GPU 型号）
+        Node Labels (resource pool &amp; GPU model)
       
     </span>
   </a>
@@ -1217,10 +1247,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#storage" class="md-nav__link">
+  <a href="#storage-mount-mechanism" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Storage 挂载机制
+        Storage Mount Mechanism
       
     </span>
   </a>
@@ -1228,10 +1258,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-jobs" class="md-nav__link">
+  <a href="#get-jobs-output-columns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        get jobs 输出列
+        get jobs Output Columns
       
     </span>
   </a>
@@ -1239,10 +1269,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#apply" class="md-nav__link">
+  <a href="#apply-semantics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        apply 语义
+        apply Semantics
       
     </span>
   </a>
@@ -1250,10 +1280,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#status-calculation-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        状态计算规则
+        Status Calculation Rules
       
     </span>
   </a>
@@ -1261,10 +1291,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#constants-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        常量文件
+        Constants File
       
     </span>
   </a>
@@ -1291,40 +1321,40 @@
   
 
 
-<h1 id="_1">系统架构<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>本文档详细描述 gpuctl 的分层架构设计、核心模块职责、数据模型与 K8s 资源映射关系，以及 Label 体系规范。</p>
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<p>This document describes gpuctl's layered architecture, core module responsibilities, data model and K8s resource mapping, and the label system.</p>
 <hr />
-<h2 id="_2">整体架构<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p>gpuctl 采用分层设计，每一层职责清晰：</p>
+<h2 id="overall-architecture">Overall Architecture<a class="headerlink" href="#overall-architecture" title="Permanent link">&para;</a></h2>
+<p>gpuctl uses a layered design with clear responsibilities at each layer:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌────────────────────────────────────────────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                     用户层                           │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  gpuctl CLI（argparse）  ·  REST API（FastAPI）      │
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                    User Layer                        │
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  gpuctl CLI (argparse)  ·  REST API (FastAPI)       │
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└────────────────────────┬───────────────────────────┘
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                         │
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>┌────────────────────────▼───────────────────────────┐
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│                   解析与验证层                        │
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│               Parsing &amp; Validation Layer             │
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  parser/base_parser.py                              │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  · 读取 YAML 文件                                    │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  · 根据 kind 分发到对应的 Pydantic 模型               │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  · 字段校验（必填、范围、格式）                        │
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  · Reads YAML files                                 │
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  · Dispatches to Pydantic models by kind            │
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  · Field validation (required, range, format)       │
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>└────────────────────────┬───────────────────────────┘
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                         │
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>┌────────────────────────▼───────────────────────────┐
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│                   构建层（Builder）                   │
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│                  Builder Layer                       │
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  builder/training_builder.py  → K8s Job            │
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  builder/inference_builder.py → K8s Deployment     │
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  builder/notebook_builder.py  → K8s StatefulSet    │
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│  builder/compute_builder.py   → K8s Deployment     │
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  builder/base_builder.py      → 公共方法             │
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  builder/base_builder.py      → Shared methods     │
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>└────────────────────────┬───────────────────────────┘
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                         │
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>┌────────────────────────▼───────────────────────────┐
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│                   K8s 客户端层（Client）              │
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│  client/job_client.py    任务 CRUD                  │
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  client/pool_client.py   资源池（ConfigMap + Label） │
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│              K8s Client Layer                        │
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│  client/job_client.py    Job CRUD                   │
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  client/pool_client.py   Pools (ConfigMap + Label)  │
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│  client/quota_client.py  ResourceQuota + Namespace  │
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│  client/log_client.py    Pod 日志（流式）             │
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│  client/base_client.py   K8s 连接和通用操作          │
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│  client/log_client.py    Pod logs (streaming)       │
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│  client/base_client.py   K8s connection &amp; utils     │
 </span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>└────────────────────────┬───────────────────────────┘
 </span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>                         │
 </span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>┌────────────────────────▼───────────────────────────┐
@@ -1334,15 +1364,15 @@
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>└────────────────────────────────────────────────────┘
 </span></code></pre></div>
 <hr />
-<h2 id="kind-k8s">Kind → K8s 资源映射<a class="headerlink" href="#kind-k8s" title="Permanent link">&para;</a></h2>
+<h2 id="kind-k8s-resource-mapping">Kind → K8s Resource Mapping<a class="headerlink" href="#kind-k8s-resource-mapping" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Kind</th>
-<th>K8s 主资源</th>
+<th>K8s Primary Resource</th>
 <th>API Group</th>
-<th>附属 Service</th>
-<th>说明</th>
+<th>Associated Service</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
@@ -1350,46 +1380,46 @@
 <td><code>training</code></td>
 <td><code>Job</code></td>
 <td><code>batch/v1</code></td>
-<td>无</td>
-<td>一次性训练，运行完结束</td>
+<td>None</td>
+<td>One-shot training, terminates on completion</td>
 </tr>
 <tr>
 <td><code>inference</code></td>
 <td><code>Deployment</code></td>
 <td><code>apps/v1</code></td>
 <td><code>svc-{name}</code> (NodePort)</td>
-<td>长期推理服务</td>
+<td>Long-running inference service</td>
 </tr>
 <tr>
 <td><code>notebook</code></td>
 <td><code>StatefulSet</code></td>
 <td><code>apps/v1</code></td>
 <td><code>svc-{name}</code> (NodePort)</td>
-<td>有状态开发环境</td>
+<td>Stateful development environment</td>
 </tr>
 <tr>
 <td><code>compute</code></td>
 <td><code>Deployment</code></td>
 <td><code>apps/v1</code></td>
 <td><code>svc-{name}</code> (NodePort)</td>
-<td>通用 CPU 服务</td>
+<td>General-purpose CPU service</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_3">命名规则<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>所有命名以 YAML <code>job.name</code> 为源头：</p>
+<h2 id="naming-rules">Naming Rules<a class="headerlink" href="#naming-rules" title="Permanent link">&para;</a></h2>
+<p>All names derive from the YAML <code>job.name</code> field:</p>
 <table>
 <thead>
 <tr>
-<th>资源</th>
-<th>命名规则</th>
-<th>示例（<code>job.name: my-inference</code>）</th>
+<th>Resource</th>
+<th>Naming Rule</th>
+<th>Example (<code>job.name: my-inference</code>)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>主资源</td>
+<td>Primary resource</td>
 <td><code>{name}</code></td>
 <td><code>my-inference</code></td>
 </tr>
@@ -1399,118 +1429,118 @@
 <td><code>svc-my-inference</code></td>
 </tr>
 <tr>
-<td>Pod（training）</td>
+<td>Pod (training)</td>
 <td><code>{name}-{random5}</code></td>
 <td><code>my-training-zlflg</code></td>
 </tr>
 <tr>
-<td>Pod（inference）</td>
+<td>Pod (inference)</td>
 <td><code>{name}-{rs-hash}-{pod-hash}</code></td>
 <td><code>my-inference-854c6c5cd-kfh77</code></td>
 </tr>
 <tr>
-<td>Pod（notebook）</td>
-<td><code>{name}-{序号}</code></td>
+<td>Pod (notebook)</td>
+<td><code>{name}-{index}</code></td>
 <td><code>my-notebook-0</code></td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="label">Label 体系<a class="headerlink" href="#label" title="Permanent link">&para;</a></h2>
-<h3 id="label-kind">通用 Label（所有 Kind 共享）<a class="headerlink" href="#label-kind" title="Permanent link">&para;</a></h3>
+<h2 id="label-system">Label System<a class="headerlink" href="#label-system" title="Permanent link">&para;</a></h2>
+<h3 id="common-labels-all-kinds">Common Labels (all kinds)<a class="headerlink" href="#common-labels-all-kinds" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Label Key</th>
-<th>值</th>
-<th>用途</th>
+<th>Value</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>runwhere.ai/job-type</code></td>
 <td><code>training</code> / <code>inference</code> / <code>notebook</code> / <code>compute</code></td>
-<td>区分任务类型</td>
+<td>Identify job type</td>
 </tr>
 <tr>
 <td><code>runwhere.ai/priority</code></td>
 <td><code>high</code> / <code>medium</code> / <code>low</code></td>
-<td>调度优先级</td>
+<td>Scheduling priority</td>
 </tr>
 <tr>
 <td><code>runwhere.ai/pool</code></td>
-<td>资源池名 或 <code>default</code></td>
-<td>绑定资源池</td>
+<td>pool name or <code>default</code></td>
+<td>Bind to resource pool</td>
 </tr>
 <tr>
 <td><code>runwhere.ai/namespace</code></td>
-<td>namespace 名称</td>
-<td>记录所属命名空间</td>
+<td>namespace name</td>
+<td>Record owning namespace</td>
 </tr>
 </tbody>
 </table>
-<h3 id="label-pod-jobname">反查 Label（从 Pod 找回 job.name）<a class="headerlink" href="#label-pod-jobname" title="Permanent link">&para;</a></h3>
-<p><code>get jobs</code> 显示 NAME 列时，通过此 Label 从 Pod 反查原始任务名：</p>
+<h3 id="reverse-lookup-labels-pod-jobname">Reverse-Lookup Labels (Pod → job.name)<a class="headerlink" href="#reverse-lookup-labels-pod-jobname" title="Permanent link">&para;</a></h3>
+<p>Used by <code>get jobs</code> to look up the original job name from a Pod:</p>
 <table>
 <thead>
 <tr>
 <th>Kind</th>
 <th>Label Key</th>
-<th>设置方式</th>
+<th>How Set</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>inference / notebook / compute</td>
 <td><code>app: {name}</code></td>
-<td>Builder 手动在 Pod template 中设置</td>
+<td>Set manually in Pod template by Builder</td>
 </tr>
 <tr>
 <td>training</td>
 <td><code>job-name: {name}</code></td>
-<td>K8s Job 控制器自动设置</td>
+<td>Set automatically by K8s Job controller</td>
 </tr>
 </tbody>
 </table>
-<p>代码实现：</p>
+<p>Code implementation:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_job_name</span><span class="p">(</span><span class="n">labels</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="k">return</span> <span class="n">labels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">labels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;job-name&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
 </span></code></pre></div>
-<h3 id="label-gpu">节点 Label（资源池 &amp; GPU 型号）<a class="headerlink" href="#label-gpu" title="Permanent link">&para;</a></h3>
+<h3 id="node-labels-resource-pool-gpu-model">Node Labels (resource pool &amp; GPU model)<a class="headerlink" href="#node-labels-resource-pool-gpu-model" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Label Key</th>
-<th>用途</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>runwhere.ai/pool</code></td>
-<td>标记节点所属资源池</td>
+<td>Mark which resource pool a node belongs to</td>
 </tr>
 <tr>
 <td><code>runwhere.ai/gpuType</code></td>
-<td>标记节点 GPU 型号（gpuctl 内部使用）</td>
+<td>Mark GPU model (gpuctl internal use)</td>
 </tr>
 <tr>
 <td><code>runwhere.ai/gpu-type</code></td>
-<td>标记节点 GPU 型号（用户标记使用）</td>
+<td>Mark GPU model (user-facing label)</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="storage">Storage 挂载机制<a class="headerlink" href="#storage" title="Permanent link">&para;</a></h2>
-<p><code>storage.workdirs</code> 中的每个 <code>path</code> 会展开为一对 <code>Volume + VolumeMount</code>（hostPath 类型）：</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a># gpuctl YAML（用户写的）
+<h2 id="storage-mount-mechanism">Storage Mount Mechanism<a class="headerlink" href="#storage-mount-mechanism" title="Permanent link">&para;</a></h2>
+<p>Each <code>path</code> in <code>storage.workdirs</code> expands into a <code>Volume + VolumeMount</code> pair (hostPath type):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a># gpuctl YAML (user-written)
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>storage:
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  workdirs:
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    - path: /models
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    - path: /output
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>         ↓ Builder 展开
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>         ↓ Builder expands
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a># K8s Pod Spec（平台自动生成）
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a># K8s Pod Spec (auto-generated by platform)
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>spec:
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  volumes:
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    - name: workdir-0
@@ -1522,22 +1552,22 @@
 </span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        - { name: workdir-0, mountPath: /models }
 </span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>        - { name: workdir-1, mountPath: /output }
 </span></code></pre></div>
-<p><strong>关键点</strong>：<code>path</code> 同时作为宿主机路径和容器内挂载路径，两者完全一致。</p>
+<p><strong>Key point</strong>: The <code>path</code> field serves as both the host path and the container mount path — they are identical.</p>
 <hr />
-<h2 id="get-jobs"><code>get jobs</code> 输出列<a class="headerlink" href="#get-jobs" title="Permanent link">&para;</a></h2>
-<p><code>get jobs</code> 直接查询 Pod，每行代表一个 Pod 实例：</p>
+<h2 id="get-jobs-output-columns"><code>get jobs</code> Output Columns<a class="headerlink" href="#get-jobs-output-columns" title="Permanent link">&para;</a></h2>
+<p><code>get jobs</code> queries Pods directly; each row represents one Pod instance:</p>
 <table>
 <thead>
 <tr>
-<th>列</th>
-<th>含义</th>
-<th>数据来源</th>
+<th>Column</th>
+<th>Meaning</th>
+<th>Data Source</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>JOB ID</td>
-<td>Pod 名称（含 hash）</td>
+<td>Pod name (with hash)</td>
 <td><code>pod.metadata.name</code></td>
 </tr>
 <tr>
@@ -1547,27 +1577,27 @@
 </tr>
 <tr>
 <td>NAMESPACE</td>
-<td>所在命名空间</td>
+<td>Namespace</td>
 <td><code>pod.metadata.namespace</code></td>
 </tr>
 <tr>
 <td>KIND</td>
-<td>任务类型</td>
+<td>Job type</td>
 <td>label <code>runwhere.ai/job-type</code></td>
 </tr>
 <tr>
 <td>STATUS</td>
-<td>Pod 状态</td>
+<td>Pod status</td>
 <td><code>pod.status.phase</code> + container status</td>
 </tr>
 <tr>
 <td>READY</td>
-<td>就绪/总容器数</td>
+<td>Ready/total containers</td>
 <td><code>container_statuses</code></td>
 </tr>
 <tr>
 <td>NODE</td>
-<td>调度到的节点</td>
+<td>Scheduled node</td>
 <td><code>pod.spec.node_name</code></td>
 </tr>
 <tr>
@@ -1577,55 +1607,55 @@
 </tr>
 <tr>
 <td>AGE</td>
-<td>创建至今时长</td>
+<td>Time since creation</td>
 <td><code>pod.metadata.creation_timestamp</code></td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="apply">apply 语义<a class="headerlink" href="#apply" title="Permanent link">&para;</a></h2>
-<p><code>gpuctl apply -f xxx.yaml</code> 等价于：</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>delete（删除旧资源 + Service）
+<h2 id="apply-semantics">apply Semantics<a class="headerlink" href="#apply-semantics" title="Permanent link">&para;</a></h2>
+<p><code>gpuctl apply -f xxx.yaml</code> is equivalent to:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>delete (remove old resource + Service)
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    +
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>create（重新创建资源 + Service）
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>create (recreate resource + Service)
 </span></code></pre></div>
-<p>即<strong>先删后建</strong>，实现配置更新语义。</p>
+<p>That is, <strong>delete then recreate</strong> to implement configuration update semantics.</p>
 <hr />
-<h2 id="_4">状态计算规则<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><code>describe job</code> 显示的 Status 字段由 K8s 资源状态计算得出：</p>
+<h2 id="status-calculation-rules">Status Calculation Rules<a class="headerlink" href="#status-calculation-rules" title="Permanent link">&para;</a></h2>
+<p>The Status field shown by <code>describe job</code> is derived from K8s resource state:</p>
 <table>
 <thead>
 <tr>
-<th>资源类型</th>
-<th>状态判定逻辑</th>
+<th>Resource Type</th>
+<th>Status Logic</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Job</td>
-<td><code>succeeded &gt; 0</code> → Succeeded，<code>failed &gt; 0</code> → Failed，<code>active &gt; 0</code> → Running，否则 Pending</td>
+<td><code>succeeded &gt; 0</code> → Succeeded, <code>failed &gt; 0</code> → Failed, <code>active &gt; 0</code> → Running, else Pending</td>
 </tr>
 <tr>
 <td>Deployment</td>
-<td><code>ready == desired &amp;&amp; &gt; 0</code> → Running，<code>ready &gt; 0</code> → Partially Running，否则 Pending</td>
+<td><code>ready == desired &amp;&amp; &gt; 0</code> → Running, <code>ready &gt; 0</code> → Partially Running, else Pending</td>
 </tr>
 <tr>
 <td>StatefulSet</td>
-<td><code>readyReplicas &gt;= replicas &amp;&amp; &gt; 0</code> → Running，<code>readyReplicas &gt; 0</code> → Partially Running，否则 Pending</td>
+<td><code>readyReplicas &gt;= replicas &amp;&amp; &gt; 0</code> → Running, <code>readyReplicas &gt; 0</code> → Partially Running, else Pending</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_5">常量文件<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/runwhere-ai/gpuctl/blob/main/gpuctl/constants.py"><code>gpuctl/constants.py</code></a> 集中定义了所有魔法字符串，包括：</p>
+<h2 id="constants-file">Constants File<a class="headerlink" href="#constants-file" title="Permanent link">&para;</a></h2>
+<p><a href="https://github.com/runwhere-ai/gpuctl/blob/main/gpuctl/constants.py"><code>gpuctl/constants.py</code></a> centralizes all magic strings, including:</p>
 <ul>
-<li><code>Kind</code> 枚举：TRAINING / INFERENCE / NOTEBOOK / COMPUTE</li>
-<li><code>Labels</code> 类：所有 Label Key 常量</li>
-<li><code>KIND_TO_RESOURCE</code> 映射：Kind → K8s 资源类型</li>
-<li><code>CONTAINER_WAITING_REASONS</code>：容器等待状态 → 用户友好状态字符串</li>
-<li><code>DEFAULT_NAMESPACE / DEFAULT_POOL</code>：默认值</li>
+<li><code>Kind</code> enum: TRAINING / INFERENCE / NOTEBOOK / COMPUTE</li>
+<li><code>Labels</code> class: all label key constants</li>
+<li><code>KIND_TO_RESOURCE</code> mapping: Kind → K8s resource type</li>
+<li><code>CONTAINER_WAITING_REASONS</code>: container waiting states → user-friendly status strings</li>
+<li><code>DEFAULT_NAMESPACE / DEFAULT_POOL</code>: default values</li>
 </ul>
-<p>所有模块应从此文件导入常量，而非在各处硬编码字符串。</p>
+<p>All modules should import constants from this file rather than hardcoding strings elsewhere.</p>
 
 
 
@@ -1651,7 +1681,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  回到页面顶部
+  Back to top
 </button>
         
       </main>
@@ -1660,30 +1690,30 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="上一页: 概览">
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                上一页
+                Previous
               </span>
               <div class="md-ellipsis">
-                概览
+                Overview
               </div>
             </div>
           </a>
         
         
           
-          <a href="../api/" class="md-footer__link md-footer__link--next" aria-label="下一页: REST API">
+          <a href="../api/" class="md-footer__link md-footer__link--next" aria-label="Next: REST API">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                下一页
+                Next
               </span>
               <div class="md-ellipsis">
                 REST API
@@ -1740,7 +1770,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>

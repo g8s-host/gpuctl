@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="zh" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -22,6 +22,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../zh/user-guide/quota/" hreflang="zh">
+        
       
       
       <link rel="icon" href="../../assets/gpuctl_logo.svg">
@@ -29,7 +33,7 @@
     
     
       
-        <title>配额管理 - GPUCTL - AI 算力调度工具</title>
+        <title>Quota Management - GPUCTL - AI GPU Scheduling Tool</title>
       
     
     
@@ -90,8 +94,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
-          跳转至
+        <a href="#quota-and-namespace-management" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -105,8 +109,8 @@
   
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-header__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-header__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
@@ -119,13 +123,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            GPUCTL - AI 算力调度工具
+            GPUCTL - AI GPU Scheduling Tool
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              配额管理
+              Quota Management
             
           </span>
         </div>
@@ -162,6 +166,32 @@
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/user-guide/quota/" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
     
       
       
@@ -173,21 +203,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="查找">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -200,7 +230,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            正在初始化搜索引擎
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -212,7 +242,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -227,7 +257,7 @@
   
     
       
-<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -243,7 +273,7 @@
   
     
   
-  首页
+  Home
 
       </a>
     </li>
@@ -264,7 +294,7 @@
           
   
   
-  用户指南
+  User Guide
 
         </a>
       </li>
@@ -284,7 +314,7 @@
           
   
   
-  开发者指南
+  Developer Guide
 
         </a>
       </li>
@@ -304,7 +334,7 @@
   
     
   
-  CLI 参考
+  CLI Reference
 
       </a>
     </li>
@@ -323,7 +353,7 @@
   
     
   
-  社区
+  Community
 
       </a>
     </li>
@@ -356,18 +386,18 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-nav__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-nav__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
     </a>
-    GPUCTL - AI 算力调度工具
+    GPUCTL - AI GPU Scheduling Tool
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -394,7 +424,7 @@
   <span class="md-ellipsis">
     
   
-    首页
+    Home
   
 
     
@@ -442,7 +472,7 @@
   <span class="md-ellipsis">
     
   
-    用户指南
+    User Guide
   
 
     
@@ -458,7 +488,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    用户指南
+    User Guide
   
 
           </label>
@@ -478,7 +508,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -506,7 +536,7 @@
   <span class="md-ellipsis">
     
   
-    快速开始
+    Quickstart
   
 
     
@@ -534,7 +564,7 @@
   <span class="md-ellipsis">
     
   
-    训练任务
+    Training Jobs
   
 
     
@@ -562,7 +592,7 @@
   <span class="md-ellipsis">
     
   
-    推理服务
+    Inference Services
   
 
     
@@ -618,7 +648,7 @@
   <span class="md-ellipsis">
     
   
-    计算任务
+    Compute Jobs
   
 
     
@@ -646,7 +676,7 @@
   <span class="md-ellipsis">
     
   
-    资源池管理
+    Resource Pool
   
 
     
@@ -683,7 +713,7 @@
   <span class="md-ellipsis">
     
   
-    配额管理
+    Quota Management
   
 
     
@@ -701,7 +731,7 @@
   <span class="md-ellipsis">
     
   
-    配额管理
+    Quota Management
   
 
     
@@ -713,7 +743,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -722,15 +752,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#core-concepts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        核心概念
+        Core Concepts
       
     </span>
   </a>
@@ -738,22 +768,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#creating-quotas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        创建配额
+        Creating Quotas
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="创建配额">
+    <nav class="md-nav" aria-label="Creating Quotas">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#yaml" class="md-nav__link">
+  <a href="#quota-yaml-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        配额 YAML 格式
+        Quota YAML Format
       
     </span>
   </a>
@@ -766,10 +796,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#querying-quotas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        查询配额
+        Querying Quotas
       
     </span>
   </a>
@@ -777,10 +807,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#submitting-jobs-in-a-specific-namespace" class="md-nav__link">
     <span class="md-ellipsis">
       
-        在指定命名空间提交任务
+        Submitting Jobs in a Specific Namespace
       
     </span>
   </a>
@@ -788,10 +818,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#querying-namespaces" class="md-nav__link">
     <span class="md-ellipsis">
       
-        查询命名空间
+        Querying Namespaces
       
     </span>
   </a>
@@ -799,10 +829,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#deleting-quotas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        删除配额
+        Deleting Quotas
       
     </span>
   </a>
@@ -857,7 +887,7 @@
   <span class="md-ellipsis">
     
   
-    开发者指南
+    Developer Guide
   
 
     
@@ -873,7 +903,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    开发者指南
+    Developer Guide
   
 
           </label>
@@ -893,7 +923,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -921,7 +951,7 @@
   <span class="md-ellipsis">
     
   
-    系统架构
+    Architecture
   
 
     
@@ -977,7 +1007,7 @@
   <span class="md-ellipsis">
     
   
-    贡献指南
+    Contributing
   
 
     
@@ -1012,7 +1042,7 @@
   <span class="md-ellipsis">
     
   
-    CLI 参考
+    CLI Reference
   
 
     
@@ -1039,7 +1069,7 @@
   <span class="md-ellipsis">
     
   
-    社区
+    Community
   
 
     
@@ -1065,7 +1095,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1074,15 +1104,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#core-concepts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        核心概念
+        Core Concepts
       
     </span>
   </a>
@@ -1090,22 +1120,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#creating-quotas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        创建配额
+        Creating Quotas
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="创建配额">
+    <nav class="md-nav" aria-label="Creating Quotas">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#yaml" class="md-nav__link">
+  <a href="#quota-yaml-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        配额 YAML 格式
+        Quota YAML Format
       
     </span>
   </a>
@@ -1118,10 +1148,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#querying-quotas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        查询配额
+        Querying Quotas
       
     </span>
   </a>
@@ -1129,10 +1159,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#submitting-jobs-in-a-specific-namespace" class="md-nav__link">
     <span class="md-ellipsis">
       
-        在指定命名空间提交任务
+        Submitting Jobs in a Specific Namespace
       
     </span>
   </a>
@@ -1140,10 +1170,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#querying-namespaces" class="md-nav__link">
     <span class="md-ellipsis">
       
-        查询命名空间
+        Querying Namespaces
       
     </span>
   </a>
@@ -1151,10 +1181,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#deleting-quotas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        删除配额
+        Deleting Quotas
       
     </span>
   </a>
@@ -1181,29 +1211,29 @@
   
 
 
-<h1 id="_1">配额与命名空间管理<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>gpuctl 通过 Kubernetes ResourceQuota 机制，为每个命名空间（团队/用户）设置 CPU、内存、GPU 资源上限，防止资源滥用，实现多租户隔离。</p>
-<h2 id="_2">核心概念<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h1 id="quota-and-namespace-management">Quota and Namespace Management<a class="headerlink" href="#quota-and-namespace-management" title="Permanent link">&para;</a></h1>
+<p>gpuctl uses the Kubernetes ResourceQuota mechanism to set CPU, memory, and GPU resource limits per namespace (team/user), preventing resource abuse and enabling multi-tenant isolation.</p>
+<h2 id="core-concepts">Core Concepts<a class="headerlink" href="#core-concepts" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>命名空间（Namespace）</strong>：K8s 的逻辑隔离单元，每个团队/用户分配一个独立命名空间</li>
-<li><strong>配额（Quota）</strong>：限制命名空间内可使用的最大资源量（CPU/内存/GPU/Pod 数）</li>
-<li><strong>自动创建</strong>：通过 <code>gpuctl create -f quota.yaml</code> 会自动创建命名空间 + 资源配额</li>
+<li><strong>Namespace</strong>: A K8s logical isolation unit; each team or user gets a dedicated namespace</li>
+<li><strong>Quota</strong>: Limits the maximum resources (CPU/memory/GPU/Pod count) usable within a namespace</li>
+<li><strong>Auto-creation</strong>: Running <code>gpuctl create -f quota.yaml</code> automatically creates both the namespace and its resource quota</li>
 </ul>
 <hr />
-<h2 id="_3">创建配额<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="yaml">配额 YAML 格式<a class="headerlink" href="#yaml" title="Permanent link">&para;</a></h3>
+<h2 id="creating-quotas">Creating Quotas<a class="headerlink" href="#creating-quotas" title="Permanent link">&para;</a></h2>
+<h3 id="quota-yaml-format">Quota YAML Format<a class="headerlink" href="#quota-yaml-format" title="Permanent link">&para;</a></h3>
 <div class="language-yaml highlight"><span class="filename">team-quota.yaml</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quota</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nt">quota</span><span class="p">:</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team-resource-quota</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;各团队资源配额配置&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Resource</span><span class="nv"> </span><span class="s">quotas</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">each</span><span class="nv"> </span><span class="s">team&quot;</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nt">namespace</span><span class="p">:</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">team-alice</span><span class="p">:</span><span class="w">          </span><span class="c1"># 命名空间名称（自动创建）</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span><span class="w">            </span><span class="c1"># CPU 核数上限</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64Gi</span><span class="w">       </span><span class="c1"># 内存上限</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span><span class="w">             </span><span class="c1"># GPU 数量上限</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">team-alice</span><span class="p">:</span><span class="w">          </span><span class="c1"># Namespace name (auto-created)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span><span class="w">            </span><span class="c1"># CPU core limit</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64Gi</span><span class="w">       </span><span class="c1"># Memory limit</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span><span class="w">             </span><span class="c1"># GPU count limit</span>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="nt">team-bob</span><span class="p">:</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
@@ -1215,55 +1245,55 @@
 </span></code></pre></div>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>team-quota.yaml
 </span></code></pre></div>
-<p>平台会自动：
-1. 创建 <code>team-alice</code>、<code>team-bob</code>、<code>team-charlie</code> 三个命名空间
-2. 在每个命名空间内创建对应的 <code>ResourceQuota</code>
-3. 标记命名空间为 gpuctl 管理（label <code>runwhere.ai/namespace=true</code>）</p>
+<p>The platform automatically:
+1. Creates <code>team-alice</code>, <code>team-bob</code>, and <code>team-charlie</code> namespaces
+2. Creates the corresponding <code>ResourceQuota</code> in each namespace
+3. Labels the namespaces as gpuctl-managed (<code>runwhere.ai/namespace=true</code>)</p>
 <hr />
-<h2 id="_4">查询配额<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 列出所有配额</span>
+<h2 id="querying-quotas">Querying Quotas<a class="headerlink" href="#querying-quotas" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># List all quotas</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas
 </span></code></pre></div>
-<p>输出示例：</p>
+<p>Example output:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>NAMESPACE       CPU (USED/TOTAL)   MEMORY (USED/TOTAL)   GPU (USED/TOTAL)   STATUS
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>team-alice      4/16               12Gi/64Gi             2/8                Active
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>team-bob        2/8                8Gi/32Gi              1/4                Active
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>team-charlie    0/4                0/16Gi                0/2                Active
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>default         -                  -                     -                  Active
 </span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 查看指定命名空间配额</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># View quota for a specific namespace</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span>team-alice
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># 查看配额详情（含使用率）</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># View quota details (including utilization)</span>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>team-alice
 </span></code></pre></div>
 <hr />
-<h2 id="_5">在指定命名空间提交任务<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p>配额创建后，团队成员在提交任务时通过 <code>-n</code> 指定命名空间：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Alice 团队提交训练任务</span>
+<h2 id="submitting-jobs-in-a-specific-namespace">Submitting Jobs in a Specific Namespace<a class="headerlink" href="#submitting-jobs-in-a-specific-namespace" title="Permanent link">&para;</a></h2>
+<p>Once quotas are created, team members specify the namespace with <code>-n</code> when submitting jobs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Alice&#39;s team submits a training job</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># 查看 Alice 团队的任务</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># View Alice&#39;s team jobs</span>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
 </span></code></pre></div>
 <hr />
-<h2 id="_6">查询命名空间<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 列出所有由 gpuctl 管理的命名空间</span>
+<h2 id="querying-namespaces">Querying Namespaces<a class="headerlink" href="#querying-namespaces" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># List all namespaces managed by gpuctl</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>ns
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># 或</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># or</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>namespaces
 </span></code></pre></div>
-<p>输出示例：</p>
+<p>Example output:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>NAME            STATUS   AGE
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>team-alice      Active   5d
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>team-bob        Active   5d
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>team-charlie    Active   2d
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>default         Active   30d
 </span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 查看命名空间详情（含配额信息）</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># View namespace details (including quota info)</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>team-alice
 </span></code></pre></div>
-<p>输出示例：</p>
+<p>Example output:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Name:    team-alice
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Status:  Active
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Age:     5d
@@ -1277,26 +1307,26 @@
 </span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>  GPU:    2/8
 </span></code></pre></div>
 <hr />
-<h2 id="_7">删除配额<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 通过 YAML 文件删除（批量删除 YAML 中定义的所有配额）</span>
+<h2 id="deleting-quotas">Deleting Quotas<a class="headerlink" href="#deleting-quotas" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Delete via YAML file (deletes all quotas defined in the file)</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>team-quota.yaml
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># 删除指定命名空间的配额</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Delete a specific namespace&#39;s quota</span>
 </span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>team-charlie
 </span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># 删除命名空间（同时删除其中所有资源）</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Delete a namespace (and all resources within it)</span>
 </span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-charlie
 </span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># 强制删除（跳过确认提示）</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># Force delete (skip confirmation prompt)</span>
 </span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-charlie<span class="w"> </span>--force
 </span></code></pre></div>
 <div class="admonition danger">
-<p class="admonition-title">删除命名空间</p>
-<p>删除命名空间会<strong>删除该命名空间内的所有资源</strong>（包括正在运行的任务、Service 等），此操作<strong>不可逆</strong>。请先确认已备份重要数据。</p>
+<p class="admonition-title">Deleting a Namespace</p>
+<p>Deleting a namespace <strong>deletes all resources within it</strong> (including running jobs, Services, etc.). This operation is <strong>irreversible</strong>. Make sure to back up any important data first.</p>
 </div>
 <div class="admonition tip">
-<p class="admonition-title">只能管理 gpuctl 创建的命名空间</p>
-<p>gpuctl 只管理带有 <code>runwhere.ai/namespace=true</code> 标签的命名空间（由 gpuctl 创建），以及 <code>default</code> 命名空间。<code>kube-system</code> 等系统命名空间不在管理范围内。</p>
+<p class="admonition-title">Only Manages gpuctl-Created Namespaces</p>
+<p>gpuctl only manages namespaces with the <code>runwhere.ai/namespace=true</code> label (created by gpuctl) and the <code>default</code> namespace. System namespaces like <code>kube-system</code> are out of scope.</p>
 </div>
 
 
@@ -1323,7 +1353,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  回到页面顶部
+  Back to top
 </button>
         
       </main>
@@ -1332,33 +1362,33 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../pool/" class="md-footer__link md-footer__link--prev" aria-label="上一页: 资源池管理">
+          <a href="../pool/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Resource Pool">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                上一页
+                Previous
               </span>
               <div class="md-ellipsis">
-                资源池管理
+                Resource Pool
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../developer-guide/" class="md-footer__link md-footer__link--next" aria-label="下一页: 概览">
+          <a href="../../developer-guide/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                下一页
+                Next
               </span>
               <div class="md-ellipsis">
-                概览
+                Overview
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1412,7 +1442,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>

@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="zh" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -22,6 +22,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../zh/developer-guide/contributing/" hreflang="zh">
+        
       
       
       <link rel="icon" href="../../assets/gpuctl_logo.svg">
@@ -29,7 +33,7 @@
     
     
       
-        <title>贡献指南 - GPUCTL - AI 算力调度工具</title>
+        <title>Contributing - GPUCTL - AI GPU Scheduling Tool</title>
       
     
     
@@ -90,8 +94,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
-          跳转至
+        <a href="#contributing" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -105,8 +109,8 @@
   
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-header__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-header__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
@@ -119,13 +123,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            GPUCTL - AI 算力调度工具
+            GPUCTL - AI GPU Scheduling Tool
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              贡献指南
+              Contributing
             
           </span>
         </div>
@@ -162,6 +166,32 @@
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/developer-guide/contributing/" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
     
       
       
@@ -173,21 +203,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="查找">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -200,7 +230,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            正在初始化搜索引擎
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -212,7 +242,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -227,7 +257,7 @@
   
     
       
-<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -243,7 +273,7 @@
   
     
   
-  首页
+  Home
 
       </a>
     </li>
@@ -262,7 +292,7 @@
           
   
   
-  用户指南
+  User Guide
 
         </a>
       </li>
@@ -284,7 +314,7 @@
           
   
   
-  开发者指南
+  Developer Guide
 
         </a>
       </li>
@@ -304,7 +334,7 @@
   
     
   
-  CLI 参考
+  CLI Reference
 
       </a>
     </li>
@@ -323,7 +353,7 @@
   
     
   
-  社区
+  Community
 
       </a>
     </li>
@@ -356,18 +386,18 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="GPUCTL - AI 算力调度工具" class="md-nav__button md-logo" aria-label="GPUCTL - AI 算力调度工具" data-md-component="logo">
+    <a href="../.." title="GPUCTL - AI GPU Scheduling Tool" class="md-nav__button md-logo" aria-label="GPUCTL - AI GPU Scheduling Tool" data-md-component="logo">
       
   <img src="../../assets/gpuctl_logo.svg" alt="logo">
 
     </a>
-    GPUCTL - AI 算力调度工具
+    GPUCTL - AI GPU Scheduling Tool
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/runwhere-ai/gpuctl" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -394,7 +424,7 @@
   <span class="md-ellipsis">
     
   
-    首页
+    Home
   
 
     
@@ -439,7 +469,7 @@
   <span class="md-ellipsis">
     
   
-    用户指南
+    User Guide
   
 
     
@@ -455,7 +485,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    用户指南
+    User Guide
   
 
           </label>
@@ -475,7 +505,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -503,7 +533,7 @@
   <span class="md-ellipsis">
     
   
-    快速开始
+    Quickstart
   
 
     
@@ -531,7 +561,7 @@
   <span class="md-ellipsis">
     
   
-    训练任务
+    Training Jobs
   
 
     
@@ -559,7 +589,7 @@
   <span class="md-ellipsis">
     
   
-    推理服务
+    Inference Services
   
 
     
@@ -615,7 +645,7 @@
   <span class="md-ellipsis">
     
   
-    计算任务
+    Compute Jobs
   
 
     
@@ -643,7 +673,7 @@
   <span class="md-ellipsis">
     
   
-    资源池管理
+    Resource Pool
   
 
     
@@ -671,7 +701,7 @@
   <span class="md-ellipsis">
     
   
-    配额管理
+    Quota Management
   
 
     
@@ -727,7 +757,7 @@
   <span class="md-ellipsis">
     
   
-    开发者指南
+    Developer Guide
   
 
     
@@ -743,7 +773,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    开发者指南
+    Developer Guide
   
 
           </label>
@@ -763,7 +793,7 @@
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -791,7 +821,7 @@
   <span class="md-ellipsis">
     
   
-    系统架构
+    Architecture
   
 
     
@@ -856,7 +886,7 @@
   <span class="md-ellipsis">
     
   
-    贡献指南
+    Contributing
   
 
     
@@ -874,7 +904,7 @@
   <span class="md-ellipsis">
     
   
-    贡献指南
+    Contributing
   
 
     
@@ -886,7 +916,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -895,27 +925,27 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#development-environment-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        开发环境搭建
+        Development Environment Setup
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="开发环境搭建">
+    <nav class="md-nav" aria-label="Development Environment Setup">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        前提条件
+        Prerequisites
       
     </span>
   </a>
@@ -923,10 +953,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#clone-and-install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        克隆与安装
+        Clone and Install
       
     </span>
   </a>
@@ -934,10 +964,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#directory-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        目录结构速览
+        Directory Structure
       
     </span>
   </a>
@@ -950,10 +980,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#running-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        运行测试
+        Running Tests
       
     </span>
   </a>
@@ -961,22 +991,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#code-conventions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        代码规范
+        Code Conventions
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="代码规范">
+    <nav class="md-nav" aria-label="Code Conventions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#naming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        命名约定
+        Naming
       
     </span>
   </a>
@@ -984,10 +1014,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#using-constants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        常量使用
+        Using Constants
       
     </span>
   </a>
@@ -995,10 +1025,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#adding-a-new-job-type" class="md-nav__link">
     <span class="md-ellipsis">
       
-        新增任务类型
+        Adding a New Job Type
       
     </span>
   </a>
@@ -1011,22 +1041,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pr" class="md-nav__link">
+  <a href="#submitting-a-pr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        提交 PR 流程
+        Submitting a PR
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="提交 PR 流程">
+    <nav class="md-nav" aria-label="Submitting a PR">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#branch-naming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        分支命名
+        Branch Naming
       
     </span>
   </a>
@@ -1034,10 +1064,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#commit" class="md-nav__link">
+  <a href="#commit-message-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commit 信息规范
+        Commit Message Format
       
     </span>
   </a>
@@ -1045,10 +1075,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pr_1" class="md-nav__link">
+  <a href="#pr-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PR 提交步骤
+        PR Steps
       
     </span>
   </a>
@@ -1056,10 +1086,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pr_2" class="md-nav__link">
+  <a href="#pr-checklist" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PR 检查清单
+        PR Checklist
       
     </span>
   </a>
@@ -1072,10 +1102,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#building-binaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        构建二进制文件
+        Building Binaries
       
     </span>
   </a>
@@ -1083,10 +1113,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#contributing-to-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        文档贡献
+        Contributing to Documentation
       
     </span>
   </a>
@@ -1094,10 +1124,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#getting-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        获取帮助
+        Getting Help
       
     </span>
   </a>
@@ -1134,7 +1164,7 @@
   <span class="md-ellipsis">
     
   
-    CLI 参考
+    CLI Reference
   
 
     
@@ -1161,7 +1191,7 @@
   <span class="md-ellipsis">
     
   
-    社区
+    Community
   
 
     
@@ -1187,7 +1217,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1196,27 +1226,27 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#development-environment-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        开发环境搭建
+        Development Environment Setup
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="开发环境搭建">
+    <nav class="md-nav" aria-label="Development Environment Setup">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        前提条件
+        Prerequisites
       
     </span>
   </a>
@@ -1224,10 +1254,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#clone-and-install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        克隆与安装
+        Clone and Install
       
     </span>
   </a>
@@ -1235,10 +1265,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#directory-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        目录结构速览
+        Directory Structure
       
     </span>
   </a>
@@ -1251,10 +1281,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#running-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        运行测试
+        Running Tests
       
     </span>
   </a>
@@ -1262,22 +1292,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#code-conventions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        代码规范
+        Code Conventions
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="代码规范">
+    <nav class="md-nav" aria-label="Code Conventions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#naming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        命名约定
+        Naming
       
     </span>
   </a>
@@ -1285,10 +1315,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#using-constants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        常量使用
+        Using Constants
       
     </span>
   </a>
@@ -1296,10 +1326,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#adding-a-new-job-type" class="md-nav__link">
     <span class="md-ellipsis">
       
-        新增任务类型
+        Adding a New Job Type
       
     </span>
   </a>
@@ -1312,22 +1342,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pr" class="md-nav__link">
+  <a href="#submitting-a-pr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        提交 PR 流程
+        Submitting a PR
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="提交 PR 流程">
+    <nav class="md-nav" aria-label="Submitting a PR">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#branch-naming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        分支命名
+        Branch Naming
       
     </span>
   </a>
@@ -1335,10 +1365,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#commit" class="md-nav__link">
+  <a href="#commit-message-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commit 信息规范
+        Commit Message Format
       
     </span>
   </a>
@@ -1346,10 +1376,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pr_1" class="md-nav__link">
+  <a href="#pr-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PR 提交步骤
+        PR Steps
       
     </span>
   </a>
@@ -1357,10 +1387,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pr_2" class="md-nav__link">
+  <a href="#pr-checklist" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PR 检查清单
+        PR Checklist
       
     </span>
   </a>
@@ -1373,10 +1403,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#building-binaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        构建二进制文件
+        Building Binaries
       
     </span>
   </a>
@@ -1384,10 +1414,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#contributing-to-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        文档贡献
+        Contributing to Documentation
       
     </span>
   </a>
@@ -1395,10 +1425,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#getting-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        获取帮助
+        Getting Help
       
     </span>
   </a>
@@ -1425,151 +1455,151 @@
   
 
 
-<h1 id="_1">贡献指南<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>感谢你有兴趣为 gpuctl 贡献代码！本文档说明如何搭建开发环境、运行测试，以及提交 PR 的流程。</p>
-<h2 id="_2">开发环境搭建<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="_3">前提条件<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h1 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h1>
+<p>Thank you for your interest in contributing to gpuctl! This document explains how to set up a development environment, run tests, and submit a PR.</p>
+<h2 id="development-environment-setup">Development Environment Setup<a class="headerlink" href="#development-environment-setup" title="Permanent link">&para;</a></h2>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Python 3.8+</li>
 <li>Git</li>
-<li>可访问的 Kubernetes 集群（用于集成测试，可选）</li>
+<li>Access to a Kubernetes cluster (for integration tests, optional)</li>
 </ul>
-<h3 id="_4">克隆与安装<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 1. Fork 仓库并克隆</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/&lt;你的用户名&gt;/gpuctl.git
+<h3 id="clone-and-install">Clone and Install<a class="headerlink" href="#clone-and-install" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 1. Fork the repo and clone</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/&lt;your-username&gt;/gpuctl.git
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">cd</span><span class="w"> </span>gpuctl
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># 2. 安装开发依赖</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># 2. Install dev dependencies</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># 或使用 Poetry</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Or with Poetry</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>poetry<span class="w"> </span>install
 </span></code></pre></div>
-<h3 id="_5">目录结构速览<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<h3 id="directory-structure">Directory Structure<a class="headerlink" href="#directory-structure" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpuctl/
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── gpuctl/
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   ├── api/           # Pydantic 数据模型
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── parser/        # YAML 解析
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── builder/       # K8s 资源构建
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── client/        # K8s API 调用
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   ├── kind/          # 场景化业务逻辑
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── cli/           # CLI 命令实现
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   └── constants.py   # 全局常量
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>├── server/            # FastAPI 服务
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>├── tests/             # 测试用例
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>└── doc/               # 设计文档
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   ├── api/           # Pydantic data models
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── parser/        # YAML parsing
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── builder/       # K8s resource building
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── client/        # K8s API calls
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   ├── kind/          # Scenario-specific business logic
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── cli/           # CLI command implementations
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   └── constants.py   # Global constants
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>├── server/            # FastAPI service
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>├── tests/             # Test cases
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>└── doc/               # Design documents
 </span></code></pre></div>
 <hr />
-<h2 id="_6">运行测试<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 运行所有单元测试</span>
+<h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Run all unit tests</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>pytest
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># 运行指定测试文件</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Run a specific test file</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>pytest<span class="w"> </span>tests/test_gpuctl.py
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># 显示详细输出</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Verbose output</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>pytest<span class="w"> </span>-v
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># 生成覆盖率报告</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># Generate coverage report</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>pytest<span class="w"> </span>--cov<span class="o">=</span>gpuctl<span class="w"> </span>--cov-report<span class="o">=</span>html
 </span></code></pre></div>
 <hr />
-<h2 id="_7">代码规范<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<h3 id="_8">命名约定<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<h2 id="code-conventions">Code Conventions<a class="headerlink" href="#code-conventions" title="Permanent link">&para;</a></h2>
+<h3 id="naming">Naming<a class="headerlink" href="#naming" title="Permanent link">&para;</a></h3>
 <ul>
-<li>函数/变量：<code>snake_case</code></li>
-<li>类名：<code>PascalCase</code></li>
-<li>常量：定义在 <code>gpuctl/constants.py</code> 中，不允许在其他模块硬编码魔法字符串</li>
+<li>Functions/variables: <code>snake_case</code></li>
+<li>Class names: <code>PascalCase</code></li>
+<li>Constants: defined in <code>gpuctl/constants.py</code> — hardcoding magic strings in other modules is not allowed</li>
 </ul>
-<h3 id="_9">常量使用<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 正确 ✅</span>
+<h3 id="using-constants">Using Constants<a class="headerlink" href="#using-constants" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Correct ✅</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gpuctl.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Kind</span><span class="p">,</span> <span class="n">Labels</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">label_value</span> <span class="o">=</span> <span class="n">Kind</span><span class="o">.</span><span class="n">TRAINING</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># 错误 ❌</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Incorrect ❌</span>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">label_value</span> <span class="o">=</span> <span class="s2">&quot;training&quot;</span>
 </span></code></pre></div>
-<h3 id="_10">新增任务类型<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<p>如果要新增任务类型（例如 <code>batch</code>），需要按以下顺序修改：</p>
+<h3 id="adding-a-new-job-type">Adding a New Job Type<a class="headerlink" href="#adding-a-new-job-type" title="Permanent link">&para;</a></h3>
+<p>To add a new job type (e.g. <code>batch</code>), modify files in this order:</p>
 <ol>
-<li><strong><code>gpuctl/constants.py</code></strong> — 在 <code>Kind</code> 枚举中添加新 Kind</li>
-<li><strong><code>gpuctl/api/</code></strong> — 新增对应的 Pydantic 模型文件</li>
-<li><strong><code>gpuctl/parser/</code></strong> — 新增或修改 parser 支持新 Kind</li>
-<li><strong><code>gpuctl/builder/</code></strong> — 新增 Builder，实现 <code>build()</code> 方法</li>
-<li><strong><code>gpuctl/client/job_client.py</code></strong> — 添加对新 K8s 资源类型的支持</li>
-<li><strong><code>gpuctl/cli/job.py</code></strong> — 在 CLI 命令中处理新 Kind</li>
-<li><strong><code>server/routes/jobs.py</code></strong> — 在 API 路由中处理新 Kind</li>
-<li><strong><code>tests/</code></strong> — 添加对应测试用例</li>
+<li><strong><code>gpuctl/constants.py</code></strong> — add the new Kind to the <code>Kind</code> enum</li>
+<li><strong><code>gpuctl/api/</code></strong> — add the corresponding Pydantic model file</li>
+<li><strong><code>gpuctl/parser/</code></strong> — add or update the parser to support the new Kind</li>
+<li><strong><code>gpuctl/builder/</code></strong> — add a Builder implementing the <code>build()</code> method</li>
+<li><strong><code>gpuctl/client/job_client.py</code></strong> — add support for the new K8s resource type</li>
+<li><strong><code>gpuctl/cli/job.py</code></strong> — handle the new Kind in CLI commands</li>
+<li><strong><code>server/routes/jobs.py</code></strong> — handle the new Kind in API routes</li>
+<li><strong><code>tests/</code></strong> — add corresponding test cases</li>
 </ol>
 <hr />
-<h2 id="pr">提交 PR 流程<a class="headerlink" href="#pr" title="Permanent link">&para;</a></h2>
-<h3 id="_11">分支命名<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h2 id="submitting-a-pr">Submitting a PR<a class="headerlink" href="#submitting-a-pr" title="Permanent link">&para;</a></h2>
+<h3 id="branch-naming">Branch Naming<a class="headerlink" href="#branch-naming" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>feature/add-batch-job-support
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>fix/delete-service-on-cleanup
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>docs/update-cli-reference
 </span></code></pre></div>
-<h3 id="commit">Commit 信息规范<a class="headerlink" href="#commit" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>feat: 添加 batch 任务类型支持
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>fix: 修复删除任务时 Service 未同步删除的问题
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>docs: 更新 CLI 命令参考文档
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>refactor: 将公共标签常量移至 constants.py
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>test: 新增 inference 类型端到端测试
+<h3 id="commit-message-format">Commit Message Format<a class="headerlink" href="#commit-message-format" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>feat: add batch job type support
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>fix: fix service not deleted on job cleanup
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>docs: update CLI command reference
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>refactor: move shared label constants to constants.py
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>test: add inference end-to-end tests
 </span></code></pre></div>
-<h3 id="pr_1">PR 提交步骤<a class="headerlink" href="#pr_1" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 1. 创建功能分支</span>
+<h3 id="pr-steps">PR Steps<a class="headerlink" href="#pr-steps" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 1. Create a feature branch</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/my-feature
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># 2. 开发并提交</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># 2. Develop and commit</span>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>git<span class="w"> </span>add<span class="w"> </span>.
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 描述你的改动&quot;</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: describe your change&quot;</span>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1"># 3. 推送到你的 Fork</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1"># 3. Push to your fork</span>
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/my-feature
 </span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="c1"># 4. 在 GitHub 上创建 Pull Request</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="c1"># 4. Open a Pull Request on GitHub</span>
 </span></code></pre></div>
-<h3 id="pr_2">PR 检查清单<a class="headerlink" href="#pr_2" title="Permanent link">&para;</a></h3>
-<p>在提交 PR 前，请确认：</p>
+<h3 id="pr-checklist">PR Checklist<a class="headerlink" href="#pr-checklist" title="Permanent link">&para;</a></h3>
+<p>Before submitting, confirm:</p>
 <ul>
-<li>[ ] 代码通过 <code>pytest</code> 所有测试</li>
-<li>[ ] 新功能有对应的测试用例</li>
-<li>[ ] 新增的魔法字符串已添加到 <code>constants.py</code></li>
-<li>[ ] 更新了相关文档（如 CLI 参考、用户指南）</li>
-<li>[ ] PR 标题符合 Commit 规范</li>
+<li>[ ] All <code>pytest</code> tests pass</li>
+<li>[ ] New functionality has corresponding test cases</li>
+<li>[ ] New magic strings are added to <code>constants.py</code></li>
+<li>[ ] Relevant documentation is updated (CLI reference, user guide, etc.)</li>
+<li>[ ] PR title follows the commit message format</li>
 </ul>
 <hr />
-<h2 id="_12">构建二进制文件<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 安装 PyInstaller</span>
+<h2 id="building-binaries">Building Binaries<a class="headerlink" href="#building-binaries" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Install PyInstaller</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>pip<span class="w"> </span>install<span class="w"> </span>pyinstaller
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># 构建 Linux 二进制</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Build Linux binary</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>pyinstaller<span class="w"> </span>--onefile<span class="w"> </span>--name<span class="o">=</span><span class="s2">&quot;gpuctl-linux-amd64&quot;</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>--hidden-import<span class="o">=</span>yaml<span class="w"> </span>--hidden-import<span class="o">=</span>PyYAML<span class="w"> </span>main.py
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># 构建 Windows 二进制</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># Build Windows binary</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>pyinstaller<span class="w"> </span>--onefile<span class="w"> </span>--name<span class="o">=</span><span class="s2">&quot;gpuctl-windows-amd64.exe&quot;</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span>--hidden-import<span class="o">=</span>yaml<span class="w"> </span>--hidden-import<span class="o">=</span>PyYAML<span class="w"> </span>main.py
 </span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="c1"># 构建产物在 dist/ 目录</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="c1"># Output is in the dist/ directory</span>
 </span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>ls<span class="w"> </span>dist/
 </span></code></pre></div>
 <hr />
-<h2 id="_13">文档贡献<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
-<p>本文档站点基于 MkDocs + Material 主题：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 安装文档依赖</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>pip<span class="w"> </span>install<span class="w"> </span>mkdocs<span class="w"> </span>mkdocs-material
+<h2 id="contributing-to-documentation">Contributing to Documentation<a class="headerlink" href="#contributing-to-documentation" title="Permanent link">&para;</a></h2>
+<p>This documentation site is built with MkDocs + Material theme:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Install doc dependencies</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>pip<span class="w"> </span>install<span class="w"> </span>mkdocs<span class="w"> </span>mkdocs-material<span class="w"> </span>mkdocs-static-i18n
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># 在项目根目录执行</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>mkdocs<span class="w"> </span>serve<span class="w">   </span><span class="c1"># 本地预览</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>mkdocs<span class="w"> </span>build<span class="w">   </span><span class="c1"># 构建静态文件（输出到 site/）</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># From the project root</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>mkdocs<span class="w"> </span>serve<span class="w">   </span><span class="c1"># Local preview</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>mkdocs<span class="w"> </span>build<span class="w">   </span><span class="c1"># Build static files (output to site/)</span>
 </span></code></pre></div>
-<p>文档源文件位于 <code>docs/</code>，<code>mkdocs.yml</code> 配置在项目根目录，修改后提交 PR 即可更新官网。</p>
+<p>Documentation source files are in <code>docs/</code>, with <code>mkdocs.yml</code> at the project root. Submit a PR with your changes to update the live site.</p>
 <hr />
-<h2 id="_14">获取帮助<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
-<p>如有问题，欢迎通过以下方式联系：</p>
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<p>If you have questions, feel free to reach out:</p>
 <ul>
-<li><strong>GitHub Issues</strong>：<a href="https://github.com/runwhere-ai/gpuctl/issues">提交 Bug 或功能建议</a></li>
-<li><strong>GitHub Discussions</strong>：<a href="https://github.com/runwhere-ai/gpuctl/discussions">参与社区讨论</a></li>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/runwhere-ai/gpuctl/issues">Submit a bug or feature request</a></li>
+<li><strong>GitHub Discussions</strong>: <a href="https://github.com/runwhere-ai/gpuctl/discussions">Join the community discussion</a></li>
 </ul>
 
 
@@ -1596,7 +1626,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  回到页面顶部
+  Back to top
 </button>
         
       </main>
@@ -1605,17 +1635,17 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../api/" class="md-footer__link md-footer__link--prev" aria-label="上一页: REST API">
+          <a href="../api/" class="md-footer__link md-footer__link--prev" aria-label="Previous: REST API">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                上一页
+                Previous
               </span>
               <div class="md-ellipsis">
                 REST API
@@ -1625,13 +1655,13 @@
         
         
           
-          <a href="../../cli/" class="md-footer__link md-footer__link--next" aria-label="下一页: CLI 参考">
+          <a href="../../cli/" class="md-footer__link md-footer__link--next" aria-label="Next: CLI Reference">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                下一页
+                Next
               </span>
               <div class="md-ellipsis">
-                CLI 参考
+                CLI Reference
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1685,7 +1715,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
