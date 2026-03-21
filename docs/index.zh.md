@@ -121,16 +121,19 @@ hide:
     kind: training
     version: v0.1
     job:
-      name: gpu-check
-      priority: medium
+      name: qwen2-7b-sft
+      priority: high
     environment:
-      image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-      command: ["python", "-c", "import torch; print(f'GPU count: {torch.cuda.device_count()}')"]
+      image: hiyouga/llamafactory:latest
+      command: ["llamafactory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b"]
     resources:
       pool: default
-      gpu: 1
-      cpu: 4
-      memory: 16Gi
+      gpu: 4
+      cpu: 32
+      memory: 128Gi
+    storage:
+      workdirs:
+        - path: /models
     ```
 
 === "推理服务"
