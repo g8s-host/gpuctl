@@ -1,0 +1,2251 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="面向算法工程师的 AI 算力调度平台，通过声明式 YAML 和简单 CLI 命令高效管理 GPU 资源">
+      
+      
+        <meta name="author" content="GPU Control Team">
+      
+      
+        <link rel="canonical" href="https://runwhere-ai.github.io/gpuctl/design/prd/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/gpuctl_logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>面向算法工程师的AI算力调度平台 (gpuctl) 产品需求文档 - GPUCTL - AI 算力调度平台</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-XXXXXXXXXX"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-XXXXXXXXXX",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="white">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ai-gpuctl" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="GPUCTL - AI 算力调度平台" class="md-header__button md-logo" aria-label="GPUCTL - AI 算力调度平台" data-md-component="logo">
+      
+  <img src="../../assets/gpuctl_logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPUCTL - AI 算力调度平台
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              面向算法工程师的AI算力调度平台 (gpuctl) 产品需求文档
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="white"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="white" data-md-color-accent="white"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    runwhere-ai/gpuctl
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../user-guide/" class="md-tabs__link">
+          
+  
+  
+  用户指南
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  开发者指南
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../cli/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI 参考
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../community/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  社区
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="GPUCTL - AI 算力调度平台" class="md-nav__button md-logo" aria-label="GPUCTL - AI 算力调度平台" data-md-component="logo">
+      
+  <img src="../../assets/gpuctl_logo.svg" alt="logo">
+
+    </a>
+    GPUCTL - AI 算力调度平台
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/runwhere-ai/gpuctl" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    runwhere-ai/gpuctl
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    用户指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    用户指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速开始
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    训练任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/notebook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    计算任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/pool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    资源池管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/quota/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    配额管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发者指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    开发者指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    系统架构
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI 参考
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    社区
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ai-gpuctl">面向算法工程师的AI算力调度平台 (gpuctl) 产品需求文档<a class="headerlink" href="#ai-gpuctl" title="Permanent link">&para;</a></h1>
+<h1 id="1">1. 产品概述与核心目标<a class="headerlink" href="#1" title="Permanent link">&para;</a></h1>
+<p>本产品旨在为算法工程师群体提供一个高度抽象、易于使用的AI算力调度平台，其核心目标是显著降低GPU算力的使用门槛。通过声明式的YAML配置和简单的gpuctl CLI命令，算法工程师无需掌握Kubernetes等底层基础设施的复杂知识，即可高效提交和管理AI训练与推理任务。</p>
+<h2 id="11">1.1 解决的核心痛点<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>算法工程师不熟悉Kubernetes，希望避免学习Pod、Deployment、Service等复杂概念。</p>
+</li>
+<li>
+<p>简化GPU驱动、依赖库等繁琐环境的安装与配置。</p>
+</li>
+<li>
+<p>提供高性能、高效率的算力执行环境，支持训练和推理场景。</p>
+</li>
+<li>
+<p>实现在现有Kubernetes集群上通过声明式命令直接使用算力资源。</p>
+</li>
+</ul>
+<h1 id="2">2. 典型用户场景与工具兼容性验证<a class="headerlink" href="#2" title="Permanent link">&para;</a></h1>
+<p>基于算法工程师在训练与推理全流程中的核心需求，结合主流工具生态，设计以下典型用户场景，并验证平台对关键工具的适配能力，确保满足实际生产需求。</p>
+<h2 id="21">2.1 训练场景及工具适配<a class="headerlink" href="#21" title="Permanent link">&para;</a></h2>
+<h3 id="211">2.1.1 场景一：大模型微调（单机多卡并行训练）<a class="headerlink" href="#211" title="Permanent link">&para;</a></h3>
+<p><strong>用户画像</strong>：专注于LLM微调的算法工程师，需基于Qwen-7B、Llama3等基座模型进行SFT训练，依赖多卡并行提升训练效率。</p>
+<p><strong>核心需求</strong>：支持Deepspeed分布式训练框架，兼容Llama Factory微调工具链，能够便捷配置多卡资源，自动处理分布式环境依赖。</p>
+<p><strong>平台适配验证</strong>：完全满足且兼容工具最新特性，以下为完整实操案例支撑。工程师可在YAML配置中指定集成Deepspeed 0.14.0+与Llama Factory 0.8.0+的自定义镜像（如<code>registry.example.com/llama-factory-deepspeed:v0.8.0</code>），该镜像已预装微调所需依赖（transformers 4.41.0、peft 0.11.1）。
+1. <strong>Llama Factory微调案例（Qwen2-7B SFT）</strong>：数据集采用Alpaca格式（含instruction、input、output字段），存储于<code>/datasets/alpaca-qwen.json</code>。YAML中通过<code>environment.command</code>配置微调命令：<code>["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--do_train", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft", "--per_device_train_batch_size", "8", "--gradient_accumulation_steps", "4", "--learning_rate", "2e-5", "--num_train_epochs", "3", "--deepspeed", "ds_config.json"]</code>。其中<code>ds_config.json</code>由平台自动注入基础配置（如zero-2优化），工程师仅需补充学习率等模型参数。
+2. <strong>平台简化能力</strong>：通过<code>resources.gpu</code>字段声明4张A100-80G GPU后，平台自动完成NVLink网络配置、GPU设备绑定及Deepspeed环境变量注入，无需手动编写K8s分布式Job。提交命令为<code>gpuctl create -f qwen-7b-sft.yaml</code>，底层转换为K8s Job资源并适配flash-attention2优化，实测训练效率提升约25%，单轮epoch训练时间缩短至45分钟。</p>
+<h3 id="212">2.1.2 场景二：多任务批量训练（实验对比）<a class="headerlink" href="#212" title="Permanent link">&para;</a></h3>
+<p><strong>用户画像</strong>：从事模型调参的算法工程师，需同时运行多个不同超参数的训练任务（如不同学习率、batch_size的ResNet训练），需区分任务资源归属，便于结果对比与资源统计。</p>
+<p><strong>核心需求</strong>：支持批量提交任务，可将任务绑定至专属资源池，避免资源争抢，同时能快速查询各任务的GPU利用率、训练进度。</p>
+<p><strong>平台适配验证</strong>：完全满足。通过YAML中新增的<code>resources.pool</code>字段，工程师可将所有实验任务指定至<code>experiment-pool</code>资源池，平台将基于池内资源进行调度，避免与生产任务冲突。借助<code>gpuctl create -f task1.yaml -f task2.yaml</code>批量提交命令，配合<code>gpuctl get jobs --pool experiment-pool</code>命令，可集中管理实验任务，满足批量调参需求。</p>
+<h3 id="213-notebook">2.1.3 场景三：Notebook交互式开发（代码快速验证）<a class="headerlink" href="#213-notebook" title="Permanent link">&para;</a></h3>
+<p><strong>用户画像</strong>：从事模型原型开发、数据预处理的算法工程师，需通过交互式编程环境（如Jupyter Notebook）快速调试代码片段、可视化数据分布、验证模型前向逻辑，常用于训练任务正式提交前的原型验证阶段。</p>
+<p><strong>用户画像</strong>：聚焦基座模型优化的算法工程师，需对Qwen2-72B、Llama3-70B等大模型进行全参数更新（非PEFT轻量微调），用于构建领域专属基座模型，依赖Deepspeed ZeRO系列优化突破显存瓶颈，需稳定的多节点分布式训练环境。</p>
+<p><strong>核心需求</strong>：支持Jupyter Notebook/JupyterLab环境部署，能直接关联GPU资源；环境需预装常用数据科学库（Pandas、Matplotlib、PyTorch）及AI工具链，确保与后续训练环境一致；支持远程访问、代码持久化存储，可灵活调整资源规格。</p>
+<p><strong>平台适配验证</strong>：完全满足交互式开发需求，实现“一键部署、即开即用、资源联动”，实操流程如下。</p>
+<ol>
+<li><strong>Notebook环境部署</strong>：工程师在YAML中指定集成JupyterLab 4.0+的镜像（如<code>registry.example.com/jupyter-ai:v1.0</code>），该镜像预装PyTorch 2.3.0、Pandas 2.2.2及GPU驱动依赖。核心配置通过<code>environment.command</code>设置启动参数：<code>["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=ai-gpuctl-2025", "--NotebookApp.password="]</code>，其中token用于安全访问。</li>
+<li><strong>资源与访问配置</strong>：通过<code>resources</code>字段声明1张A10 GPU及<code>dev-pool</code>开发资源池，配置<code>cpu: 8</code>、<code>memory: 32Gi</code>满足数据处理需求；在<code>service</code>字段中暴露8888端口并配置NodePort访问方式，平台自动生成访问地址。</li>
+<li><strong>平台协同能力</strong>：提交命令<code>gpuctl create -f jupyter-notebook.yaml</code>后，通过<code>gpuctl get notebook</code>可获取访问地址（如<code>http://node-ip:30088/?token=ai-gpuctl-2025</code>），直接在浏览器打开即可进入Notebook环境。支持通过<code>gpuctl scale notebook</code>动态升级GPU资源，无需重启环境；代码与数据存储于平台共享存储，可通过<code>gpuctl cp</code>实现本地与Notebook的文件传输。若需将Notebook中的训练代码转为正式任务，可直接导出为Python脚本，通过平台YAML的<code>environment.command</code>引用执行，确保开发与训练环境一致性。</li>
+</ol>
+<p><strong>平台适配验证</strong>：完全满足全参数微调的高算力需求，通过底层优化实现大模型全量更新的高效执行，实操案例如下。工程师指定集成Deepspeed 0.14.5、transformers 4.44.0的专用镜像（<code>registry.example.com/deepspeed-zero3:v1.2</code>），该镜像预配置BF16计算环境，减少显存占用的同时提升计算效率。</p>
+<ol>
+<li><strong>全参数微调案例（Qwen2-72B全量更新）</strong>：核心通过YAML配置分布式参数与Deepspeed策略，命令为<code>["python", "full_ft_train.py", "--model_name_or_path", "/models/qwen2-72b", "--dataset", "/datasets/domain-large-10M", "--output_dir", "/output/qwen2-72b-domain", "--per_device_train_batch_size", "2", "--gradient_accumulation_steps", "8", "--learning_rate", "5e-6", "--num_train_epochs", "2", "--deepspeed", "zero3_config.json", "--bf16", "true", "--gradient_checkpointing", "true"]</code>。其中<code>zero3_config.json</code>由平台提供模板，内置ZeRO-3优化核心配置（<code>zero_optimization.stage: 3</code>、<code>offload_optimizer.device: cpu</code>），工程师仅需调整批量大小等任务参数。 </li>
+<li><strong>平台分布式能力</strong>：通过<code>resources.gpu: 8</code>及<code>resources.node_count: 2</code>声明2节点8卡A100-80G资源，平台自动识别节点间NVLink网络状态，注入<code>NCCL_SOCKET_IFNAME=eth0</code>等通信环境变量，优化跨节点数据传输效率。提交命令<code>gpuctl create -f qwen2-72b-fullft.yaml</code>后，底层自动生成K8s分布式Job，配置节点亲和性确保任务调度至同机柜低延迟节点组。</li>
+<li><strong>显存与稳定性保障</strong>：平台实时监控单卡显存占用（默认阈值≤75GB），当某节点显存使用率突增时，自动触发梯度检查点强化策略并降低该节点临时批量大小；支持断点续训，通过<code>output.resume_from_checkpoint: true</code>配置，训练中断后可通过<code>gpuctl resume job</code>恢复训练，避免数据丢失。实测单卡显存占用稳定在68-72GB，跨节点通信延迟≤2ms，训练吞吐量较手动配置Deepspeed提升18%。</li>
+</ol>
+<h2 id="22">2.2 推理场景及工具适配<a class="headerlink" href="#22" title="Permanent link">&para;</a></h2>
+<h3 id="221-llm">2.2.1 场景一：高并发LLM推理服务<a class="headerlink" href="#221-llm" title="Permanent link">&para;</a></h3>
+<p><strong>用户画像</strong>：负责推理服务部署的算法工程师，需基于Llama3-8B模型提供高并发API服务，要求低延迟、高吞吐量，依赖VLLM优化推理性能。</p>
+<p><strong>核心需求</strong>：支持VLLM推理框架，能够配置自动扩缩容策略，基于GPU利用率动态调整实例数量，保障服务稳定性。</p>
+<p><strong>平台适配验证</strong>：完全满足。工程师在YAML中指定VLLM官方镜像（<code>vllm/vllm-serving:latest</code>），通过<code>environment.command</code>配置VLLM启动命令（<code>["python", "-m", "vllm.entrypoints.openai.api_server", "--model", "llama3-8b"]</code>），并通过<code>autoscaling</code>字段设置目标GPU利用率70%，平台将自动转换为K8s Deployment+Service+HPA资源，实现基于负载的弹性扩缩容，充分发挥VLLM的高并发优势。</p>
+<h3 id="222">2.2.2 场景二：轻量推理调试（快速验证）<a class="headerlink" href="#222" title="Permanent link">&para;</a></h3>
+<p><strong>用户画像</strong>：进行推理逻辑开发的算法工程师，需基于BERT模型快速调试推理代码，使用SGLang简化推理流程，要求快速启停任务、实时查看日志。</p>
+<p><strong>核心需求</strong>：支持SGLang推理工具，任务启动延迟低，支持实时日志查询与快速终止，资源占用可灵活配置。</p>
+<p><strong>平台适配验证</strong>：完全满足。工程师可在YAML中指定包含SGLang的轻量镜像，配置1张T4 GPU资源及<code>debug-pool</code>资源池，通过<code>gpuctl create -f bert-debug.yaml</code>快速提交任务。借助<code>gpuctl logs &lt;job-id&gt; -f</code>命令实时查看推理日志，调试完成后通过<code>gpuctl delete job &lt;job-id&gt;</code>立即释放资源，整个流程无需关注K8s细节，适配快速调试场景。</p>
+<h2 id="23">2.3 资源池管理<a class="headerlink" href="#23" title="Permanent link">&para;</a></h2>
+<h3 id="221">2.2.1 场景：资源池声明<a class="headerlink" href="#221" title="Permanent link">&para;</a></h3>
+<p>通过声明式的资源池</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kind: pool
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>version: v0.1
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>metadata:
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  name: train-pool
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  description: &quot;训练任务专用资源池&quot;
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>nodes: 
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  node1: # 节点主机名
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    gpu-type: A100-100G
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  node2: # 节点主机名
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    gpu-type: A800-20G
+</span></code></pre></div>
+<h1 id="3">3. 用户使用流程<a class="headerlink" href="#3" title="Permanent link">&para;</a></h1>
+<pre class="mermaid"><code>flowchart TD
+        A[算法工程师] --&gt; B[编写声明式YAML（指定工具、资源池、资源需求）]
+        B --&gt; C[执行gpuctl命令（创建/查询/删除任务）]
+        C --&gt; D[平台自动化处理]
+        D --&gt; E[任务高效运行]
+
+        D --&gt; F[驱动与环境自动部署（含Deepspeed/VLLM等工具依赖）]
+        D --&gt; G[抽象转换K8s资源（Job/Deployment+HPA等）]
+        D --&gt; H[智能调度GPU资源（基于资源池与负载）]
+        D --&gt; I[实时监控任务状态（GPU利用率、日志等）]
+</code></pre>
+<h1 id="4">4. 平台技术架构要点<a class="headerlink" href="#4" title="Permanent link">&para;</a></h1>
+<p>平台采用分层设计，对用户暴露友好的抽象层，底层则基于成熟的Kubernetes和容器化技术构建，新增资源池管理模块以支撑资源精细化调度。</p>
+<ul>
+<li>
+<p><strong>接入层</strong>：提供gpuctl CLI和REST API，接收用户以声明式YAML定义的任务，支持批量提交与资源池筛选。</p>
+</li>
+<li>
+<p><strong>抽象与转换层</strong>：核心组件。负责解析YAML中的资源池、工具依赖、资源需求等配置，验证合法性后转换为K8s资源定义（Job、Deployment等），封装K8s复杂性；新增资源池解析模块，实现基于池的资源隔离与调度。</p>
+</li>
+<li>
+<p><strong>调度与执行层</strong>：基于Kubernetes及生态（NVIDIA GPU Operator、阿里GPU Share Device Plugin）实现，支持资源池化管理，按池分配GPU资源，提升资源利用率；支持Deepspeed、VLLM等工具的分布式环境与运行时配置。</p>
+</li>
+<li>
+<p><strong>监控与反馈层</strong>：基于Prometheus+Grafana构建监控体系，收集任务运行全量数据，包括GPU利用率、显存带宽、算力占比、任务进度、分布式训练通信延迟等指标；通过gpuctl CLI向用户反馈可视化结果，支持按资源池、任务类型、GPU型号多维度筛选查询，关键指标支持设置阈值告警（如GPU温度≥85℃自动提醒）。</p>
+</li>
+</ul>
+<h1 id="5-yaml">5. 声明式YAML规范设计<a class="headerlink" href="#5-yaml" title="Permanent link">&para;</a></h1>
+<p>YAML设计的原则是面向算法工程，使用他们熟悉的术语，隐藏基础设施细节，新增<code>resources.pool</code>字段实现资源池化管理。</p>
+<h2 id="51-training-jobyaml">5.1 训练任务示例 (training-job.yaml)<a class="headerlink" href="#51-training-jobyaml" title="Permanent link">&para;</a></h2>
+<p>```Plain Text</p>
+<p>kind: training
+version: v0.1</p>
+<h1 id="llama-factory">任务标识与描述（Llama Factory微调场景）<a class="headerlink" href="#llama-factory" title="Permanent link">&para;</a></h1>
+<p>job:
+  name: qwen2-7b-llamafactory-sft
+  priority: "high"
+  description: "llama3推理任务"</p>
+<h1 id="-llama-factory-080-deepspeed-0140">环境与镜像 - 集成Llama Factory 0.8.0 + DeepSpeed 0.14.0<a class="headerlink" href="#-llama-factory-080-deepspeed-0140" title="Permanent link">&para;</a></h1>
+<p>environment:
+  image: registry.example.com/llama-factory-deepspeed:v0.8.0
+  imagePullSecret: my-secret
+  # Llama Factory微调核心命令
+  command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft", "--per_device_train_batch_size", "8", "--gradient_accumulation_steps", "4", "--learning_rate", "2e-5", "--deepspeed", "ds_config.json"]
+  env:
+    - name: NVIDIA_FLASH_ATTENTION
+      value: "1"
+    - name: LLAMA_FACTORY_CACHE
+      value: "/cache/llama-factory"</p>
+<h1 id="4a100">资源需求声明（4卡A100）<a class="headerlink" href="#4a100" title="Permanent link">&para;</a></h1>
+<p>resources:
+  pool: training-pool #默认default
+  gpu: 4
+  gpu-type: A100-100G #可选，不填就k8s的调度
+  cpu: 32
+  memory: 128Gi
+  gpu-share: 2Gi</p>
+<h1 id="_1">数据与模型配置<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>storage:
+  workdirs:
+    - path: /datasets/alpaca-qwen.json
+    - path: /models/qwen2-7b  <br />
+    - path: /cache/models
+    - path: /output/qwen2-sft
+    - path: /output/qwen2-sft/checkpoints    </p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>注：平台底层将此YAML转换为支持多卡分布式的Kubernetes Job资源，自动注入Deepspeed所需的环境变量与网络配置，基于`training-pool`调度资源。
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>## 5.2 推理任务示例 (inference-service.yaml)
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>```Plain Text
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>kind: inference
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>version: v0.1
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a># 任务标识
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>job:
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  name: llama3-8b-inference
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>  priority: &quot;medium&quot;
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>  description: &quot;llama3推理任务&quot;
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a># 环境与镜像（集成VLLM 0.5.0+）
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>environment:
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  image: vllm/vllm-serving:v0.5.0 # 优化过的推理镜像
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>  command: [&quot;python&quot;, &quot;-m&quot;, &quot;vllm.entrypoints.openai.api_server&quot;] # 启动命令
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>  args:
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    - &quot;--model&quot;
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    - &quot;/home/data/models/llama3-8b&quot;
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>    - &quot;--tensor-parallel-size&quot;
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    - &quot;1&quot;
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    - &quot;v2&quot;
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    - &quot;--max-num-seqs&quot;
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    - &quot;256&quot;
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a># 服务配置
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>service:
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>  replicas: 2
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>  port: 8000
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>  health_check: /health
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a># 资源规格（新增pool字段）
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>resources:
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>  pool: inference-pool # 推理专属资源池,默认default
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>  gpu: 1
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>  gpu-type: A100-100G #可选，不填就k8s的调度
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>  cpu: 8
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>  memory: 32Gi
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>  gpu-share: 2Gi
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>storage:
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>  workdirs:
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    - path: /home/data/ # 挂在本地存储目录
+</span></code></pre></div>
+<p>注：平台底层将此YAML转换为Kubernetes Deployment、Service、HPA资源，基于<code>inference-pool</code>进行资源调度，确保推理服务与训练任务资源隔离。</p>
+<h2 id="53-notebook-jobyaml">5.3 调试任务示例（notebook-job.yaml)<a class="headerlink" href="#53-notebook-jobyaml" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kind: notebook
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>version: v0.1
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>job:
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  name: data-prep-notebook
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  priority: medium
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  description: llama3推理任务
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>environment:
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  image: registry.example.com/jupyter-ai:v1.0
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  command: [&quot;jupyter-lab&quot;, &quot;--ip=0.0.0.0&quot;, &quot;--port=8888&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;, &quot;--NotebookApp.token=ai-gpuctl-2025&quot;, &quot;--NotebookApp.password=&quot;]`
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a># 服务配置
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>service:
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  port: 8000
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>resources:
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  pool: dev-pool #默认default
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>  gpu: 1
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  gpu-type: a10-24g #可选，不填就k8s的调度
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>  cpu: 8
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>  memory: 32Gi
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>  gpu-share: 2Gi
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>storage:
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>  workdirs:
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    - path: /home/jovyan/work # 代码存储目录
+</span></code></pre></div>
+<h2 id="53-train-poolyaml">5.3 资源池示例（train-pool.yaml）<a class="headerlink" href="#53-train-poolyaml" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>kind: resource
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>version: v0.1
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>pool:
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  name: train-pool
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  description: &quot;训练任务专用资源池&quot;
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>nodes: 
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  node1: 
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    gpu-type: A100-100G
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  node2:
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    gpu-type: A800-20G
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>---
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>kind: resource
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>version: v0.1
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>pool:
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>  name: inference-pool
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>  description: &quot;训练任务专用资源池&quot;
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>nodes: 
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>  node1: 
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    gpu-type: 4090-24G
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>  node2:
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    gpu-type: 5090-20G
+</span></code></pre></div>
+<h1 id="6-gpuctl-cli">6. gpuctl CLI 命令设计<a class="headerlink" href="#6-gpuctl-cli" title="Permanent link">&para;</a></h1>
+<p>gpuctl 命令与 kubectl 对标，但语义更贴近算法工程师的使用场景，新增资源池相关命令以支撑精细化管理。gpuctl由go语言实现，编译之后移动到/usr/local/bin/目录下即可立即使用，底层由api_server/kubectl支撑。</p>
+<table>
+<thead>
+<tr>
+<th>命令示例</th>
+<th>功能描述</th>
+<th>底层近似操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gpuctl create -f train-job.yaml</td>
+<td>提交一个训练任务</td>
+<td>kubectl create -f &lt;转换后的job.yaml&gt;</td>
+</tr>
+<tr>
+<td>gpuctl create -f task1.yaml -f task2.yaml</td>
+<td>批量提交多个任务</td>
+<td>批量执行kubectl create</td>
+</tr>
+<tr>
+<td>gpuctl get jobs</td>
+<td>列出所有任务（训练/推理）及核心指标</td>
+<td>kubectl get pods,jobs,deployments -o custom-columns</td>
+</tr>
+<tr>
+<td>gpuctl get jobs --pool training-pool</td>
+<td>列出指定资源池的任务</td>
+<td>kubectl get pods,jobs -l pool=training-pool</td>
+</tr>
+<tr>
+<td>gpuctl describe job <job-id></td>
+<td>查看任务详细信息及资源使用曲线</td>
+<td>kubectl describe &lt;资源类型&gt; &lt;资源名&gt; + 监控数据聚合</td>
+</tr>
+<tr>
+<td>gpuctl logs <job-id> -f</td>
+<td>实时查看任务日志，支持按关键词过滤</td>
+<td>kubectl logs <pod名> -f --tail=1000</td>
+</tr>
+<tr>
+<td>gpuctl delete -f job.yaml</td>
+<td>删除/停止任务，支持--force强制删除</td>
+<td>kubectl delete &lt;资源类型&gt; &lt;资源名&gt; --grace-period=0</td>
+</tr>
+<tr>
+<td>gpuctl query pools</td>
+<td>查询所有资源池及资源占用情况</td>
+<td>聚合K8s节点标签与Prometheus监控数据</td>
+</tr>
+<tr>
+<td>gpuctl create -f pool.yaml</td>
+<td>暂停运行中的任务，保留资源占用</td>
+<td>kubectl scale job <job-id> --replicas=0</td>
+</tr>
+<tr>
+<td>gpuctl delete -f pool.yaml</td>
+<td>恢复暂停的任务，延续之前的运行状态</td>
+<td>kubectl scale job <job-id> --replicas=1</td>
+</tr>
+</tbody>
+</table>
+<p>节点查询类 gpuctl CLI 命令（按指定格式）</p>
+<table>
+<thead>
+<tr>
+<th>命令示例</th>
+<th>功能描述</th>
+<th>底层近似操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gpuctl get nodes</code></td>
+<td>列出集群所有节点的基础信息（名称、状态、GPU 总数、绑定资源池）</td>
+<td><code>kubectl get nodes -o wide</code> + 平台查询节点 - GPU 统计映射 + 资源池绑定关系</td>
+</tr>
+<tr>
+<td><code>gpuctl get nodes --pool training-pool</code></td>
+<td>过滤查询指定资源池绑定的所有节点</td>
+<td><code>kubectl get nodes -l gpuctl/pool=training-pool</code>（平台自定义资源池 Label） + 基础信息聚合</td>
+</tr>
+<tr>
+<td><code>gpuctl get nodes --gpu-type runwhere.ai/a100-80g</code></td>
+<td>过滤查询带有指定 GPU 类型的所有节点</td>
+<td><code>kubectl get nodes -l runwhere.ai/gpu-type=a100-80g</code> + 节点状态校验</td>
+</tr>
+<tr>
+<td><code>gpuctl describe node node-1</code></td>
+<td>查看单个节点的详细信息（CPU/GPU 资源、GPU 类型 / 数量、Label 列表、绑定资源池、K8s 节点详情）</td>
+<td><code>kubectl describe node node-1</code> + 平台查询节点 GPU 类型统计 + Label 聚合 + 资源池关联信息</td>
+</tr>
+<tr>
+<td><code>gpuctl get nodes --gpu-type runwhere.ai/gpu-type</code></td>
+<td>仅查询所有节点的 GPU 类型 Label（键值对形式）</td>
+<td><code>kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels.nvidia\.com/gpu-type}{"\n"}{end}'</code></td>
+</tr>
+</tbody>
+</table>
+<p>节点管理类 gpuctl CLI 命令（按指定格式）：label命令的key必须要以"runwhere.ai/"开头，以避免和其他人员label的key冲突。十分重要，注意！！！</p>
+<table>
+<thead>
+<tr>
+<th>命令示例</th>
+<th>功能描述</th>
+<th>底层近似操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gpuctl label node node-1 runwhere.ai/gpu-type=a100-80g</code></td>
+<td>给指定节点标记 GPU 类型 Label（默认 Label 键）</td>
+<td><code>kubectl label nodes node-1 runwhere.ai/gpu-type=a100-80g</code></td>
+</tr>
+<tr>
+<td><code>gpuctl label node node-2 node-3 runwhere.ai/gpu-type=a100-40g --overwrite</code></td>
+<td>批量给多个节点标记自定义 GPU 类型 Label，支持覆盖已有同键 Label</td>
+<td><code>for node in node-2 node-3; do kubectl label nodes $node company.com/gpu-model=a100-40g --overwrite; done</code></td>
+</tr>
+<tr>
+<td><code>gpuctl get label node-1 --key=runwhere.ai/gpu-type</code></td>
+<td>查询指定节点的指定 GPU 类型 Label 值</td>
+<td><code>kubectl get node node-1 -o jsonpath='{.metadata.labels.nvidia\.com/gpu-type}'</code></td>
+</tr>
+<tr>
+<td><code>gpuctl get gpu-type --all</code></td>
+<td>列出所有节点的 GPU 类型 Label 及绑定的资源池信息</td>
+<td><code>kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels}{"\n"}{end}' + 平台筛选GPU相关Label及gpuctl/pool绑定标签</code></td>
+</tr>
+<tr>
+<td><code>gpuctl label node node-1 runwhere.ai/gpu-type --delete</code></td>
+<td>删除指定节点的指定 GPU 类型 Label</td>
+<td><code>kubectl label nodes node-1 runwhere.ai/gpu-type-</code>（K8s 删除 Label 的标准语法）</td>
+</tr>
+</tbody>
+</table>
+<p>资源池节点管理类 gpuctl CLI 命令</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">命令示例</th>
+<th style="text-align: left;">功能描述</th>
+<th style="text-align: left;">底层近似操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">gpuctl create -f train-pool.yaml</td>
+<td style="text-align: left;">创建新的资源池</td>
+<td style="text-align: left;">创建K8s ConfigMap/CRD存储资源池定义，设置节点选择器</td>
+</tr>
+<tr>
+<td style="text-align: left;">gpuctl delete -f train-pool.yaml</td>
+<td style="text-align: left;">删除资源池</td>
+<td style="text-align: left;">删除资源池定义，可选移除关联节点标签</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpuctl get pools</code></td>
+<td style="text-align: left;">列出所有资源池及基本信息</td>
+<td style="text-align: left;">查询所有资源池定义，聚合节点统计信息</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpuctl describe pool training-pool</code></td>
+<td style="text-align: left;">查看资源池详细信息</td>
+<td style="text-align: left;">显示资源池配置、关联节点、资源使用情况</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpuctl add node node-1 node-2 --pool training-pool</code></td>
+<td style="text-align: left;">将节点添加到资源池</td>
+<td style="text-align: left;">给节点打上资源池标签：<code>kubectl label nodes node-1 gpuctl/pool=training-pool</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpuctl remove node node-3 --pool training-pool</code></td>
+<td style="text-align: left;">从资源池移除节点</td>
+<td style="text-align: left;">移除节点资源池标签：<code>kubectl label nodes node-3 gpuctl/pool-</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpuctl get nodes --pool training-pool</code></td>
+<td style="text-align: left;">列出指定资源池的所有节点</td>
+<td style="text-align: left;">基于标签筛选：<code>kubectl get nodes -l gpuctl/pool=training-pool</code></td>
+</tr>
+</tbody>
+</table>
+<h1 id="7api">7.API 设计<a class="headerlink" href="#7api" title="Permanent link">&para;</a></h1>
+<p>平台 API 作为 gpuctl CLI 的底层支撑，采用 RESTful 风格设计，提供标准化接口供客户端（CLI、第三方工具）调用，抽象 Kubernetes 底层细节，聚焦 AI 算力任务的全生命周期管理。</p>
+<h2 id="71">7.1 基础信息<a class="headerlink" href="#71" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>基础路径</strong>：<code>/api/v1</code></li>
+<li><strong>数据格式</strong>：请求 / 响应均采用 JSON 格式，YAML 配置通过<code>application/yaml</code>媒体类型传输</li>
+<li><strong>认证方式</strong>：基于 Bearer Token 认证，通过 HTTP 请求头<code>Authorization: Bearer &lt;token&gt;</code>传递</li>
+<li><strong>版本控制</strong>：URL 路径包含版本（如<code>v1</code>），支持多版本并行维护</li>
+<li>状态码规范：</li>
+<li>200：请求成功</li>
+<li>201：资源创建成功</li>
+<li>400：请求参数无效（如 YAML 格式错误）</li>
+<li>401：未认证（Token 无效或过期）</li>
+<li>403：权限不足（如非管理员操作资源池）</li>
+<li>404：资源不存在（如任务 ID 无效）</li>
+<li>500：服务器内部错误（如 Kubernetes 集群异常）</li>
+</ul>
+<h2 id="72-api">7.2 核心 API 端点<a class="headerlink" href="#72-api" title="Permanent link">&para;</a></h2>
+<h3 id="721-api">7.2.1 任务管理 API<a class="headerlink" href="#721-api" title="Permanent link">&para;</a></h3>
+<h4 id="1-gpuctl-create">1. 创建任务（对应<code>gpuctl create</code>）<a class="headerlink" href="#1-gpuctl-create" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>请求体：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;yamlContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kind: training\nversion: v0.1\njob:\n  name: qwen2-7b-sft\n...&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 声明式YAML配置字符串</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>响应（201 Created）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 平台生成的唯一任务ID</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft&quot;</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training&quot;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pending&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 初始状态：pending</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;任务已提交至训练资源池&quot;</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="2_1">2. 批量创建任务<a class="headerlink" href="#2_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs/batch</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>请求体：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;yamlContents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="s2">&quot;kind: training\nversion: v0.1\njob:\n  name: task1\n...&quot;</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="s2">&quot;kind: training\nversion: v0.1\njob:\n  name: task2\n...&quot;</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>响应（201 Created）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;task1-xxxxx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;task1&quot;</span><span class="p">},</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;task2-xxxxx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;task2&quot;</span><span class="p">}</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="c1">// 若有失败任务，包含错误信息</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="3-gpuctl-get-jobs">3. 查询任务列表（对应<code>gpuctl get jobs</code>）<a class="headerlink" href="#3-gpuctl-get-jobs" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>kind</code>：可选，过滤任务类型（training/inference/notebook）</p>
+</li>
+<li><code>pool</code>：可选，过滤资源池（如 training-pool）</li>
+<li><code>status</code>：可选，过滤状态（pending/running/succeeded/failed）</li>
+<li><code>page</code>：分页页码，默认 1</li>
+<li>
+<p><code>pageSize</code>：每页数量，默认 20</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft&quot;</span><span class="p">,</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">      </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training&quot;</span><span class="p">,</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">      </span><span class="nt">&quot;pool&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">      </span><span class="nt">&quot;gpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">      </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">      </span><span class="nt">&quot;startedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:05:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="c1">// ... 更多任务</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="4-gpuctl-describe-job">4. 查询任务详情（对应<code>gpuctl describe job</code>）<a class="headerlink" href="#4-gpuctl-describe-job" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs/{jobId}</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft&quot;</span><span class="p">,</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training&quot;</span><span class="p">,</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v0.1&quot;</span><span class="p">,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="nt">&quot;yamlContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kind: training\nversion: v0.1\n...&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 原始YAML配置</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="nt">&quot;pool&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="nt">&quot;gpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="nt">&quot;cpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="nt">&quot;memory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;128Gi&quot;</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">  </span><span class="nt">&quot;metrics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="nt">&quot;gpuUtilization&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">89.2</span><span class="p">,</span><span class="w"> </span><span class="c1">// 平均GPU利用率（%），暂不实现，默认0</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="nt">&quot;memoryUsage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;68Gi/80Gi&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 显存使用，暂不实现，默认0</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">    </span><span class="nt">&quot;networkLatency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.8ms&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 分布式训练延迟，暂不实现，默认0</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">    </span><span class="nt">&quot;throughput&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;245 tokens/sec&quot;</span><span class="w"> </span><span class="c1">// 训练吞吐量，暂不实现，默认0</span>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">  </span><span class="nt">&quot;startedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:05:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-9-23"><a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="w">  </span><span class="nt">&quot;k8sResources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-24"><a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">    </span><span class="nt">&quot;jobName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx-k8s&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 底层K8s Job名称</span>
+</span><span id="__span-9-25"><a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">    </span><span class="nt">&quot;pods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pod-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pod-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pod-3&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pod-4&quot;</span><span class="p">]</span><span class="w"> </span><span class="c1">// 关联的Pod列表</span>
+</span><span id="__span-9-26"><a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-9-27"><a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="5-gpuctl-delete">5. 删除任务（对应<code>gpuctl delete</code>）<a class="headerlink" href="#5-gpuctl-delete" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs/{jobId}</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>DELETE</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>force</code>：可选，<code>true</code>时强制删除（对应<code>--force</code>）</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;terminating&quot;</span><span class="p">,</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;任务删除指令已下发&quot;</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="6-gpuctl-pauseresume">6. 暂停 / 恢复任务（对应<code>gpuctl pause/resume</code>）<a class="headerlink" href="#6-gpuctl-pauseresume" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>暂停 URL</strong>：<code>/jobs/{jobId}/pause</code></p>
+</li>
+<li>
+<p><strong>恢复 URL</strong>：<code>/jobs/{jobId}/resume</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;paused&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 或&quot;resumed&quot;</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;任务已暂停，资源保留&quot;</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="722-api">7.2.2 资源池管理 API<a class="headerlink" href="#722-api" title="Permanent link">&para;</a></h3>
+<h4 id="1-gpuctl-query-pools">1. 查询资源池列表（对应<code>gpuctl query pools</code>）<a class="headerlink" href="#1-gpuctl-query-pools" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/pools</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;用于模型训练的资源池&quot;</span><span class="p">,</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">      </span><span class="nt">&quot;gpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">      </span><span class="nt">&quot;gpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">      </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;a100-40g&quot;</span><span class="p">],</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inference-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;用于推理服务的资源池&quot;</span><span class="p">,</span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">      </span><span class="nt">&quot;gpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">      </span><span class="nt">&quot;gpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">      </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;a10-24g&quot;</span><span class="p">],</span>
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span>
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="2_2">2. 查询资源池详情<a class="headerlink" href="#2_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/pools/{poolName}</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;用于模型训练的资源池&quot;</span><span class="p">,</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="nt">&quot;nodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;node-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;node-3&quot;</span><span class="p">],</span><span class="w"> </span><span class="c1">// 关联的K8s节点</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span><span class="nt">&quot;gpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span><span class="nt">&quot;gpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="nt">&quot;gpuFree&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">  </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="nt">&quot;a100-80g&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">    </span><span class="nt">&quot;a100-40g&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">  </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="c1">// 当前运行的任务</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft-xxxxx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qwen2-7b-sft&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">}</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="3_1">3. 创建资源池（管理员接口）<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/pools</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>请求体：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;experiment-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;用于实验调参的资源池&quot;</span><span class="p">,</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span><span class="nt">&quot;nodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;node-4&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;node-5&quot;</span><span class="p">],</span><span class="w"> </span><span class="c1">// 绑定的节点</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;t4&quot;</span><span class="p">]</span><span class="w"> </span><span class="c1">// 允许的GPU类型</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>响应（201 Created）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;experiment-pool&quot;</span><span class="p">,</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;created&quot;</span><span class="p">,</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;资源池创建成功&quot;</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="723-api">7.2.3 监控与日志 API<a class="headerlink" href="#723-api" title="Permanent link">&para;</a></h3>
+<h4 id="1-gpuctl-logs-f">1. 获取任务实时日志（对应<code>gpuctl logs -f</code>）<a class="headerlink" href="#1-gpuctl-logs-f" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs/{jobId}/logs</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>follow</code>：可选，<code>true</code>时启用流式日志（WebSocket）</p>
+</li>
+<li><code>tail</code>：可选，返回末尾 N 行日志，默认 100</li>
+<li>
+<p><code>pod</code>：可选，指定 Pod（多卡任务可能有多个 Pod）</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">&quot;logs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="s2">&quot;2024-06-01 10:06:00 [INFO] Starting training...&quot;</span><span class="p">,</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="s2">&quot;2024-06-01 10:06:30 [INFO] Epoch 1/3, Step 100, Loss: 0.87&quot;</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span><span class="nt">&quot;lastTimestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:06:30Z&quot;</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>（注：follow=true时升级为 WebSocket 连接，实时推送新日志）</p>
+<h4 id="2_3">2. 获取任务指标时序数据<a class="headerlink" href="#2_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/jobs/{jobId}/metrics</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>metric</code>：可选，指定指标（gpuUtilization/memoryUsage/throughput），默认返回全部</p>
+</li>
+<li><code>startTime</code>：起始时间（UTC），如<code>2024-06-01T10:00:00Z</code></li>
+<li>
+<p><code>endTime</code>：结束时间，默认当前时间</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="nt">&quot;gpuUtilization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:05:00Z&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">75.2</span><span class="p">},</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:10:00Z&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">89.2</span><span class="p">}</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">  </span><span class="nt">&quot;memoryUsage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:05:00Z&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">65</span><span class="p">},</span><span class="w"> </span><span class="c1">// 单位：GiB</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T10:10:00Z&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">68</span><span class="p">}</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="724-api">7.2.4 权限管理 API<a class="headerlink" href="#724-api" title="Permanent link">&para;</a></h3>
+<h4 id="1_1">1. 验证用户权限<a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/auth/check</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>请求体：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jobs&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 资源类型（jobs/pools）</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 操作（create/get/delete）</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="nt">&quot;pool&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-pool&quot;</span><span class="w"> </span><span class="c1">// 可选，资源池级权限验证</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>响应（200 OK）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">{</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="nt">&quot;allowed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;用户拥有training-pool的任务创建权限&quot;</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="725-api">7.2.5 节点查询类对应 API<a class="headerlink" href="#725-api" title="Permanent link">&para;</a></h3>
+<h4 id="1_2">1. 列出集群所有节点基础信息<a class="headerlink" href="#1_2" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-get-nodes-pool-gpu-type-status">（对应 <code>gpuctl get nodes</code>，支持 <code>--pool</code>/<code>--gpu-type</code>/<code>--status</code> 过滤）<a class="headerlink" href="#gpuctl-get-nodes-pool-gpu-type-status" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>pool</code>：可选，过滤指定资源池绑定的节点（如 <code>training-pool</code>）</p>
+</li>
+<li><code>gpuType</code>：可选，过滤指定 GPU 类型的节点（如 <code>a100-80g</code>）</li>
+<li><code>status</code>：可选，过滤节点状态（<code>active</code>/<code>maintaining</code>/<code>faulty</code>）</li>
+<li><code>page</code>：分页页码，默认 1</li>
+<li><code>pageSize</code>：每页数量，默认 20</li>
+<li>
+<p><code>accept</code>：可选，指定响应格式（<code>application/json</code> 默认，<code>application/yaml</code> 对应 <code>gpuctl get nodes -o yaml</code>）</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">  </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">      </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">      </span><span class="nt">&quot;gpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">      </span><span class="nt">&quot;gpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="w">      </span><span class="nt">&quot;gpuFree&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">      </span><span class="nt">&quot;boundPools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;training-pool&quot;</span><span class="p">],</span>
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">      </span><span class="nt">&quot;cpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;64&quot;</span><span class="p">,</span>
+</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">      </span><span class="nt">&quot;memory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;256Gi&quot;</span><span class="p">,</span>
+</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="w">      </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span>
+</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T09:00:00Z&quot;</span>
+</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a><span class="w">      </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-2&quot;</span><span class="p">,</span>
+</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a><span class="w">      </span><span class="nt">&quot;gpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a><span class="w">      </span><span class="nt">&quot;gpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a><span class="w">      </span><span class="nt">&quot;gpuFree&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a><span class="w">      </span><span class="nt">&quot;boundPools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;training-pool&quot;</span><span class="p">],</span>
+</span><span id="__span-20-23"><a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a><span class="w">      </span><span class="nt">&quot;cpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;64&quot;</span><span class="p">,</span>
+</span><span id="__span-20-24"><a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a><span class="w">      </span><span class="nt">&quot;memory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;256Gi&quot;</span><span class="p">,</span>
+</span><span id="__span-20-25"><a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a><span class="w">      </span><span class="nt">&quot;gpuType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span>
+</span><span id="__span-20-26"><a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a><span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T09:00:00Z&quot;</span>
+</span><span id="__span-20-27"><a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-20-28"><a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a><span class="w">    </span><span class="c1">// ... 更多节点</span>
+</span><span id="__span-20-29"><a id="__codelineno-20-29" name="__codelineno-20-29" href="#__codelineno-20-29"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-20-30"><a id="__codelineno-20-30" name="__codelineno-20-30" href="#__codelineno-20-30"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li><strong>说明</strong>：<code>-o yaml</code> 格式通过请求头 <code>Accept: application/yaml</code> 实现，响应结构与 JSON 一致，仅格式不同。</li>
+</ul>
+<h4 id="2_4">2. 查看单个节点详细信息<a class="headerlink" href="#2_4" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-describe-node-node-1">（对应 <code>gpuctl describe node node-1</code>）<a class="headerlink" href="#gpuctl-describe-node-node-1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/{nodeName}</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>路径参数：</p>
+</li>
+<li>
+<p><code>nodeName</code>：节点名称（如 <code>node-1</code>）</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="p">{</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">    </span><span class="nt">&quot;cpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="nt">&quot;cpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span><span class="nt">&quot;memoryTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;256Gi&quot;</span><span class="p">,</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">    </span><span class="nt">&quot;memoryUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;128Gi&quot;</span><span class="p">,</span>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">    </span><span class="nt">&quot;gpuTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">    </span><span class="nt">&quot;gpuUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">    </span><span class="nt">&quot;gpuFree&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">  </span><span class="nt">&quot;labels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">},</span>
+</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpuctl/pool&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;training-pool&quot;</span><span class="p">},</span>
+</span><span id="__span-21-16"><a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kubernetes.io/hostname&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">}</span>
+</span><span id="__span-21-17"><a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-21-18"><a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="w">  </span><span class="nt">&quot;boundPools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;training-pool&quot;</span><span class="p">]</span>
+</span><span id="__span-21-19"><a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a><span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T09:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-21-20"><a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a><span class="w">  </span><span class="nt">&quot;lastUpdatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-02T14:30:00Z&quot;</span>
+</span><span id="__span-21-21"><a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="4-label">4. 查询所有节点的指定 Label<a class="headerlink" href="#4-label" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-get-nodes-label-runwhereaigpu-type">（对应 <code>gpuctl get nodes --label runwhere.ai/gpu-type</code>）<a class="headerlink" href="#gpuctl-get-nodes-label-runwhereaigpu-type" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/labels</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>key</code>：必填，指定要查询的 Label 键（如 <code>runwhere.ai/gpu-type</code>）</p>
+</li>
+<li><code>page</code>：分页页码，默认 1</li>
+<li>
+<p><code>pageSize</code>：每页数量，默认 20</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="p">{</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">  </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">},</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">},</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-3&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-40g&quot;</span><span class="p">},</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-4&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;t4&quot;</span><span class="p">},</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-5&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;labelValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;t4&quot;</span><span class="p">}</span>
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="726-label-cli-api">7.2.6 Label 管理类 CLI 对应 API<a class="headerlink" href="#726-label-cli-api" title="Permanent link">&para;</a></h3>
+<h4 id="1-gpu-label">1. 给指定节点标记 GPU 类型 Label<a class="headerlink" href="#1-gpu-label" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-label-node-node-1-runwhereaigpu-typea100-80g">（对应 <code>gpuctl label node node-1 runwhere.ai/gpu-type=a100-80g</code>）<a class="headerlink" href="#gpuctl-label-node-node-1-runwhereaigpu-typea100-80g" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/{nodeName}/labels</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>路径参数：</p>
+</li>
+<li>
+<p><code>nodeName</code>：节点名称（如 <code>node-1</code>）</p>
+</li>
+<li>
+<p>请求体：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Label 键（支持自定义）</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span><span class="w">          </span><span class="c1">// GPU 类型值</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span><span class="nt">&quot;overwrite&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">            </span><span class="c1">// 可选，是否覆盖已有同键 Label，默认 false</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>响应（200 OK）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="p">{</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">    </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;节点 Label 标记成功&quot;</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>错误响应（409 Conflict）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="p">{</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LabelConflict&quot;</span><span class="p">,</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;节点 node-1 已存在键为 runwhere.ai/gpu-type 的 Label，如需覆盖请设置 overwrite=true&quot;</span>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="2-label">2. 批量给多个节点标记 Label<a class="headerlink" href="#2-label" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-label-node-node-2-node-3-companycomgpu-modela100-40g-overwrite">（对应 <code>gpuctl label node node-2 node-3 company.com/gpu-model=a100-40g --overwrite</code>）<a class="headerlink" href="#gpuctl-label-node-node-2-node-3-companycomgpu-modela100-40g-overwrite" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/labels/batch</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>POST</code></p>
+</li>
+<li>
+<p>请求体：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="p">{</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="w">  </span><span class="nt">&quot;nodeNames&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;node-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;node-3&quot;</span><span class="p">],</span><span class="w"> </span><span class="c1">// 批量节点名称列表</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="w">  </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w">    </span><span class="c1">// Label 键</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-40g&quot;</span><span class="p">,</span><span class="w">               </span><span class="c1">// Label 值</span>
+</span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="w">  </span><span class="nt">&quot;overwrite&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">                  </span><span class="c1">// 是否覆盖已有同键 Label</span>
+</span><span id="__span-26-6"><a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>响应（200 OK）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="p">{</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;node-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;node-3&quot;</span><span class="p">],</span>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">  </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;批量标记节点 Label 成功&quot;</span>
+</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>错误响应（200 OK，部分失败）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="p">{</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;node-2&quot;</span><span class="p">],</span>
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">  </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="w">      </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-3&quot;</span><span class="p">,</span>
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">      </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NodeNotFound&quot;</span><span class="p">,</span>
+</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;节点 node-3 不存在&quot;</span>
+</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-28-10"><a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;部分节点标记失败，请查看 failed 列表&quot;</span>
+</span><span id="__span-28-11"><a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="3-label">3. 查询指定节点的指定 Label<a class="headerlink" href="#3-label" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-get-node-labels-node-1-keyrunwhereaigpu-type">（对应 <code>gpuctl get node-labels node-1 --key=runwhere.ai/gpu-type</code>）<a class="headerlink" href="#gpuctl-get-node-labels-node-1-keyrunwhereaigpu-type" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/{nodeName}/labels/{key}</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>路径参数：</p>
+</li>
+<li>
+<p><code>nodeName</code>：节点名称（如 <code>node-1</code>）</p>
+</li>
+<li>
+<p><code>key</code>：Label 键（如 <code>runwhere.ai/gpu-type</code>）</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="p">{</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">  </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">    </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span>
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">,</span>
+</span><span id="__span-29-6"><a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">    </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T09:30:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-29-7"><a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">    </span><span class="nt">&quot;lastUpdatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-01T09:30:00Z&quot;</span>
+</span><span id="__span-29-8"><a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-29-9"><a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>错误响应（404 Not Found）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="p">{</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LabelNotFound&quot;</span><span class="p">,</span>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;节点 node-1 未找到键为 runwhere.ai/gpu-type 的 Label&quot;</span>
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="4-gpu-label">4. 列出所有节点的 GPU 相关 Label 及绑定资源池<a class="headerlink" href="#4-gpu-label" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-get-node-labels-all">（对应 <code>gpuctl get node-labels --all</code>）<a class="headerlink" href="#gpuctl-get-node-labels-all" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/labels/all</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>GET</code></p>
+</li>
+<li>
+<p>查询参数：</p>
+</li>
+<li>
+<p><code>page</code>：分页页码，默认 1</p>
+</li>
+<li>
+<p><code>pageSize</code>：每页数量，默认 20</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="p">{</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">  </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="w">      </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span>
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="w">      </span><span class="nt">&quot;gpuLabels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="w">        </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a100-80g&quot;</span><span class="p">}</span>
+</span><span id="__span-31-8"><a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="w">      </span><span class="p">],</span>
+</span><span id="__span-31-9"><a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a><span class="w">      </span><span class="nt">&quot;boundPools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;training-pool&quot;</span><span class="p">]</span>
+</span><span id="__span-31-10"><a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-31-11"><a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-31-12"><a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a><span class="w">      </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-4&quot;</span><span class="p">,</span>
+</span><span id="__span-31-13"><a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a><span class="w">      </span><span class="nt">&quot;gpuLabels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-31-14"><a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a><span class="w">        </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;t4&quot;</span><span class="p">}</span>
+</span><span id="__span-31-15"><a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a><span class="w">      </span><span class="p">],</span>
+</span><span id="__span-31-16"><a id="__codelineno-31-16" name="__codelineno-31-16" href="#__codelineno-31-16"></a><span class="w">      </span><span class="nt">&quot;boundPools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;experiment-pool&quot;</span><span class="p">]</span>
+</span><span id="__span-31-17"><a id="__codelineno-31-17" name="__codelineno-31-17" href="#__codelineno-31-17"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-31-18"><a id="__codelineno-31-18" name="__codelineno-31-18" href="#__codelineno-31-18"></a><span class="w">    </span><span class="c1">// ... 更多节点</span>
+</span><span id="__span-31-19"><a id="__codelineno-31-19" name="__codelineno-31-19" href="#__codelineno-31-19"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-31-20"><a id="__codelineno-31-20" name="__codelineno-31-20" href="#__codelineno-31-20"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="5-label">5. 删除指定节点的指定 Label<a class="headerlink" href="#5-label" title="Permanent link">&para;</a></h4>
+<h4 id="gpuctl-label-node-node-1-runwhereaigpu-type-delete">（对应 <code>gpuctl label node node-1 runwhere.ai/gpu-type --delete</code>）<a class="headerlink" href="#gpuctl-label-node-node-1-runwhereaigpu-type-delete" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>URL</strong>：<code>/api/v1/nodes/{nodeName}/labels/{key}</code></p>
+</li>
+<li>
+<p><strong>方法</strong>：<code>DELETE</code></p>
+</li>
+<li>
+<p>路径参数：</p>
+</li>
+<li>
+<p><code>nodeName</code>：节点名称（如 <code>node-1</code>）</p>
+</li>
+<li>
+<p><code>key</code>：Label 键（如 <code>runwhere.ai/gpu-type</code>）</p>
+</li>
+<li>
+<p>响应（200 OK）：json</p>
+</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">  </span><span class="nt">&quot;nodeName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;node-1&quot;</span><span class="p">,</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">  </span><span class="nt">&quot;labelKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;runwhere.ai/gpu-type&quot;</span><span class="p">,</span>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;节点 Label 删除成功&quot;</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li>错误响应（404 Not Found）：json</li>
+</ul>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="p">{</span>
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LabelNotFound&quot;</span><span class="p">,</span>
+</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;节点 node-1 未找到键为 runwhere.ai/gpu-type 的 Label&quot;</span>
+</span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="73">7.3 接口文档与调试<a class="headerlink" href="#73" title="Permanent link">&para;</a></h2>
+<ul>
+<li>提供 OpenAPI 3.0 规范的接口文档，可通过<code>/api/v1/docs</code>访问交互式 Swagger UI</li>
+<li>支持请求示例生成、参数校验说明及错误码解释</li>
+<li>提供 API 调用 SDK（Python/Go），封装认证、请求重试等逻辑，简化集成难度</li>
+</ul>
+<h2 id="74">7.4 扩展性设计<a class="headerlink" href="#74" title="Permanent link">&para;</a></h2>
+<ul>
+<li>预留<code>/webhooks</code>端点，支持任务状态变更通知（如训练完成回调）</li>
+<li>支持自定义指标接口扩展，通过<code>/metrics/custom</code>接入用户自定义监控指标</li>
+<li>设计版本兼容策略，确保 API v1 与未来 v2 版本的平滑过渡</li>
+</ul>
+<h1 id="8">8. 代码模块<a class="headerlink" href="#8" title="Permanent link">&para;</a></h1>
+<p>kubernetes-client/python库实现： </p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>gpuctl/
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>├── api/                  # 数据模型层（新增抽象资源字段，兼容多芯片）
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>│   ├── training.py       # 训练任务模型（gpu→accelerator_count，新增framework字段）
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>│   ├── inference.py      # 推理任务模型（同上）
+</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>│   ├── notebook.py       # Notebook任务模型（同上）
+</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>│   ├── pool.py           # 资源池模型（新增芯片类型标签关联）
+</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>│   └── common.py         # 公共数据模型（抽象ResourceRequest类，统一资源定义）
+</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>├── parser/               # YAML解析与校验（新增芯片-框架兼容性校验）
+</span><span id="__span-34-9"><a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a>│   ├── base_parser.py    # 基础解析逻辑（集成UDAL校验接口）
+</span><span id="__span-34-10"><a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>│   ├── training_parser.py # 训练任务解析（校验accelerator_count合法性）
+</span><span id="__span-34-11"><a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a>│   ├── inference_parser.py # 推理任务解析（同上）
+</span><span id="__span-34-12"><a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a>│   └── pool_parser.py    # 资源池解析（校验资源池-芯片类型匹配）
+</span><span id="__span-34-13"><a id="__codelineno-34-13" name="__codelineno-34-13" href="#__codelineno-34-13"></a>├── builder/              # 模型转K8s资源（通过UDAL动态生成芯片专属配置）
+</span><span id="__span-34-14"><a id="__codelineno-34-14" name="__codelineno-34-14" href="#__codelineno-34-14"></a>│   ├── training_builder.py # 训练任务→K8s Job（调用UDAL转换设备标签/环境变量）
+</span><span id="__span-34-15"><a id="__codelineno-34-15" name="__codelineno-34-15" href="#__codelineno-34-15"></a>│   ├── inference_builder.py # 推理任务→Deployment+HPA（同上）
+</span><span id="__span-34-16"><a id="__codelineno-34-16" name="__codelineno-34-16" href="#__codelineno-34-16"></a>│   ├── notebook_builder.py # Notebook→StatefulSet+Service（同上）
+</span><span id="__span-34-17"><a id="__codelineno-34-17" name="__codelineno-34-17" href="#__codelineno-34-17"></a>│   └── base_builder.py   # 基础构建逻辑（封装UDAL调用，统一资源转换逻辑）
+</span><span id="__span-34-18"><a id="__codelineno-34-18" name="__codelineno-34-18" href="#__codelineno-34-18"></a>├── client/               # K8s操作封装（无修改，仅使用builder生成的资源）
+</span><span id="__span-34-19"><a id="__codelineno-34-19" name="__codelineno-34-19" href="#__codelineno-34-19"></a>│   ├── base_client.py    # 基础K8s客户端（认证/通用操作）
+</span><span id="__span-34-20"><a id="__codelineno-34-20" name="__codelineno-34-20" href="#__codelineno-34-20"></a>│   ├── job_client.py     # 任务管理（创建/查询/删除）
+</span><span id="__span-34-21"><a id="__codelineno-34-21" name="__codelineno-34-21" href="#__codelineno-34-21"></a>│   ├── pool_client.py    # 资源池管理（节点标签/选择器，支持芯片类型筛选）
+</span><span id="__span-34-22"><a id="__codelineno-34-22" name="__codelineno-34-22" href="#__codelineno-34-22"></a>│   └── log_client.py     # 日志获取（流式/历史）
+</span><span id="__span-34-23"><a id="__codelineno-34-23" name="__codelineno-34-23" href="#__codelineno-34-23"></a>├── kind/             # 场景化逻辑（通过UDAL适配芯片专属流程）
+</span><span id="__span-34-24"><a id="__codelineno-34-24" name="__codelineno-34-24" href="#__codelineno-34-24"></a>│   ├── training_kind.py # 多卡训练/分布式调度（调用UDAL配置分布式通信）
+</span><span id="__span-34-25"><a id="__codelineno-34-25" name="__codelineno-34-25" href="#__codelineno-34-25"></a>│   ├── inference_kind.py # 推理服务扩缩容（同上）
+</span><span id="__span-34-26"><a id="__codelineno-34-26" name="__codelineno-34-26" href="#__codelineno-34-26"></a>│   └── notebook_kind.py # Notebook生命周期管理（同上）
+</span><span id="__span-34-27"><a id="__codelineno-34-27" name="__codelineno-34-27" href="#__codelineno-34-27"></a>└── cli/                  # 命令行入口（调整参数，兼容抽象资源定义）
+</span><span id="__span-34-28"><a id="__codelineno-34-28" name="__codelineno-34-28" href="#__codelineno-34-28"></a>    ├── create.py         # 提交任务命令（--gpu→--accelerator-count）
+</span><span id="__span-34-29"><a id="__codelineno-34-29" name="__codelineno-34-29" href="#__codelineno-34-29"></a>    ├── get.py            # 查询命令（展示芯片类型/加速器信息）
+</span><span id="__span-34-30"><a id="__codelineno-34-30" name="__codelineno-34-30" href="#__codelineno-34-30"></a>    ├── logs.py           # 日志命令（无修改）
+</span><span id="__span-34-31"><a id="__codelineno-34-31" name="__codelineno-34-31" href="#__codelineno-34-31"></a>    └── update.py         # 资源更新命令（支持加速器数量动态调整）
+</span></code></pre></div>
+<h1 id="10">10. 资源池设计说明<a class="headerlink" href="#10" title="Permanent link">&para;</a></h1>
+<h2 id="81">8.1 核心作用<a class="headerlink" href="#81" title="Permanent link">&para;</a></h2>
+<p>通过<code>resources.pool</code>字段将集群GPU资源划分为多个逻辑资源池，实现资源的隔离与精细化管理，满足不同场景（训练/推理、实验/生产）的资源需求，避免任务间资源争抢。</p>
+<h2 id="82">8.2 配置方式<a class="headerlink" href="#82" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p><strong>管理员配置</strong>：通过平台管理后台创建资源池（如<code>training-pool</code>、<code>inference-pool</code>、<code>experiment-pool</code>），并将集群节点按资源池标签划分（如节点标签<code>gpu-pool=training-pool</code>），指定各池的GPU类型、数量上限等约束。</p>
+</li>
+<li>
+<p><strong>用户使用</strong>：算法工程师在YAML配置中通过<code>resources.pool</code>字段指定任务所属资源池，平台仅在该池内调度资源；若未指定，默认使用<code>default-pool</code>。</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 GPU Control Team - MIT License
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/runwhere-ai/gpuctl" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "search.share", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
