@@ -1,56 +1,56 @@
-# 开发者指南
+# Developer Guide
 
-欢迎来到 gpuctl 开发者文档！本章面向希望了解 gpuctl 内部实现、进行二次开发或贡献代码的工程师。
+Welcome to the gpuctl developer documentation! This section is for engineers who want to understand gpuctl's internals, extend it, or contribute code.
 
-## 技术栈
+## Tech Stack
 
-| 层次 | 技术 |
-|------|------|
+| Layer | Technology |
+|-------|------------|
 | CLI | Python 3.8+ + argparse |
-| API 服务 | FastAPI + uvicorn |
-| 数据模型 | Pydantic v2 |
-| K8s 交互 | kubernetes-client/python |
-| 配置解析 | PyYAML |
-| 打包 | PyInstaller（二进制）/ Poetry（Python 包） |
+| API Service | FastAPI + uvicorn |
+| Data Models | Pydantic v2 |
+| K8s Interaction | kubernetes-client/python |
+| Config Parsing | PyYAML |
+| Packaging | PyInstaller (binary) / Poetry (Python package) |
 
 ---
 
-## 代码模块总览
+## Code Module Overview
 
 ```
 gpuctl/
 ├── gpuctl/
-│   ├── api/           数据模型层（Pydantic）
-│   ├── parser/        YAML 解析与校验
-│   ├── builder/       模型 → K8s 资源构建
-│   ├── client/        K8s API 操作封装
-│   ├── kind/          场景化业务逻辑
-│   ├── cli/           命令行入口（argparse）
-│   └── constants.py   全局常量
+│   ├── api/           Data model layer (Pydantic)
+│   ├── parser/        YAML parsing and validation
+│   ├── builder/       Model → K8s resource building
+│   ├── client/        K8s API operation wrappers
+│   ├── kind/          Scenario-specific business logic
+│   ├── cli/           CLI entry points (argparse)
+│   └── constants.py   Global constants
 ├── server/
-│   ├── main.py        FastAPI 应用入口
-│   ├── models.py      API 请求/响应模型
-│   └── routes/        路由分组
-├── tests/             测试用例
-├── doc/               原始设计文档
-├── mkdocs.yml         文档站点配置
-└── docs/              文档源文件（公开文档 + 内部设计文档）
+│   ├── main.py        FastAPI application entry point
+│   ├── models.py      API request/response models
+│   └── routes/        Route groups
+├── tests/             Test cases
+├── doc/               Original design documents
+├── mkdocs.yml         Documentation site config
+└── docs/              Documentation source files
 ```
 
 ---
 
-## 数据流
+## Data Flow
 
-用户的 YAML 文件经过以下链路处理后提交到 Kubernetes：
+User YAML files are processed through the following pipeline before being submitted to Kubernetes:
 
 ```
-用户 YAML 文件
+User YAML File
       │
       ▼ BaseParser.parse_yaml_file()
- Pydantic 数据模型（api/）
+ Pydantic Data Model (api/)
       │
       ▼ XxxBuilder.build()
- K8s 资源对象（kubernetes-client 对象）
+ K8s Resource Object (kubernetes-client object)
       │
       ▼ XxxClient.create()
  Kubernetes API Server
@@ -58,53 +58,53 @@ gpuctl/
 
 ---
 
-## 本章内容
+## Contents
 
 <div class="grid cards" markdown>
 
--   :material-layers:{ .lg .middle } **系统架构**
+-   :material-layers:{ .lg .middle } **Architecture**
 
     ---
 
-    详细的分层架构设计、模块依赖关系、Label 体系和 K8s 资源映射规则。
+    Detailed layered architecture design, module dependency relationships, Label system, and K8s resource mapping rules.
 
-    [:octicons-arrow-right-24: 系统架构](architecture.md)
+    [:octicons-arrow-right-24: Architecture](architecture.md)
 
 -   :material-api:{ .lg .middle } **REST API**
 
     ---
 
-    完整的 REST API 接口文档，包含请求/响应格式、参数说明和错误码。
+    Complete REST API documentation including request/response formats, parameter descriptions, and error codes.
 
     [:octicons-arrow-right-24: REST API](api.md)
 
--   :material-source-pull:{ .lg .middle } **贡献指南**
+-   :material-source-pull:{ .lg .middle } **Contributing**
 
     ---
 
-    开发环境搭建、代码规范、测试运行和 PR 提交流程。
+    Development environment setup, code conventions, running tests, and the PR submission process.
 
-    [:octicons-arrow-right-24: 贡献指南](contributing.md)
+    [:octicons-arrow-right-24: Contributing](contributing.md)
 
 </div>
 
 ---
 
-## 快速开发环境搭建
+## Quick Dev Environment Setup
 
 ```bash
-# 克隆仓库
+# Clone the repo
 git clone https://github.com/runwhere-ai/gpuctl.git
 cd gpuctl
 
-# 安装开发依赖
+# Install dev dependencies
 pip install -e ".[dev]"
-# 或使用 Poetry
+# Or with Poetry
 poetry install
 
-# 运行测试
+# Run tests
 pytest
 
-# 启动 API 服务（开发模式）
+# Start the API server (dev mode)
 python server/main.py
 ```

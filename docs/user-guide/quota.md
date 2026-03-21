@@ -1,18 +1,18 @@
-# 配额与命名空间管理
+# Quota and Namespace Management
 
-gpuctl 通过 Kubernetes ResourceQuota 机制，为每个命名空间（团队/用户）设置 CPU、内存、GPU 资源上限，防止资源滥用，实现多租户隔离。
+gpuctl uses the Kubernetes ResourceQuota mechanism to set CPU, memory, and GPU resource limits per namespace (team/user), preventing resource abuse and enabling multi-tenant isolation.
 
-## 核心概念
+## Core Concepts
 
-- **命名空间（Namespace）**：K8s 的逻辑隔离单元，每个团队/用户分配一个独立命名空间
-- **配额（Quota）**：限制命名空间内可使用的最大资源量（CPU/内存/GPU/Pod 数）
-- **自动创建**：通过 `gpuctl create -f quota.yaml` 会自动创建命名空间 + 资源配额
+- **Namespace**: A K8s logical isolation unit; each team or user gets a dedicated namespace
+- **Quota**: Limits the maximum resources (CPU/memory/GPU/Pod count) usable within a namespace
+- **Auto-creation**: Running `gpuctl create -f quota.yaml` automatically creates both the namespace and its resource quota
 
 ---
 
-## 创建配额
+## Creating Quotas
 
-### 配额 YAML 格式
+### Quota YAML Format
 
 ```yaml title="team-quota.yaml"
 kind: quota
@@ -20,13 +20,13 @@ version: v0.1
 
 quota:
   name: team-resource-quota
-  description: "各团队资源配额配置"
+  description: "Resource quotas for each team"
 
 namespace:
-  team-alice:          # 命名空间名称（自动创建）
-    cpu: 16            # CPU 核数上限
-    memory: 64Gi       # 内存上限
-    gpu: 8             # GPU 数量上限
+  team-alice:          # Namespace name (auto-created)
+    cpu: 16            # CPU core limit
+    memory: 64Gi       # Memory limit
+    gpu: 8             # GPU count limit
   team-bob:
     cpu: 8
     memory: 32Gi
@@ -41,21 +41,21 @@ namespace:
 gpuctl create -f team-quota.yaml
 ```
 
-平台会自动：
-1. 创建 `team-alice`、`team-bob`、`team-charlie` 三个命名空间
-2. 在每个命名空间内创建对应的 `ResourceQuota`
-3. 标记命名空间为 gpuctl 管理（label `runwhere.ai/namespace=true`）
+The platform automatically:
+1. Creates `team-alice`, `team-bob`, and `team-charlie` namespaces
+2. Creates the corresponding `ResourceQuota` in each namespace
+3. Labels the namespaces as gpuctl-managed (`runwhere.ai/namespace=true`)
 
 ---
 
-## 查询配额
+## Querying Quotas
 
 ```bash
-# 列出所有配额
+# List all quotas
 gpuctl get quotas
 ```
 
-输出示例：
+Example output:
 
 ```
 NAMESPACE       CPU (USED/TOTAL)   MEMORY (USED/TOTAL)   GPU (USED/TOTAL)   STATUS
@@ -66,39 +66,39 @@ default         -                  -                     -                  Acti
 ```
 
 ```bash
-# 查看指定命名空间配额
+# View quota for a specific namespace
 gpuctl get quotas team-alice
 
-# 查看配额详情（含使用率）
+# View quota details (including utilization)
 gpuctl describe quota team-alice
 ```
 
 ---
 
-## 在指定命名空间提交任务
+## Submitting Jobs in a Specific Namespace
 
-配额创建后，团队成员在提交任务时通过 `-n` 指定命名空间：
+Once quotas are created, team members specify the namespace with `-n` when submitting jobs:
 
 ```bash
-# Alice 团队提交训练任务
+# Alice's team submits a training job
 gpuctl create -f training-job.yaml -n team-alice
 
-# 查看 Alice 团队的任务
+# View Alice's team jobs
 gpuctl get jobs -n team-alice
 ```
 
 ---
 
-## 查询命名空间
+## Querying Namespaces
 
 ```bash
-# 列出所有由 gpuctl 管理的命名空间
+# List all namespaces managed by gpuctl
 gpuctl get ns
-# 或
+# or
 gpuctl get namespaces
 ```
 
-输出示例：
+Example output:
 
 ```
 NAME            STATUS   AGE
@@ -109,11 +109,11 @@ default         Active   30d
 ```
 
 ```bash
-# 查看命名空间详情（含配额信息）
+# View namespace details (including quota info)
 gpuctl describe ns team-alice
 ```
 
-输出示例：
+Example output:
 
 ```
 Name:    team-alice
@@ -131,24 +131,24 @@ Quota:
 
 ---
 
-## 删除配额
+## Deleting Quotas
 
 ```bash
-# 通过 YAML 文件删除（批量删除 YAML 中定义的所有配额）
+# Delete via YAML file (deletes all quotas defined in the file)
 gpuctl delete -f team-quota.yaml
 
-# 删除指定命名空间的配额
+# Delete a specific namespace's quota
 gpuctl delete quota team-charlie
 
-# 删除命名空间（同时删除其中所有资源）
+# Delete a namespace (and all resources within it)
 gpuctl delete ns team-charlie
 
-# 强制删除（跳过确认提示）
+# Force delete (skip confirmation prompt)
 gpuctl delete ns team-charlie --force
 ```
 
-!!! danger "删除命名空间"
-    删除命名空间会**删除该命名空间内的所有资源**（包括正在运行的任务、Service 等），此操作**不可逆**。请先确认已备份重要数据。
+!!! danger "Deleting a Namespace"
+    Deleting a namespace **deletes all resources within it** (including running jobs, Services, etc.). This operation is **irreversible**. Make sure to back up any important data first.
 
-!!! tip "只能管理 gpuctl 创建的命名空间"
-    gpuctl 只管理带有 `runwhere.ai/namespace=true` 标签的命名空间（由 gpuctl 创建），以及 `default` 命名空间。`kube-system` 等系统命名空间不在管理范围内。
+!!! tip "Only Manages gpuctl-Created Namespaces"
+    gpuctl only manages namespaces with the `runwhere.ai/namespace=true` label (created by gpuctl) and the `default` namespace. System namespaces like `kube-system` are out of scope.

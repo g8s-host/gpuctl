@@ -1,103 +1,103 @@
-# 贡献指南
+# Contributing
 
-感谢你有兴趣为 gpuctl 贡献代码！本文档说明如何搭建开发环境、运行测试，以及提交 PR 的流程。
+Thank you for your interest in contributing to gpuctl! This document explains how to set up a development environment, run tests, and submit a PR.
 
-## 开发环境搭建
+## Development Environment Setup
 
-### 前提条件
+### Prerequisites
 
 - Python 3.8+
 - Git
-- 可访问的 Kubernetes 集群（用于集成测试，可选）
+- Access to a Kubernetes cluster (for integration tests, optional)
 
-### 克隆与安装
+### Clone and Install
 
 ```bash
-# 1. Fork 仓库并克隆
-git clone https://github.com/<你的用户名>/gpuctl.git
+# 1. Fork the repo and clone
+git clone https://github.com/<your-username>/gpuctl.git
 cd gpuctl
 
-# 2. 安装开发依赖
+# 2. Install dev dependencies
 pip install -e ".[dev]"
 
-# 或使用 Poetry
+# Or with Poetry
 poetry install
 ```
 
-### 目录结构速览
+### Directory Structure
 
 ```
 gpuctl/
 ├── gpuctl/
-│   ├── api/           # Pydantic 数据模型
-│   ├── parser/        # YAML 解析
-│   ├── builder/       # K8s 资源构建
-│   ├── client/        # K8s API 调用
-│   ├── kind/          # 场景化业务逻辑
-│   ├── cli/           # CLI 命令实现
-│   └── constants.py   # 全局常量
-├── server/            # FastAPI 服务
-├── tests/             # 测试用例
-└── doc/               # 设计文档
+│   ├── api/           # Pydantic data models
+│   ├── parser/        # YAML parsing
+│   ├── builder/       # K8s resource building
+│   ├── client/        # K8s API calls
+│   ├── kind/          # Scenario-specific business logic
+│   ├── cli/           # CLI command implementations
+│   └── constants.py   # Global constants
+├── server/            # FastAPI service
+├── tests/             # Test cases
+└── doc/               # Design documents
 ```
 
 ---
 
-## 运行测试
+## Running Tests
 
 ```bash
-# 运行所有单元测试
+# Run all unit tests
 pytest
 
-# 运行指定测试文件
+# Run a specific test file
 pytest tests/test_gpuctl.py
 
-# 显示详细输出
+# Verbose output
 pytest -v
 
-# 生成覆盖率报告
+# Generate coverage report
 pytest --cov=gpuctl --cov-report=html
 ```
 
 ---
 
-## 代码规范
+## Code Conventions
 
-### 命名约定
+### Naming
 
-- 函数/变量：`snake_case`
-- 类名：`PascalCase`
-- 常量：定义在 `gpuctl/constants.py` 中，不允许在其他模块硬编码魔法字符串
+- Functions/variables: `snake_case`
+- Class names: `PascalCase`
+- Constants: defined in `gpuctl/constants.py` — hardcoding magic strings in other modules is not allowed
 
-### 常量使用
+### Using Constants
 
 ```python
-# 正确 ✅
+# Correct ✅
 from gpuctl.constants import Kind, Labels
 label_value = Kind.TRAINING
 
-# 错误 ❌
+# Incorrect ❌
 label_value = "training"
 ```
 
-### 新增任务类型
+### Adding a New Job Type
 
-如果要新增任务类型（例如 `batch`），需要按以下顺序修改：
+To add a new job type (e.g. `batch`), modify files in this order:
 
-1. **`gpuctl/constants.py`** — 在 `Kind` 枚举中添加新 Kind
-2. **`gpuctl/api/`** — 新增对应的 Pydantic 模型文件
-3. **`gpuctl/parser/`** — 新增或修改 parser 支持新 Kind
-4. **`gpuctl/builder/`** — 新增 Builder，实现 `build()` 方法
-5. **`gpuctl/client/job_client.py`** — 添加对新 K8s 资源类型的支持
-6. **`gpuctl/cli/job.py`** — 在 CLI 命令中处理新 Kind
-7. **`server/routes/jobs.py`** — 在 API 路由中处理新 Kind
-8. **`tests/`** — 添加对应测试用例
+1. **`gpuctl/constants.py`** — add the new Kind to the `Kind` enum
+2. **`gpuctl/api/`** — add the corresponding Pydantic model file
+3. **`gpuctl/parser/`** — add or update the parser to support the new Kind
+4. **`gpuctl/builder/`** — add a Builder implementing the `build()` method
+5. **`gpuctl/client/job_client.py`** — add support for the new K8s resource type
+6. **`gpuctl/cli/job.py`** — handle the new Kind in CLI commands
+7. **`server/routes/jobs.py`** — handle the new Kind in API routes
+8. **`tests/`** — add corresponding test cases
 
 ---
 
-## 提交 PR 流程
+## Submitting a PR
 
-### 分支命名
+### Branch Naming
 
 ```
 feature/add-batch-job-support
@@ -105,84 +105,84 @@ fix/delete-service-on-cleanup
 docs/update-cli-reference
 ```
 
-### Commit 信息规范
+### Commit Message Format
 
 ```
-feat: 添加 batch 任务类型支持
-fix: 修复删除任务时 Service 未同步删除的问题
-docs: 更新 CLI 命令参考文档
-refactor: 将公共标签常量移至 constants.py
-test: 新增 inference 类型端到端测试
+feat: add batch job type support
+fix: fix service not deleted on job cleanup
+docs: update CLI command reference
+refactor: move shared label constants to constants.py
+test: add inference end-to-end tests
 ```
 
-### PR 提交步骤
+### PR Steps
 
 ```bash
-# 1. 创建功能分支
+# 1. Create a feature branch
 git checkout -b feature/my-feature
 
-# 2. 开发并提交
+# 2. Develop and commit
 git add .
-git commit -m "feat: 描述你的改动"
+git commit -m "feat: describe your change"
 
-# 3. 推送到你的 Fork
+# 3. Push to your fork
 git push origin feature/my-feature
 
-# 4. 在 GitHub 上创建 Pull Request
+# 4. Open a Pull Request on GitHub
 ```
 
-### PR 检查清单
+### PR Checklist
 
-在提交 PR 前，请确认：
+Before submitting, confirm:
 
-- [ ] 代码通过 `pytest` 所有测试
-- [ ] 新功能有对应的测试用例
-- [ ] 新增的魔法字符串已添加到 `constants.py`
-- [ ] 更新了相关文档（如 CLI 参考、用户指南）
-- [ ] PR 标题符合 Commit 规范
+- [ ] All `pytest` tests pass
+- [ ] New functionality has corresponding test cases
+- [ ] New magic strings are added to `constants.py`
+- [ ] Relevant documentation is updated (CLI reference, user guide, etc.)
+- [ ] PR title follows the commit message format
 
 ---
 
-## 构建二进制文件
+## Building Binaries
 
 ```bash
-# 安装 PyInstaller
+# Install PyInstaller
 pip install pyinstaller
 
-# 构建 Linux 二进制
+# Build Linux binary
 pyinstaller --onefile --name="gpuctl-linux-amd64" \
   --hidden-import=yaml --hidden-import=PyYAML main.py
 
-# 构建 Windows 二进制
+# Build Windows binary
 pyinstaller --onefile --name="gpuctl-windows-amd64.exe" \
   --hidden-import=yaml --hidden-import=PyYAML main.py
 
-# 构建产物在 dist/ 目录
+# Output is in the dist/ directory
 ls dist/
 ```
 
 ---
 
-## 文档贡献
+## Contributing to Documentation
 
-本文档站点基于 MkDocs + Material 主题：
+This documentation site is built with MkDocs + Material theme:
 
 ```bash
-# 安装文档依赖
-pip install mkdocs mkdocs-material
+# Install doc dependencies
+pip install mkdocs mkdocs-material mkdocs-static-i18n
 
-# 在项目根目录执行
-mkdocs serve   # 本地预览
-mkdocs build   # 构建静态文件（输出到 site/）
+# From the project root
+mkdocs serve   # Local preview
+mkdocs build   # Build static files (output to site/)
 ```
 
-文档源文件位于 `docs/`，`mkdocs.yml` 配置在项目根目录，修改后提交 PR 即可更新官网。
+Documentation source files are in `docs/`, with `mkdocs.yml` at the project root. Submit a PR with your changes to update the live site.
 
 ---
 
-## 获取帮助
+## Getting Help
 
-如有问题，欢迎通过以下方式联系：
+If you have questions, feel free to reach out:
 
-- **GitHub Issues**：[提交 Bug 或功能建议](https://github.com/runwhere-ai/gpuctl/issues)
-- **GitHub Discussions**：[参与社区讨论](https://github.com/runwhere-ai/gpuctl/discussions)
+- **GitHub Issues**: [Submit a bug or feature request](https://github.com/runwhere-ai/gpuctl/issues)
+- **GitHub Discussions**: [Join the community discussion](https://github.com/runwhere-ai/gpuctl/discussions)

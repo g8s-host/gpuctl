@@ -1,36 +1,36 @@
-# Training Jobs
+# 训练任务
 
-Training jobs (`kind: training`) are designed for AI model training scenarios. They map to a Kubernetes **Job** resource and terminate automatically when the run completes.
+训练任务（`kind: training`）适用于 AI 模型训练场景，底层对应 Kubernetes **Job** 资源，任务运行完成后自动结束。
 
-## Full YAML Fields
+## YAML 完整字段
 
 ```yaml
 kind: training
 version: v0.1
 
 job:
-  name: <job-name>          # Required, used as the K8s resource name
+  name: <任务名称>          # 必填，K8s 资源名
   priority: medium          # high / medium / low
-  description: "..."        # Optional
+  description: "描述"       # 可选
 
 environment:
-  image: <image>            # Required
-  imagePullSecret: <secret> # Optional, for private registries
-  command: [...]            # Startup command
-  args: [...]               # Command arguments (optional)
-  env:                      # Environment variables (optional)
+  image: <镜像地址>          # 必填
+  imagePullSecret: <secret> # 可选，私有镜像拉取 Secret
+  command: [...]             # 启动命令
+  args: [...]                # 命令参数（可选）
+  env:                       # 环境变量（可选）
     - name: KEY
       value: VALUE
 
 resources:
-  pool: default             # Resource pool, default: default
-  gpu: 4                    # Number of GPUs
-  gpu-type: A100-100G       # GPU model (optional)
-  cpu: 32                   # CPU cores
-  memory: 128Gi             # Memory
+  pool: default              # 资源池，默认 default
+  gpu: 4                     # GPU 数量
+  gpu-type: A100-100G        # GPU 型号（可选）
+  cpu: 32                    # CPU 核数
+  memory: 128Gi              # 内存
 
 storage:
-  workdirs:                 # Host directory mounts (hostPath)
+  workdirs:                  # 宿主机目录挂载（hostPath）
     - path: /datasets
     - path: /models
     - path: /output
@@ -38,9 +38,9 @@ storage:
 
 ---
 
-## Example 1: LlamaFactory LLM Fine-Tuning (Single-Node Multi-GPU)
+## 场景一：LlamaFactory 大模型微调（单机多卡）
 
-Fine-tune Qwen2-7B with SFT using LlamaFactory 0.8.0 + DeepSpeed 0.14.0.
+使用 LlamaFactory 0.8.0 + DeepSpeed 0.14.0 对 Qwen2-7B 进行 SFT 微调。
 
 ```yaml title="qwen2-7b-sft.yaml"
 kind: training
@@ -49,7 +49,7 @@ version: v0.1
 job:
   name: qwen2-7b-llamafactory-sft
   priority: high
-  description: "Qwen2-7B SFT fine-tuning (LlamaFactory + DeepSpeed)"
+  description: "Qwen2-7B SFT 微调（LlamaFactory + DeepSpeed）"
 
 environment:
   image: registry.example.com/llama-factory-deepspeed:v0.8.0
@@ -104,14 +104,14 @@ gpuctl create -f qwen2-7b-sft.yaml
 gpuctl logs qwen2-7b-llamafactory-sft -f
 ```
 
-!!! info "Automatic Platform Handling"
-    When you declare `gpu: 4`, the platform automatically handles NVLink network configuration, GPU device binding, and DeepSpeed environment variable injection — no need to write a K8s distributed Job manually.
+!!! info "平台自动处理"
+    声明 `gpu: 4` 后，平台自动完成：NVLink 网络配置、GPU 设备绑定、DeepSpeed 环境变量注入，无需手动编写 K8s 分布式 Job。
 
 ---
 
-## Example 2: Full-Parameter Fine-Tuning (Multi-Node Multi-GPU, ZeRO-3)
+## 场景二：全参数微调（多机多卡，ZeRO-3）
 
-For full-parameter training of very large models like Qwen2-72B or Llama3-70B.
+适用于 Qwen2-72B、Llama3-70B 等超大模型的全量参数更新。
 
 ```yaml title="qwen2-72b-fullft.yaml"
 kind: training
@@ -120,7 +120,7 @@ version: v0.1
 job:
   name: qwen2-72b-fullft
   priority: high
-  description: "Qwen2-72B full-parameter fine-tuning (ZeRO-3 + multi-node multi-GPU)"
+  description: "Qwen2-72B 全参数微调（ZeRO-3 + 多机多卡）"
 
 environment:
   image: registry.example.com/deepspeed-zero3:v1.2
@@ -167,42 +167,42 @@ storage:
 
 ---
 
-## Example 3: Hyperparameter Search
+## 场景三：批量超参实验
 
-Submit multiple training jobs simultaneously for hyperparameter comparison:
+同时提交多个训练任务进行超参对比实验：
 
 ```bash
-# Batch submit (target the same pool to avoid contention with production jobs)
+# 批量提交（指定同一资源池，避免与生产任务争抢）
 gpuctl create -f lr1e-4.yaml -f lr2e-4.yaml -f lr5e-4.yaml
 
-# View experiment jobs
+# 查看实验任务
 gpuctl get jobs --pool experiment-pool --kind training
 ```
 
 ---
 
-## Monitoring Training Status
+## 监控训练状态
 
 ```bash
-# List training jobs
+# 查看任务列表
 gpuctl get jobs --kind training
 
-# Stream logs (track training loss)
+# 实时日志（跟踪训练 loss）
 gpuctl logs qwen2-7b-llamafactory-sft -f
 
-# Job details (including K8s Events)
+# 任务详情（含 Events 事件）
 gpuctl describe job qwen2-7b-llamafactory-sft
 ```
 
-## Deleting Training Jobs
+## 删除训练任务
 
 ```bash
-# Normal delete
+# 正常删除
 gpuctl delete job qwen2-7b-llamafactory-sft
 
-# Force delete (immediate termination)
+# 强制删除（立即终止）
 gpuctl delete job qwen2-7b-llamafactory-sft --force
 ```
 
-!!! warning "Training Jobs Cannot Be Paused"
-    K8s Jobs do not support pause/resume semantics. To stop and resume training, implement checkpoint logic in your training script and mount the checkpoint directory via `storage.workdirs`.
+!!! warning "训练任务无法暂停"
+    K8s Job 不支持暂停/恢复语义。如需停止后继续训练，请在训练脚本中实现 checkpoint 断点续训逻辑，并通过 `storage.workdirs` 挂载 checkpoint 目录。

@@ -1,34 +1,34 @@
-# Compute Jobs
+# 计算任务
 
-Compute jobs (`kind: compute`) are for deploying CPU-only services such as web servers, databases, caches, and proxies. They map to a Kubernetes **Deployment + NodePort Service**, with support for multiple replicas and health checks.
+计算任务（`kind: compute`）适用于纯 CPU 服务部署，如 Web 服务、数据库、缓存、代理等。底层对应 Kubernetes **Deployment + NodePort Service**，支持多副本和健康检查。
 
-## Full YAML Fields
+## YAML 完整字段
 
 ```yaml
 kind: compute
 version: v0.1
 
 job:
-  name: <service-name>
+  name: <服务名称>
   priority: medium
-  description: "..."
+  description: "描述"
 
 environment:
-  image: <image>
-  command: [...]   # Optional — uses the image's default entrypoint if omitted
-  args: [...]      # Optional
+  image: <镜像地址>
+  command: [...]   # 可选，不填使用镜像默认 entrypoint
+  args: [...]      # 可选
   env:
     - name: KEY
       value: VALUE
 
 service:
-  replicas: 1       # Number of replicas (default: 1)
-  port: 80          # Service port
-  healthCheck: /    # Health check path (optional)
+  replicas: 1       # 副本数（默认 1）
+  port: 80          # 服务端口
+  healthCheck: /    # 健康检查路径（可选）
 
 resources:
   pool: default
-  gpu: 0            # Set to 0 for CPU-only compute jobs
+  gpu: 0            # 计算任务设置为 0（纯 CPU）
   cpu: 2
   memory: 4Gi
 
@@ -39,7 +39,7 @@ storage:
 
 ---
 
-## Example 1: Deploy an Nginx Web Service
+## 场景一：部署 Nginx Web 服务
 
 ```yaml title="nginx-service.yaml"
 kind: compute
@@ -48,7 +48,7 @@ version: v0.1
 job:
   name: nginx-web
   priority: medium
-  description: "Nginx static web service"
+  description: "Nginx 静态 Web 服务"
 
 environment:
   image: nginx:latest
@@ -77,12 +77,12 @@ storage:
 
 ```bash
 gpuctl create -f nginx-service.yaml
-gpuctl describe job nginx-web    # View access address
+gpuctl describe job nginx-web    # 查看访问地址
 ```
 
 ---
 
-## Example 2: Deploy a Redis Cache
+## 场景二：部署 Redis 缓存
 
 ```yaml title="redis-cache.yaml"
 kind: compute
@@ -109,12 +109,12 @@ resources:
 
 storage:
   workdirs:
-    - path: /data   # Redis persistence directory
+    - path: /data   # Redis 持久化目录
 ```
 
 ---
 
-## Example 3: Deploy a Custom Python API Service
+## 场景三：部署自定义 Python API 服务
 
 ```yaml title="fastapi-service.yaml"
 kind: compute
@@ -148,24 +148,24 @@ resources:
 
 ---
 
-## Updating a Compute Job
+## 更新计算任务
 
 ```bash
-# After modifying the YAML (e.g. changing replica count or image version):
+# 修改 YAML（如调整副本数、镜像版本等）后执行：
 gpuctl apply -f nginx-service.yaml
 ```
 
-## Viewing Service Logs
+## 查看服务日志
 
 ```bash
 gpuctl logs nginx-web -f
 ```
 
-## Deleting a Compute Job
+## 删除计算任务
 
 ```bash
 gpuctl delete job nginx-web
 ```
 
-!!! info "Difference from Inference Jobs"
-    Both `compute` and `inference` use a K8s Deployment under the hood. The key difference is semantic labeling (`runwhere.ai/job-type`) and resource pool selection. Compute jobs typically have `gpu: 0`; inference jobs typically require GPUs.
+!!! info "与推理任务的区别"
+    `compute` 和 `inference` 底层都使用 K8s Deployment，主要区别在于语义标注（`runwhere.ai/job-type` label）和资源池选择。计算任务通常 `gpu: 0`，推理任务通常有 GPU 需求。

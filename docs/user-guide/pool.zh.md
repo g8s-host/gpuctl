@@ -1,28 +1,28 @@
-# Resource Pool Management
+# 资源池管理
 
-Resource pools (Pool) are gpuctl's core resource isolation mechanism. They partition cluster nodes into multiple logical pools, enabling isolation between training, inference, development, and other workloads to prevent GPU contention.
+资源池（Pool）是 gpuctl 的核心资源隔离机制，将集群节点划分为多个逻辑资源池，实现训练/推理/实验/开发等不同场景的资源隔离，避免任务间 GPU 资源争抢。
 
-## How It Works
+## 工作原理
 
 ```
-Cluster Nodes
+集群节点
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
 │   node-1    │  │   node-2    │  │   node-3    │  │   node-4    │
 │  A100×8     │  │  A100×8     │  │   A10×4     │  │   A10×4     │
 │ pool=train  │  │ pool=train  │  │pool=infer   │  │  pool=dev   │
 └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
 
-     Training Pool               Inference Pool       Dev Pool
-   (training-pool)             (inference-pool)      (dev-pool)
+        训练资源池                推理资源池         开发资源池
+     (training-pool)          (inference-pool)    (dev-pool)
 ```
 
-Nodes are bound to a pool via the Kubernetes label `runwhere.ai/pool=<pool-name>`. Jobs specify the target pool with `resources.pool`, and the platform uses `nodeSelector` to schedule Pods onto pool nodes.
+节点通过 Kubernetes Label `runwhere.ai/pool=<pool-name>` 绑定到资源池，任务在提交时通过 `resources.pool` 字段指定目标资源池，平台使用 `nodeSelector` 将 Pod 调度到池内节点。
 
 ---
 
-## Creating a Resource Pool
+## 创建资源池
 
-### Pool YAML Format
+### 资源池 YAML 格式
 
 ```yaml title="training-pool.yaml"
 kind: pool
@@ -30,10 +30,10 @@ version: v0.1
 
 pool:
   name: training-pool
-  description: "Dedicated pool for training jobs"
+  description: "训练任务专用资源池"
 
 nodes:
-  node-1:              # Node hostname (matches kubectl get nodes output)
+  node-1:              # 节点主机名（与 kubectl get nodes 一致）
     gpu-type: A100-100G
   node-2:
     gpu-type: A100-100G
@@ -43,9 +43,9 @@ nodes:
 gpuctl create -f training-pool.yaml
 ```
 
-### Creating Multiple Pools
+### 多资源池同时创建
 
-Create multiple pools separately:
+在一个 YAML 文件中使用 `---` 分隔多个资源池定义（不支持），或分别创建：
 
 ```bash
 gpuctl create -f training-pool.yaml
@@ -55,16 +55,16 @@ gpuctl create -f dev-pool.yaml
 
 ---
 
-## Recommended Pool Layout
+## 典型资源池规划方案
 
-### Four-Pool Design
+### 推荐的四池划分
 
 ```yaml title="training-pool.yaml"
 kind: pool
 version: v0.1
 pool:
   name: training-pool
-  description: "Large model training (high-end GPUs)"
+  description: "大模型训练专用（高端 GPU）"
 nodes:
   gpu-node-1:
     gpu-type: A100-100G
@@ -77,7 +77,7 @@ kind: pool
 version: v0.1
 pool:
   name: inference-pool
-  description: "Inference services (mid-range GPUs)"
+  description: "推理服务专用（中端 GPU）"
 nodes:
   gpu-node-3:
     gpu-type: A10-24G
@@ -90,7 +90,7 @@ kind: pool
 version: v0.1
 pool:
   name: dev-pool
-  description: "Notebook development and debugging (low-end GPUs)"
+  description: "Notebook 开发调试（低端 GPU）"
 nodes:
   gpu-node-5:
     gpu-type: RTX4090-24G
@@ -101,7 +101,7 @@ kind: pool
 version: v0.1
 pool:
   name: compute-pool
-  description: "CPU compute services (no GPU nodes)"
+  description: "CPU 计算服务（无 GPU 节点）"
 nodes:
   cpu-node-1:
     gpu-type: ""
@@ -111,14 +111,14 @@ nodes:
 
 ---
 
-## Querying Resource Pools
+## 查询资源池
 
 ```bash
-# List all resource pools
+# 列出所有资源池
 gpuctl get pools
 ```
 
-Example output:
+输出示例：
 
 ```
 POOL NAME        STATUS   GPU TOTAL  GPU USED  GPU FREE  NODE COUNT
@@ -129,63 +129,63 @@ default          active   0          0         0         0
 ```
 
 ```bash
-# View pool details (including node list and running jobs)
+# 查看资源池详情（含节点列表和运行中任务）
 gpuctl describe pool training-pool
 ```
 
 ---
 
-## Node Label Management
+## 节点标签管理
 
-Resource pools are implemented via node labels. You can also manage node-pool bindings directly through label commands:
+资源池通过节点标签实现，你也可以直接通过标签命令管理节点与资源池的绑定：
 
 ```bash
-# Add node-6 to training-pool
+# 将 node-6 加入 training-pool
 gpuctl label node node-6 runwhere.ai/pool=training-pool
 
-# Overwrite an existing pool label
+# 覆盖已有的 pool 标签
 gpuctl label node node-6 runwhere.ai/pool=inference-pool --overwrite
 
-# View a node's pool label
+# 查看节点的 pool 标签
 gpuctl get labels node-6 --key=runwhere.ai/pool
 
-# Set GPU type label
+# 标记 GPU 类型
 gpuctl label node node-6 runwhere.ai/gpu-type=A100-100G
 ```
 
-!!! warning "Label Key Convention"
-    Labels managed by gpuctl **must be prefixed with `runwhere.ai/`** to avoid conflicts with other systems.
+!!! warning "标签键规范"
+    gpuctl 管理的标签键**必须以 `runwhere.ai/` 开头**，以避免与其他系统的标签冲突。
 
 ---
 
-## Using a Resource Pool in Jobs
+## 在任务中使用资源池
 
-Specify the target resource pool in the `resources.pool` field of your YAML:
+在 YAML 的 `resources.pool` 字段指定目标资源池：
 
 ```yaml
 resources:
-  pool: training-pool   # Must be an already-created pool name
+  pool: training-pool   # 必须是已创建的资源池名
   gpu: 4
   cpu: 32
   memory: 128Gi
 ```
 
 ```bash
-# View jobs in a specific pool
+# 查看指定资源池的任务
 gpuctl get jobs --pool training-pool
 ```
 
 ---
 
-## Deleting a Resource Pool
+## 删除资源池
 
 ```bash
-# Delete via YAML file
+# 通过 YAML 文件删除
 gpuctl delete -f training-pool.yaml
 
-# Or delete by name directly
+# 或通过名称直接删除
 gpuctl delete pool training-pool
 ```
 
-!!! danger "Confirm Before Deleting"
-    Deleting a resource pool removes the pool label bindings from nodes, but does **not** terminate running jobs. It is recommended to stop all jobs in the pool before deleting it.
+!!! danger "删除前确认"
+    删除资源池会移除节点上的资源池标签绑定，但**不会终止**正在运行的任务。建议先停止池内所有任务，再删除资源池。
