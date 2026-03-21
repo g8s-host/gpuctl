@@ -40,6 +40,22 @@ hide:
 
     [:octicons-arrow-right-24: API 文档](developer-guide/api.md)
 
+-   :material-eye:{ .lg .middle .card-icon } **统一观测**
+
+    ---
+
+    日志、事件、资源用量一站式查看。`gpuctl logs <job-name>` 直接查看，告别 kubectl get pods 找 Pod 名的繁琐。
+
+    [:octicons-arrow-right-24: 查看监控指南](user-guide/monitoring.md)
+
+-   :material-shield-check:{ .lg .middle .card-icon } **自动配额**
+
+    ---
+
+    Namespace 级配额自动创建，CPU / Memory / GPU 限额一键查看，超限自动拦截并给出友好提示。
+
+    [:octicons-arrow-right-24: 配额管理](user-guide/quota.md)
+
 </div>
 
 ---
@@ -52,12 +68,38 @@ hide:
 
 ### 解决的核心痛点
 
-| 痛点 | gpuctl 解法 |
-|------|------------|
-| 算法工程师不熟悉 K8s（Pod、Deployment、Service…） | 声明式 YAML，只需填写熟悉的字段 |
-| GPU 驱动、依赖库安装配置繁琐 | 镜像中预装，platform 自动注入环境变量 |
-| 多团队 GPU 资源争抢 | 资源池隔离 + 配额管理 |
-| 分布式训练环境搭建复杂 | 声明 gpu 数量，自动注入 NCCL/DeepSpeed 配置 |
+<table width="100%">
+  <tr>
+    <th width="25%">痛点</th>
+    <th width="35%">具体表现与影响</th>
+    <th width="40%">gpuctl 解法</th>
+  </tr>
+  <tr>
+    <td><b>😰 K8s 学习成本高</b><br>Pod、Deployment、Service 概念复杂</td>
+    <td>算法工程师需要花费数周学习 Kubernetes 概念，理解 PodSpec、ResourceRequirements、VolumeMounts 等复杂配置。提交任务前需要编写 100+ 行 YAML，涉及多个资源对象（Secret、ConfigMap、Job），学习曲线陡峭，上手困难</td>
+    <td><b>声明式 YAML，只需填写熟悉的字段</b><br>用算法工程师熟悉的 kind、job.name、resources.gpu 等字段描述任务，15-20 行配置即可完成训练任务提交，无需理解底层 K8s 资源对象</td>
+  </tr>
+  <tr>
+    <td><b>😤 GPU 环境配置繁琐</b><br>驱动、CUDA、NCCL 依赖复杂</td>
+    <td>每次新建环境都需要手动安装 GPU 驱动、CUDA Toolkit、cuDNN，配置 NCCL 多卡通信环境变量，安装 DeepSpeed、VLLM 等框架及其依赖。版本冲突频发，环境搭建耗时数小时甚至数天</td>
+    <td><b>镜像中预装，platform 自动注入环境变量</b><br>提供预装 DeepSpeed、VLLM、LlamaFactory 的官方镜像，平台自动注入 NCCL_SOCKET_IFNAME、MASTER_ADDR、WORLD_SIZE 等环境变量，无需手动配置分布式训练参数</td>
+  </tr>
+  <tr>
+    <td><b>😫 多团队 GPU 资源争抢</b><br>缺乏资源隔离机制</td>
+    <td>训练、推理、实验任务混跑在同一个集群，没有资源隔离导致重要任务被低优先级任务抢占 GPU。某团队跑大模型训练占满所有卡，其他团队任务只能排队等待，严重影响研发效率和团队协作</td>
+    <td><b>资源池隔离 + 配额管理</b><br>将集群划分为训练池、推理池、开发池等逻辑资源池，实现物理隔离。支持按 Namespace 设置 CPU/Memory/GPU 配额，超限自动拦截，确保各团队资源公平使用</td>
+  </tr>
+  <tr>
+    <td><b>😵 多 GPU 训练配置复杂</b><br>NCCL、DeepSpeed 参数繁琐</td>
+    <td>单机多卡训练需要手动配置 NCCL 环境变量、DeepSpeed hostfile、PyTorch 启动参数，理解进程组、通信后端、梯度同步等概念。配置错误导致训练卡死或效率低下，调试困难</td>
+    <td><b>声明 gpu 数量，自动注入 NCCL/DeepSpeed 配置</b><br>只需在 YAML 中声明 resources.gpu: 4，平台自动生成 DeepSpeed 配置文件，注入 NCCL 环境变量，完成进程组初始化，算法工程师无需关心底层分布式细节</td>
+  </tr>
+  <tr>
+    <td><b>😵‍💫 任务状态查看繁琐</b><br>Pod 名称随机难记</td>
+    <td>使用 kubectl 需要记住随机生成的 Pod 名称（如 training-job-7d9f4b8c5-x2mnp），先 get jobs 找到 Job，再 get pods 找到 Pod，最后 describe pod 查看详情。Pod 重启后名称变化需要重新查找，流程繁琐耗时</td>
+    <td><b>用任务名直接操作，自动追踪 Pod 变化</b><br>gpuctl get jobs 查看所有任务状态，gpuctl logs job-name 直接查看日志，支持多副本聚合。自动追踪 Pod 重建和状态变化，算法工程师只需记住自己定义的任务名</td>
+  </tr>
+</table>
 
 ---
 
