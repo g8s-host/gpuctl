@@ -4,19 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
-      - '.github/workflows/mkdocs-deploy.yml'
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -34,12 +24,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install mkdocs-material
-          pip install -e .
 
-      - name: Configure Git
+      - name: Build and Deploy
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force --message "docs: deploy mkdocs site [skip ci]"
+          mkdocs gh-deploy --force --remote-name origin
