@@ -47,11 +47,11 @@ class QuotaClient(KubernetesClient):
 
             self._ensure_namespace_exists(namespace)
 
-            # Check if namespace already has a quota with g8s.host/quota label
+            # Check if namespace already has a quota with runwhere.ai/quota label
             quota_list = self.core_v1.list_namespaced_resource_quota(namespace)
             for existing_quota in quota_list.items:
                 if existing_quota.metadata.labels and existing_quota.metadata.labels.get(Labels.QUOTA):
-                    raise ValueError(f"Namespace {namespace} already has a quota '{existing_quota.metadata.labels.get('g8s.host/quota')}'. Only one quota is allowed per namespace.")
+                    raise ValueError(f"Namespace {namespace} already has a quota '{existing_quota.metadata.labels.get('runwhere.ai/quota')}'. Only one quota is allowed per namespace.")
 
             hard_limits = {}
             if cpu:
@@ -198,11 +198,11 @@ class QuotaClient(KubernetesClient):
                                          memory: str = None, gpu: str = None) -> Dict[str, Any]:
         """Create or update ResourceQuota in default namespace"""
         try:
-            # Check if default namespace already has a quota with g8s.host/quota label
+            # Check if default namespace already has a quota with runwhere.ai/quota label
             quota_list = self.core_v1.list_namespaced_resource_quota("default")
             for existing_quota in quota_list.items:
                 if existing_quota.metadata.labels and existing_quota.metadata.labels.get(Labels.QUOTA):
-                    raise ValueError(f"Namespace default already has a quota '{existing_quota.metadata.labels.get('g8s.host/quota')}'. Only one quota is allowed per namespace.")
+                    raise ValueError(f"Namespace default already has a quota '{existing_quota.metadata.labels.get('runwhere.ai/quota')}'. Only one quota is allowed per namespace.")
 
             hard_limits = {}
             if cpu:
@@ -266,7 +266,7 @@ class QuotaClient(KubernetesClient):
         try:
             quotas = []
             
-            # 扫描所有命名空间，查找带有g8s.host/quota标签的ResourceQuota
+            # 扫描所有命名空间，查找带有runwhere.ai/quota标签的ResourceQuota
             all_namespaces = self.core_v1.list_namespace()
             
             for ns in all_namespaces.items:

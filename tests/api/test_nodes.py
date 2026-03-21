@@ -22,7 +22,7 @@ def test_get_nodes(mock_get_instance, client):
             "gpu_free": 2,
             "gpu_types": ["A100"],
             "status": "ready",
-            "labels": {"g8s.host/pool": "test-pool"}
+            "labels": {"runwhere.ai/pool": "test-pool"}
         },
         {
             "name": "node-2",
@@ -31,7 +31,7 @@ def test_get_nodes(mock_get_instance, client):
             "gpu_free": 4,
             "gpu_types": ["H100"],
             "status": "ready",
-            "labels": {"g8s.host/pool": "test-pool"}
+            "labels": {"runwhere.ai/pool": "test-pool"}
         }
     ]
     mock_get_instance.return_value = mock_instance
@@ -58,7 +58,7 @@ def test_get_node_detail(mock_get_instance, client):
         "gpu_free": 2,
         "gpu_types": ["A100"],
         "status": "ready",
-        "labels": {"g8s.host/pool": "test-pool"},
+        "labels": {"runwhere.ai/pool": "test-pool"},
         "addresses": ["192.168.1.100"]
     }
     mock_get_instance.return_value = mock_instance
@@ -128,7 +128,7 @@ def test_get_node_labels(mock_get_instance, client):
     mock_instance = MagicMock()
     mock_instance.get_node.return_value = {
         "name": "node-1",
-        "labels": {"g8s.host/pool": "test-pool", "gpu-type": "A100"}
+        "labels": {"runwhere.ai/pool": "test-pool", "gpu-type": "A100"}
     }
     mock_get_instance.return_value = mock_instance
 
@@ -140,7 +140,7 @@ def test_get_node_labels(mock_get_instance, client):
     assert response.status_code == 200
     assert response.json() == {
         "node": "node-1",
-        "labels": {"g8s.host/pool": "test-pool", "gpu-type": "A100"}
+        "labels": {"runwhere.ai/pool": "test-pool", "gpu-type": "A100"}
     }
 
 

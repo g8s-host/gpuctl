@@ -19,12 +19,12 @@ class TestJobMapper(unittest.TestCase):
         compute_job = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/job-type': 'compute',
-                'g8s.host/pool': 'default',
-                'g8s.host/priority': 'medium'
+                'runwhere.ai/job-type': 'compute',
+                'runwhere.ai/pool': 'default',
+                'runwhere.ai/priority': 'medium'
             },
             'annotations': {
-                'g8s.host/description': 'Test compute job'
+                'runwhere.ai/description': 'Test compute job'
             },
             'spec': {
                 'replicas': 1,
@@ -66,10 +66,10 @@ class TestJobMapper(unittest.TestCase):
         compute_job = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/job-type': 'compute',
-                'g8s.host/pool': 'default',
-                'g8s.host/priority': 'medium'
-                # 缺少 g8s.host/description
+                'runwhere.ai/job-type': 'compute',
+                'runwhere.ai/pool': 'default',
+                'runwhere.ai/priority': 'medium'
+                # 缺少 runwhere.ai/description
             },
             'annotations': {},
             'spec': {
@@ -106,9 +106,9 @@ class TestJobMapper(unittest.TestCase):
         inference_job = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/job-type': 'inference',
-                'g8s.host/pool': 'default',
-                'g8s.host/priority': 'medium'
+                'runwhere.ai/job-type': 'inference',
+                'runwhere.ai/pool': 'default',
+                'runwhere.ai/priority': 'medium'
             },
             'spec': {
                 'replicas': 1,
@@ -149,9 +149,9 @@ class TestJobMapper(unittest.TestCase):
         training_job = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/job-type': 'training',
-                'g8s.host/pool': 'training-pool',
-                'g8s.host/priority': 'high'
+                'runwhere.ai/job-type': 'training',
+                'runwhere.ai/pool': 'training-pool',
+                'runwhere.ai/priority': 'high'
             },
             'spec': {
                 'template': {
@@ -170,7 +170,7 @@ class TestJobMapper(unittest.TestCase):
                             }
                         ],
                         'nodeSelector': {
-                            'g8s.host/gpuType': 'a10-24g'
+                            'runwhere.ai/gpuType': 'a10-24g'
                         }
                     }
                 }
@@ -194,9 +194,9 @@ class TestJobMapper(unittest.TestCase):
         notebook_job = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/job-type': 'notebook',
-                'g8s.host/pool': 'default',
-                'g8s.host/priority': 'medium'
+                'runwhere.ai/job-type': 'notebook',
+                'runwhere.ai/pool': 'default',
+                'runwhere.ai/priority': 'medium'
             },
             'spec': {
                 'replicas': 1,
@@ -237,8 +237,8 @@ class TestJobMapper(unittest.TestCase):
         unknown_job = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/priority': 'medium'
-                # 缺少g8s.host/job-type标签
+                'runwhere.ai/priority': 'medium'
+                # 缺少runwhere.ai/job-type标签
             }
         }
 

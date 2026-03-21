@@ -124,9 +124,9 @@ class JobClient(KubernetesClient):
             all_jobs = []
 
             # 如果没有指定labels，添加默认过滤器，只返回gpuctl创建的资源
-            # 所有gpuctl创建的资源都会带有g8s.host/job-type标签
+            # 所有gpuctl创建的资源都会带有runwhere.ai/job-type标签
             if not labels and not include_pods:
-                # 当include_pods=True时，不要使用gpuctl_filter，因为Pod资源可能没有g8s.host/job-type标签
+                # 当include_pods=True时，不要使用gpuctl_filter，因为Pod资源可能没有runwhere.ai/job-type标签
                 use_gpuctl_filter = True
             else:
                 use_gpuctl_filter = False
@@ -143,26 +143,26 @@ class JobClient(KubernetesClient):
             self.handle_api_exception(e, "list jobs")
 
     def _get_all_gpuctl_namespaces(self) -> List[str]:
-        """获取所有gpuctl管理的namespace，包括default和带有g8s.host标签的namespace"""
+        """获取所有gpuctl管理的namespace，包括default和带有runwhere.ai标签的namespace"""
         namespaces = set()
         
         # 始终包含default命名空间
         namespaces.add("default")
         
         try:
-            # 获取带有g8s.host/namespace标签的命名空间
+            # 获取带有runwhere.ai/namespace标签的命名空间
             labeled_ns = self.core_v1.list_namespace(
                 label_selector=NS_LABEL_SELECTOR
             )
             for ns in labeled_ns.items:
                 namespaces.add(ns.metadata.name)
             
-            # 扫描所有命名空间查找带有g8s.host标签的资源
+            # 扫描所有命名空间查找带有runwhere.ai标签的资源
             all_ns = self.core_v1.list_namespace()
             for ns in all_ns.items:
                 ns_name = ns.metadata.name
                 
-                # 检查该命名空间下的job（使用 key 存在性检查，g8s.host/job-type 是所有 gpuctl 资源的必有标签）
+                # 检查该命名空间下的job（使用 key 存在性检查，runwhere.ai/job-type 是所有 gpuctl 资源的必有标签）
                 try:
                     jobs = self.batch_v1.list_namespaced_job(ns_name, label_selector=Labels.JOB_TYPE)
                     if jobs.items:
@@ -198,7 +198,7 @@ class JobClient(KubernetesClient):
         # 构建标签选择器
         selector_parts = []
         
-        # 如果需要过滤gpuctl创建的资源，添加g8s.host/job-type标签存在性检查
+        # 如果需要过滤gpuctl创建的资源，添加runwhere.ai/job-type标签存在性检查
         if use_gpuctl_filter:
             selector_parts.append(Labels.JOB_TYPE)
         

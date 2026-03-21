@@ -182,14 +182,14 @@ def test_get_labels_with_key_filter(mock_pool_client):
     mock_instance.get_node.return_value = {
         "name": "leon-host",
         "labels": {
-            "g8s.host/gpu-type": "a100-80g",
-            "g8s.host/pool": "test-pool",
+            "runwhere.ai/gpu-type": "a100-80g",
+            "runwhere.ai/pool": "test-pool",
             "kubernetes.io/hostname": "leon-host"
         }
     }
     mock_pool_client.return_value = mock_instance
 
-    args = Namespace(node_name="leon-host", key="g8s.host/gpu-type", json=False)
+    args = Namespace(node_name="leon-host", key="runwhere.ai/gpu-type", json=False)
     result = get_labels_command(args)
 
     assert result == 0
@@ -202,11 +202,11 @@ def test_get_labels_key_not_found(mock_pool_client):
     mock_instance = MagicMock()
     mock_instance.get_node.return_value = {
         "name": "leon-host",
-        "labels": {"g8s.host/pool": "test-pool"}
+        "labels": {"runwhere.ai/pool": "test-pool"}
     }
     mock_pool_client.return_value = mock_instance
 
-    args = Namespace(node_name="leon-host", key="g8s.host/gpu-type", json=False)
+    args = Namespace(node_name="leon-host", key="runwhere.ai/gpu-type", json=False)
     result = get_labels_command(args)
 
     # Label not found -> prints error message but may return 0 or 1
@@ -231,8 +231,8 @@ def test_get_labels_all_nodes(mock_pool_client):
     """测试用例: 获取所有节点的标签（不指定节点名）"""
     mock_instance = MagicMock()
     mock_instance.list_nodes.return_value = [
-        {"name": "node-1", "labels": {"g8s.host/pool": "pool-a"}},
-        {"name": "node-2", "labels": {"g8s.host/gpu-type": "a10-24g"}},
+        {"name": "node-1", "labels": {"runwhere.ai/pool": "pool-a"}},
+        {"name": "node-2", "labels": {"runwhere.ai/gpu-type": "a10-24g"}},
     ]
     mock_pool_client.return_value = mock_instance
 
@@ -248,7 +248,7 @@ def test_get_labels_with_json(mock_pool_client):
     mock_instance = MagicMock()
     mock_instance.get_node.return_value = {
         "name": "leon-host",
-        "labels": {"g8s.host/gpu-type": "a100-80g", "g8s.host/pool": "default"}
+        "labels": {"runwhere.ai/gpu-type": "a100-80g", "runwhere.ai/pool": "default"}
     }
     mock_pool_client.return_value = mock_instance
 
