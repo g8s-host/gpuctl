@@ -125,13 +125,6 @@ gpuctl get jobs
 gpuctl logs qwen2-7b-sft -f
 ```
 
-<!-- Demo GIF Placeholder - Replace with actual recording later -->
-<p align="center">
-  <img src="https://via.placeholder.com/800x400/1a1a2e/e94560?text=Demo+GIF+Placeholder" width="800" alt="demo">
-  <br>
-  <sub>👆 Terminal demo (replace with actual recording later)</sub>
-</p>
-
 ---
 
 ## 🆚 gpuctl vs Native Kubectl
