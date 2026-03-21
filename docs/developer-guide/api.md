@@ -1,18 +1,18 @@
-# REST API 参考
+# REST API Reference
 
-gpuctl 提供完整的 RESTful API，基于 FastAPI 构建。启动后可通过 Swagger UI 进行交互式调试。
+gpuctl provides a complete RESTful API built on FastAPI. Once started, you can use the Swagger UI for interactive exploration.
 
-## 基础信息
+## Basic Information
 
-| 项目 | 值 |
-|------|-----|
+| Item | Value |
+|------|-------|
 | Base URL | `http://localhost:8000` |
-| API 前缀 | `/api/v1` |
-| 响应格式 | JSON |
-| 错误格式 | `{"error": "错误信息"}` |
+| API Prefix | `/api/v1` |
+| Response Format | JSON |
+| Error Format | `{"error": "error message"}` |
 | Swagger UI | `http://localhost:8000/docs` |
 
-## 启动 API 服务
+## Starting the API Server
 
 ```bash
 python server/main.py
@@ -20,11 +20,11 @@ python server/main.py
 
 ---
 
-## 基础接口
+## Base Endpoints
 
 ### `GET /`
 
-返回服务基本信息。
+Returns basic service information.
 
 ```json
 {
@@ -35,7 +35,7 @@ python server/main.py
 
 ### `GET /health`
 
-健康检查接口。
+Health check endpoint.
 
 ```json
 {
@@ -46,20 +46,20 @@ python server/main.py
 
 ---
 
-## 任务 API
+## Job API
 
 Base Path: `/api/v1/jobs`
 
-### `POST /api/v1/jobs` — 创建任务
+### `POST /api/v1/jobs` — Create Job
 
-**请求体：**
+**Request body:**
 ```json
 {
     "yamlContent": "kind: training\nversion: v0.1\njob:\n  name: my-job\n..."
 }
 ```
 
-**响应 (201)：**
+**Response (201):**
 ```json
 {
     "jobId": "my-job",
@@ -67,15 +67,15 @@ Base Path: `/api/v1/jobs`
     "kind": "training",
     "status": "pending",
     "createdAt": "2024-01-01T00:00:00",
-    "message": "任务已提交至资源池"
+    "message": "Job submitted to resource pool"
 }
 ```
 
 ---
 
-### `POST /api/v1/jobs/batch` — 批量创建任务
+### `POST /api/v1/jobs/batch` — Batch Create Jobs
 
-**请求体：**
+**Request body:**
 ```json
 {
     "yamlContents": [
@@ -85,7 +85,7 @@ Base Path: `/api/v1/jobs`
 }
 ```
 
-**响应 (201)：**
+**Response (201):**
 ```json
 {
     "success": [
@@ -100,20 +100,20 @@ Base Path: `/api/v1/jobs`
 
 ---
 
-### `GET /api/v1/jobs` — 查询任务列表
+### `GET /api/v1/jobs` — List Jobs
 
-**查询参数：**
+**Query parameters:**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `kind` | string | 任务类型过滤：training / inference / notebook / compute |
-| `pool` | string | 资源池名称过滤 |
-| `status` | string | 状态过滤 |
-| `namespace` | string | 命名空间过滤 |
-| `page` | int | 页码，默认 1 |
-| `pageSize` | int | 每页数量，默认 20，最大 100 |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `kind` | string | Filter by job type: training / inference / notebook / compute |
+| `pool` | string | Filter by resource pool name |
+| `status` | string | Filter by status |
+| `namespace` | string | Filter by namespace |
+| `page` | int | Page number, default 1 |
+| `pageSize` | int | Items per page, default 20, max 100 |
 
-**响应 (200)：**
+**Response (200):**
 ```json
 {
     "total": 5,
@@ -135,13 +135,13 @@ Base Path: `/api/v1/jobs`
 
 ---
 
-### `GET /api/v1/jobs/{jobId}` — 查询任务详情
+### `GET /api/v1/jobs/{jobId}` — Get Job Details
 
-**路径参数：** `jobId` — 任务名称或 Pod 名称均可
+**Path parameter:** `jobId` — accepts either the job name or Pod name
 
-**查询参数：** `namespace` — 可选，不指定则搜索所有 gpuctl 命名空间
+**Query parameter:** `namespace` — optional; searches all gpuctl namespaces if omitted
 
-**响应 (200)：**
+**Response (200):**
 ```json
 {
     "job_id": "my-notebook-job-0",
@@ -183,37 +183,37 @@ Base Path: `/api/v1/jobs`
 ```
 
 !!! note
-    - `resource_type`：实际 K8s 资源类型（Pod / Job / Deployment / StatefulSet）
-    - `yaml_content`：从 K8s 资源反映射回的 gpuctl YAML 结构
-    - `access_methods`：仅 inference / compute / notebook 返回，training 为 null
+    - `resource_type`: actual K8s resource type (Pod / Job / Deployment / StatefulSet)
+    - `yaml_content`: gpuctl YAML structure reverse-mapped from the K8s resource
+    - `access_methods`: only returned for inference / compute / notebook; null for training
 
 ---
 
-### `DELETE /api/v1/jobs/{jobId}` — 删除任务
+### `DELETE /api/v1/jobs/{jobId}` — Delete Job
 
-**查询参数：** `force=true` — 强制删除
+**Query parameter:** `force=true` — force delete
 
-**响应 (200)：**
+**Response (200):**
 ```json
 {
     "jobId": "my-job",
     "status": "terminating",
-    "message": "任务删除指令已下发"
+    "message": "Job deletion command issued"
 }
 ```
 
 ---
 
-### `GET /api/v1/jobs/{jobId}/logs` — 获取日志
+### `GET /api/v1/jobs/{jobId}/logs` — Get Logs
 
-**查询参数：**
+**Query parameters:**
 
-| 参数 | 说明 |
-|------|------|
-| `tail` | 返回最近 N 行，默认 100 |
-| `pod` | 指定 Pod 名称（多 Pod 时使用） |
+| Parameter | Description |
+|-----------|-------------|
+| `tail` | Return last N lines, default 100 |
+| `pod` | Specify Pod name (for multi-Pod jobs) |
 
-**响应 (200)：**
+**Response (200):**
 ```json
 {
     "logs": ["2024-01-01 00:00:00 Starting...", "..."],
@@ -223,9 +223,9 @@ Base Path: `/api/v1/jobs`
 
 ---
 
-### `WS /api/v1/jobs/{jobId}/logs/ws` — WebSocket 实时日志
+### `WS /api/v1/jobs/{jobId}/logs/ws` — WebSocket Streaming Logs
 
-连接后持续推送日志，每条消息格式：
+Streams logs continuously after connection. Each message format:
 
 ```json
 {"type": "log", "data": "2024-01-01 00:00:10 Step 100/1000 loss=0.32"}
@@ -233,90 +233,90 @@ Base Path: `/api/v1/jobs`
 
 ---
 
-## 资源池 API
+## Resource Pool API
 
 Base Path: `/api/v1/pools`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | `/api/v1/pools` | 获取资源池列表 |
-| GET | `/api/v1/pools/{poolName}` | 获取资源池详情 |
-| POST | `/api/v1/pools` | 创建资源池 |
-| DELETE | `/api/v1/pools/{poolName}` | 删除资源池 |
+| Method | Path | Function |
+|--------|------|----------|
+| GET | `/api/v1/pools` | List resource pools |
+| GET | `/api/v1/pools/{poolName}` | Get pool details |
+| POST | `/api/v1/pools` | Create resource pool |
+| DELETE | `/api/v1/pools/{poolName}` | Delete resource pool |
 
 ---
 
-## 节点 API
+## Node API
 
 Base Path: `/api/v1/nodes`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | `/api/v1/nodes` | 节点列表（支持 pool/gpuType/status 过滤） |
-| GET | `/api/v1/nodes/{nodeName}` | 节点详情（含 Labels、资源使用） |
-| GET | `/api/v1/nodes/gpu-detail` | 所有节点 GPU 详细信息 |
-| POST | `/api/v1/nodes/{nodeName}/pools` | 节点加入资源池 |
-| DELETE | `/api/v1/nodes/{nodeName}/pools/{poolName}` | 节点离开资源池 |
-| GET | `/api/v1/nodes/{nodeName}/labels` | 获取节点所有标签 |
+| Method | Path | Function |
+|--------|------|----------|
+| GET | `/api/v1/nodes` | List nodes (supports pool/gpuType/status filters) |
+| GET | `/api/v1/nodes/{nodeName}` | Node details (labels, resource usage) |
+| GET | `/api/v1/nodes/gpu-detail` | GPU details for all nodes |
+| POST | `/api/v1/nodes/{nodeName}/pools` | Add node to a resource pool |
+| DELETE | `/api/v1/nodes/{nodeName}/pools/{poolName}` | Remove node from a pool |
+| GET | `/api/v1/nodes/{nodeName}/labels` | Get all labels on a node |
 
 ---
 
-## 标签 API
+## Label API
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| POST | `/api/v1/nodes/{nodeName}/labels` | 给节点添加标签 |
-| POST | `/api/v1/nodes/labels/batch` | 批量添加节点标签 |
-| GET | `/api/v1/nodes/{nodeName}/labels/{key}` | 获取节点特定标签 |
-| PUT | `/api/v1/nodes/{nodeName}/labels/{key}` | 更新节点标签 |
-| DELETE | `/api/v1/nodes/{nodeName}/labels/{key}` | 删除节点标签 |
-| GET | `/api/v1/labels` | 获取所有节点标签概览（按键聚合） |
-| GET | `/api/v1/nodes/labels` | 查询所有节点的指定标签（需 key 参数） |
-| GET | `/api/v1/nodes/labels/all` | 所有节点的 GPU 相关标签及绑定资源池 |
+| Method | Path | Function |
+|--------|------|----------|
+| POST | `/api/v1/nodes/{nodeName}/labels` | Add label to a node |
+| POST | `/api/v1/nodes/labels/batch` | Batch add node labels |
+| GET | `/api/v1/nodes/{nodeName}/labels/{key}` | Get a specific label on a node |
+| PUT | `/api/v1/nodes/{nodeName}/labels/{key}` | Update a node label |
+| DELETE | `/api/v1/nodes/{nodeName}/labels/{key}` | Delete a node label |
+| GET | `/api/v1/labels` | Overview of all node labels (aggregated by key) |
+| GET | `/api/v1/nodes/labels` | Query a specific label across all nodes (requires `key` param) |
+| GET | `/api/v1/nodes/labels/all` | GPU-related labels and pool bindings for all nodes |
 
 ---
 
-## 配额 API
+## Quota API
 
 Base Path: `/api/v1/quotas`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| POST | `/api/v1/quotas` | 创建配额（YAML 格式） |
-| GET | `/api/v1/quotas` | 获取配额列表（支持 namespace 过滤） |
-| GET | `/api/v1/quotas/{namespaceName}` | 获取命名空间配额详情（含使用量） |
-| DELETE | `/api/v1/quotas/{namespaceName}` | 删除命名空间配额 |
+| Method | Path | Function |
+|--------|------|----------|
+| POST | `/api/v1/quotas` | Create quota (YAML format) |
+| GET | `/api/v1/quotas` | List quotas (supports namespace filter) |
+| GET | `/api/v1/quotas/{namespaceName}` | Get namespace quota details (with utilization) |
+| DELETE | `/api/v1/quotas/{namespaceName}` | Delete namespace quota |
 
 ---
 
-## 命名空间 API
+## Namespace API
 
 Base Path: `/api/v1/namespaces`
 
-!!! info "仅管理 gpuctl 创建的命名空间"
-    带有 `runwhere.ai/namespace=true` 标签的命名空间，以及 `default` 命名空间。
+!!! info "Manages only gpuctl-created namespaces"
+    Namespaces with the `runwhere.ai/namespace=true` label, and the `default` namespace.
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | `/api/v1/namespaces` | 获取命名空间列表 |
-| GET | `/api/v1/namespaces/{namespaceName}` | 获取命名空间详情（含配额信息） |
-| DELETE | `/api/v1/namespaces/{namespaceName}` | 删除命名空间 |
+| Method | Path | Function |
+|--------|------|----------|
+| GET | `/api/v1/namespaces` | List namespaces |
+| GET | `/api/v1/namespaces/{namespaceName}` | Get namespace details (including quota info) |
+| DELETE | `/api/v1/namespaces/{namespaceName}` | Delete namespace |
 
 ---
 
-## 错误响应
+## Error Responses
 
-所有 API 使用统一错误格式：
+All APIs use a unified error format:
 
-| HTTP 状态码 | 含义 |
-|------------|------|
-| 400 | 请求参数无效（如 YAML 格式错误） |
-| 404 | 资源不存在 |
-| 409 | 资源冲突（如标签已存在且未设置 overwrite） |
-| 500 | 服务器内部错误（如 K8s 集群异常） |
+| HTTP Status | Meaning |
+|-------------|---------|
+| 400 | Invalid request parameters (e.g. malformed YAML) |
+| 404 | Resource not found |
+| 409 | Resource conflict (e.g. label already exists and overwrite not set) |
+| 500 | Internal server error (e.g. K8s cluster issue) |
 
 ```json
 {
-    "error": "具体错误信息"
+    "error": "specific error message"
 }
 ```

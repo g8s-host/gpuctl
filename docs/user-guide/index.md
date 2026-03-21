@@ -1,110 +1,110 @@
-# 用户指南
+# User Guide
 
-欢迎使用 gpuctl！本指南将帮助你从零开始掌握 gpuctl 的核心功能，高效管理 GPU 算力资源。
+Welcome to gpuctl! This guide will help you master gpuctl's core features from scratch and efficiently manage GPU compute resources.
 
-## 本章内容
+## Contents
 
 <div class="grid cards" markdown>
 
--   :material-clock-fast:{ .lg .middle } **快速开始**
+-   :material-clock-fast:{ .lg .middle } **Quickstart**
 
     ---
 
-    5 分钟内完成安装配置并提交你的第一个任务。
+    Complete installation and submit your first job in under 5 minutes.
 
-    [:octicons-arrow-right-24: 快速开始](quickstart.md)
+    [:octicons-arrow-right-24: Quickstart](quickstart.md)
 
--   :material-brain:{ .lg .middle } **训练任务**
-
-    ---
-
-    支持 LlamaFactory、DeepSpeed 分布式训练，单机多卡 & 多机多卡场景完整示例。
-
-    [:octicons-arrow-right-24: 训练任务](training.md)
-
--   :material-server:{ .lg .middle } **推理服务**
+-   :material-brain:{ .lg .middle } **Training Jobs**
 
     ---
 
-    基于 VLLM 等框架部署推理服务，支持多副本 + 自动扩缩容。
+    LlamaFactory and DeepSpeed distributed training, with complete examples for single-node multi-GPU and multi-node multi-GPU scenarios.
 
-    [:octicons-arrow-right-24: 推理服务](inference.md)
+    [:octicons-arrow-right-24: Training Jobs](training.md)
+
+-   :material-server:{ .lg .middle } **Inference Services**
+
+    ---
+
+    Deploy inference services using VLLM and similar frameworks, with multi-replica and auto-scaling support.
+
+    [:octicons-arrow-right-24: Inference Services](inference.md)
 
 -   :material-notebook:{ .lg .middle } **Notebook**
 
     ---
 
-    一键启动 JupyterLab 环境，挂载 GPU 资源，快速原型验证。
+    Launch a JupyterLab environment with GPU resources attached in one command, for rapid prototyping.
 
-    [:octicons-arrow-right-24: Notebook 开发](notebook.md)
+    [:octicons-arrow-right-24: Notebook Development](notebook.md)
 
--   :material-cog:{ .lg .middle } **计算任务**
-
-    ---
-
-    部署 nginx、redis 等 CPU 服务，无需关注 K8s Deployment 细节。
-
-    [:octicons-arrow-right-24: 计算任务](compute.md)
-
--   :material-pool:{ .lg .middle } **资源池管理**
+-   :material-cog:{ .lg .middle } **Compute Jobs**
 
     ---
 
-    将节点划分为资源池，实现训练/推理资源隔离与精细化调度。
+    Deploy CPU services like nginx and redis without worrying about Kubernetes Deployment details.
 
-    [:octicons-arrow-right-24: 资源池管理](pool.md)
+    [:octicons-arrow-right-24: Compute Jobs](compute.md)
 
--   :material-gauge:{ .lg .middle } **配额与命名空间**
+-   :material-pool:{ .lg .middle } **Resource Pool Management**
 
     ---
 
-    为每个团队/用户设置 CPU、内存、GPU 配额，防止资源滥用。
+    Partition nodes into resource pools for training/inference isolation and fine-grained scheduling.
 
-    [:octicons-arrow-right-24: 配额与命名空间](quota.md)
+    [:octicons-arrow-right-24: Resource Pool Management](pool.md)
+
+-   :material-gauge:{ .lg .middle } **Quotas & Namespaces**
+
+    ---
+
+    Set CPU, memory, and GPU quotas per team or user to prevent resource abuse.
+
+    [:octicons-arrow-right-24: Quotas & Namespaces](quota.md)
 
 </div>
 
 ---
 
-## YAML 配置总览
+## YAML Configuration Overview
 
-所有资源都通过声明式 YAML 定义。以下是各字段的通用说明：
+All resources are defined through declarative YAML. The following describes the common fields:
 
 ```yaml
-kind: training          # 任务类型：training / inference / notebook / compute / pool / quota
-version: v0.1           # 版本号，当前固定为 v0.1
+kind: training          # Job type: training / inference / notebook / compute / pool / quota
+version: v0.1           # Version, currently fixed at v0.1
 
 job:
-  name: my-job          # 任务名称（同时作为 K8s 资源名）
-  priority: medium      # 优先级：high / medium / low
-  description: "描述"   # 可选描述
+  name: my-job          # Job name (also used as the K8s resource name)
+  priority: medium      # Priority: high / medium / low
+  description: "..."    # Optional description
 
 environment:
-  image: my-image:tag   # 容器镜像地址
-  imagePullSecret: xxx  # 镜像拉取 Secret（可选）
-  command: [...]        # 启动命令
-  args: [...]           # 命令参数（可选）
-  env:                  # 环境变量（可选）
+  image: my-image:tag   # Container image
+  imagePullSecret: xxx  # Image pull secret (optional)
+  command: [...]        # Startup command
+  args: [...]           # Command arguments (optional)
+  env:                  # Environment variables (optional)
     - name: KEY
       value: VALUE
 
 resources:
-  pool: default         # 资源池名称（默认 default）
-  gpu: 0                # GPU 数量（0 表示纯 CPU 任务）
-  gpu-type: A100-100G   # GPU 型号（可选，不填由 K8s 调度）
-  cpu: 4                # CPU 核数
-  memory: 8Gi           # 内存大小
+  pool: default         # Resource pool name (default: default)
+  gpu: 0                # Number of GPUs (0 for CPU-only jobs)
+  gpu-type: A100-100G   # GPU model (optional, K8s schedules any GPU if omitted)
+  cpu: 4                # CPU cores
+  memory: 8Gi           # Memory size
 
-service:                # 仅 inference / notebook / compute 有效
-  replicas: 1           # 副本数
-  port: 8080            # 服务端口
-  healthCheck: /health  # 健康检查路径（可选）
+service:                # Only applicable to inference / notebook / compute
+  replicas: 1           # Number of replicas
+  port: 8080            # Service port
+  healthCheck: /health  # Health check path (optional)
 
 storage:
-  workdirs:             # 宿主机目录挂载列表
+  workdirs:             # Host directory mount list
     - path: /data/models
     - path: /output
 ```
 
-!!! tip "命名规则"
-    `job.name` 字段直接作为 K8s 资源的 `metadata.name`，命名需符合 K8s 命名规范：只含小写字母、数字和连字符，长度不超过 63 个字符。
+!!! tip "Naming Rules"
+    The `job.name` field is used directly as the Kubernetes resource `metadata.name`. Names must follow K8s naming conventions: lowercase letters, numbers, and hyphens only, max 63 characters.

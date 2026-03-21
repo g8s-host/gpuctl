@@ -1,7 +1,7 @@
 docs_dir: docs
 site_dir: site
 
-site_name: GPUCTL - AI 算力调度工具
+site_name: GPUCTL - AI GPU Scheduling Tool
 site_url: https://runwhere-ai.github.io/gpuctl
 site_description: 面向算法工程师的 AI 算力调度平台，通过声明式 YAML 和简单 CLI 命令高效管理 GPU 资源
 site_author: GPU Control Team
@@ -11,7 +11,6 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  language: zh
   logo: assets/gpuctl_logo.svg
   favicon: assets/gpuctl_logo.svg
   icon:
@@ -50,6 +49,34 @@ plugins:
       lang:
         - zh
         - en
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: zh
+          name: 简体中文
+          build: true
+          site_name: GPUCTL - AI 算力调度工具
+          nav_translations:
+            Home: 首页
+            User Guide: 用户指南
+            Overview: 概览
+            Quickstart: 快速开始
+            Training Jobs: 训练任务
+            Inference Services: 推理服务
+            Notebook: Notebook
+            Compute Jobs: 计算任务
+            Resource Pool: 资源池管理
+            Quota Management: 配额管理
+            Developer Guide: 开发者指南
+            Architecture: 系统架构
+            REST API: REST API
+            Contributing: 贡献指南
+            CLI Reference: CLI 参考
+            Community: 社区
 
 markdown_extensions:
   - admonition
@@ -77,23 +104,23 @@ markdown_extensions:
       permalink: true
 
 nav:
-  - 首页: index.md
-  - 用户指南:
-    - 概览: user-guide/index.md
-    - 快速开始: user-guide/quickstart.md
-    - 训练任务: user-guide/training.md
-    - 推理服务: user-guide/inference.md
+  - Home: index.md
+  - User Guide:
+    - Overview: user-guide/index.md
+    - Quickstart: user-guide/quickstart.md
+    - Training Jobs: user-guide/training.md
+    - Inference Services: user-guide/inference.md
     - Notebook: user-guide/notebook.md
-    - 计算任务: user-guide/compute.md
-    - 资源池管理: user-guide/pool.md
-    - 配额管理: user-guide/quota.md
-  - 开发者指南:
-    - 概览: developer-guide/index.md
-    - 系统架构: developer-guide/architecture.md
+    - Compute Jobs: user-guide/compute.md
+    - Resource Pool: user-guide/pool.md
+    - Quota Management: user-guide/quota.md
+  - Developer Guide:
+    - Overview: developer-guide/index.md
+    - Architecture: developer-guide/architecture.md
     - REST API: developer-guide/api.md
-    - 贡献指南: developer-guide/contributing.md
-  - CLI 参考: cli/index.md
-  - 社区: community/index.md
+    - Contributing: developer-guide/contributing.md
+  - CLI Reference: cli/index.md
+  - Community: community/index.md
 
 extra:
   social:
