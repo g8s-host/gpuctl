@@ -30,7 +30,7 @@
 
     [:octicons-arrow-right-24: 推理服务](inference.md)
 
--   :material-notebook:{ .lg .middle } **Notebook 开发**
+-   :material-notebook:{ .lg .middle } **Notebook**
 
     ---
 
