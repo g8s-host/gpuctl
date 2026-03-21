@@ -25,7 +25,7 @@ def get_nodes_command(args):
             gpu_used = node.get('gpu_used', 0)
             gpu_free = node.get('gpu_free', 0)
             gpu_types = ', '.join(node.get('gpu_types', []))
-            pool = node.get('labels', {}).get('g8s.host/pool', 'default')
+            pool = node.get('labels', {}).get('runwhere.ai/pool', 'default')
             ip = node.get('ip', 'N/A')
             
             processed_nodes.append({
@@ -110,10 +110,10 @@ def get_labels_command(args):
                     else:
                         print(f"❌ Label {args.key} not found on node {args.node_name}")
                 else:
-                    # Print only g8s.host prefix labels
+                    # Print only runwhere.ai prefix labels
                     print(f"🏷️  Labels for node {args.node_name}:")
                     for key, value in labels.items():
-                        if key.startswith('g8s.host'):
+                        if key.startswith('runwhere.ai'):
                             print(f"   {key}: {value}")
         else:
             # Get labels from all nodes
@@ -133,9 +133,9 @@ def get_labels_command(args):
                             'label': f"{args.key}={labels[args.key]}"
                         })
                 else:
-                    # Add all g8s.host prefix labels
+                    # Add all runwhere.ai prefix labels
                     for key, value in labels.items():
-                        if key.startswith('g8s.host'):
+                        if key.startswith('runwhere.ai'):
                             all_labels.append({
                                 'node': node_name,
                                 'label': f"{key}={value}"
@@ -197,8 +197,8 @@ def label_node_command(args):
                     kebab_key += '-' + char.lower()
                 else:
                     kebab_key += char.lower()
-            # Add g8s.host/ prefix
-            return f"g8s.host/{kebab_key}"
+            # Add runwhere.ai/ prefix
+            return f"runwhere.ai/{kebab_key}"
         
         for node_name in args.node_name:
             if args.delete:
@@ -303,7 +303,7 @@ def describe_node_command(args):
         print(f"📊 Name: {node.get('name', 'N/A')}")
         print(f"📈 Status: {node.get('status', 'unknown')}")
         print(f"🔧 K8s Status: {node.get('k8s_status', 'N/A')}")
-        print(f"🖥️  Pool: {node.get('labels', {}).get('g8s.host/pool', 'default')}")
+        print(f"🖥️  Pool: {node.get('labels', {}).get('runwhere.ai/pool', 'default')}")
         
         # Calculate AGE
         from datetime import datetime, timezone

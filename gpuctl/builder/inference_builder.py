@@ -32,7 +32,7 @@ class InferenceBuilder(BaseBuilder):
             pod_spec_extras['node_selector'] = node_selector
         else:
             # 对于默认池或未指定池，使用 node_affinity 实现反亲和性
-            # 确保 Pod 不会调度到带有 g8s.host/pool 标签的节点上
+            # 确保 Pod 不会调度到带有 runwhere.ai/pool 标签的节点上
             if inference_job.resources.gpu_type:
                 # 如果指定了 GPU 类型，仍然使用 node_selector 来选择 GPU 类型
                 node_selector = {}

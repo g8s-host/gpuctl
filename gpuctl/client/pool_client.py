@@ -162,7 +162,7 @@ class PoolClient(KubernetesClient):
             associated_jobs = []
             for job in all_jobs:
                 # Check if job belongs to this resource pool
-                job_pool = job.get('labels', {}).get('g8s.host/pool')
+                job_pool = job.get('labels', {}).get('runwhere.ai/pool')
                 if job_pool == pool_name:
                     associated_jobs.append(job['name'])
             
@@ -381,7 +381,7 @@ class PoolClient(KubernetesClient):
                 if filters:
                     # Filter by pool
                     if filters.get("pool"):
-                        node_pool = node_info.get('labels', {}).get('g8s.host/pool', 'default')
+                        node_pool = node_info.get('labels', {}).get('runwhere.ai/pool', 'default')
                         if node_pool != filters['pool']:
                             continue
                     

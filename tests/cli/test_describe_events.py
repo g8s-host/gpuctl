@@ -121,8 +121,8 @@ class TestJobDescriptionAnnotation:
         
         # 验证 annotation 包含 description
         assert statefulset.metadata.annotations is not None
-        assert "g8s.host/description" in statefulset.metadata.annotations
-        assert statefulset.metadata.annotations["g8s.host/description"] == "测试Notebook描述"
+        assert "runwhere.ai/description" in statefulset.metadata.annotations
+        assert statefulset.metadata.annotations["runwhere.ai/description"] == "测试Notebook描述"
     
     def test_training_builder_description_annotation(self):
         """测试 TrainingBuilder 添加 description 到 annotation"""
@@ -158,8 +158,8 @@ class TestJobDescriptionAnnotation:
         
         # 验证 annotation 包含 description
         assert job.metadata.annotations is not None
-        assert "g8s.host/description" in job.metadata.annotations
-        assert job.metadata.annotations["g8s.host/description"] == "测试Training描述"
+        assert "runwhere.ai/description" in job.metadata.annotations
+        assert job.metadata.annotations["runwhere.ai/description"] == "测试Training描述"
     
     def test_inference_builder_description_annotation(self):
         """测试 InferenceBuilder 添加 description 到 annotation"""
@@ -196,5 +196,5 @@ class TestJobDescriptionAnnotation:
         
         # 验证 annotation 包含 description
         assert deployment.metadata.annotations is not None
-        assert "g8s.host/description" in deployment.metadata.annotations
-        assert deployment.metadata.annotations["g8s.host/description"] == "测试Inference描述"
+        assert "runwhere.ai/description" in deployment.metadata.annotations
+        assert deployment.metadata.annotations["runwhere.ai/description"] == "测试Inference描述"

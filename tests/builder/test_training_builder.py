@@ -41,13 +41,13 @@ class TestTrainingBuilder:
 
         # 验证 annotation 中包含 description
         assert job.metadata.annotations is not None
-        assert "g8s.host/description" in job.metadata.annotations
-        assert job.metadata.annotations["g8s.host/description"] == "测试Training任务描述"
+        assert "runwhere.ai/description" in job.metadata.annotations
+        assert job.metadata.annotations["runwhere.ai/description"] == "测试Training任务描述"
 
         # 验证 Pod template 中也包含 description
         assert job.spec.template.metadata.annotations is not None
-        assert "g8s.host/description" in job.spec.template.metadata.annotations
-        assert job.spec.template.metadata.annotations["g8s.host/description"] == "测试Training任务描述"
+        assert "runwhere.ai/description" in job.spec.template.metadata.annotations
+        assert job.spec.template.metadata.annotations["runwhere.ai/description"] == "测试Training任务描述"
 
     def test_build_job_without_description(self):
         """测试 Job 没有 description 时不添加 annotation"""
@@ -81,8 +81,8 @@ class TestTrainingBuilder:
 
         # 验证 annotation 中不包含 description
         if job.metadata.annotations:
-            assert "g8s.host/description" not in job.metadata.annotations
+            assert "runwhere.ai/description" not in job.metadata.annotations
 
         # 验证 Pod template 中也不包含 description
         if job.spec.template.metadata.annotations:
-            assert "g8s.host/description" not in job.spec.template.metadata.annotations
+            assert "runwhere.ai/description" not in job.spec.template.metadata.annotations

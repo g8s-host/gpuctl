@@ -18,7 +18,7 @@ def test_get_node_label_key(mock_get_instance, client):
     mock_node = MagicMock()
     mock_node.metadata.labels = {
         "gpu-type": "A100",
-        "g8s.host/pool": "test-pool"
+        "runwhere.ai/pool": "test-pool"
     }
     mock_node.metadata.creation_timestamp = datetime.now()
     mock_instance.core_v1.read_node.return_value = mock_node

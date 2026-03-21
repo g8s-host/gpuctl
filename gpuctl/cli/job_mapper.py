@@ -231,7 +231,7 @@ def extract_gpu_type(job: Dict[str, Any]) -> str:
     """
     try:
         pod_spec = get_pod_spec(job)
-        return pod_spec.get('nodeSelector', {}).get('g8s.host/gpuType', '')
+        return pod_spec.get('nodeSelector', {}).get('runwhere.ai/gpuType', '')
     except Exception:
         return ''
 
@@ -249,7 +249,7 @@ def map_k8s_to_gpuctl(job: Dict[str, Any]) -> Dict[str, Any]:
     # 提取标签和注解
     labels = extract_labels(job)
     annotations = extract_annotations(job)
-    job_type = labels.get('g8s.host/job-type', 'unknown')
+    job_type = labels.get('runwhere.ai/job-type', 'unknown')
 
     # 基础映射 - 创建空字典
     mapped = {}
@@ -259,8 +259,8 @@ def map_k8s_to_gpuctl(job: Dict[str, Any]) -> Dict[str, Any]:
     mapped['job'] = {
         'name': job.get('name', 'N/A'),
         'namespace': job.get('namespace', 'default'),
-        'priority': labels.get('g8s.host/priority', 'medium'),
-        'description': annotations.get('g8s.host/description', '')  # 从 annotation 中提取描述
+        'priority': labels.get('runwhere.ai/priority', 'medium'),
+        'description': annotations.get('runwhere.ai/description', '')  # 从 annotation 中提取描述
     }
     
     # 根据作业类型进行特定映射
@@ -303,7 +303,7 @@ def _map_compute_job(job: Dict[str, Any], mapped: Dict[str, Any]) -> Dict[str, A
     labels = extract_labels(job)
     
     # 提取端口 - 优先从 label 中获取，其次从 container ports 中获取
-    port = labels.get('g8s.host/port')  # 优先从 label 获取
+    port = labels.get('runwhere.ai/port')  # 优先从 label 获取
     if port:
         try:
             port = int(port)
@@ -333,7 +333,7 @@ def _map_compute_job(job: Dict[str, Any], mapped: Dict[str, Any]) -> Dict[str, A
             'port': port
         },
         'resources': {
-            'pool': labels.get('g8s.host/pool', 'default'),
+            'pool': labels.get('runwhere.ai/pool', 'default'),
             'gpu': resources.get('gpu', 0),
             'cpu': _format_cpu_value(resources.get('cpu', '1')),
             'memory': resources.get('memory', '1G')
@@ -408,7 +408,7 @@ def _map_inference_job(job: Dict[str, Any], mapped: Dict[str, Any]) -> Dict[str,
             'port': port
         },
         'resources': {
-            'pool': labels.get('g8s.host/pool', 'default'),
+            'pool': labels.get('runwhere.ai/pool', 'default'),
             'gpu': resources.get('gpu', 0),
             'cpu': _format_cpu_value(resources.get('cpu', '1')),
             'memory': resources.get('memory', '2Gi'),
@@ -473,7 +473,7 @@ def _map_training_job(job: Dict[str, Any], mapped: Dict[str, Any]) -> Dict[str, 
             'command': command
         },
         'resources': {
-            'pool': labels.get('g8s.host/pool', 'training-pool'),
+            'pool': labels.get('runwhere.ai/pool', 'training-pool'),
             'gpu': resources.get('gpu', 2),
             'gpuType': gpu_type,
             'cpu': _format_cpu_value(resources.get('cpu', '8')),
@@ -545,7 +545,7 @@ def _map_notebook_job(job: Dict[str, Any], mapped: Dict[str, Any]) -> Dict[str, 
             'port': port
         },
         'resources': {
-            'pool': labels.get('g8s.host/pool', 'default'),
+            'pool': labels.get('runwhere.ai/pool', 'default'),
             'gpu': resources.get('gpu', 0),
             'cpu': _format_cpu_value(resources.get('cpu', '1')),
             'memory': resources.get('memory', '2Gi'),

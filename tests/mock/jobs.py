@@ -6,8 +6,8 @@ mock_jobs = [
         "name": "test-training-job",
         "namespace": "default",
         "labels": {
-            "g8s.host/job-type": "training",
-            "g8s.host/pool": "training-pool"
+            "runwhere.ai/job-type": "training",
+            "runwhere.ai/pool": "training-pool"
         },
         "status": {
             "active": 1,
@@ -20,8 +20,8 @@ mock_jobs = [
         "name": "test-inference-job",
         "namespace": "default",
         "labels": {
-            "g8s.host/job-type": "inference",
-            "g8s.host/pool": "inference-pool"
+            "runwhere.ai/job-type": "inference",
+            "runwhere.ai/pool": "inference-pool"
         },
         "status": {
             "active": 1,
@@ -34,8 +34,8 @@ mock_jobs = [
         "name": "test-notebook-job",
         "namespace": "default",
         "labels": {
-            "g8s.host/job-type": "notebook",
-            "g8s.host/pool": "notebook-pool"
+            "runwhere.ai/job-type": "notebook",
+            "runwhere.ai/pool": "notebook-pool"
         },
         "status": {
             "active": 1,
@@ -53,7 +53,7 @@ mock_pods = [
         "namespace": "default",
         "labels": {
             "job-name": "test-training-job",
-            "g8s.host/job-type": "training"
+            "runwhere.ai/job-type": "training"
         },
         "status": {
             "phase": "Running"
@@ -65,7 +65,7 @@ mock_pods = [
         "namespace": "default",
         "labels": {
             "app": "test-inference-job",
-            "g8s.host/job-type": "inference"
+            "runwhere.ai/job-type": "inference"
         },
         "status": {
             "phase": "Running"

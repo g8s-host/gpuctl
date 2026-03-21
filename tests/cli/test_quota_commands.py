@@ -248,7 +248,7 @@ def test_describe_namespace(mock_quota_client_class):
     mock_core_v1 = MagicMock()
     
     mock_ns = MagicMock()
-    mock_ns.metadata = MagicMock(name='test-namespace', creation_timestamp='2024-01-01T00:00:00Z', labels={"g8s.host/namespace": "true"})
+    mock_ns.metadata = MagicMock(name='test-namespace', creation_timestamp='2024-01-01T00:00:00Z', labels={"runwhere.ai/namespace": "true"})
     mock_ns.status = MagicMock(phase='Active')
     mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
     
@@ -269,7 +269,7 @@ def test_delete_namespace(mock_quota_client_class):
     mock_core_v1 = MagicMock()
     
     mock_ns = MagicMock()
-    mock_ns.metadata = MagicMock(name='test-namespace', labels={"g8s.host/namespace": "true"})
+    mock_ns.metadata = MagicMock(name='test-namespace', labels={"runwhere.ai/namespace": "true"})
     mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
     mock_core_v1.delete_namespace = MagicMock()
     
@@ -380,7 +380,7 @@ def test_describe_namespace_with_json(mock_quota_client_class):
     mock_core_v1 = MagicMock()
     
     mock_ns = MagicMock()
-    mock_ns.metadata = MagicMock(name='test-namespace', creation_timestamp='2024-01-01T00:00:00Z', labels={"g8s.host/namespace": "true"})
+    mock_ns.metadata = MagicMock(name='test-namespace', creation_timestamp='2024-01-01T00:00:00Z', labels={"runwhere.ai/namespace": "true"})
     mock_ns.status = MagicMock(phase='Active')
     mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
     
@@ -536,7 +536,7 @@ def test_delete_namespace_with_json(mock_quota_client_class):
     mock_core_v1 = MagicMock()
 
     mock_ns = MagicMock()
-    mock_ns.metadata = MagicMock(name='test-ns', labels={"g8s.host/namespace": "true"})
+    mock_ns.metadata = MagicMock(name='test-ns', labels={"runwhere.ai/namespace": "true"})
     mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
     mock_core_v1.delete_namespace = MagicMock()
 
@@ -619,7 +619,7 @@ def test_describe_namespace_with_quota(mock_quota_client_class):
     mock_ns.metadata = MagicMock(
         name='test-namespace',
         creation_timestamp='2024-01-01T00:00:00Z',
-        labels={"g8s.host/namespace": "true"}
+        labels={"runwhere.ai/namespace": "true"}
     )
     mock_ns.status = MagicMock(phase='Active')
     mock_core_v1.read_namespace = MagicMock(return_value=mock_ns)
@@ -649,7 +649,7 @@ def test_get_namespaces_age_string_no_typeerror(mock_quota_client_class):
 
     mock_ns = MagicMock()
     mock_ns.metadata.name = "test-ns"
-    mock_ns.metadata.labels = {"g8s.host/namespace": "true"}
+    mock_ns.metadata.labels = {"runwhere.ai/namespace": "true"}
     mock_ns.metadata.creation_timestamp = "2024-01-15T10:30:00Z"
     mock_ns.status.phase = "Active"
     mock_core_v1.list_namespace.return_value = MagicMock(items=[mock_ns])
@@ -672,7 +672,7 @@ def test_describe_namespace_quota_missing_keys_no_keyerror(mock_quota_client_cla
 
     mock_ns = MagicMock()
     mock_ns.metadata.name = "test-ns"
-    mock_ns.metadata.labels = {"g8s.host/namespace": "true"}
+    mock_ns.metadata.labels = {"runwhere.ai/namespace": "true"}
     mock_ns.metadata.creation_timestamp = "2024-01-15T10:30:00Z"
     mock_ns.status.phase = "Active"
     mock_core_v1.read_namespace.return_value = mock_ns

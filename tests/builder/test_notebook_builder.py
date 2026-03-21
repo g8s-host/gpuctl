@@ -41,13 +41,13 @@ class TestNotebookBuilder:
 
         # 验证 annotation 中包含 description
         assert statefulset.metadata.annotations is not None
-        assert "g8s.host/description" in statefulset.metadata.annotations
-        assert statefulset.metadata.annotations["g8s.host/description"] == "测试Notebook任务描述"
+        assert "runwhere.ai/description" in statefulset.metadata.annotations
+        assert statefulset.metadata.annotations["runwhere.ai/description"] == "测试Notebook任务描述"
 
         # 验证 Pod template 中也包含 description
         assert statefulset.spec.template.metadata.annotations is not None
-        assert "g8s.host/description" in statefulset.spec.template.metadata.annotations
-        assert statefulset.spec.template.metadata.annotations["g8s.host/description"] == "测试Notebook任务描述"
+        assert "runwhere.ai/description" in statefulset.spec.template.metadata.annotations
+        assert statefulset.spec.template.metadata.annotations["runwhere.ai/description"] == "测试Notebook任务描述"
 
     def test_build_statefulset_without_description(self):
         """测试 StatefulSet 没有 description 时不添加 annotation"""
@@ -81,11 +81,11 @@ class TestNotebookBuilder:
 
         # 验证 annotation 中不包含 description
         if statefulset.metadata.annotations:
-            assert "g8s.host/description" not in statefulset.metadata.annotations
+            assert "runwhere.ai/description" not in statefulset.metadata.annotations
 
         # 验证 Pod template 中也不包含 description
         if statefulset.spec.template.metadata.annotations:
-            assert "g8s.host/description" not in statefulset.spec.template.metadata.annotations
+            assert "runwhere.ai/description" not in statefulset.spec.template.metadata.annotations
 
     def test_build_service_with_description(self):
         """测试 Service 包含 description 在 annotation 中"""
@@ -115,8 +115,8 @@ class TestNotebookBuilder:
 
         # 验证 annotation 中包含 description
         assert service.metadata.annotations is not None
-        assert "g8s.host/description" in service.metadata.annotations
-        assert service.metadata.annotations["g8s.host/description"] == "测试Notebook任务描述"
+        assert "runwhere.ai/description" in service.metadata.annotations
+        assert service.metadata.annotations["runwhere.ai/description"] == "测试Notebook任务描述"
 
     def test_build_service_without_description(self):
         """测试 Service 没有 description 时不添加 annotation"""
@@ -146,4 +146,4 @@ class TestNotebookBuilder:
 
         # 验证 annotation 中不包含 description
         if service.metadata.annotations:
-            assert "g8s.host/description" not in service.metadata.annotations
+            assert "runwhere.ai/description" not in service.metadata.annotations

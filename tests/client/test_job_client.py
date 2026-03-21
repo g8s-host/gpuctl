@@ -10,7 +10,7 @@ from kubernetes import client as k8s_client
 
 @patch('gpuctl.client.job_client.KubernetesClient.__init__', return_value=None)
 def test_get_all_gpuctl_namespaces_uses_valid_label_selector(mock_init):
-    """回归测试：_get_all_gpuctl_namespaces 应使用 g8s.host/job-type 而非无效的 g8s.host/"""
+    """回归测试：_get_all_gpuctl_namespaces 应使用 runwhere.ai/job-type 而非无效的 runwhere.ai/"""
     from gpuctl.client.job_client import JobClient
 
     client = JobClient.__new__(JobClient)
@@ -42,13 +42,13 @@ def test_get_all_gpuctl_namespaces_uses_valid_label_selector(mock_init):
 
     # 验证使用了合法的 label selector（key 存在性检查）
     client.batch_v1.list_namespaced_job.assert_called_once_with(
-        "test-ns", label_selector="g8s.host/job-type"
+        "test-ns", label_selector="runwhere.ai/job-type"
     )
     client.apps_v1.list_namespaced_deployment.assert_called_once_with(
-        "test-ns", label_selector="g8s.host/job-type"
+        "test-ns", label_selector="runwhere.ai/job-type"
     )
     client.apps_v1.list_namespaced_stateful_set.assert_called_once_with(
-        "test-ns", label_selector="g8s.host/job-type"
+        "test-ns", label_selector="runwhere.ai/job-type"
     )
 
     # default 始终在结果中

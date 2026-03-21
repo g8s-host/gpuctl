@@ -23,9 +23,9 @@ class TestExtractHelpers(unittest.TestCase):
         self.valid_job = {
             'metadata': {
                 'labels': {
-                    'g8s.host/job-type': 'compute',
-                    'g8s.host/pool': 'default',
-                    'g8s.host/priority': 'medium'
+                    'runwhere.ai/job-type': 'compute',
+                    'runwhere.ai/pool': 'default',
+                    'runwhere.ai/priority': 'medium'
                 },
                 'name': 'test-nginx',
                 'namespace': 'default'
@@ -70,7 +70,7 @@ class TestExtractHelpers(unittest.TestCase):
                             }
                         ],
                         'nodeSelector': {
-                            'g8s.host/gpuType': 'a10-24g'
+                            'runwhere.ai/gpuType': 'a10-24g'
                         }
                     }
                 }

@@ -440,7 +440,7 @@ def get_namespaces_command(args):
     try:
         client = QuotaClient()
         
-        # Get all namespaces created by this CLI (with g8s.host/namespace label)
+        # Get all namespaces created by this CLI (with runwhere.ai/namespace label)
         namespaces = client.core_v1.list_namespace(
             label_selector=NS_LABEL_SELECTOR
         )
