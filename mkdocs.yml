@@ -1,7 +1,7 @@
 docs_dir: docs
 site_dir: site
 
-site_name: GPUCTL - AI 算力调度平台
+site_name: GPUCTL - AI 算力调度工具
 site_url: https://runwhere-ai.github.io/gpuctl
 site_description: 面向算法工程师的 AI 算力调度平台，通过声明式 YAML 和简单 CLI 命令高效管理 GPU 资源
 site_author: GPU Control Team
