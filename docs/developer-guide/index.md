@@ -94,7 +94,7 @@ gpuctl/
 
 ```bash
 # 克隆仓库
-git clone https://github.com/g8s-host/gpuctl.git
+git clone https://github.com/runwhere-ai/gpuctl.git
 cd gpuctl
 
 # 安装开发依赖
