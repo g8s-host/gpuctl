@@ -1,7 +1,7 @@
 docs_dir: docs
 site_dir: site
 
-site_name: gpuctl - AI 算力调度平台
+site_name: GPUCTL - AI 算力调度平台
 site_url: https://g8s-host.github.io/gpuctl
 site_description: 面向算法工程师的 AI 算力调度平台，通过声明式 YAML 和简单 CLI 命令高效管理 GPU 资源
 site_author: GPU Control Team
@@ -12,20 +12,22 @@ edit_uri: edit/main/docs/
 theme:
   name: material
   language: zh
+  logo: assets/gpuctl_logo.svg
+  favicon: assets/gpuctl_logo.svg
   icon:
     logo: material/cpu-64-bit
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: indigo
+      primary: white
+      accent: white
       toggle:
         icon: material/brightness-7
         name: 切换到深色模式
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: white
+      accent: white
       toggle:
         icon: material/brightness-4
         name: 切换到浅色模式
@@ -81,10 +83,10 @@ nav:
     - 快速开始: user-guide/quickstart.md
     - 训练任务: user-guide/training.md
     - 推理服务: user-guide/inference.md
-    - Notebook 开发: user-guide/notebook.md
+    - Notebook: user-guide/notebook.md
     - 计算任务: user-guide/compute.md
     - 资源池管理: user-guide/pool.md
-    - 配额与命名空间: user-guide/quota.md
+    - 配额管理: user-guide/quota.md
   - 开发者指南:
     - 概览: developer-guide/index.md
     - 系统架构: developer-guide/architecture.md
