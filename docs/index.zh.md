@@ -106,7 +106,7 @@ hide:
 ## 系统架构
 
 <div style="text-align: center;">
-<img src="assets/architect.png" alt="gpuctl 系统架构" style="width: 50%;">
+<img src="../assets/architect.png" alt="gpuctl 系统架构" style="width: 50%;">
 </div>
 
 ---
