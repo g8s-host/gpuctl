@@ -4,11 +4,11 @@ hide:
   - toc
 ---
 
-# gpuctl · AI 算力调度平台
+# GPUCTL · AI 算力调度平台
 
 <div class="grid cards" markdown>
 
--   :material-rocket-launch:{ .lg .middle } **无需了解 Kubernetes**
+-   :material-rocket-launch:{ .lg .middle .card-icon } **无需了解 Kubernetes**
 
     ---
 
@@ -16,7 +16,7 @@ hide:
 
     [:octicons-arrow-right-24: 快速开始](user-guide/quickstart.md)
 
--   :material-chip:{ .lg .middle } **GPU 资源池化管理**
+-   :material-chip:{ .lg .middle .card-icon } **GPU 资源池化管理**
 
     ---
 
@@ -24,7 +24,7 @@ hide:
 
     [:octicons-arrow-right-24: 资源池管理](user-guide/pool.md)
 
--   :material-console:{ .lg .middle } **简洁的 CLI 命令**
+-   :material-console:{ .lg .middle .card-icon } **简洁的 CLI 命令**
 
     ---
 
@@ -32,7 +32,7 @@ hide:
 
     [:octicons-arrow-right-24: CLI 参考](cli/index.md)
 
--   :material-api:{ .lg .middle } **RESTful API**
+-   :material-api:{ .lg .middle .card-icon } **RESTful API**
 
     ---
 
@@ -63,36 +63,9 @@ hide:
 
 ## 系统架构
 
-```
-┌──────────────────────────────────┐
-│           算法工程师              │
-└──────────────┬───────────────────┘
-               │  YAML / CLI / REST API
-               ▼
-┌──────────────────────────────────┐
-│         接入层                    │
-│   gpuctl CLI  ·  REST API        │
-└──────────────┬───────────────────┘
-               │
-               ▼
-┌──────────────────────────────────┐
-│       抽象与转换层                 │
-│  解析 YAML → 验证 → 构建 K8s 资源 │
-└──────────────┬───────────────────┘
-               │
-               ▼
-┌──────────────────────────────────┐
-│       调度与执行层                 │
-│   Kubernetes (Job / Deployment / │
-│   StatefulSet) + 资源池调度       │
-└──────────────┬───────────────────┘
-               │
-               ▼
-┌──────────────────────────────────┐
-│       监控与反馈层                 │
-│   Prometheus + Grafana           │
-└──────────────────────────────────┘
-```
+<div style="text-align: center;">
+<img src="assets/architect.png" alt="gpuctl 系统架构" style="width: 50%;">
+</div>
 
 ---
 
