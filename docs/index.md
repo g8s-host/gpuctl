@@ -120,46 +120,49 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
     ```yaml
     kind: training
     version: v0.1
+
     job:
-      name: qwen2-7b-sft
-      priority: high
+      name: llamafactory-quickstart
+
     environment:
-      image: hiyouga/llamafactory:latest
-      command: ["llamafactory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b"]
-    resources:
-      pool: default
-      gpu: 4
-      cpu: 32
-      memory: 128Gi
-    storage:
-      workdirs:
-        - path: /models
-    ```
+      image: hiyouga/llamafactory:0.9.4
+      command: ["bash", "-lc", "cd /app && llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml model_name_or_path=Qwen/Qwen3-0.6B template=qwen3 output_dir=/output"]
 
-=== "Inference Services"
-
-    Deploy VLLM inference services with auto-scaling support. Translates to a Kubernetes **Deployment + Service**.
-
-    ```yaml
-    kind: inference
-    version: v0.1
-    job:
-      name: llama3-8b-inference
-    environment:
-      image: vllm/vllm-openai:latest
-      command: ["python", "-m", "vllm.entrypoints.openai.api_server"]
-      args: ["--model", "/models/llama3-8b", "--port", "8000"]
-    service:
-      replicas: 1
-      port: 8000
     resources:
       pool: default
       gpu: 1
       cpu: 8
-      memory: 32Gi
+      memory: 24Gi
+
     storage:
       workdirs:
-        - path: /models
+        - path: /output
+    ```
+
+=== "Inference Services"
+
+    Deploy VLLM inference services with multi-replica support. Translates to a Kubernetes **Deployment + Service**.
+
+    ```yaml
+    kind: inference
+    version: v0.1
+
+    job:
+      name: vllm-quickstart
+
+    environment:
+      image: vllm/vllm-openai:v0.17.1
+      command: ["python", "-m", "vllm.entrypoints.openai.api_server", "--model", "Qwen/Qwen2.5-3B-Instruct", "--host", "0.0.0.0", "--port", "8000", "--tensor-parallel-size", "1"]
+
+    service:
+      replicas: 1
+      port: 8000
+
+    resources:
+      pool: default
+      gpu: 1
+      cpu: 8
+      memory: 24Gi
     ```
 
 === "Notebook"
@@ -169,39 +172,60 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
     ```yaml
     kind: notebook
     version: v0.1
+
     job:
-      name: dev-notebook
+      name: jupyter-quickstart
+
     environment:
-      image: jupyter/scipy-notebook:latest
-      command: ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+      image: quay.io/jupyter/scipy-notebook:2025-12-31
+      command: ["start-notebook.py", "--NotebookApp.token=gpuctl", "--ServerApp.ip=0.0.0.0", "--ServerApp.port=8888"]
+
     service:
       port: 8888
+
     resources:
       pool: default
-      gpu: 1
-      cpu: 4
-      memory: 16Gi
+      gpu: 0
+      cpu: 2
+      memory: 8Gi
     ```
 
 === "Compute Jobs"
 
-    CPU-only services (nginx, redis, etc.). Translates to a Kubernetes **Deployment + Service**.
+    CPU-only services (MySQL, Redis, nginx, etc.). Translates to a Kubernetes **Deployment + Service**.
 
     ```yaml
     kind: compute
     version: v0.1
+
     job:
-      name: my-nginx
+      name: mysql-quickstart
+
     environment:
-      image: nginx:latest
+      image: mysql:8.4
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root123456
+        - name: MYSQL_DATABASE
+          value: demo
+        - name: MYSQL_USER
+          value: demo
+        - name: MYSQL_PASSWORD
+          value: demo123456
+
     service:
       replicas: 1
-      port: 80
+      port: 3306
+
     resources:
       pool: default
       gpu: 0
-      cpu: 1
-      memory: 512Mi
+      cpu: 2
+      memory: 4Gi
+
+    storage:
+      workdirs:
+        - path: /var/lib/mysql
     ```
 
 ---
