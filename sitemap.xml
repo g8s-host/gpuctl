@@ -1,95 +1,297 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/en/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/cli/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/en/cli/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/cli/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/cli/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/community/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/en/community/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/community/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/community/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/README.zh-CN/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/en/developer-guide/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/developer-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/developer-guide/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/api-design/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/quickstart/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/user-guide/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/user-guide/quickstart/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/cli-manual/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/training/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/user-guide/training/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/user-guide/training/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/model-structure/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/prd/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/cli/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/cli/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/cli/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/test/natural-language-tests/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/community/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/community/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/community/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/test/scenario-tests/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/developer-guide/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/design/test/test-report/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/developer-guide/api/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/api/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/developer-guide/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/developer-guide/architecture/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/architecture/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/developer-guide/api/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/developer-guide/contributing/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/contributing/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/contributing/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/developer-guide/architecture/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/developer-guide/contributing/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/compute/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/compute/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/compute/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/inference/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/inference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/inference/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/compute/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/notebook/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/notebook/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/notebook/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/inference/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/pool/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/pool/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/pool/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/notebook/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/quickstart/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/quickstart/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/pool/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/quota/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/quota/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/quota/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/quickstart/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/training/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/training/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/training/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/quota/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/en/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/"/>
     </url>
     <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/training/</loc>
-         <lastmod>2026-03-21</lastmod>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/en/cli/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/cli/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/cli/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/en/community/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/community/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/community/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/en/developer-guide/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/developer-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/developer-guide/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/en/user-guide/quickstart/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/user-guide/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/user-guide/quickstart/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/en/user-guide/training/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/en/user-guide/training/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/en/user-guide/training/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/cli/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/cli/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/cli/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/community/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/community/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/community/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/api/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/api/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/architecture/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/architecture/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/contributing/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/developer-guide/contributing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/developer-guide/contributing/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/compute/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/compute/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/compute/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/inference/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/inference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/inference/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/notebook/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/notebook/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/notebook/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/pool/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/pool/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/pool/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/quickstart/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/quickstart/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/quota/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/quota/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/quota/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/training/</loc>
+        <lastmod>2026-03-21</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/zh/user-guide/training/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/training/"/>
     </url>
 </urlset>
