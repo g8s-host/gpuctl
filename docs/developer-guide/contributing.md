@@ -184,5 +184,5 @@ mkdocs build   # 构建静态文件（输出到 site/）
 
 如有问题，欢迎通过以下方式联系：
 
-- **GitHub Issues**：[提交 Bug 或功能建议](https://github.com/g8s-host/gpuctl/issues)
-- **GitHub Discussions**：[参与社区讨论](https://github.com/g8s-host/gpuctl/discussions)
+- **GitHub Issues**：[提交 Bug 或功能建议](https://github.com/runwhere-ai/gpuctl/issues)
+- **GitHub Discussions**：[参与社区讨论](https://github.com/runwhere-ai/gpuctl/discussions)

@@ -187,7 +187,7 @@ create（重新创建资源 + Service）
 
 ## 常量文件
 
-[`gpuctl/constants.py`](https://github.com/g8s-host/gpuctl/blob/main/gpuctl/constants.py) 集中定义了所有魔法字符串，包括：
+[`gpuctl/constants.py`](https://github.com/runwhere-ai/gpuctl/blob/main/gpuctl/constants.py) 集中定义了所有魔法字符串，包括：
 
 - `Kind` 枚举：TRAINING / INFERENCE / NOTEBOOK / COMPUTE
 - `Labels` 类：所有 Label Key 常量
