@@ -13,6 +13,38 @@
          <lastmod>2026-03-21</lastmod>
     </url>
     <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/README.zh-CN/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/api-design/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/cli-manual/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/model-structure/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/prd/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/test/natural-language-tests/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/test/scenario-tests/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://runwhere-ai.github.io/gpuctl/design/test/test-report/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
          <loc>https://runwhere-ai.github.io/gpuctl/developer-guide/</loc>
          <lastmod>2026-03-21</lastmod>
     </url>
@@ -26,66 +58,6 @@
     </url>
     <url>
          <loc>https://runwhere-ai.github.io/gpuctl/developer-guide/contributing/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/cli/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/community/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/developer-guide/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/developer-guide/api/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/developer-guide/architecture/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/developer-guide/contributing/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/compute/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/inference/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/notebook/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/pool/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/quickstart/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/quota/</loc>
-         <lastmod>2026-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://runwhere-ai.github.io/gpuctl/en/user-guide/training/</loc>
          <lastmod>2026-03-21</lastmod>
     </url>
     <url>
