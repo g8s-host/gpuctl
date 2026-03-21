@@ -5,8 +5,8 @@
 
 <!-- 彩色徽章 Shields -->
 <p align="center">
-  <a href="https://github.com/g8s-host/gpuctl/releases">
-    <img src="https://img.shields.io/github/v/release/g8s-host/gpuctl?style=flat-square&color=blue&label=Release" alt="release">
+  <a href="https://github.com/runwhere-ai/gpuctl/releases">
+    <img src="https://img.shields.io/github/v/release/runwhere-ai/gpuctl?style=flat-square&color=blue&label=Release" alt="release">
   </a>
   <img src="https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white" alt="python">
   <img src="https://img.shields.io/badge/Kubernetes-1.24+-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="kubernetes">
@@ -248,7 +248,7 @@ pip install gpuctl
 
 ### From Source
 ```bash
-git clone https://github.com/g8s-host/gpuctl.git
+git clone https://github.com/runwhere-ai/gpuctl.git
 cd gpuctl
 pip install -e .
 ```
@@ -256,7 +256,7 @@ pip install -e .
 ### Binary Download
 ```bash
 # Linux
-wget https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-linux-amd64
+wget https://github.com/runwhere-ai/gpuctl/releases/latest/download/gpuctl-linux-amd64
 chmod +x gpuctl-linux-amd64
 sudo mv gpuctl-linux-amd64 /usr/local/bin/gpuctl
 ```
@@ -267,8 +267,8 @@ sudo mv gpuctl-linux-amd64 /usr/local/bin/gpuctl
 
 如果 gpuctl 对你有帮助，请给我们一个 ⭐️ Star！
 
-<a href="https://github.com/g8s-host/gpuctl/stargazers">
-  <img src="https://img.shields.io/github/stars/g8s-host/gpuctl?style=social" alt="stars">
+<a href="https://github.com/runwhere-ai/gpuctl/stargazers">
+  <img src="https://img.shields.io/github/stars/runwhere-ai/gpuctl?style=social" alt="stars">
 </a>
 
 ---
