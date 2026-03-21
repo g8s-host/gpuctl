@@ -42,7 +42,7 @@ def _format_event_age(timestamp_str: str) -> str:
         return "-"
 
 
-# Helper function: handle g8s-host prefix
+# Helper function: handle runwhere-ai prefix
 
 def remove_prefix(name):
     """Return the original name without any prefix"""

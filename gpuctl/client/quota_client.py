@@ -10,7 +10,7 @@ class QuotaClient(KubernetesClient):
 
     _instance = None
 
-    DEFAULT_NAMESPACE = "g8s-host"
+    DEFAULT_NAMESPACE = "runwhere-ai"
 
     @classmethod
     def get_instance(cls):
