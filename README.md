@@ -1,674 +1,278 @@
-# gpuctl - AI Computing Power Scheduling Platform
+<!-- Banner 区域 -->
+<p align="center">
+  <img src="docs/assets/gpuctl_logo.svg" width="200" alt="gpuctl logo">
+</p>
 
-[简体中文](doc/README.zh-CN.md) | [English](README.md)
+<!-- 彩色徽章 Shields -->
+<p align="center">
+  <a href="https://github.com/g8s-host/gpuctl/releases">
+    <img src="https://img.shields.io/github/v/release/g8s-host/gpuctl?style=flat-square&color=blue&label=Release" alt="release">
+  </a>
+  <img src="https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white" alt="python">
+  <img src="https://img.shields.io/badge/Kubernetes-1.24+-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="kubernetes">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="license">
+  <img src="https://img.shields.io/badge/Contributions-Welcome-orange?style=flat-square" alt="contributions">
+</p>
 
-## Project Introduction
+<!-- 一句话标语 -->
+<h2 align="center">🚀 像写 Python 脚本一样调度 GPU 集群</h2>
 
-gpuctl is an AI computing power scheduling platform designed for algorithm engineers, aiming to lower the threshold for using GPU computing resources. Through declarative YAML configuration and simple CLI commands, algorithm engineers can efficiently submit and manage AI training and inference tasks without mastering complex knowledge of underlying infrastructure like Kubernetes.
+<p align="center">
+  <b>声明式 YAML</b> · <b>零 K8s 知识</b> · <b>资源池隔离</b>
+</p>
 
-### Core Pain Points Solved
+<p align="center">
+  <a href="./doc/README.zh-CN.md">简体中文</a> •
+  <a href="#-quick-start">快速开始</a> •
+  <a href="#-documentation">文档</a> •
+  <a href="#-features">特性</a>
+</p>
 
-- No need to learn complex Kubernetes concepts (Pod, Deployment, Service, etc.)
-- Simplify the installation and configuration of GPU drivers, dependency libraries, and other cumbersome environments
-- Provide high-performance, efficient computing execution environment supporting both training and inference scenarios
-- Enable direct use of computing resources on existing Kubernetes clusters through declarative commands
+---
 
-## System Architecture
+## ✨ 为什么选择 gpuctl
 
-The platform adopts a layered design, exposing a user-friendly abstraction layer while being built on mature Kubernetes and containerization technologies, with an added resource pool management module to support fine-grained resource scheduling.
+<!-- 第1行：核心价值 -->
+<table align="center">
+  <tr>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/⚡-极简_CLI-FFD700?style=flat-square" alt="cli"><br><br>
+      <b>一行命令搞定</b><br>
+      <code>gpuctl create -f job.yaml</code><br><br>
+      <sub>告别 100+ 行 K8s YAML，用声明式配置提交任务</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/🎯-资源池隔离-00C853?style=flat-square" alt="pool"><br><br>
+      <b>多团队资源隔离</b><br>
+      训练池 / 推理池 / 开发池<br><br>
+      <sub>逻辑隔离避免争抢，支持按团队配额管理</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/🔌-无缝集成-2962FF?style=flat-square" alt="integration"><br><br>
+      <b>AI 框架开箱即用</b><br>
+      DeepSpeed / VLLM / LlamaFactory<br><br>
+      <sub>自动注入 NCCL 环境变量和分布式配置</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/👁️-统一观测-FF6D00?style=flat-square" alt="observability"><br><br>
+      <b>一站式监控</b><br>
+      日志 / 事件 / 资源用量<br><br>
+      <sub>告别 kubectl get pods 找 Pod 名的繁琐</sub>
+    </td>
+  </tr>
+</table>
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Algorithm Engineer                        │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        Access Layer                              │
-│                     (gpuctl CLI / REST API)                     │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Abstraction & Conversion Layer                │
-│ (Parse YAML → Validate → Convert to K8s resources → Encapsulate │
-│                          K8s complexity)                        │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                 Scheduling & Execution Layer                     │
-│ (Implement resource pooling based on Kubernetes and ecosystem,  │
-│               allocate GPU resources by pool)                   │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Monitoring & Feedback Layer                    │
-│  (Build monitoring system based on Prometheus+Grafana, collect  │
-│                     full task runtime data)                     │
-└─────────────────────────────────────────────────────────────────┘
-```
+<!-- 第2行：更多优势 -->
+<table align="center">
+  <tr>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/📝-声明式配置-9C27B0?style=flat-square" alt="declarative"><br><br>
+      <b>算法工程师友好</b><br>
+      kind / job / resources<br><br>
+      <sub>熟悉的 YAML 语法，无需理解 Pod/Deployment</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/🔐-自动配额-00BCD4?style=flat-square" alt="quota"><br><br>
+      <b>Namespace 级配额</b><br>
+      CPU / Memory / GPU<br><br>
+      <sub>创建 Namespace 自动绑定 ResourceQuota</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/🌐-RESTful_API-E91E63?style=flat-square" alt="api"><br><br>
+      <b>完整 API 支持</b><br>
+      HTTP / WebSocket<br><br>
+      <sub>易于集成到 MLOps 平台或自建系统</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/🔧-零侵入部署-795548?style=flat-square" alt="non-intrusive"><br><br>
+      <b>已有 K8s 集群</b><br>
+      直接可用<br><br>
+      <sub>不修改集群配置，不影响现有工作负载</sub>
+    </td>
+  </tr>
+</table>
 
-## Core Features
+---
 
-### 1. Multi-type Task Support
-
-- **Training Tasks**: Support distributed training, integrated with acceleration frameworks like DeepSpeed
-- **Inference Services**: Support model deployment with automatic scaling
-- **Debugging Tasks**: Provide Jupyter Notebook environment for easy debugging
-- **Compute Tasks**: Support for batch compute workloads with various resource configurations
-
-### 2. Resource Pool Management
-
-- Support creation and management of resource pools
-- Flexible binding and unbinding of nodes and resource pools
-- Resource isolation and quota management at the resource pool level
-
-### 3. Resource Quota Management
-
-- Declarative YAML-based quota configuration
-- Set resource limits per namespace (CPU, Memory, GPU)
-- View quota usage and consumption rates
-- Automatic namespace creation for each namespace
-
-### 4. Declarative Configuration
-
-- Use terminology familiar to algorithm engineers
-- Hide underlying infrastructure details
-- Support YAML format for task definition
-
-### 5. Rich CLI Commands
-
-- Task lifecycle management
-- Node and resource pool management
-- Real-time log viewing
-- Resource usage monitoring
-
-## Installation
-
-### Prerequisites
-
-- Python 3.8+
-- Kubernetes cluster access permissions
-
-### Installation Methods
-
-#### Method 1: Use Binary File (Recommended)
-
-Download the binary file suitable for your system from GitHub Releases:
+## 🚀 Quick Start
 
 ```bash
-# Linux x86_64 architecture
-wget https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-linux-amd64 -O gpuctl
+# 1. 安装 CLI
+pip install gpuctl
 
-# macOS x86_64 architecture
-curl -L https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-macos-amd64 -o gpuctl
-
-chmod +x gpuctl
-sudo mv gpuctl /usr/local/bin/
-gpuctl --help
-```
-
-#### Method 2: Install from Source (Recommended)
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/g8s-host/gpuctl.git
-cd gpuctl
-```
-
-2. Install dependencies and the package
-
-```bash
-pip install -e .
-```
-
-3. Run gpuctl
-
-```bash
-gpuctl --help
-```
-
-or
-
-```bash
-python main.py --help
-```
-
-### Configure Kubernetes Access
-
-Ensure `kubectl` is properly configured and can access the target Kubernetes cluster.
-
-## Quick Start
-
-### 1. Create a Resource Pool
-
-```yaml
-# train-pool.yaml
-kind: pool
-version: v0.1
-
-pool:
-  name: training-pool
-  description: "Resource pool dedicated to training tasks"
-
-nodes:
-  node1:
-    gpuType: A100-100G
-  node2:
-    gpuType: A800-20G
-```
-
-```bash
-gpuctl create -f train-pool.yaml
-```
-
-### 2. Submit a Training Task
-
-```yaml
-# training-job.yaml
+# 2. 提交 LLM 微调任务（4x A100）
+cat > training.yaml << 'EOF'
 kind: training
 version: v0.1
-
-# Task identification and description (Llama Factory fine-tuning scenario)
 job:
-  name: qwen2-7b-llamafactory-sft
-  priority: "high"
-  description: "llama3 inference task"
-
-# Environment and image - integrated with Llama Factory 0.8.0 + DeepSpeed 0.14.0
+  name: qwen2-7b-sft
 environment:
-  image: registry.example.com/llama-factory-deepspeed:v0.8.0
-  imagePullSecret: my-secret
-  # Llama Factory fine-tuning core command
-  command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b", "--dataset", "alpaca-qwen", "--dataset_dir", "/datasets", "--output_dir", "/output/qwen2-sft", "--per_device_train_batch_size", "8", "--gradient_accumulation_steps", "4", "--learning_rate", "2e-5", "--deepspeed", "ds_config.json"]
-  env:
-    - name: NVIDIA_FLASH_ATTENTION
-      value: "1"
-    - name: LLAMA_FACTORY_CACHE
-      value: "/cache/llama-factory"
-
-# Resource requirements declaration (4x A100 cards)
+  image: llama-factory:latest
+  command: ["llamafactory-cli", "train", "--stage", "sft"]
 resources:
   pool: training-pool
   gpu: 4
-  gpuType: A100-100G # Optional, if not filled, k8s scheduling is used
   cpu: 32
   memory: 128Gi
-  gpuShare: 2Gi
+EOF
 
-# Data and model configuration
-storage:
-  workdirs:
-    - path: /datasets/alpaca-qwen.json
-    - path: /models/qwen2-7b
-    - path: /cache/models
-    - path: /output/qwen2-sft
-    - path: /output/qwen2-sft/checkpoints
-```
+gpuctl create -f training.yaml
 
-```bash
-gpuctl create -f training-job.yaml
-```
-
-### 3. Submit an Inference Task
-
-```yaml
-# inference-service.yaml
-kind: inference
-version: v0.1
-
-# Task identification
-job:
-  name: llama3-8b-inference
-  priority: "medium"
-  description: "llama3 inference task"
-
-# Environment and image (integrated with VLLM 0.5.0+)
-environment:
-  image: vllm/vllm-serving:v0.5.0 # Optimized inference image
-  command: ["python", "-m", "vllm.entrypoints.openai.api_server"] # Start command
-  args:
-    - "--model"
-    - "/home/data/models/llama3-8b"
-    - "--tensor-parallel-size"
-    - "1"
-    - "v2"
-    - "--max-num-seqs"
-    - "256"
-
-# Service configuration
-service:
-  replicas: 2
-  port: 8000
-  healthCheck: /health
-
-# Resource specifications (added pool field)
-resources:
-  pool: inference-pool # Dedicated inference resource pool, default is default
-  gpu: 1
-  gpuType: A100-100G # Optional, if not filled, k8s scheduling is used
-  cpu: 8
-  memory: 32Gi
-  gpuShare: 2Gi
-
-storage:
-  workdirs:
-    - path: /home/data/ # Mount local storage directory
-```
-
-```bash
-gpuctl create -f inference-service.yaml
-```
-
-### 4. Submit a Notebook Task
-
-```yaml
-# notebook-job.yaml
-kind: notebook
-version: v0.1
-
-job:
-  name: data-prep-notebook
-  priority: medium
-  description: llama3 inference task
-
-environment:
-  image: registry.example.com/jupyter-ai:v1.0
-  command: ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=ai-gpuctl-2025", "--NotebookApp.password="]
-
-# Service configuration
-service:
-  port: 8888
-
-resources:
-  pool: dev-pool # Default is default
-  gpu: 1
-  gpuType: a10-24g # Optional, if not filled, k8s scheduling is used
-  cpu: 8
-  memory: 32Gi
-  gpuShare: 2Gi
-
-storage:
-  workdirs:
-    - path: /home/jovyan/work # Code storage directory
-```
-
-```bash
-gpuctl create -f notebook-job.yaml
-```
-
-### 5. Submit a Compute Task
-
-```yaml
-# compute-job.yaml
-kind: compute
-version: v0.1
-
-job:
-  name: batch-compute-job
-  priority: medium
-  description: "Batch compute task"
-
-environment:
-  image: registry.example.com/compute:v1.0
-  command: ["python", "compute.py"]
-  args:
-    - "--input"
-    - "/data/input"
-    - "--output"
-    - "/data/output"
-
-resources:
-  pool: default
-  gpu: 1
-  gpuType: a10-24g
-  cpu: 4
-  memory: 16Gi
-  gpuShare: 2Gi
-  pods: 3
-
-storage:
-  workdirs:
-    - path: /data/input
-    - path: /data/output
-```
-
-```bash
-gpuctl create -f compute-job.yaml
-```
-
-### 6. Configure Resource Quota
-
-```yaml
-# quota-config.yaml
-kind: quota
-version: v0.1
-
-quota:
-  name: team-resource-quota
-  description: "Team resource quota configuration"
-
-# Namespace resource allocation (automatically creates namespace for each namespace)
-namespace:
-  elon-musk:
-    cpu: 10
-    memory: 20Gi
-    gpu: 4
-  sam-altman:
-    cpu: 10
-    memory: 20Gi
-    gpu: 4
-```
-
-```bash
-gpuctl create -f quota-config.yaml
-```
-
-### 7. Query Task Status
-
-```bash
+# 3. 查看任务状态
 gpuctl get jobs
+
+# 4. 实时查看日志
+gpuctl logs qwen2-7b-sft -f
 ```
 
-### 8. View Task Logs
+<!-- Demo GIF 占位符 - 后续替换为实际动图 -->
+<p align="center">
+  <img src="https://via.placeholder.com/800x400/1a1a2e/e94560?text=Demo+GIF+Placeholder" width="800" alt="demo">
+  <br>
+  <sub>👆 终端操作演示（后续替换为实际录制）</sub>
+</p>
 
+---
+
+## 🆚 gpuctl vs 原生 Kubectl
+
+<table width="100%">
+  <tr>
+    <th width="25%">场景</th>
+    <th width="37.5%">✨ gpuctl 方式</th>
+    <th width="37.5%">原生 Kubectl 方式</th>
+  </tr>
+  <tr>
+    <td><b>📝 提交训练任务</b></td>
+    <td><b>只需 15-20 行声明式配置</b>，填写 kind、job.name、resources.gpu 等算法工程师熟悉的字段即可提交任务</td>
+    <td>编写 120+ 行 K8s YAML，手动创建 Secret、ConfigMap、Job 等资源，需要理解 PodSpec、ResourceRequirements、VolumeMounts 等复杂概念</td>
+  </tr>
+  <tr>
+    <td><b>📊 查看任务状态</b></td>
+    <td><b>一条命令查看所有任务</b> <code>gpuctl get jobs</code>，自动聚合 Pod 状态，直接显示任务名称、状态、资源用量</td>
+    <td>先 <code>kubectl get jobs</code> 找到 Job，再 <code>get pods -l job-name=xxx</code> 找到 Pod，最后 <code>describe pod</code> 查看详情，流程繁琐</td>
+  </tr>
+  <tr>
+    <td><b>🔍 查看任务日志</b></td>
+    <td><b>直接用任务名查看日志</b> <code>gpuctl logs &lt;job-name&gt; -f</code>，自动追踪 Pod 变化，支持多副本聚合日志</td>
+    <td>需要记住 Pod 名称（如 <code>training-job-7d9f4b8c5-x2mnp</code>），执行 <code>kubectl logs &lt;pod-name&gt; -f</code>，Pod 重启后名称变化需要重新查找</td>
+  </tr>
+  <tr>
+    <td><b>🧠 多 GPU 训练</b></td>
+    <td><b>声明 gpu 数量即可</b>，平台自动注入 NCCL_SOCKET_IFNAME、MASTER_ADDR、WORLD_SIZE 等环境变量，自动配置 DeepSpeed</td>
+    <td>手动配置 NCCL 环境变量、DeepSpeed hostfile、PyTorch 启动参数，需要理解 GPU 通信和进程组概念</td>
+  </tr>
+  <tr>
+    <td><b>🏊 资源池管理</b></td>
+    <td><b>声明式资源池配置</b>，<code>pool: training-pool</code> 自动调度到对应节点组，支持多团队资源隔离和配额管控</td>
+    <td>通过 LabelSelector 和 NodeAffinity 手动绑定节点，需要为每个团队维护复杂的调度策略和资源限制</td>
+  </tr>
+  <tr>
+    <td><b>📋 资源配额管理</b></td>
+    <td><b>配额随 Namespace 自动创建</b>，<code>gpuctl describe quota</code> 一键查看已用/总量，超限自动拦截并给出友好提示</td>
+    <td>手动创建 ResourceQuota 和 LimitRange，每个 Namespace 需要单独配置，配额使用情况需要多次查询汇总</td>
+  </tr>
+  <tr>
+    <td><b>⚡ 部署推理服务</b></td>
+    <td><b>自动创建 Deployment + Service</b>，声明 replicas 和 port 即可，自动生成 NodePort 暴露服务，内置就绪探针</td>
+    <td>分别创建 Deployment、Service、Ingress/NodePort，配置 HPA 自动扩缩容，需要理解 Service 类型和网络策略</td>
+  </tr>
+  <tr>
+    <td><b>📓 启动 Notebook</b></td>
+    <td><b>一键启动 JupyterLab</b>，自动生成访问链接，支持自定义镜像和密码，自动挂载存储卷</td>
+    <td>手动创建 StatefulSet、Headless Service、Ingress，配置 PVC 存储，处理 Jupyter Token 和密码</td>
+  </tr>
+</table>
+
+---
+
+## 🏗️ Architecture
+
+<p align="center">
+  <img src="docs/assets/architect.png" width="700" alt="gpuctl architecture">
+</p>
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────────────────────┐
+│   User      │────▶│  gpuctl CLI │────▶│  K8s Job/Deployment/        │
+│  (YAML)     │     │   / REST API│     │  StatefulSet + Service      │
+└─────────────┘     └─────────────┘     └─────────────────────────────┘
+```
+
+---
+
+## 📚 Documentation
+
+完整文档请访问 **[docs/](docs/)** 目录，或查看以下快速导航：
+
+### 🚀 入门
+从零开始使用 gpuctl，快速体验声明式 GPU 调度带来的效率提升
+
+- **[快速开始](docs/user-guide/quickstart.md)** — 5 分钟完成首个训练任务提交，从安装到查看日志的完整流程，包含 ready-to-use 的示例 YAML 文件
+- **[安装指南](docs/install.md)** — 详细说明 PyPI 安装、源码安装、二进制下载三种方式，以及 K8s 集群连接配置和权限设置
+
+### 📖 用户指南
+深入了解 gpuctl 的四大任务类型，掌握生产环境下的最佳实践
+
+- **[训练任务](docs/user-guide/training.md)** — 详解 LlamaFactory + DeepSpeed 分布式训练配置，涵盖单机多卡、Checkpoint 保存、自定义镜像等高级用法，以及训练过程中的监控和故障恢复
+- **[推理服务](docs/user-guide/inference.md)** — VLLM 推理服务的完整部署流程，包括自动扩缩容配置、服务暴露、多副本负载均衡，以及生产环境的性能调优建议
+- **[Notebook](docs/user-guide/notebook.md)** — JupyterLab 交互式开发环境的创建与管理，支持自定义镜像、持久化存储、GPU 共享等场景，适合模型调试和数据探索
+- **[资源池管理](docs/user-guide/pool.md)** — 将集群 GPU 节点划分为逻辑资源池，实现训练/推理/开发环境的资源隔离，避免多团队之间的资源争抢
+
+### 🔧 参考文档
+速查手册和 API 说明，解决使用过程中的具体问题
+
+- **[CLI 命令](docs/cli/index.md)** — gpuctl 全部命令的完整参考，包括 create、get、logs、delete 等常用命令的参数说明和典型使用示例
+- **[API 文档](docs/developer-guide/api.md)** — RESTful API 的详细接口定义，包含请求/响应格式、错误码说明，以及 Python/JavaScript 调用示例
+- **[常见问题](docs/faq.md)** — 汇总用户最常遇到的 20+ 个问题，如 Pod 调度失败、镜像拉取错误、GPU 不可见等，提供详细的排查步骤和解决方案
+
+### 🛠️ 开发贡献
+了解 gpuctl 的内部实现，参与社区贡献，共同打造更好的 AI 算力调度平台
+
+- **[架构设计](docs/developer-guide/architecture.md)** — 深入解析 gpuctl 的分层架构设计，包括 YAML 解析器、Builder 模式、K8s Client 封装等核心模块的实现原理
+- **[本地开发](docs/developer-guide/index.md)** — 搭建本地开发环境，运行单元测试和集成测试，调试代码并提交 PR 的完整工作流
+- **[贡献指南](CONTRIBUTING.md)** — 代码规范、Commit Message 格式、Issue 和 PR 的提交规范，以及社区行为准则
+
+---
+
+## 💻 Installation
+
+### Prerequisites
+- Python 3.8+
+- Kubernetes cluster access (via `kubectl`)
+
+### From PyPI (推荐)
 ```bash
-gpuctl logs qwen2-7b-llamafactory-sft -f
+pip install gpuctl
 ```
 
-## CLI Command Reference
-
-### Task Management
-
-| Command Example | Description |
-|---------|---------|
-| `gpuctl create -f train-job.yaml` | Submit a training task |
-| `gpuctl create -f task1.yaml -f task2.yaml` | Batch submit multiple tasks |
-| `gpuctl get jobs` | List all tasks (training/inference) and core metrics |
-| `gpuctl get jobs -n <namespace>` | List tasks in a specified namespace |
-| `gpuctl get jobs --pool training-pool` | List tasks in a specified resource pool |
-| `gpuctl get jobs --kind training` | List tasks of a specific type |
-| `gpuctl get jobs --pods` | Show pod-level information instead of deployment/statefulset level |
-| `gpuctl describe job <job-id>` | View detailed task information and resource usage curves |
-| `gpuctl logs <job-id> -f` | View real-time task logs, supports keyword filtering |
-| `gpuctl delete -f job.yaml` | Delete/stop a task, supports --force for forced deletion |
-| `gpuctl delete job <job-name>` | Delete a specific job by name |
-| `gpuctl apply -f job.yaml` | Apply a resource configuration (create or update) |
-
-### Resource Pool Management
-
-| Command Example | Description |
-|---------|---------|
-| `gpuctl get pools` | List all resource pools and basic information |
-| `gpuctl create -f pool.yaml` | Create a new resource pool |
-| `gpuctl delete -f pool.yaml` | Delete a resource pool |
-| `gpuctl describe pool <pool-name>` | View detailed resource pool information |
-
-### Node Management
-
-| Command Example | Description |
-|---------|---------|
-| `gpuctl get nodes` | List basic information of all cluster nodes (name, status, total GPUs, bound resource pools) |
-| `gpuctl get nodes --pool <pool-name>` | Filter nodes bound to a specific resource pool |
-| `gpuctl get nodes --gpuType <gpuType>` | Filter nodes with a specific GPU type |
-| `gpuctl describe node <node-name>` | View detailed information of a single node (CPU/GPU resources, GPU type/quantity, label list, bound resource pools, K8s node details) |
-| `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | Mark GPU type label for a specific node (default label key) |
-| `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | Mark a label for a specific node, supports overwriting existing labels with the same key |
-| `gpuctl get labels <node-name>` | Query all labels for a node |
-| `gpuctl get labels <node-name> --key=g8s.host/gpu-type` | Query the value of a specific GPU type label for a node |
-| `gpuctl label node <node-name> <label-key> --delete` | Delete a specific label from a node |
-
-### Resource Quota Management
-
-| Command Example | Description |
-|---------|---------|
-| `gpuctl create -f quota.yaml` | Create resource quota configuration |
-| `gpuctl get quotas` | List all resource quotas |
-| `gpuctl get quotas <namespace-name>` | View quota for a specific namespace |
-| `gpuctl describe quota <namespace-name>` | View detailed quota usage (used/total) |
-| `gpuctl delete -f quota.yaml` | Delete resource quota |
-| `gpuctl delete quota <namespace-name>` | Delete quota for a specific namespace |
-
-### Namespace Management
-
-| Command Example | Description |
-|---------|---------|
-| `gpuctl get ns` | List all namespaces |
-| `gpuctl get namespaces` | List all namespaces (full command) |
-| `gpuctl describe ns <namespace-name>` | View detailed information of a namespace |
-| `gpuctl describe namespace <namespace-name>` | View detailed information of a namespace (full command) |
-| `gpuctl delete ns <namespace-name>` | Delete a namespace |
-| `gpuctl delete namespace <namespace-name>` | Delete a namespace (full command) |
-| `gpuctl delete ns <namespace-name> --force` | Force delete a namespace |
-
-## API Documentation
-
-The platform provides RESTful API interfaces that can be used to build third-party tools or integrate into existing systems.
-
-### Basic Information
-
-- **Base Path**: `/api/v1`
-- **Data Format**: Requests/responses use JSON format, YAML configuration is transmitted via `application/yaml` media type
-- **Authentication**: Bearer Token authentication, passed through HTTP header `Authorization: Bearer <token>`
-- **Version Control**: URL path includes version (e.g., `v1`), supporting multi-version parallel maintenance
-- **Status Code Specifications**:
-  - 200: Request successful
-  - 201: Resource created successfully
-  - 400: Invalid request parameters (e.g., invalid YAML format)
-  - 401: Unauthenticated (invalid or expired Token)
-  - 403: Insufficient permissions (e.g., non-admin operating resource pools)
-  - 404: Resource not found (e.g., invalid task ID)
-  - 500: Server internal error (e.g., Kubernetes cluster exception)
-
-### Core API Endpoints
-
-#### Task Management API
-
-| Endpoint | Method | Function |
-|----------|--------|----------|
-| `/jobs` | POST | Create task |
-| `/jobs/batch` | POST | Batch create tasks |
-| `/jobs` | GET | Query task list |
-| `/jobs/{jobId}` | GET | Query task details |
-| `/jobs/{jobId}` | DELETE | Delete task |
-| `/jobs/{jobId}/logs` | GET | Get task real-time logs |
-| `/jobs/{jobId}/metrics` | GET | Get task metric time-series data |
-
-#### Resource Pool Management API
-
-| Endpoint | Method | Function |
-|----------|--------|----------|
-| `/pools` | GET | Query resource pool list |
-| `/pools/{poolName}` | GET | Query resource pool details |
-| `/pools` | POST | Create resource pool |
-| `/pools/{poolName}` | DELETE | Delete resource pool |
-
-#### Node Management API
-
-| Endpoint | Method | Function |
-|----------|--------|----------|
-| `/nodes` | GET | Query node list |
-| `/nodes/{nodeName}` | GET | Query node details |
-| `/nodes/{nodeName}/labels` | POST | Add labels to node |
-| `/nodes/labels` | GET | Query node labels |
-| `/nodes/{nodeName}/labels/{key}` | DELETE | Delete node label |
-
-#### Resource Quota Management API
-
-| Endpoint | Method | Function |
-|----------|--------|----------|
-| `/quotas` | GET | Query quota list |
-| `/quotas/{namespaceName}` | GET | Query quota details with usage |
-| `/quotas` | POST | Create resource quota |
-| `/quotas/{namespaceName}` | DELETE | Delete resource quota |
-
-### Interactive API Documentation
-
-After starting the server, you can access the interactive Swagger UI at:
-
-```
-http://localhost:8000/api/v1/docs
-```
-
-## Development Guide
-
-### Directory Structure
-
-```
-gpuctl/
-├── api/                  # API definitions
-│   ├── training.py       # Training task model
-│   ├── inference.py      # Inference task model
-│   ├── notebook.py       # Notebook task model
-│   ├── compute.py        # Compute task model
-│   ├── quota.py          # Resource quota model
-│   ├── pool.py           # Resource pool model
-│   └── common.py         # Common data models
-├── parser/               # YAML parsing and validation
-│   ├── base_parser.py    # Basic parsing logic
-│   ├── training_parser.py # Training task parsing
-│   ├── inference_parser.py # Inference task parsing
-│   ├── notebook_parser.py # Notebook task parsing
-│   ├── compute_parser.py # Compute task parsing
-│   ├── quota_parser.py   # Resource quota parsing
-│   └── pool_parser.py    # Resource pool parsing
-├── builder/              # Model to K8s resource conversion
-│   ├── training_builder.py # Training task → K8s Job
-│   ├── inference_builder.py # Inference task → Deployment+HPA
-│   ├── notebook_builder.py # Notebook → StatefulSet+Service
-│   ├── compute_builder.py # Compute task → K8s Job/Deployment
-│   └── base_builder.py   # Basic building logic
-├── client/               # K8s operation encapsulation
-│   ├── base_client.py    # Basic K8s client
-│   ├── job_client.py     # Task management
-│   ├── quota_client.py   # Resource quota management
-│   ├── pool_client.py    # Resource pool management
-│   └── log_client.py     # Log retrieval
-├── kind/                 # Scenario-specific logic
-│   ├── training_kind.py  # Multi-GPU training/distributed scheduling
-│   ├── inference_kind.py # Inference service scaling
-│   ├── notebook_kind.py  # Notebook lifecycle management
-│   └── compute_kind.py   # Batch compute task management
-├── cli/                  # CLI command implementations
-│   ├── main.py           # Main command entry
-│   ├── job.py            # Task-related commands
-│   ├── pool.py           # Resource pool-related commands
-│   ├── quota.py          # Resource quota commands
-│   └── node.py           # Node-related commands
-├── server/               # API server implementation
-│   ├── main.py           # Server entry point
-│   ├── models.py         # Data models
-│   ├── auth.py           # Authentication and authorization
-│   ├── dependencies.py   # Dependency injection
-│   └── routes/           # API routes
-│       ├── jobs.py        # Task management routes
-│       ├── pools.py       # Resource pool management routes
-│       ├── quotas.py      # Resource quota routes
-│       ├── nodes.py       # Node management routes
-│       ├── labels.py      # Label management routes
-│       └── auth.py        # Authentication routes
-├── tests/                # Test cases
-│   ├── conftest.py       # Test configuration
-│   ├── test_gpuctl.py    # Core functionality tests
-│   ├── api/              # API tests
-│   │   ├── test_jobs.py   # Task API tests
-│   │   ├── test_pools.py  # Resource pool API tests
-│   │   ├── test_nodes.py  # Node API tests
-│   │   └── test_labels.py # Label management API tests
-│   └── cli/              # CLI tests
-│       ├── test_job_commands.py   # Task command tests
-│       ├── test_pool_commands.py  # Resource pool command tests
-│       └── test_node_commands.py  # Node command tests
-├── main.py               # Main entry point
-├── poetry.lock           # Dependency lock file
-└── pyproject.toml        # Project configuration
-```
-
-### Start Development Server
-
+### From Source
 ```bash
-python server/main.py
+git clone https://github.com/g8s-host/gpuctl.git
+cd gpuctl
+pip install -e .
 ```
 
-### Run Tests
-
+### Binary Download
 ```bash
-pytest
+# Linux
+wget https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-linux-amd64
+chmod +x gpuctl-linux-amd64
+sudo mv gpuctl-linux-amd64 /usr/local/bin/gpuctl
 ```
 
-### Build Binary
+---
 
-You can build a standalone binary file using PyInstaller. This allows you to run gpuctl without a Python environment.
+## 🌟 Show Your Support
 
-#### Prerequisites
+如果 gpuctl 对你有帮助，请给我们一个 ⭐️ Star！
 
-- PyInstaller 5.0+
-- Python 3.12 (recommended)
+<a href="https://github.com/g8s-host/gpuctl/stargazers">
+  <img src="https://img.shields.io/github/stars/g8s-host/gpuctl?style=social" alt="stars">
+</a>
 
-#### Build Steps
+---
 
-1. Install dependencies
+## 📄 License
 
-```bash
-pip install kubernetes>=24.2.0 PyYAML>=6.0 pydantic>=2.0 pyinstaller
-```
-
-2. Build the binary for Linux/macOS
-
-```bash
-# Build for Linux
-pyinstaller --onefile --name="gpuctl-linux-amd64" --hidden-import=yaml --hidden-import=PyYAML main.py
-
-# Build for macOS
-pyinstaller --onefile --name="gpuctl-macos-amd64" --hidden-import=yaml --hidden-import=PyYAML main.py
-```
-
-3. Build the binary for Windows
-
-```bash
-pyinstaller --onefile --name="gpuctl-windows-amd64.exe" --hidden-import=yaml --hidden-import=PyYAML main.py
-```
-
-4. Find the built binary
-
-```bash
-ls -la dist/
-```
-
-The built binary will be in the `dist/` directory.
-
-5. Use the binary
-
-```bash
-# Linux/macOS
-chmod +x dist/gpuctl-linux-amd64
-./dist/gpuctl-linux-amd64 --help
-
-# Windows
-./dist/gpuctl-windows-amd64.exe --help
-```
-
-## Contribution Guide
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-- Project Home: https://github.com/g8s-host/gpuctl
-- Issue Tracker: https://github.com/g8s-host/gpuctl/issues
-- Documentation: https://github.com/g8s-host/gpuctl/tree/main/doc
-
-## Acknowledgments
-
-Thank you to all developers and users who have contributed to the project!
+[MIT License](LICENSE) © 2024 GPU Control Team
