@@ -233,20 +233,21 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
 ## Quick Start
 
 ```bash
-# 1. Install
-pip install -e .
+# 1. Download the binary to the master node (no Python/pip required)
+curl -L https://github.com/runwhere-ai/gpuctl/releases/latest/download/gpuctl-linux-amd64 -o gpuctl
+chmod +x gpuctl && sudo mv gpuctl /usr/local/bin/
 
-# 2. Submit a training job
-gpuctl create -f training-job.yaml
+# 2. Submit a job
+gpuctl create -f job.yaml
 
 # 3. Check job status
 gpuctl get jobs
 
 # 4. Stream logs
-gpuctl logs qwen2-7b-sft -f
+gpuctl logs llamafactory-quickstart -f
 
 # 5. Delete job
-gpuctl delete job qwen2-7b-sft
+gpuctl delete job llamafactory-quickstart
 ```
 
 [:octicons-arrow-right-24: Full Quickstart Guide](user-guide/quickstart.md){ .md-button .md-button--primary }

@@ -233,20 +233,21 @@ hide:
 ## 快速体验
 
 ```bash
-# 1. 安装
-pip install -e .
+# 1. 在 master 节点下载二进制，无需 Python/pip
+curl -L https://github.com/runwhere-ai/gpuctl/releases/latest/download/gpuctl-linux-amd64 -o gpuctl
+chmod +x gpuctl && sudo mv gpuctl /usr/local/bin/
 
-# 2. 提交训练任务
-gpuctl create -f training-job.yaml
+# 2. 提交任务
+gpuctl create -f job.yaml
 
 # 3. 查看任务状态
 gpuctl get jobs
 
 # 4. 实时日志
-gpuctl logs qwen2-7b-sft -f
+gpuctl logs llamafactory-quickstart -f
 
 # 5. 删除任务
-gpuctl delete job qwen2-7b-sft
+gpuctl delete job llamafactory-quickstart
 ```
 
 [:octicons-arrow-right-24: 查看完整快速开始指南](user-guide/quickstart.md){ .md-button .md-button--primary }
