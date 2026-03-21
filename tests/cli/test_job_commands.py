@@ -234,7 +234,7 @@ def test_delete_job(mock_job_client):
     mock_instance = MagicMock()
     mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
     mock_instance.list_jobs.return_value = [
-        {"name": "test-nginx", "labels": {"g8s.host/job-type": "compute"}, "namespace": "default"}
+        {"name": "test-nginx", "labels": {"runwhere.ai/job-type": "compute"}, "namespace": "default"}
     ]
     mock_instance.list_pods.return_value = []
     mock_instance.delete_deployment.return_value = True
@@ -322,7 +322,7 @@ def test_describe_job(mock_job_client):
     mock_instance.get_job.return_value = {
         "name": "test-nginx",
         "namespace": "default",
-        "labels": {"g8s.host/job-type": "compute"},
+        "labels": {"runwhere.ai/job-type": "compute"},
         "status": {}
     }
     mock_job_client.return_value = mock_instance
@@ -391,7 +391,7 @@ def test_delete_job_with_force(mock_job_client):
     mock_instance = MagicMock()
     mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
     mock_instance.list_jobs.return_value = [
-        {"name": "test-nginx", "labels": {"g8s.host/job-type": "training"}, "namespace": "default"}
+        {"name": "test-nginx", "labels": {"runwhere.ai/job-type": "training"}, "namespace": "default"}
     ]
     mock_instance.list_pods.return_value = []
     mock_instance.delete_job.return_value = True
@@ -410,7 +410,7 @@ def test_delete_job_with_json(mock_job_client):
     mock_instance = MagicMock()
     mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
     mock_instance.list_jobs.return_value = [
-        {"name": "test-nginx", "labels": {"g8s.host/job-type": "compute"}, "namespace": "default"}
+        {"name": "test-nginx", "labels": {"runwhere.ai/job-type": "compute"}, "namespace": "default"}
     ]
     mock_instance.list_pods.return_value = []
     mock_instance.delete_deployment.return_value = True
@@ -514,7 +514,7 @@ def test_describe_job_with_json(mock_job_client):
     mock_instance.get_job.return_value = {
         "name": "test-nginx",
         "namespace": "default",
-        "labels": {"g8s.host/job-type": "compute"},
+        "labels": {"runwhere.ai/job-type": "compute"},
         "status": {}
     }
     mock_job_client.return_value = mock_instance
@@ -681,7 +681,7 @@ def test_create_job_rejects_duplicate_same_kind(mock_pool_client_class, mock_quo
         {
             "name": "test-training-job",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "training"},
+            "labels": {"runwhere.ai/job-type": "training"},
         }
     ]
     mock_job_client_class.return_value = mock_job_instance
@@ -724,7 +724,7 @@ def test_create_inference_rejects_duplicate(mock_pool_client_class, mock_quota_c
         {
             "name": "new-test-inference-job",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "inference"},
+            "labels": {"runwhere.ai/job-type": "inference"},
         }
     ]
     mock_job_client_class.return_value = mock_job_instance
@@ -767,7 +767,7 @@ def test_create_inference_rejects_duplicate_json_output(mock_pool_client_class, 
         {
             "name": "new-test-inference-job",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "inference"},
+            "labels": {"runwhere.ai/job-type": "inference"},
         }
     ]
     mock_job_client_class.return_value = mock_job_instance
@@ -815,7 +815,7 @@ def test_create_job_allows_different_name(mock_pool_client_class, mock_quota_cli
         {
             "name": "existing-other-job",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "training"},
+            "labels": {"runwhere.ai/job-type": "training"},
         }
     ]
     mock_job_client_class.return_value = mock_job_instance
@@ -1007,7 +1007,7 @@ def test_delete_job_via_yaml(mock_parse_yaml_file, mock_job_client):
     mock_instance = MagicMock()
     mock_instance._get_all_gpuctl_namespaces.return_value = ["default"]
     mock_instance.list_jobs.return_value = [
-        {"name": "test-training", "labels": {"g8s.host/job-type": "training"}, "namespace": "default"}
+        {"name": "test-training", "labels": {"runwhere.ai/job-type": "training"}, "namespace": "default"}
     ]
     mock_instance.list_pods.return_value = []
     mock_instance.delete_job.return_value = True
@@ -1031,7 +1031,7 @@ def test_get_jobs_with_pods_flag(mock_job_client):
             "name": "test-nginx-pod-abc",
             "namespace": "default",
             "kind": "compute",
-            "labels": {"g8s.host/job-type": "compute"},
+            "labels": {"runwhere.ai/job-type": "compute"},
             "status": {"phase": "Running"},
             "node": "node-1",
             "ip": "10.42.0.10",
@@ -1055,7 +1055,7 @@ def test_get_jobs_returns_data(mock_job_client):
             "name": "test-training-job",
             "namespace": "default",
             "kind": "training",
-            "labels": {"g8s.host/job-type": "training"},
+            "labels": {"runwhere.ai/job-type": "training"},
             "status": {"phase": "Running"},
             "node": "node-1",
             "ip": "10.42.0.5",
@@ -1065,7 +1065,7 @@ def test_get_jobs_returns_data(mock_job_client):
             "name": "test-inference-job",
             "namespace": "new-test",
             "kind": "inference",
-            "labels": {"g8s.host/job-type": "inference"},
+            "labels": {"runwhere.ai/job-type": "inference"},
             "status": {"phase": "Failed"},
             "node": "node-2",
             "ip": "N/A",
@@ -1088,7 +1088,7 @@ def test_get_jobs_returns_data_with_json(mock_job_client):
             "name": "test-training-job",
             "namespace": "default",
             "kind": "training",
-            "labels": {"g8s.host/job-type": "training"},
+            "labels": {"runwhere.ai/job-type": "training"},
             "status": {"phase": "Running"},
             "node": "node-1",
             "ip": "10.42.0.5",
@@ -1116,7 +1116,7 @@ def test_describe_job_with_namespace(mock_job_client):
     mock_instance.get_job.return_value = {
         "name": "test-nginx",
         "namespace": "custom-ns",
-        "labels": {"g8s.host/job-type": "compute"},
+        "labels": {"runwhere.ai/job-type": "compute"},
         "status": {}
     }
     mock_job_client.return_value = mock_instance
@@ -1138,7 +1138,7 @@ def test_statefulset_status_running(mock_job_client):
         {
             "name": "test-notebook-0",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "notebook"},
+            "labels": {"runwhere.ai/job-type": "notebook"},
             "status": {
                 "readyReplicas": 1,
                 "currentReplicas": 1,
@@ -1168,7 +1168,7 @@ def test_statefulset_status_pending(mock_job_client):
         {
             "name": "test-notebook-0",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "notebook"},
+            "labels": {"runwhere.ai/job-type": "notebook"},
             "status": {
                 "readyReplicas": 0,
                 "currentReplicas": 0,
@@ -1199,7 +1199,7 @@ def test_delete_job_by_exact_name(mock_job_client):
     mock_instance.list_jobs.return_value = [
         {
             "name": "new-test-inference-job",
-            "labels": {"g8s.host/job-type": "inference"},
+            "labels": {"runwhere.ai/job-type": "inference"},
             "namespace": "default"
         }
     ]
@@ -1224,7 +1224,7 @@ def test_delete_job_wrong_name_not_found(mock_job_client):
     mock_instance.list_jobs.return_value = [
         {
             "name": "new-test-inference-job",
-            "labels": {"g8s.host/job-type": "inference"},
+            "labels": {"runwhere.ai/job-type": "inference"},
             "namespace": "default"
         }
     ]
@@ -1247,7 +1247,7 @@ def test_delete_training_job_by_name(mock_job_client):
     mock_instance.list_jobs.return_value = [
         {
             "name": "test-training-job",
-            "labels": {"g8s.host/job-type": "training"},
+            "labels": {"runwhere.ai/job-type": "training"},
             "namespace": "default"
         }
     ]
@@ -1270,7 +1270,7 @@ def test_delete_notebook_job_by_name(mock_job_client):
     mock_instance.list_jobs.return_value = [
         {
             "name": "my-notebook-job",
-            "labels": {"g8s.host/job-type": "notebook"},
+            "labels": {"runwhere.ai/job-type": "notebook"},
             "namespace": "default"
         }
     ]
@@ -1295,9 +1295,9 @@ def test_delete_job_ambiguous_cross_namespace(mock_job_client):
 
     def list_jobs_by_ns(ns, labels=None, include_pods=False):
         if ns == "default":
-            return [{"name": "my-train-job", "labels": {"g8s.host/job-type": "training"}, "namespace": "default"}]
+            return [{"name": "my-train-job", "labels": {"runwhere.ai/job-type": "training"}, "namespace": "default"}]
         elif ns == "ml-team":
-            return [{"name": "my-train-job", "labels": {"g8s.host/job-type": "training"}, "namespace": "ml-team"}]
+            return [{"name": "my-train-job", "labels": {"runwhere.ai/job-type": "training"}, "namespace": "ml-team"}]
         return []
 
     mock_instance.list_jobs.side_effect = list_jobs_by_ns
@@ -1318,7 +1318,7 @@ def test_delete_job_disambiguate_by_namespace(mock_job_client):
 
     def list_jobs_by_ns(ns, labels=None, include_pods=False):
         if ns == "ml-team":
-            return [{"name": "my-train-job", "labels": {"g8s.host/job-type": "training"}, "namespace": "ml-team"}]
+            return [{"name": "my-train-job", "labels": {"runwhere.ai/job-type": "training"}, "namespace": "ml-team"}]
         return []
 
     mock_instance.list_jobs.side_effect = list_jobs_by_ns
@@ -1340,7 +1340,7 @@ def test_delete_job_ambiguous_json_output(mock_job_client, capsys):
     mock_instance._get_all_gpuctl_namespaces.return_value = ["default", "staging"]
 
     def list_jobs_by_ns(ns, labels=None, include_pods=False):
-        return [{"name": "shared-job", "labels": {"g8s.host/job-type": "inference"}, "namespace": ns}]
+        return [{"name": "shared-job", "labels": {"runwhere.ai/job-type": "inference"}, "namespace": ns}]
 
     mock_instance.list_jobs.side_effect = list_jobs_by_ns
     mock_job_client.return_value = mock_instance
@@ -1369,12 +1369,12 @@ def test_delete_job_orphan_pods_no_parent_resource(mock_job_client):
         {
             "name": "my-app-inference-job-854c6c5cd-kfh77",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+            "labels": {"runwhere.ai/job-type": "inference", "app": "my-app-inference-job"},
         },
         {
             "name": "my-app-inference-job-f49d5b86c-cgt6h",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+            "labels": {"runwhere.ai/job-type": "inference", "app": "my-app-inference-job"},
         },
     ]
     mock_instance.delete_pod.return_value = True
@@ -1400,7 +1400,7 @@ def test_delete_job_orphan_pods_cleans_service(mock_job_client):
         {
             "name": "my-app-inference-job-854c6c5cd-abc12",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+            "labels": {"runwhere.ai/job-type": "inference", "app": "my-app-inference-job"},
         },
     ]
     mock_instance.delete_pod.return_value = True
@@ -1426,7 +1426,7 @@ def test_delete_job_orphan_pods_with_force(mock_job_client):
         {
             "name": "my-app-inference-job-854c6c5cd-abc12",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "inference", "app": "my-app-inference-job"},
+            "labels": {"runwhere.ai/job-type": "inference", "app": "my-app-inference-job"},
         },
     ]
     mock_instance.delete_pod.return_value = True
@@ -1449,12 +1449,12 @@ from gpuctl.cli.job import _get_job_name
 
 def test_get_job_name_from_app_label():
     """inference/notebook/compute Pod 通过 app label 获取 job.name"""
-    assert _get_job_name({"app": "new-test-inference-job", "g8s.host/job-type": "inference"}) == "new-test-inference-job"
+    assert _get_job_name({"app": "new-test-inference-job", "runwhere.ai/job-type": "inference"}) == "new-test-inference-job"
 
 
 def test_get_job_name_from_job_name_label():
     """training Pod 通过 job-name label 获取 job.name"""
-    assert _get_job_name({"job-name": "test-training-job", "g8s.host/job-type": "training"}) == "test-training-job"
+    assert _get_job_name({"job-name": "test-training-job", "runwhere.ai/job-type": "training"}) == "test-training-job"
 
 
 def test_get_job_name_app_takes_priority():
@@ -1465,4 +1465,4 @@ def test_get_job_name_app_takes_priority():
 def test_get_job_name_empty_labels():
     """无相关 label 时返回空字符串"""
     assert _get_job_name({}) == ""
-    assert _get_job_name({"g8s.host/job-type": "compute"}) == ""
+    assert _get_job_name({"runwhere.ai/job-type": "compute"}) == ""

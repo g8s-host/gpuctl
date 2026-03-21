@@ -87,7 +87,7 @@ def test_get_jobs(mock_job_client):
         {
             "name": "test-job-1-abc123-xyz",
             "namespace": "default",
-            "labels": {"g8s.host/job-type": "training", "g8s.host/pool": "test-pool"},
+            "labels": {"runwhere.ai/job-type": "training", "runwhere.ai/pool": "test-pool"},
             "status": {
                 "active": 1,
                 "succeeded": 0,
@@ -128,7 +128,7 @@ def test_get_job_detail(mock_job_client):
     mock_instance.get_job.return_value = {
         "name": "test-job",
         "namespace": "default",
-        "labels": {"g8s.host/job-type": "training", "g8s.host/pool": "test-pool"},
+        "labels": {"runwhere.ai/job-type": "training", "runwhere.ai/pool": "test-pool"},
         "status": {"active": 1, "succeeded": 0, "failed": 0},
         "creation_timestamp": "2023-01-01T12:00:00Z",
         "start_time": "2023-01-01T12:01:00Z",

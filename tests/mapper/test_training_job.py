@@ -48,7 +48,7 @@ class TestTrainingJobMapper(unittest.TestCase):
                             }
                         ],
                         'nodeSelector': {
-                            'g8s.host/gpuType': 'a10-24g'
+                            'runwhere.ai/gpuType': 'a10-24g'
                         }
                     }
                 }
@@ -221,7 +221,7 @@ class TestTrainingJobMapper(unittest.TestCase):
         job_with_labels = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/pool': 'custom-training-pool'
+                'runwhere.ai/pool': 'custom-training-pool'
             }
         }
 

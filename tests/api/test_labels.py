@@ -83,7 +83,7 @@ def test_get_node_labels(mock_get_instance, client):
     mock_instance.get_node = MagicMock(return_value={
         "name": "node-1",
         "labels": {
-            "g8s.host/pool": "test-pool",
+            "runwhere.ai/pool": "test-pool",
             "gpu-type": "A100",
             "node-role.kubernetes.io/worker": "true"
         }
@@ -99,7 +99,7 @@ def test_get_node_labels(mock_get_instance, client):
     assert response.json() == {
         "node": "node-1",
         "labels": {
-            "g8s.host/pool": "test-pool",
+            "runwhere.ai/pool": "test-pool",
             "gpu-type": "A100",
             "node-role.kubernetes.io/worker": "true"
         }
@@ -114,14 +114,14 @@ def test_list_all_node_labels(mock_get_instance, client):
         {
             "name": "node-1",
             "labels": {
-                "g8s.host/pool": "test-pool",
+                "runwhere.ai/pool": "test-pool",
                 "gpu-type": "A100"
             }
         },
         {
             "name": "node-2",
             "labels": {
-                "g8s.host/pool": "test-pool",
+                "runwhere.ai/pool": "test-pool",
                 "gpu-type": "H100"
             }
         }

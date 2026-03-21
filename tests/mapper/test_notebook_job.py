@@ -202,7 +202,7 @@ class TestNotebookJobMapper(unittest.TestCase):
         job_with_labels = {
             **self.base_job_data,
             'labels': {
-                'g8s.host/pool': 'custom-notebook-pool'
+                'runwhere.ai/pool': 'custom-notebook-pool'
             }
         }
 

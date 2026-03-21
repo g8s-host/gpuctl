@@ -73,16 +73,16 @@ DEFAULT_PRIORITY = Priority.MEDIUM
 # ── Label keys ───────────────────────────────────────────────────────────────
 
 class Labels:
-    JOB_TYPE   = "g8s.host/job-type"
-    PRIORITY   = "g8s.host/priority"
-    POOL       = "g8s.host/pool"
-    NAMESPACE  = "g8s.host/namespace"
-    GPU_TYPE       = "g8s.host/gpuType"
-    GPU_TYPE_KEBAB = "g8s.host/gpu-type"
-    PORT       = "g8s.host/port"
-    DESCRIPTION = "g8s.host/description"
-    QUOTA      = "g8s.host/quota"
-    NS_MARKER  = "g8s.host/namespace"
+    JOB_TYPE   = "runwhere.ai/job-type"
+    PRIORITY   = "runwhere.ai/priority"
+    POOL       = "runwhere.ai/pool"
+    NAMESPACE  = "runwhere.ai/namespace"
+    GPU_TYPE       = "runwhere.ai/gpuType"
+    GPU_TYPE_KEBAB = "runwhere.ai/gpu-type"
+    PORT       = "runwhere.ai/port"
+    DESCRIPTION = "runwhere.ai/description"
+    QUOTA      = "runwhere.ai/quota"
+    NS_MARKER  = "runwhere.ai/namespace"
 
     APP        = "app"
     JOB_NAME   = "job-name"
