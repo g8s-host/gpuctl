@@ -12,7 +12,7 @@ gpuctl 是一个开源项目，欢迎所有人参与！无论是提交 Bug、提
 
     查看源代码、提交 Issue、提交 Pull Request。
 
-    [github.com/g8s-host/gpuctl](https://github.com/g8s-host/gpuctl){ .md-button }
+    [github.com/runwhere-ai/gpuctl](https://github.com/runwhere-ai/gpuctl){ .md-button }
 
 -   :material-bug:{ .lg .middle } **报告 Bug**
 
@@ -20,7 +20,7 @@ gpuctl 是一个开源项目，欢迎所有人参与！无论是提交 Bug、提
 
     发现了问题？在 GitHub Issues 中描述复现步骤，帮助我们持续改进。
 
-    [提交 Bug 报告](https://github.com/g8s-host/gpuctl/issues/new?template=bug_report.md){ .md-button }
+    [提交 Bug 报告](https://github.com/runwhere-ai/gpuctl/issues/new?template=bug_report.md){ .md-button }
 
 -   :material-lightbulb:{ .lg .middle } **功能建议**
 
@@ -28,7 +28,7 @@ gpuctl 是一个开源项目，欢迎所有人参与！无论是提交 Bug、提
 
     有好的想法？在 Issues 中提出功能请求，或在 Discussions 中发起讨论。
 
-    [提出功能建议](https://github.com/g8s-host/gpuctl/issues/new?template=feature_request.md){ .md-button }
+    [提出功能建议](https://github.com/runwhere-ai/gpuctl/issues/new?template=feature_request.md){ .md-button }
 
 -   :material-forum:{ .lg .middle } **社区讨论**
 
@@ -36,7 +36,7 @@ gpuctl 是一个开源项目，欢迎所有人参与！无论是提交 Bug、提
 
     参与技术讨论、分享使用经验、寻求帮助。
 
-    [进入 Discussions](https://github.com/g8s-host/gpuctl/discussions){ .md-button }
+    [进入 Discussions](https://github.com/runwhere-ai/gpuctl/discussions){ .md-button }
 
 </div>
 
@@ -128,7 +128,7 @@ gpuctl 遵循[语义化版本](https://semver.org/lang/zh-CN/)规范：
 - **MINOR**：向后兼容的新功能
 - **PATCH**：向后兼容的 Bug 修复
 
-查看所有版本：[GitHub Releases](https://github.com/g8s-host/gpuctl/releases)
+查看所有版本：[GitHub Releases](https://github.com/runwhere-ai/gpuctl/releases)
 
 ---
 
@@ -149,15 +149,15 @@ gpuctl 遵循[语义化版本](https://semver.org/lang/zh-CN/)规范：
 
 ## 联系我们
 
-- **GitHub Issues**：[技术问题和 Bug](https://github.com/g8s-host/gpuctl/issues)
-- **GitHub Discussions**：[功能讨论和使用经验分享](https://github.com/g8s-host/gpuctl/discussions)
+- **GitHub Issues**：[技术问题和 Bug](https://github.com/runwhere-ai/gpuctl/issues)
+- **GitHub Discussions**：[功能讨论和使用经验分享](https://github.com/runwhere-ai/gpuctl/discussions)
 - **Email**：team@gpuctl.com
 
 ---
 
 ## 许可证
 
-gpuctl 采用 [MIT 许可证](https://github.com/g8s-host/gpuctl/blob/main/LICENSE)开源，你可以自由使用、修改和分发。
+gpuctl 采用 [MIT 许可证](https://github.com/runwhere-ai/gpuctl/blob/main/LICENSE)开源，你可以自由使用、修改和分发。
 
 ```
 MIT License
