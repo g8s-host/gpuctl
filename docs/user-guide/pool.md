@@ -16,7 +16,7 @@
      (training-pool)          (inference-pool)    (dev-pool)
 ```
 
-节点通过 Kubernetes Label `g8s.host/pool=<pool-name>` 绑定到资源池，任务在提交时通过 `resources.pool` 字段指定目标资源池，平台使用 `nodeSelector` 将 Pod 调度到池内节点。
+节点通过 Kubernetes Label `runwhere.ai/pool=<pool-name>` 绑定到资源池，任务在提交时通过 `resources.pool` 字段指定目标资源池，平台使用 `nodeSelector` 将 Pod 调度到池内节点。
 
 ---
 
@@ -141,20 +141,20 @@ gpuctl describe pool training-pool
 
 ```bash
 # 将 node-6 加入 training-pool
-gpuctl label node node-6 g8s.host/pool=training-pool
+gpuctl label node node-6 runwhere.ai/pool=training-pool
 
 # 覆盖已有的 pool 标签
-gpuctl label node node-6 g8s.host/pool=inference-pool --overwrite
+gpuctl label node node-6 runwhere.ai/pool=inference-pool --overwrite
 
 # 查看节点的 pool 标签
-gpuctl get labels node-6 --key=g8s.host/pool
+gpuctl get labels node-6 --key=runwhere.ai/pool
 
 # 标记 GPU 类型
-gpuctl label node node-6 g8s.host/gpu-type=A100-100G
+gpuctl label node node-6 runwhere.ai/gpu-type=A100-100G
 ```
 
 !!! warning "标签键规范"
-    gpuctl 管理的标签键**必须以 `g8s.host/` 开头**，以避免与其他系统的标签冲突。
+    gpuctl 管理的标签键**必须以 `runwhere.ai/` 开头**，以避免与其他系统的标签冲突。
 
 ---
 

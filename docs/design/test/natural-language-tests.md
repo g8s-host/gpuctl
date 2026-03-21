@@ -141,10 +141,10 @@
 
 16. **测试目的**：验证按标签键过滤节点标签的功能
     **测试步骤**：
-    - 执行命令：`gpuctl get labels node-1 --key=g8s.host/gpu-type`
+    - 执行命令：`gpuctl get labels node-1 --key=runwhere.ai/gpu-type`
     **预期结果**：
     - 命令成功，返回零退出码
-    - 输出只包含键为 `g8s.host/gpu-type` 的标签
+    - 输出只包含键为 `runwhere.ai/gpu-type` 的标签
 
 17. **测试目的**：验证获取指定命名空间配额的功能
     **测试步骤**：
@@ -334,7 +334,7 @@
 #### 基本功能测试
 36. **测试目的**：验证为单个节点添加标签的功能
     **测试步骤**：
-    - 执行命令：`gpuctl label node g8s.host/gpu-type=a100-80g node-1`
+    - 执行命令：`gpuctl label node runwhere.ai/gpu-type=a100-80g node-1`
     **预期结果**：
     - 命令成功，返回零退出码
     - 输出包含节点名称和标签信息

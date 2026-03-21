@@ -78,8 +78,8 @@
    - **建议修复**：在命令解析器中添加`create-quota`命令的定义
 
 4. **namespace_has_quota 方法逻辑问题**：
-   - **问题**：该方法首先检查带有`g8s.host/user-namespace=true`标签的命名空间，如果存在任何这样的命名空间，就不会检查带有`g8s.host/namespace=true`标签的命名空间
-   - **影响**：带有`g8s.host/namespace=true`标签的命名空间可能无法通过配额检查
+   - **问题**：该方法首先检查带有`runwhere.ai/user-namespace=true`标签的命名空间，如果存在任何这样的命名空间，就不会检查带有`runwhere.ai/namespace=true`标签的命名空间
+   - **影响**：带有`runwhere.ai/namespace=true`标签的命名空间可能无法通过配额检查
    - **建议修复**：修改逻辑，检查所有相关标签的命名空间，而不是只检查其中一种
 
 ### 5.2 其他问题

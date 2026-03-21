@@ -532,7 +532,7 @@ Base Path: `/api/v1/nodes`
     },
     "labels": [
         {"key": "gpu-type", "value": "A100"},
-        {"key": "g8s.host/pool", "value": "default"}
+        {"key": "runwhere.ai/pool", "value": "default"}
     ],
     "boundPools": ["default"],
     "createdAt": null,
@@ -642,7 +642,7 @@ Content-Type: application/json
     "node": "node-1",
     "labels": {
         "gpu-type": "A100",
-        "g8s.host/pool": "default"
+        "runwhere.ai/pool": "default"
     }
 }
 ```
@@ -755,7 +755,7 @@ POST /api/v1/nodes/labels/batch?nodeNames=node-1&nodeNames=node-2&key=gpu-type&v
 ```json
 {
     "gpu-type": ["A100", "H100"],
-    "g8s.host/pool": ["default", "gpu-pool"]
+    "runwhere.ai/pool": ["default", "gpu-pool"]
 }
 ```
 
@@ -1001,7 +1001,7 @@ Content-Type: application/json
 
 Base Path: `/api/v1/namespaces`
 
-> 仅管理由 gpuctl 创建的命名空间（带有 `g8s.host/namespace=true` 标签），同时包含 `default` 命名空间。
+> 仅管理由 gpuctl 创建的命名空间（带有 `runwhere.ai/namespace=true` 标签），同时包含 `default` 命名空间。
 
 ### GET /api/v1/namespaces
 
@@ -1048,7 +1048,7 @@ Base Path: `/api/v1/namespaces`
     "status": "Active",
     "age": "2026-01-03 23:34:16+00:00",
     "labels": {
-        "g8s.host/namespace": "true"
+        "runwhere.ai/namespace": "true"
     },
     "quota": {
         "name": "default-quota",
