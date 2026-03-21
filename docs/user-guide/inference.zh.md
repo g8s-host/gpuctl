@@ -1,20 +1,20 @@
-# Inference Services
+# 推理服务
 
-Inference jobs (`kind: inference`) are designed for long-running model inference API services. They map to a Kubernetes **Deployment + NodePort Service**, with support for multi-replica deployment and auto-scaling.
+推理任务（`kind: inference`）适用于长期运行的模型推理 API 服务，底层对应 Kubernetes **Deployment + NodePort Service**，支持多副本部署和自动扩缩容。
 
-## Full YAML Fields
+## YAML 完整字段
 
 ```yaml
 kind: inference
 version: v0.1
 
 job:
-  name: <service-name>
+  name: <服务名称>
   priority: medium
-  description: "..."
+  description: "描述"
 
 environment:
-  image: <image>
+  image: <镜像地址>
   command: [...]
   args: [...]
   env:
@@ -22,14 +22,14 @@ environment:
       value: VALUE
 
 service:
-  replicas: 2            # Number of replicas (default: 1)
-  port: 8000             # Service port
-  healthCheck: /health   # Health check path (optional)
+  replicas: 2            # 副本数（默认 1）
+  port: 8000             # 服务端口
+  healthCheck: /health   # 健康检查路径（可选）
 
 resources:
-  pool: inference-pool   # Dedicated inference resource pool
+  pool: inference-pool   # 推理专属资源池
   gpu: 1
-  gpu-type: A100-100G    # Optional
+  gpu-type: A100-100G    # 可选
   cpu: 8
   memory: 32Gi
 
@@ -40,9 +40,9 @@ storage:
 
 ---
 
-## Example 1: VLLM High-Throughput Inference Service
+## 场景一：VLLM 高并发推理服务
 
-Deploy Llama3-8B with VLLM to provide a high-throughput OpenAI-compatible API.
+部署 Llama3-8B 模型，使用 VLLM 提供高吞吐量 OpenAI 兼容 API。
 
 ```yaml title="llama3-inference.yaml"
 kind: inference
@@ -51,7 +51,7 @@ version: v0.1
 job:
   name: llama3-8b-inference
   priority: medium
-  description: "Llama3-8B VLLM inference service"
+  description: "Llama3-8B VLLM 推理服务"
 
 environment:
   image: vllm/vllm-serving:v0.5.0
@@ -90,17 +90,17 @@ storage:
 ```
 
 ```bash
-# Deploy the inference service
+# 部署推理服务
 gpuctl create -f llama3-inference.yaml
 
-# Check service status
+# 查看服务状态
 gpuctl get jobs --kind inference
 
-# View service access addresses
+# 查看服务访问地址
 gpuctl describe job llama3-8b-inference
 ```
 
-**Example access addresses from `describe` output:**
+**`describe` 输出中的访问地址示例：**
 
 ```
 Access Methods:
@@ -110,7 +110,7 @@ Access Methods:
 
 ---
 
-## Example 2: Multi-Replica High-Availability Deployment
+## 场景二：多副本高可用部署
 
 ```yaml title="qwen2-ha-inference.yaml"
 kind: inference
@@ -130,7 +130,7 @@ environment:
     - "8000"
 
 service:
-  replicas: 3          # 3 replicas for high availability
+  replicas: 3          # 3 副本保证高可用
   port: 8000
   healthCheck: /health
 
@@ -147,30 +147,30 @@ storage:
 
 ---
 
-## Updating an Inference Service
+## 更新推理服务
 
-Use `apply` to update service configuration (equivalent to delete + create):
+使用 `apply` 命令更新服务配置（等价于先删后建）：
 
 ```bash
-# After modifying the YAML (e.g. changing replica count or env vars):
+# 修改 YAML（如调整副本数、环境变量等）后执行：
 gpuctl apply -f qwen2-ha-inference.yaml
 ```
 
-## Viewing Inference Logs
+## 查看推理服务日志
 
 ```bash
-# View last 100 lines of logs
+# 查看最近 100 行日志
 gpuctl logs llama3-8b-inference
 
-# Stream logs in real time
+# 实时跟踪日志
 gpuctl logs llama3-8b-inference -f
 ```
 
-## Deleting an Inference Service
+## 删除推理服务
 
 ```bash
 gpuctl delete job llama3-8b-inference
 ```
 
-!!! note "Service Is Also Deleted"
-    When an inference job is deleted, the platform also deletes the associated K8s Deployment and NodePort Service, fully releasing the port resource.
+!!! note "Service 会一并删除"
+    删除推理任务时，平台会同时删除对应的 K8s Deployment 和 NodePort Service，确保端口资源完全释放。

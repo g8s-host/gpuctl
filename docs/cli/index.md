@@ -1,48 +1,48 @@
-# CLI 命令参考
+# CLI Command Reference
 
-gpuctl CLI 与 `kubectl` 对标，但语义更贴近算法工程师的使用习惯。
+The gpuctl CLI mirrors `kubectl` but with semantics optimized for ML engineers.
 
-## 命令概览
+## Command Overview
 
-| 命令 | 说明 |
-|------|------|
-| `create` | 从 YAML 创建资源（任务、资源池、配额） |
-| `apply` | 应用配置（创建或更新，等价于先删后建） |
-| `get` | 查询资源列表 |
-| `describe` | 查看资源详情 |
-| `delete` | 删除资源 |
-| `logs` | 查看任务日志 |
-| `label` | 管理节点标签 |
+| Command | Description |
+|---------|-------------|
+| `create` | Create resources from YAML (jobs, resource pools, quotas) |
+| `apply` | Apply configuration (create or update — equivalent to delete + create) |
+| `get` | List resources |
+| `describe` | View resource details |
+| `delete` | Delete resources |
+| `logs` | View job logs |
+| `label` | Manage node labels |
 
 ---
 
 ## create
 
-从 YAML 文件创建资源。
+Create resources from a YAML file.
 
 ```bash
 gpuctl create -f <file> [-n <namespace>] [--json]
 ```
 
-| 选项 | 说明 | 是否必填 |
-|------|------|---------|
-| `-f, --file` | YAML 文件路径（可多次指定） | 是 |
-| `-n, --namespace` | 命名空间（默认：`default`） | 否 |
-| `--json` | 以 JSON 格式输出 | 否 |
+| Option | Description | Required |
+|--------|-------------|----------|
+| `-f, --file` | YAML file path (can be specified multiple times) | Yes |
+| `-n, --namespace` | Namespace (default: `default`) | No |
+| `--json` | Output in JSON format | No |
 
-**示例：**
+**Examples:**
 
 ```bash
-# 提交单个任务
+# Submit a single job
 gpuctl create -f training-job.yaml
 
-# 批量提交多个任务
+# Submit multiple jobs at once
 gpuctl create -f task1.yaml -f task2.yaml
 
-# 指定命名空间
+# Specify a namespace
 gpuctl create -f job.yaml -n team-alice
 
-# JSON 格式输出
+# JSON output
 gpuctl create -f job.yaml --json
 ```
 
@@ -50,25 +50,25 @@ gpuctl create -f job.yaml --json
 
 ## apply
 
-应用资源配置（先删除旧资源，再创建新资源）。
+Apply resource configuration (deletes the existing resource, then creates a new one).
 
 ```bash
 gpuctl apply -f <file> [-n <namespace>] [--json]
 ```
 
-| 选项 | 说明 | 是否必填 |
-|------|------|---------|
-| `-f, --file` | YAML 文件路径（可多次指定） | 是 |
-| `-n, --namespace` | 命名空间（默认：`default`） | 否 |
-| `--json` | 以 JSON 格式输出 | 否 |
+| Option | Description | Required |
+|--------|-------------|----------|
+| `-f, --file` | YAML file path (can be specified multiple times) | Yes |
+| `-n, --namespace` | Namespace (default: `default`) | No |
+| `--json` | Output in JSON format | No |
 
-**示例：**
+**Examples:**
 
 ```bash
-# 更新任务配置
+# Update a job configuration
 gpuctl apply -f job.yaml
 
-# 更新并指定命名空间
+# Update with a specific namespace
 gpuctl apply -f job.yaml -n team-alice
 ```
 
@@ -76,7 +76,7 @@ gpuctl apply -f job.yaml -n team-alice
 
 ## get
 
-查询资源列表。支持多种资源类型和过滤条件。
+List resources. Supports multiple resource types and filter options.
 
 ### get jobs
 
@@ -84,29 +84,29 @@ gpuctl apply -f job.yaml -n team-alice
 gpuctl get jobs [-n <namespace>] [--pool <pool>] [--kind <kind>] [--pods] [--json]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-n, --namespace` | 指定命名空间（不指定则查询所有） |
-| `--pool` | 按资源池过滤 |
-| `--kind` | 按任务类型过滤：`training` / `inference` / `notebook` / `compute` |
-| `--pods` | 显示 Pod 级别信息（而非 Deployment/StatefulSet 级别） |
-| `--json` | JSON 格式输出 |
+| Option | Description |
+|--------|-------------|
+| `-n, --namespace` | Filter by namespace (all namespaces if omitted) |
+| `--pool` | Filter by resource pool |
+| `--kind` | Filter by job type: `training` / `inference` / `notebook` / `compute` |
+| `--pods` | Show Pod-level info (instead of Deployment/StatefulSet level) |
+| `--json` | JSON output |
 
-**输出列说明：**
+**Output columns:**
 
-| 列 | 含义 |
-|----|------|
-| JOB ID | Pod 名称（含 K8s 自动生成的 hash 后缀） |
-| NAME | YAML 中的 `job.name` |
-| NAMESPACE | 所在命名空间 |
-| KIND | 任务类型 |
-| STATUS | Pod 运行状态 |
-| READY | 就绪/总容器数（如 `1/1`） |
-| NODE | 调度到的节点 |
+| Column | Meaning |
+|--------|---------|
+| JOB ID | Pod name (with K8s auto-generated hash suffix) |
+| NAME | `job.name` from the YAML |
+| NAMESPACE | Namespace |
+| KIND | Job type |
+| STATUS | Pod running status |
+| READY | Ready/total containers (e.g. `1/1`) |
+| NODE | Node the pod was scheduled to |
 | IP | Pod IP |
-| AGE | 创建至今的时长 |
+| AGE | Time since creation |
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl get jobs
@@ -122,7 +122,7 @@ gpuctl get jobs --pods
 gpuctl get pools [--json]
 ```
 
-**示例：**
+**Example:**
 
 ```bash
 gpuctl get pools
@@ -134,12 +134,12 @@ gpuctl get pools
 gpuctl get nodes [--pool <pool>] [--gpu-type <type>] [--json]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--pool` | 按资源池过滤 |
-| `--gpu-type` | 按 GPU 型号过滤 |
+| Option | Description |
+|--------|-------------|
+| `--pool` | Filter by resource pool |
+| `--gpu-type` | Filter by GPU model |
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl get nodes
@@ -153,13 +153,13 @@ gpuctl get nodes --gpu-type A100-100G
 gpuctl get labels [<node_name>] [--key <key>] [--json]
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
-# 查看节点所有标签
+# View all labels on a node
 gpuctl get labels node-1
 
-# 查看特定标签
+# View a specific label
 gpuctl get labels node-1 --key=runwhere.ai/gpu-type
 ```
 
@@ -169,7 +169,7 @@ gpuctl get labels node-1 --key=runwhere.ai/gpu-type
 gpuctl get quotas [<namespace>] [--json]
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl get quotas
@@ -187,7 +187,7 @@ gpuctl get namespaces [--json]
 
 ## describe
 
-查看资源详细信息。
+View detailed resource information.
 
 ### describe job
 
@@ -195,15 +195,15 @@ gpuctl get namespaces [--json]
 gpuctl describe job <job_name> [-n <namespace>] [--json]
 ```
 
-**输出内容：**
+**Output includes:**
 
-- 基本信息：Name、Kind、Resource Type、Namespace、Status、Age、Priority、Pool
-- 资源配置：CPU、Memory、GPU
-- 原始 YAML：从 K8s 资源反映射回的 gpuctl YAML 配置
-- Events：最近 10 条 K8s 事件
-- Access Methods（仅 inference / notebook / compute）：Pod IP 和 NodePort 访问地址
+- Basic info: Name, Kind, Resource Type, Namespace, Status, Age, Priority, Pool
+- Resource config: CPU, Memory, GPU
+- Raw YAML: gpuctl YAML config reverse-mapped from the K8s resource
+- Events: Last 10 K8s events
+- Access Methods (inference / notebook / compute only): Pod IP and NodePort addresses
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl describe job my-training-job
@@ -216,7 +216,7 @@ gpuctl describe job my-training-job -n team-alice
 gpuctl describe pool <pool_name> [--json]
 ```
 
-**示例：**
+**Example:**
 
 ```bash
 gpuctl describe pool training-pool
@@ -228,7 +228,7 @@ gpuctl describe pool training-pool
 gpuctl describe node <node_name> [--json]
 ```
 
-**示例：**
+**Example:**
 
 ```bash
 gpuctl describe node node-1
@@ -242,7 +242,7 @@ gpuctl describe ns <namespace_name> [--json]
 gpuctl describe namespace <namespace_name> [--json]
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl describe quota team-alice
@@ -253,15 +253,15 @@ gpuctl describe ns team-alice
 
 ## delete
 
-删除资源。
+Delete resources.
 
-### 通过 YAML 文件删除
+### Delete via YAML file
 
 ```bash
 gpuctl delete -f <file> [-n <namespace>] [--force] [--json]
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl delete -f training-job.yaml
@@ -275,7 +275,7 @@ gpuctl delete -f quota.yaml
 gpuctl delete job <job_name> [-n <namespace>] [--force] [--json]
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl delete job my-training-job
@@ -289,7 +289,7 @@ gpuctl delete job my-training-job --force
 gpuctl delete quota <namespace_name> [--force] [--json]
 ```
 
-**示例：**
+**Example:**
 
 ```bash
 gpuctl delete quota team-alice
@@ -302,7 +302,7 @@ gpuctl delete ns <namespace_name> [--force] [--json]
 gpuctl delete namespace <namespace_name> [--force] [--json]
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
 gpuctl delete ns team-alice
@@ -315,46 +315,46 @@ gpuctl delete ns team-alice --force
 gpuctl delete pool <pool_name> [--force] [--json]
 ```
 
-**示例：**
+**Example:**
 
 ```bash
 gpuctl delete pool training-pool
 ```
 
-!!! warning "删除任务的行为"
-    删除任务时，平台会同时删除：
-    
-    - K8s 主资源（Job / Deployment / StatefulSet）
-    - 关联的 NodePort Service（training 任务无 Service）
-    - K8s 控制器会自动级联删除关联的 Pod
+!!! warning "Delete Job Behavior"
+    When a job is deleted, the platform also deletes:
+
+    - The primary K8s resource (Job / Deployment / StatefulSet)
+    - The associated NodePort Service (training jobs have no Service)
+    - K8s controllers will automatically cascade-delete associated Pods
 
 ---
 
 ## logs
 
-获取任务日志。
+Retrieve job logs.
 
 ```bash
 gpuctl logs <job_name> [-n <namespace>] [-f] [--json]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `<job_name>` | 任务名称 |
-| `-n, --namespace` | 命名空间（默认：`default`） |
-| `-f, --follow` | 实时跟踪日志（类似 `tail -f`） |
-| `--json` | JSON 格式输出 |
+| Option | Description |
+|--------|-------------|
+| `<job_name>` | Job name |
+| `-n, --namespace` | Namespace (default: `default`) |
+| `-f, --follow` | Stream logs in real time (like `tail -f`) |
+| `--json` | JSON output |
 
-**示例：**
+**Examples:**
 
 ```bash
-# 查看最近日志（默认最后 100 行）
+# View recent logs (last 100 lines by default)
 gpuctl logs my-training-job
 
-# 实时跟踪
+# Stream logs
 gpuctl logs my-training-job -f
 
-# 指定命名空间
+# Specify namespace
 gpuctl logs my-training-job -n team-alice -f
 ```
 
@@ -362,93 +362,93 @@ gpuctl logs my-training-job -n team-alice -f
 
 ## label
 
-管理节点标签。
+Manage node labels.
 
 ```bash
 gpuctl label <node_name> [node_name...] <label> [--delete] [--overwrite] [--json]
 ```
 
-!!! warning "标签键规范"
-    gpuctl 管理的标签键**必须以 `runwhere.ai/` 开头**，避免与其他系统冲突。
+!!! warning "Label Key Convention"
+    Label keys managed by gpuctl **must be prefixed with `runwhere.ai/`** to avoid conflicts with other systems.
 
-| 选项 | 说明 |
-|------|------|
-| `<node_name>` | 节点名称（可指定多个） |
-| `<label>` | `key=value` 格式（添加）或 `key` 格式（删除时使用） |
-| `--delete` | 删除标签 |
-| `--overwrite` | 覆盖已有同键标签 |
+| Option | Description |
+|--------|-------------|
+| `<node_name>` | Node name (multiple nodes can be specified) |
+| `<label>` | `key=value` format (to add) or `key` format (when deleting) |
+| `--delete` | Delete the label |
+| `--overwrite` | Overwrite an existing label with the same key |
 
-**示例：**
+**Examples:**
 
 ```bash
-# 给单个节点添加 GPU 型号标签
+# Add a GPU model label to a single node
 gpuctl label node-1 runwhere.ai/gpu-type=A100-100G
 
-# 给多个节点添加标签（注意：node_name 在命令中的位置）
+# Add label to multiple nodes
 gpuctl label node-1 node-2 runwhere.ai/gpu-type=A100-100G
 
-# 覆盖已有标签
+# Overwrite an existing label
 gpuctl label node-1 runwhere.ai/gpu-type=A10-24G --overwrite
 
-# 删除标签
+# Delete a label
 gpuctl label node-1 runwhere.ai/gpu-type --delete
 
-# 绑定资源池
+# Assign a node to a resource pool
 gpuctl label node-1 runwhere.ai/pool=training-pool
 ```
 
 ---
 
-## 全局选项
+## Global Options
 
-| 选项 | 说明 |
-|------|------|
-| `--help` | 显示帮助信息 |
-| `--json` | 以 JSON 格式输出（大多数命令支持） |
+| Option | Description |
+|--------|-------------|
+| `--help` | Show help information |
+| `--json` | Output in JSON format (supported by most commands) |
 
 ---
 
-## 完整工作流示例
+## Full Workflow Examples
 
-### 训练任务生命周期
+### Training Job Lifecycle
 
 ```bash
-# 1. 查看可用资源
+# 1. Check available resources
 gpuctl get nodes
 gpuctl get pools
 
-# 2. 提交训练任务
+# 2. Submit a training job
 gpuctl create -f training-job.yaml -n team-alice
 
-# 3. 监控状态
+# 3. Monitor status
 gpuctl get jobs -n team-alice
 
-# 4. 实时查看日志
+# 4. Stream logs
 gpuctl logs my-training -n team-alice -f
 
-# 5. 查看详细信息
+# 5. View job details
 gpuctl describe job my-training -n team-alice
 
-# 6. 任务完成后清理
+# 6. Clean up after completion
 gpuctl delete job my-training -n team-alice
 ```
 
-### 节点与资源池管理
+### Node and Resource Pool Management
 
 ```bash
-# 1. 查看所有节点
+# 1. List all nodes
 gpuctl get nodes
 
-# 2. 给节点打 GPU 型号标签
+# 2. Label a node with its GPU model
 gpuctl label node-5 runwhere.ai/gpu-type=A100-100G
 
-# 3. 创建资源池（将节点绑定）
+# 3. Create a resource pool (binding nodes)
 gpuctl create -f training-pool.yaml
 
-# 4. 查看资源池
+# 4. View resource pools
 gpuctl get pools
 gpuctl describe pool training-pool
 
-# 5. 查看池内节点
+# 5. View nodes in a pool
 gpuctl get nodes --pool training-pool
 ```

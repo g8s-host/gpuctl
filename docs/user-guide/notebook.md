@@ -1,43 +1,43 @@
-# Notebook 交互式开发
+# Notebook Interactive Development
 
-Notebook 任务（`kind: notebook`）提供 JupyterLab 交互式开发环境，适合代码调试、数据探索和模型原型验证。底层对应 Kubernetes **StatefulSet + NodePort Service**，保证存储状态持久化。
+Notebook jobs (`kind: notebook`) provide a JupyterLab interactive development environment, ideal for code debugging, data exploration, and model prototyping. They map to a Kubernetes **StatefulSet + NodePort Service** to ensure storage state persistence.
 
-## YAML 完整字段
+## Full YAML Fields
 
 ```yaml
 kind: notebook
 version: v0.1
 
 job:
-  name: <环境名称>
+  name: <env-name>
   priority: medium
-  description: "描述"
+  description: "..."
 
 environment:
-  image: <包含 JupyterLab 的镜像>
-  command: [...]    # JupyterLab 启动命令
+  image: <image with JupyterLab>
+  command: [...]    # JupyterLab startup command
 
 service:
-  port: 8888        # JupyterLab 默认端口
+  port: 8888        # JupyterLab default port
 
 resources:
-  pool: dev-pool    # 建议使用开发专用资源池
+  pool: dev-pool    # Recommended: use a dedicated dev resource pool
   gpu: 1
-  gpu-type: A10-24G # 可选，调试无需高端 GPU
+  gpu-type: A10-24G # Optional — debugging doesn't need high-end GPUs
   cpu: 8
   memory: 32Gi
 
 storage:
   workdirs:
-    - path: /home/jovyan/work  # 代码工作目录
-    - path: /models            # 模型缓存目录
+    - path: /home/jovyan/work  # Code working directory
+    - path: /models            # Model cache directory
 ```
 
 ---
 
-## 场景：启动 AI 开发 Notebook
+## Example: Launch an AI Development Notebook
 
-部署包含 PyTorch 2.x、常用数据科学库及 GPU 支持的 JupyterLab 环境：
+Deploy a JupyterLab environment with PyTorch 2.x, common data science libraries, and GPU support:
 
 ```yaml title="dev-notebook.yaml"
 kind: notebook
@@ -46,7 +46,7 @@ version: v0.1
 job:
   name: ai-dev-notebook
   priority: medium
-  description: "AI 开发调试环境（PyTorch + GPU）"
+  description: "AI development environment (PyTorch + GPU)"
 
 environment:
   image: registry.example.com/jupyter-ai:v1.0
@@ -77,14 +77,14 @@ storage:
 ```
 
 ```bash
-# 启动 Notebook 环境
+# Start the Notebook environment
 gpuctl create -f dev-notebook.yaml
 
-# 查看状态和访问地址
+# Check status and access address
 gpuctl describe job ai-dev-notebook
 ```
 
-**获取访问地址：**
+**Access address output:**
 
 ```
 Access Methods:
@@ -92,13 +92,13 @@ Access Methods:
   Node Port Access: http://192.168.1.102:30088
 ```
 
-在浏览器打开 NodePort 地址，输入 token `ai-gpuctl-2025` 即可进入 JupyterLab。
+Open the NodePort address in a browser and enter token `ai-gpuctl-2025` to access JupyterLab.
 
 ---
 
-## 使用纯 CPU Notebook
+## CPU-Only Notebook
 
-对于数据预处理等不需要 GPU 的场景：
+For data preprocessing and other scenarios that don't require a GPU:
 
 ```yaml title="data-prep-notebook.yaml"
 kind: notebook
@@ -122,7 +122,7 @@ service:
 
 resources:
   pool: default
-  gpu: 0        # 纯 CPU，节省 GPU 资源
+  gpu: 0        # CPU-only, preserves GPU resources
   cpu: 4
   memory: 16Gi
 
@@ -134,24 +134,24 @@ storage:
 
 ---
 
-## 查看 Notebook 日志
+## Viewing Notebook Logs
 
 ```bash
-# 查看启动日志，确认 JupyterLab 已就绪
+# View startup logs to confirm JupyterLab is ready
 gpuctl logs ai-dev-notebook
 
-# 实时跟踪日志
+# Stream logs in real time
 gpuctl logs ai-dev-notebook -f
 ```
 
-## 删除 Notebook 环境
+## Deleting a Notebook Environment
 
 ```bash
 gpuctl delete job ai-dev-notebook
 ```
 
-!!! tip "代码持久化"
-    Notebook 环境通过 `storage.workdirs` 将宿主机目录挂载到容器内，删除 Notebook Pod 后，挂载目录中的代码和数据**不会丢失**，下次创建时重新挂载即可恢复工作状态。
+!!! tip "Code Persistence"
+    The Notebook environment mounts host directories into the container via `storage.workdirs`. Deleting the Notebook Pod does **not** delete data in mounted directories — recreate the Notebook and remount to restore your work state.
 
-!!! warning "StatefulSet 特性"
-    Notebook 使用 StatefulSet 管理，Pod 名称为 `{name}-0`，如 `ai-dev-notebook-0`。查看日志时可以直接用任务名，平台会自动定位 Pod。
+!!! warning "StatefulSet Behavior"
+    Notebooks use a StatefulSet, so the Pod name is `{name}-0` (e.g. `ai-dev-notebook-0`). You can still use the job name directly with `gpuctl logs` — the platform locates the Pod automatically.

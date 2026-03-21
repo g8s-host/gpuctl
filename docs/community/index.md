@@ -1,163 +1,163 @@
-# 社区
+# Community
 
-gpuctl 是一个开源项目，欢迎所有人参与！无论是提交 Bug、提议新功能还是贡献代码，我们都非常欢迎。
+gpuctl is an open source project — everyone is welcome! Whether you're reporting a bug, proposing a new feature, or contributing code, we're glad to have you.
 
-## 快速链接
+## Quick Links
 
 <div class="grid cards" markdown>
 
--   :fontawesome-brands-github:{ .lg .middle } **GitHub 仓库**
+-   :fontawesome-brands-github:{ .lg .middle } **GitHub Repository**
 
     ---
 
-    查看源代码、提交 Issue、提交 Pull Request。
+    Browse the source code, open Issues, and submit Pull Requests.
 
     [github.com/runwhere-ai/gpuctl](https://github.com/runwhere-ai/gpuctl){ .md-button }
 
--   :material-bug:{ .lg .middle } **报告 Bug**
+-   :material-bug:{ .lg .middle } **Report a Bug**
 
     ---
 
-    发现了问题？在 GitHub Issues 中描述复现步骤，帮助我们持续改进。
+    Found a problem? Describe the reproduction steps in a GitHub Issue and help us keep improving.
 
-    [提交 Bug 报告](https://github.com/runwhere-ai/gpuctl/issues/new?template=bug_report.md){ .md-button }
+    [Submit a Bug Report](https://github.com/runwhere-ai/gpuctl/issues/new?template=bug_report.md){ .md-button }
 
--   :material-lightbulb:{ .lg .middle } **功能建议**
-
-    ---
-
-    有好的想法？在 Issues 中提出功能请求，或在 Discussions 中发起讨论。
-
-    [提出功能建议](https://github.com/runwhere-ai/gpuctl/issues/new?template=feature_request.md){ .md-button }
-
--   :material-forum:{ .lg .middle } **社区讨论**
+-   :material-lightbulb:{ .lg .middle } **Feature Requests**
 
     ---
 
-    参与技术讨论、分享使用经验、寻求帮助。
+    Have a great idea? Open a feature request in Issues or start a discussion in Discussions.
 
-    [进入 Discussions](https://github.com/runwhere-ai/gpuctl/discussions){ .md-button }
+    [Submit a Feature Request](https://github.com/runwhere-ai/gpuctl/issues/new?template=feature_request.md){ .md-button }
+
+-   :material-forum:{ .lg .middle } **Community Discussions**
+
+    ---
+
+    Join technical discussions, share your experience, and get help.
+
+    [Open Discussions](https://github.com/runwhere-ai/gpuctl/discussions){ .md-button }
 
 </div>
 
 ---
 
-## 如何贡献
+## How to Contribute
 
-### 贡献代码
+### Contributing Code
 
-1. **Fork** 项目仓库到你的 GitHub 账号
-2. **Clone** 到本地：`git clone https://github.com/<你的用户名>/gpuctl.git`
-3. **创建分支**：`git checkout -b feature/my-feature`
-4. **开发并测试**：`pytest`
-5. **提交 PR**：描述你的改动和动机
+1. **Fork** the repository to your GitHub account
+2. **Clone** it locally: `git clone https://github.com/<your-username>/gpuctl.git`
+3. **Create a branch**: `git checkout -b feature/my-feature`
+4. **Develop and test**: `pytest`
+5. **Submit a PR**: describe your changes and motivation
 
-详细步骤请参考[贡献指南](../developer-guide/contributing.md)。
+See the [Contributing Guide](../developer-guide/contributing.md) for detailed steps.
 
-### 贡献文档
+### Contributing Documentation
 
-发现文档有误或可以改进？
+Found an error or improvement opportunity in the docs?
 
-1. 点击任意文档页面右上角的 **编辑** 图标
-2. 在 GitHub 上直接修改 Markdown 文件
-3. 提交 Pull Request
+1. Click the **Edit** icon in the top-right corner of any documentation page
+2. Edit the Markdown file directly on GitHub
+3. Submit a Pull Request
 
-### 贡献测试用例
+### Contributing Tests
 
-提高测试覆盖率，让项目更加健壮：
+Help make the project more robust by improving test coverage:
 
 ```bash
-# 运行现有测试
+# Run existing tests
 pytest tests/
 
-# 查看覆盖率
+# View coverage
 pytest --cov=gpuctl --cov-report=html
 open htmlcov/index.html
 ```
 
 ---
 
-## 提交 Issue 指南
+## Issue Submission Guidelines
 
-为了帮助我们快速定位和解决问题，提交 Issue 时请包含：
+To help us quickly diagnose and resolve problems, please include the following when opening an Issue:
 
-### Bug 报告
-
-```markdown
-**环境信息**
-- gpuctl 版本：1.0.0
-- Python 版本：3.10
-- Kubernetes 版本：1.28
-- 操作系统：Ubuntu 22.04
-
-**复现步骤**
-1. 创建以下 YAML 文件...
-2. 执行命令：gpuctl create -f xxx.yaml
-3. 观察到以下错误...
-
-**期望行为**
-任务应该正常创建并运行。
-
-**实际行为**
-报错：XXX
-
-**错误日志**
-（粘贴完整错误输出）
-```
-
-### 功能建议
+### Bug Reports
 
 ```markdown
-**使用场景**
-描述你遇到的问题或想实现的目标。
+**Environment**
+- gpuctl version: 1.0.0
+- Python version: 3.10
+- Kubernetes version: 1.28
+- OS: Ubuntu 22.04
 
-**建议的解决方案**
-描述你期望的功能或行为。
+**Steps to Reproduce**
+1. Create the following YAML file...
+2. Run: gpuctl create -f xxx.yaml
+3. Observe the following error...
 
-**替代方案**
-你是否考虑过其他解决方案？
+**Expected Behavior**
+The job should be created and start running.
+
+**Actual Behavior**
+Error: XXX
+
+**Error Logs**
+(paste full error output)
+```
+
+### Feature Requests
+
+```markdown
+**Use Case**
+Describe the problem you're facing or the goal you want to achieve.
+
+**Proposed Solution**
+Describe the feature or behavior you'd like to see.
+
+**Alternatives Considered**
+Have you considered any other approaches?
 ```
 
 ---
 
-## 版本发布
+## Releases
 
-gpuctl 遵循[语义化版本](https://semver.org/lang/zh-CN/)规范：
+gpuctl follows [Semantic Versioning](https://semver.org/):
 
-- **MAJOR**：不兼容的 API 变更
-- **MINOR**：向后兼容的新功能
-- **PATCH**：向后兼容的 Bug 修复
+- **MAJOR**: Incompatible API changes
+- **MINOR**: Backwards-compatible new features
+- **PATCH**: Backwards-compatible bug fixes
 
-查看所有版本：[GitHub Releases](https://github.com/runwhere-ai/gpuctl/releases)
-
----
-
-## 路线图
-
-以下是 gpuctl 的近期规划方向（持续更新）：
-
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 多机多卡分布式训练 | 进行中 | 支持 K8s Job 多 Pod 分布式 |
-| 断点续训支持 | 规划中 | `gpuctl resume job <name>` |
-| GPU 利用率监控 | 规划中 | 集成 Prometheus + Grafana |
-| Web 管理界面 | 规划中 | 可视化任务管理面板 |
-| 多集群支持 | 规划中 | 跨集群资源调度 |
-| Helm Chart | 规划中 | 通过 Helm 部署 API 服务 |
+View all releases: [GitHub Releases](https://github.com/runwhere-ai/gpuctl/releases)
 
 ---
 
-## 联系我们
+## Roadmap
 
-- **GitHub Issues**：[技术问题和 Bug](https://github.com/runwhere-ai/gpuctl/issues)
-- **GitHub Discussions**：[功能讨论和使用经验分享](https://github.com/runwhere-ai/gpuctl/discussions)
-- **Email**：team@gpuctl.com
+The following are gpuctl's near-term planned directions (continuously updated):
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Multi-node distributed training | In progress | K8s multi-Pod Job support |
+| Checkpoint resume | Planned | `gpuctl resume job <name>` |
+| GPU utilization monitoring | Planned | Prometheus + Grafana integration |
+| Web management UI | Planned | Visual job management dashboard |
+| Multi-cluster support | Planned | Cross-cluster resource scheduling |
+| Helm Chart | Planned | Deploy API service via Helm |
 
 ---
 
-## 许可证
+## Contact Us
 
-gpuctl 采用 [MIT 许可证](https://github.com/runwhere-ai/gpuctl/blob/main/LICENSE)开源，你可以自由使用、修改和分发。
+- **GitHub Issues**: [Technical questions and bugs](https://github.com/runwhere-ai/gpuctl/issues)
+- **GitHub Discussions**: [Feature discussions and experience sharing](https://github.com/runwhere-ai/gpuctl/discussions)
+- **Email**: team@gpuctl.com
+
+---
+
+## License
+
+gpuctl is open source under the [MIT License](https://github.com/runwhere-ai/gpuctl/blob/main/LICENSE) — you are free to use, modify, and distribute it.
 
 ```
 MIT License
@@ -171,4 +171,4 @@ in the Software without restriction...
 
 ---
 
-感谢所有为 gpuctl 做出贡献的开发者和用户！ 🙏
+Thank you to all developers and users who have contributed to gpuctl!
