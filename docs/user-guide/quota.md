@@ -44,7 +44,7 @@ gpuctl create -f team-quota.yaml
 平台会自动：
 1. 创建 `team-alice`、`team-bob`、`team-charlie` 三个命名空间
 2. 在每个命名空间内创建对应的 `ResourceQuota`
-3. 标记命名空间为 gpuctl 管理（label `g8s.host/namespace=true`）
+3. 标记命名空间为 gpuctl 管理（label `runwhere.ai/namespace=true`）
 
 ---
 
@@ -121,7 +121,7 @@ Status:  Active
 Age:     5d
 
 Labels:
-  g8s.host/namespace: true
+  runwhere.ai/namespace: true
 
 Quota:
   CPU:    4/16
@@ -151,4 +151,4 @@ gpuctl delete ns team-charlie --force
     删除命名空间会**删除该命名空间内的所有资源**（包括正在运行的任务、Service 等），此操作**不可逆**。请先确认已备份重要数据。
 
 !!! tip "只能管理 gpuctl 创建的命名空间"
-    gpuctl 只管理带有 `g8s.host/namespace=true` 标签的命名空间（由 gpuctl 创建），以及 `default` 命名空间。`kube-system` 等系统命名空间不在管理范围内。
+    gpuctl 只管理带有 `runwhere.ai/namespace=true` 标签的命名空间（由 gpuctl 创建），以及 `default` 命名空间。`kube-system` 等系统命名空间不在管理范围内。

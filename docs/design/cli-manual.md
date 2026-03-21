@@ -173,7 +173,7 @@ gpuctl get <resource> [options]
 
 10. 获取指定标签键的节点标签：
     ```bash
-    gpuctl get labels node-1 --key=g8s.host/gpu-type
+    gpuctl get labels node-1 --key=runwhere.ai/gpu-type
     ```
 
 11. 获取配额列表：
@@ -379,7 +379,7 @@ gpuctl label node <label> <node_name> [node_name...] [--delete] [--overwrite] [-
 
 1. 为单个节点添加标签：
    ```bash
-   gpuctl label node g8s.host/gpu-type=a100-80g node-1
+   gpuctl label node runwhere.ai/gpu-type=a100-80g node-1
    ```
 
 2. 为多个节点添加标签：
@@ -401,7 +401,7 @@ gpuctl label node <label> <node_name> [node_name...] [--delete] [--overwrite] [-
 
 ```
 Label updated successfully for node: node-1
-Label: g8s.host/gpu-type=a100-80g
+Label: runwhere.ai/gpu-type=a100-80g
 ```
 
 ### 3.7 `describe` 命令

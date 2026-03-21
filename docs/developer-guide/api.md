@@ -294,7 +294,7 @@ Base Path: `/api/v1/quotas`
 Base Path: `/api/v1/namespaces`
 
 !!! info "仅管理 gpuctl 创建的命名空间"
-    带有 `g8s.host/namespace=true` 标签的命名空间，以及 `default` 命名空间。
+    带有 `runwhere.ai/namespace=true` 标签的命名空间，以及 `default` 命名空间。
 
 | 方法 | 路径 | 功能 |
 |------|------|------|

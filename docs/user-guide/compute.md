@@ -168,4 +168,4 @@ gpuctl delete job nginx-web
 ```
 
 !!! info "与推理任务的区别"
-    `compute` 和 `inference` 底层都使用 K8s Deployment，主要区别在于语义标注（`g8s.host/job-type` label）和资源池选择。计算任务通常 `gpu: 0`，推理任务通常有 GPU 需求。
+    `compute` 和 `inference` 底层都使用 K8s Deployment，主要区别在于语义标注（`runwhere.ai/job-type` label）和资源池选择。计算任务通常 `gpu: 0`，推理任务通常有 GPU 需求。
