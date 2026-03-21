@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="AI compute scheduling platform for ML engineers">
+        <meta name="description" content="AI compute scheduling platform for ML engineers, efficiently manage GPU resources through declarative YAML and simple CLI commands">
       
       
         <meta name="author" content="GPU Control Team">
@@ -15,16 +15,16 @@
         <link rel="canonical" href="https://runwhere-ai.github.io/gpuctl/en/cli/">
       
       
-        <link rel="prev" href="../user-guide/training/">
+        <link rel="prev" href="../developer-guide/contributing/">
       
       
-        <link rel="next" href="../developer-guide/">
+        <link rel="next" href="../community/">
       
       
+        
+          <link rel="alternate" href="../../cli/" hreflang="zh">
         
           <link rel="alternate" href="./" hreflang="en">
-        
-          <link rel="alternate" href="../../zh/en/cli/" hreflang="zh">
         
       
       
@@ -33,7 +33,7 @@
     
     
       
-        <title>CLI Reference - GPUCTL - AI Compute Scheduling Tool</title>
+        <title>CLI 参考 - GPUCTL - AI Compute Scheduling Tool</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cli-reference" class="md-skip">
+        <a href="#cli" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CLI Reference
+              CLI 参考
             
           </span>
         </div>
@@ -142,9 +142,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="white"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="white"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
       </label>
     
@@ -152,9 +152,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="white" data-md-color-accent="white"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="white" data-md-color-accent="white"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
       </label>
     
@@ -176,14 +176,14 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="./" hreflang="en" class="md-select__link">
-              English
+            <a href="../../cli/" hreflang="zh" class="md-select__link">
+              简体中文
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="../../zh/en/cli/" hreflang="zh" class="md-select__link">
-              简体中文
+            <a href="./" hreflang="en" class="md-select__link">
+              English
             </a>
           </li>
         
@@ -273,7 +273,7 @@
   
     
   
-  Home
+  首页
 
       </a>
     </li>
@@ -288,11 +288,31 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user-guide/quickstart/" class="md-tabs__link">
+        <a href="../user-guide/" class="md-tabs__link">
           
   
   
-  User Guide
+  用户指南
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  开发者指南
 
         </a>
       </li>
@@ -314,26 +334,7 @@
   
     
   
-  CLI Reference
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../developer-guide/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Developer Guide
+  CLI 参考
 
       </a>
     </li>
@@ -352,7 +353,7 @@
   
     
   
-  Community
+  社区
 
       </a>
     </li>
@@ -423,7 +424,7 @@
   <span class="md-ellipsis">
     
   
-    Home
+    首页
   
 
     
@@ -468,7 +469,7 @@
   <span class="md-ellipsis">
     
   
-    User Guide
+    用户指南
   
 
     
@@ -484,11 +485,39 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    User Guide
+    用户指南
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -504,7 +533,7 @@
   <span class="md-ellipsis">
     
   
-    Overview
+    快速开始
   
 
     
@@ -532,7 +561,320 @@
   <span class="md-ellipsis">
     
   
-    Training
+    训练任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/notebook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    计算任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/pool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    资源池管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/quota/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    配额管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发者指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    开发者指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    系统架构
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献指南
   
 
     
@@ -576,7 +918,7 @@
   <span class="md-ellipsis">
     
   
-    CLI Reference
+    CLI 参考
   
 
     
@@ -594,7 +936,7 @@
   <span class="md-ellipsis">
     
   
-    CLI Reference
+    CLI 参考
   
 
     
@@ -620,10 +962,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#global-options" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Global Options
+        命令概览
       
     </span>
   </a>
@@ -631,18 +973,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Commands
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Commands">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -652,8 +982,19 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        apply
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -662,13 +1003,14 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="get">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#logs" class="md-nav__link">
+  <a href="#get-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        logs
+        get jobs
       
     </span>
   </a>
@@ -676,10 +1018,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#delete" class="md-nav__link">
+  <a href="#get-pools" class="md-nav__link">
     <span class="md-ellipsis">
       
-        delete
+        get pools
       
     </span>
   </a>
@@ -687,10 +1029,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#describe" class="md-nav__link">
+  <a href="#get-nodes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        describe
+        get nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-quotas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get quotas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-ns-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get ns / namespaces
       
     </span>
   </a>
@@ -703,13 +1078,207 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
+  <a href="#describe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        See Also
+        describe
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="describe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#describe-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe job
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#describe-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#describe-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe node
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#describe-quota-ns-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe quota / ns / namespace
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="delete">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        通过 YAML 文件删除
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete job
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-quota" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete quota
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-ns-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete ns / namespace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        logs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#label" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        label
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全局选项
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        完整工作流示例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="完整工作流示例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        训练任务生命周期
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        节点与资源池管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -728,33 +1297,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Developer Guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../community/" class="md-nav__link">
         
   
@@ -762,7 +1304,7 @@
   <span class="md-ellipsis">
     
   
-    Community
+    社区
   
 
     
@@ -802,10 +1344,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#global-options" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Global Options
+        命令概览
       
     </span>
   </a>
@@ -813,18 +1355,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Commands
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Commands">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -834,8 +1364,19 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        apply
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -844,13 +1385,14 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="get">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#logs" class="md-nav__link">
+  <a href="#get-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        logs
+        get jobs
       
     </span>
   </a>
@@ -858,10 +1400,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#delete" class="md-nav__link">
+  <a href="#get-pools" class="md-nav__link">
     <span class="md-ellipsis">
       
-        delete
+        get pools
       
     </span>
   </a>
@@ -869,10 +1411,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#describe" class="md-nav__link">
+  <a href="#get-nodes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        describe
+        get nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-quotas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get quotas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-ns-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get ns / namespaces
       
     </span>
   </a>
@@ -885,13 +1460,207 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
+  <a href="#describe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        See Also
+        describe
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="describe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#describe-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe job
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#describe-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#describe-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe node
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#describe-quota-ns-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe quota / ns / namespace
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="delete">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        通过 YAML 文件删除
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete job
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-quota" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete quota
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-ns-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete ns / namespace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        logs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#label" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        label
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全局选项
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        完整工作流示例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="完整工作流示例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        训练任务生命周期
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        节点与资源池管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -915,86 +1684,510 @@
   
 
 
-<h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permanent link">&para;</a></h1>
-<p>Complete reference for gpuctl CLI commands.</p>
-<h2 id="global-options">Global Options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gpuctl<span class="w"> </span><span class="o">[</span>command<span class="o">]</span><span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+<h1 id="cli">CLI 命令参考<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h1>
+<p>gpuctl CLI 与 <code>kubectl</code> 对标，但语义更贴近算法工程师的使用习惯。</p>
+<h2 id="_1">命令概览<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create</code></td>
+<td>从 YAML 创建资源（任务、资源池、配额）</td>
+</tr>
+<tr>
+<td><code>apply</code></td>
+<td>应用配置（创建或更新，等价于先删后建）</td>
+</tr>
+<tr>
+<td><code>get</code></td>
+<td>查询资源列表</td>
+</tr>
+<tr>
+<td><code>describe</code></td>
+<td>查看资源详情</td>
+</tr>
+<tr>
+<td><code>delete</code></td>
+<td>删除资源</td>
+</tr>
+<tr>
+<td><code>logs</code></td>
+<td>查看任务日志</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>管理节点标签</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p>从 YAML 文件创建资源。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Option</th>
-<th>Description</th>
+<th>选项</th>
+<th>说明</th>
+<th>是否必填</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-f, --file</code></td>
+<td>YAML 文件路径（可多次指定）</td>
+<td>是</td>
+</tr>
+<tr>
+<td><code>-n, --namespace</code></td>
+<td>命名空间（默认：<code>default</code>）</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>以 JSON 格式输出</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># 提交单个任务</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># 批量提交多个任务</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>task1.yaml<span class="w"> </span>-f<span class="w"> </span>task2.yaml
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># 指定命名空间</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># JSON 格式输出</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>--json
+</span></code></pre></div>
+<hr />
+<h2 id="apply">apply<a class="headerlink" href="#apply" title="Permanent link">&para;</a></h2>
+<p>应用资源配置（先删除旧资源，再创建新资源）。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+<th>是否必填</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-f, --file</code></td>
+<td>YAML 文件路径（可多次指定）</td>
+<td>是</td>
+</tr>
+<tr>
+<td><code>-n, --namespace</code></td>
+<td>命名空间（默认：<code>default</code>）</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>以 JSON 格式输出</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 更新任务配置</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># 更新并指定命名空间</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span></code></pre></div>
+<hr />
+<h2 id="get">get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h2>
+<p>查询资源列表。支持多种资源类型和过滤条件。</p>
+<h3 id="get-jobs">get jobs<a class="headerlink" href="#get-jobs" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--pool<span class="w"> </span>&lt;pool&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--kind<span class="w"> </span>&lt;kind&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--pods<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>-n, --namespace</code></td>
-<td>Specify Kubernetes namespace</td>
+<td>指定命名空间（不指定则查询所有）</td>
+</tr>
+<tr>
+<td><code>--pool</code></td>
+<td>按资源池过滤</td>
+</tr>
+<tr>
+<td><code>--kind</code></td>
+<td>按任务类型过滤：<code>training</code> / <code>inference</code> / <code>notebook</code> / <code>compute</code></td>
+</tr>
+<tr>
+<td><code>--pods</code></td>
+<td>显示 Pod 级别信息（而非 Deployment/StatefulSet 级别）</td>
 </tr>
 <tr>
 <td><code>--json</code></td>
-<td>Output in JSON format</td>
-</tr>
-<tr>
-<td><code>-h, --help</code></td>
-<td>Show help</td>
+<td>JSON 格式输出</td>
 </tr>
 </tbody>
 </table>
-<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
-<h3 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h3>
-<p>Create resources from YAML files.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training.yaml
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>task1.yaml<span class="w"> </span>-f<span class="w"> </span>task2.yaml
+<p><strong>输出列说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th>列</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JOB ID</td>
+<td>Pod 名称（含 K8s 自动生成的 hash 后缀）</td>
+</tr>
+<tr>
+<td>NAME</td>
+<td>YAML 中的 <code>job.name</code></td>
+</tr>
+<tr>
+<td>NAMESPACE</td>
+<td>所在命名空间</td>
+</tr>
+<tr>
+<td>KIND</td>
+<td>任务类型</td>
+</tr>
+<tr>
+<td>STATUS</td>
+<td>Pod 运行状态</td>
+</tr>
+<tr>
+<td>READY</td>
+<td>就绪/总容器数（如 <code>1/1</code>）</td>
+</tr>
+<tr>
+<td>NODE</td>
+<td>调度到的节点</td>
+</tr>
+<tr>
+<td>IP</td>
+<td>Pod IP</td>
+</tr>
+<tr>
+<td>AGE</td>
+<td>创建至今的时长</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--pool<span class="w"> </span>training-pool
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--kind<span class="w"> </span>training
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--pods
 </span></code></pre></div>
-<h3 id="get">get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h3>
-<p>List resources.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># List all jobs</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># List jobs in specific namespace</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>production
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># List resource pools</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># List nodes</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+<h3 id="get-pools">get pools<a class="headerlink" href="#get-pools" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
-<h3 id="logs">logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h3>
-<p>View task logs.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># View logs</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>&lt;job-name&gt;
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Follow logs in real-time</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>&lt;job-name&gt;<span class="w"> </span>-f
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># View last 100 lines</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>&lt;job-name&gt;<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
 </span></code></pre></div>
-<h3 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h3>
-<p>Delete resources.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Delete by YAML file</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>training.yaml
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Delete by name</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>&lt;job-name&gt;
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># Force delete</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>&lt;job-name&gt;<span class="w"> </span>--force
+<h3 id="get-nodes">get nodes<a class="headerlink" href="#get-nodes" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span><span class="o">[</span>--pool<span class="w"> </span>&lt;pool&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--gpu-type<span class="w"> </span>&lt;type&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
-<h3 id="describe">describe<a class="headerlink" href="#describe" title="Permanent link">&para;</a></h3>
-<p>Show detailed resource information.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>&lt;job-name&gt;
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>&lt;pool-name&gt;
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>&lt;node-name&gt;
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--pool</code></td>
+<td>按资源池过滤</td>
+</tr>
+<tr>
+<td><code>--gpu-type</code></td>
+<td>按 GPU 型号过滤</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--pool<span class="w"> </span>training-pool
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--gpu-type<span class="w"> </span>A100-100G
 </span></code></pre></div>
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<h3 id="get-labels">get labels<a class="headerlink" href="#get-labels" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span><span class="o">[</span>&lt;node_name&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--key<span class="w"> </span>&lt;key&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># 查看节点所有标签</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span>node-1
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># 查看特定标签</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span>node-1<span class="w"> </span>--key<span class="o">=</span>runwhere.ai/gpu-type
+</span></code></pre></div>
+<h3 id="get-quotas">get quotas<a class="headerlink" href="#get-quotas" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span><span class="o">[</span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span>team-alice
+</span></code></pre></div>
+<h3 id="get-ns-namespaces">get ns / namespaces<a class="headerlink" href="#get-ns-namespaces" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>ns<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>namespaces<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<hr />
+<h2 id="describe">describe<a class="headerlink" href="#describe" title="Permanent link">&para;</a></h2>
+<p>查看资源详细信息。</p>
+<h3 id="describe-job">describe job<a class="headerlink" href="#describe-job" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>输出内容：</strong></p>
 <ul>
-<li><a href="../user-guide/training/">Training Tasks</a></li>
-<li><a href="../user-guide/inference.md">Inference Services</a></li>
+<li>基本信息：Name、Kind、Resource Type、Namespace、Status、Age、Priority、Pool</li>
+<li>资源配置：CPU、Memory、GPU</li>
+<li>原始 YAML：从 K8s 资源反映射回的 gpuctl YAML 配置</li>
+<li>Events：最近 10 条 K8s 事件</li>
+<li>Access Methods（仅 inference / notebook / compute）：Pod IP 和 NodePort 访问地址</li>
 </ul>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training-job
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span></code></pre></div>
+<h3 id="describe-pool">describe pool<a class="headerlink" href="#describe-pool" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>&lt;pool_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>training-pool
+</span></code></pre></div>
+<h3 id="describe-node">describe node<a class="headerlink" href="#describe-node" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>&lt;node_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>node-1
+</span></code></pre></div>
+<h3 id="describe-quota-ns-namespace">describe quota / ns / namespace<a class="headerlink" href="#describe-quota-ns-namespace" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>namespace<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>team-alice
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>team-alice
+</span></code></pre></div>
+<hr />
+<h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
+<p>删除资源。</p>
+<h3 id="yaml">通过 YAML 文件删除<a class="headerlink" href="#yaml" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>training-job.yaml
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>pool.yaml
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>quota.yaml
+</span></code></pre></div>
+<h3 id="delete-job">delete job<a class="headerlink" href="#delete-job" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>--force
+</span></code></pre></div>
+<h3 id="delete-quota">delete quota<a class="headerlink" href="#delete-quota" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>team-alice
+</span></code></pre></div>
+<h3 id="delete-ns-namespace">delete ns / namespace<a class="headerlink" href="#delete-ns-namespace" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-alice
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-alice<span class="w"> </span>--force
+</span></code></pre></div>
+<h3 id="delete-pool">delete pool<a class="headerlink" href="#delete-pool" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>pool<span class="w"> </span>&lt;pool_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>pool<span class="w"> </span>training-pool
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">删除任务的行为</p>
+<p>删除任务时，平台会同时删除：</p>
+<ul>
+<li>K8s 主资源（Job / Deployment / StatefulSet）</li>
+<li>关联的 NodePort Service（training 任务无 Service）</li>
+<li>K8s 控制器会自动级联删除关联的 Pod</li>
+</ul>
+</div>
+<hr />
+<h2 id="logs">logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
+<p>获取任务日志。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>-f<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;job_name&gt;</code></td>
+<td>任务名称</td>
+</tr>
+<tr>
+<td><code>-n, --namespace</code></td>
+<td>命名空间（默认：<code>default</code>）</td>
+</tr>
+<tr>
+<td><code>-f, --follow</code></td>
+<td>实时跟踪日志（类似 <code>tail -f</code>）</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>JSON 格式输出</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># 查看最近日志（默认最后 100 行）</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># 实时跟踪</span>
+</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job<span class="w"> </span>-f
+</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>
+</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="c1"># 指定命名空间</span>
+</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice<span class="w"> </span>-f
+</span></code></pre></div>
+<hr />
+<h2 id="label">label<a class="headerlink" href="#label" title="Permanent link">&para;</a></h2>
+<p>管理节点标签。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>&lt;node_name&gt;<span class="w"> </span><span class="o">[</span>node_name...<span class="o">]</span><span class="w"> </span>&lt;label&gt;<span class="w"> </span><span class="o">[</span>--delete<span class="o">]</span><span class="w"> </span><span class="o">[</span>--overwrite<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">标签键规范</p>
+<p>gpuctl 管理的标签键<strong>必须以 <code>runwhere.ai/</code> 开头</strong>，避免与其他系统冲突。</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;node_name&gt;</code></td>
+<td>节点名称（可指定多个）</td>
+</tr>
+<tr>
+<td><code>&lt;label&gt;</code></td>
+<td><code>key=value</code> 格式（添加）或 <code>key</code> 格式（删除时使用）</td>
+</tr>
+<tr>
+<td><code>--delete</code></td>
+<td>删除标签</td>
+</tr>
+<tr>
+<td><code>--overwrite</code></td>
+<td>覆盖已有同键标签</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例：</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># 给单个节点添加 GPU 型号标签</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># 给多个节点添加标签（注意：node_name 在命令中的位置）</span>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>node-2<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
+</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1"># 覆盖已有标签</span>
+</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A10-24G<span class="w"> </span>--overwrite
+</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
+</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="c1"># 删除标签</span>
+</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="w"> </span>--delete
+</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>
+</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="c1"># 绑定资源池</span>
+</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/pool<span class="o">=</span>training-pool
+</span></code></pre></div>
+<hr />
+<h2 id="_2">全局选项<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>显示帮助信息</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>以 JSON 格式输出（大多数命令支持）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_3">完整工作流示例<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">训练任务生命周期<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="c1"># 1. 查看可用资源</span>
+</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
+</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>
+</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="c1"># 2. 提交训练任务</span>
+</span><span id="__span-37-6"><a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-37-7"><a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>
+</span><span id="__span-37-8"><a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a><span class="c1"># 3. 监控状态</span>
+</span><span id="__span-37-9"><a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-37-10"><a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a>
+</span><span id="__span-37-11"><a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a><span class="c1"># 4. 实时查看日志</span>
+</span><span id="__span-37-12"><a id="__codelineno-37-12" name="__codelineno-37-12" href="#__codelineno-37-12"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice<span class="w"> </span>-f
+</span><span id="__span-37-13"><a id="__codelineno-37-13" name="__codelineno-37-13" href="#__codelineno-37-13"></a>
+</span><span id="__span-37-14"><a id="__codelineno-37-14" name="__codelineno-37-14" href="#__codelineno-37-14"></a><span class="c1"># 5. 查看详细信息</span>
+</span><span id="__span-37-15"><a id="__codelineno-37-15" name="__codelineno-37-15" href="#__codelineno-37-15"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-37-16"><a id="__codelineno-37-16" name="__codelineno-37-16" href="#__codelineno-37-16"></a>
+</span><span id="__span-37-17"><a id="__codelineno-37-17" name="__codelineno-37-17" href="#__codelineno-37-17"></a><span class="c1"># 6. 任务完成后清理</span>
+</span><span id="__span-37-18"><a id="__codelineno-37-18" name="__codelineno-37-18" href="#__codelineno-37-18"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span></code></pre></div>
+<h3 id="_5">节点与资源池管理<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="c1"># 1. 查看所有节点</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="c1"># 2. 给节点打 GPU 型号标签</span>
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-5<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
+</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>
+</span><span id="__span-38-7"><a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a><span class="c1"># 3. 创建资源池（将节点绑定）</span>
+</span><span id="__span-38-8"><a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-pool.yaml
+</span><span id="__span-38-9"><a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>
+</span><span id="__span-38-10"><a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a><span class="c1"># 4. 查看资源池</span>
+</span><span id="__span-38-11"><a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
+</span><span id="__span-38-12"><a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>training-pool
+</span><span id="__span-38-13"><a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a>
+</span><span id="__span-38-14"><a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a><span class="c1"># 5. 查看池内节点</span>
+</span><span id="__span-38-15"><a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--pool<span class="w"> </span>training-pool
+</span></code></pre></div>
 
 
 
@@ -1032,7 +2225,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../user-guide/training/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Training">
+          <a href="../developer-guide/contributing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 贡献指南">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1042,20 +2235,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Training
+                贡献指南
               </div>
             </div>
           </a>
         
         
           
-          <a href="../developer-guide/" class="md-footer__link md-footer__link--next" aria-label="Next: Developer Guide">
+          <a href="../community/" class="md-footer__link md-footer__link--next" aria-label="Next: 社区">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Developer Guide
+                社区
               </div>
             </div>
             <div class="md-footer__button md-icon">
