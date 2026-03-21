@@ -80,10 +80,10 @@ gpuctl 采用分层设计，每一层职责清晰：
 
 | Label Key | 值 | 用途 |
 |-----------|---|------|
-| `g8s.host/job-type` | `training` / `inference` / `notebook` / `compute` | 区分任务类型 |
-| `g8s.host/priority` | `high` / `medium` / `low` | 调度优先级 |
-| `g8s.host/pool` | 资源池名 或 `default` | 绑定资源池 |
-| `g8s.host/namespace` | namespace 名称 | 记录所属命名空间 |
+| `runwhere.ai/job-type` | `training` / `inference` / `notebook` / `compute` | 区分任务类型 |
+| `runwhere.ai/priority` | `high` / `medium` / `low` | 调度优先级 |
+| `runwhere.ai/pool` | 资源池名 或 `default` | 绑定资源池 |
+| `runwhere.ai/namespace` | namespace 名称 | 记录所属命名空间 |
 
 ### 反查 Label（从 Pod 找回 job.name）
 
@@ -105,9 +105,9 @@ def _get_job_name(labels: dict) -> str:
 
 | Label Key | 用途 |
 |-----------|------|
-| `g8s.host/pool` | 标记节点所属资源池 |
-| `g8s.host/gpuType` | 标记节点 GPU 型号（gpuctl 内部使用） |
-| `g8s.host/gpu-type` | 标记节点 GPU 型号（用户标记使用） |
+| `runwhere.ai/pool` | 标记节点所属资源池 |
+| `runwhere.ai/gpuType` | 标记节点 GPU 型号（gpuctl 内部使用） |
+| `runwhere.ai/gpu-type` | 标记节点 GPU 型号（用户标记使用） |
 
 ---
 
@@ -150,7 +150,7 @@ spec:
 | JOB ID | Pod 名称（含 hash） | `pod.metadata.name` |
 | NAME | YAML `job.name` | `_get_job_name(pod.labels)` |
 | NAMESPACE | 所在命名空间 | `pod.metadata.namespace` |
-| KIND | 任务类型 | label `g8s.host/job-type` |
+| KIND | 任务类型 | label `runwhere.ai/job-type` |
 | STATUS | Pod 状态 | `pod.status.phase` + container status |
 | READY | 就绪/总容器数 | `container_statuses` |
 | NODE | 调度到的节点 | `pod.spec.node_name` |

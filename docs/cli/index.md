@@ -160,7 +160,7 @@ gpuctl get labels [<node_name>] [--key <key>] [--json]
 gpuctl get labels node-1
 
 # 查看特定标签
-gpuctl get labels node-1 --key=g8s.host/gpu-type
+gpuctl get labels node-1 --key=runwhere.ai/gpu-type
 ```
 
 ### get quotas
@@ -369,7 +369,7 @@ gpuctl label <node_name> [node_name...] <label> [--delete] [--overwrite] [--json
 ```
 
 !!! warning "标签键规范"
-    gpuctl 管理的标签键**必须以 `g8s.host/` 开头**，避免与其他系统冲突。
+    gpuctl 管理的标签键**必须以 `runwhere.ai/` 开头**，避免与其他系统冲突。
 
 | 选项 | 说明 |
 |------|------|
@@ -382,19 +382,19 @@ gpuctl label <node_name> [node_name...] <label> [--delete] [--overwrite] [--json
 
 ```bash
 # 给单个节点添加 GPU 型号标签
-gpuctl label node-1 g8s.host/gpu-type=A100-100G
+gpuctl label node-1 runwhere.ai/gpu-type=A100-100G
 
 # 给多个节点添加标签（注意：node_name 在命令中的位置）
-gpuctl label node-1 node-2 g8s.host/gpu-type=A100-100G
+gpuctl label node-1 node-2 runwhere.ai/gpu-type=A100-100G
 
 # 覆盖已有标签
-gpuctl label node-1 g8s.host/gpu-type=A10-24G --overwrite
+gpuctl label node-1 runwhere.ai/gpu-type=A10-24G --overwrite
 
 # 删除标签
-gpuctl label node-1 g8s.host/gpu-type --delete
+gpuctl label node-1 runwhere.ai/gpu-type --delete
 
 # 绑定资源池
-gpuctl label node-1 g8s.host/pool=training-pool
+gpuctl label node-1 runwhere.ai/pool=training-pool
 ```
 
 ---
@@ -440,7 +440,7 @@ gpuctl delete job my-training -n team-alice
 gpuctl get nodes
 
 # 2. 给节点打 GPU 型号标签
-gpuctl label node-5 g8s.host/gpu-type=A100-100G
+gpuctl label node-5 runwhere.ai/gpu-type=A100-100G
 
 # 3. 创建资源池（将节点绑定）
 gpuctl create -f training-pool.yaml

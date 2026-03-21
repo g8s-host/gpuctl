@@ -414,10 +414,10 @@ gpuctl logs qwen2-7b-llamafactory-sft -f
 | `gpuctl get nodes --pool <pool-name>`                       | 过滤查询指定资源池绑定的所有节点 |
 | `gpuctl get nodes --gpu-type <gpu-type>`                    | 过滤查询带有指定GPU类型的所有节点 |
 | `gpuctl describe node <node-name>`                          | 查看单个节点的详细信息（CPU/GPU资源、GPU类型/数量、Label列表、绑定资源池、K8s节点详情） |
-| `gpuctl label node <node-name> g8s.host/gpu-type=a100-80g` | 给指定节点标记GPU类型Label（默认Label键） |
+| `gpuctl label node <node-name> runwhere.ai/gpu-type=a100-80g` | 给指定节点标记GPU类型Label（默认Label键） |
 | `gpuctl label node <node-name> <label-key>=<label-value> --overwrite` | 给指定节点标记Label，支持覆盖已有同键Label |
 | `gpuctl get labels <node-name>`                           | 查询节点的所有标签 |
-| `gpuctl get labels <node-name> --key=g8s.host/gpu-type`     | 查询指定节点的指定GPU类型Label值 |
+| `gpuctl get labels <node-name> --key=runwhere.ai/gpu-type`     | 查询指定节点的指定GPU类型Label值 |
 | `gpuctl label node <node-name> <label-key> --delete`       | 删除指定节点的指定Label |
 
 ### 资源配额管理
