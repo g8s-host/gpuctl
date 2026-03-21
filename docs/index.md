@@ -121,22 +121,21 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
     kind: training
     version: v0.1
     job:
-      name: qwen2-7b-sft
-      priority: high
+      name: gpu-check
+      priority: medium
     environment:
-      image: registry.example.com/llama-factory-deepspeed:v0.8.0
-      command: ["llama-factory-cli", "train", "--stage", "sft", "--model_name_or_path", "/models/qwen2-7b"]
+      image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+      command: ["python", "-c", "import torch; print(f'GPU count: {torch.cuda.device_count()}')"]
     resources:
-      pool: training-pool
-      gpu: 4
-      gpu-type: A100-100G
-      cpu: 32
-      memory: 128Gi
+      pool: default
+      gpu: 1
+      cpu: 4
+      memory: 16Gi
     ```
 
 === "Inference Services"
 
-    Deploy VLLM inference services with auto-scaling support. Translates to a Kubernetes **Deployment + Service + HPA**.
+    Deploy VLLM inference services with auto-scaling support. Translates to a Kubernetes **Deployment + Service**.
 
     ```yaml
     kind: inference
@@ -144,16 +143,20 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
     job:
       name: llama3-8b-inference
     environment:
-      image: vllm/vllm-serving:v0.5.0
+      image: vllm/vllm-openai:latest
       command: ["python", "-m", "vllm.entrypoints.openai.api_server"]
+      args: ["--model", "/models/llama3-8b", "--port", "8000"]
     service:
-      replicas: 2
+      replicas: 1
       port: 8000
     resources:
-      pool: inference-pool
+      pool: default
       gpu: 1
       cpu: 8
       memory: 32Gi
+    storage:
+      workdirs:
+        - path: /models
     ```
 
 === "Notebook"
@@ -166,14 +169,15 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
     job:
       name: dev-notebook
     environment:
-      image: registry.example.com/jupyter-ai:v1.0
+      image: jupyter/scipy-notebook:latest
+      command: ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
     service:
       port: 8888
     resources:
-      pool: dev-pool
+      pool: default
       gpu: 1
-      cpu: 8
-      memory: 32Gi
+      cpu: 4
+      memory: 16Gi
     ```
 
 === "Compute Jobs"
@@ -184,17 +188,17 @@ Through declarative YAML configuration and simple CLI commands, ML engineers can
     kind: compute
     version: v0.1
     job:
-      name: test-nginx
+      name: my-nginx
     environment:
       image: nginx:latest
     service:
-      replicas: 2
+      replicas: 1
       port: 80
     resources:
-      pool: test-pool
+      pool: default
       gpu: 0
-      cpu: 2
-      memory: 4Gi
+      cpu: 1
+      memory: 512Mi
     ```
 
 ---
