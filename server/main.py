@@ -15,6 +15,7 @@ from server.routes import (
     quotas_router,
     namespaces_router
 )
+from server.routes.clusters import router as clusters_router
 
 # 配置日志
 import os
@@ -49,6 +50,7 @@ app.include_router(nodes_router)    # 后注册nodes_router
 app.include_router(quotas_router)
 app.include_router(namespaces_router)
 app.include_router(global_labels_router)
+app.include_router(clusters_router, prefix="/api/v1")
 
 
 # 根路由

@@ -7,20 +7,45 @@ from typing import Optional
 class KubernetesClient:
     """Kubernetes客户端基类"""
 
-    def __init__(self):
-        self._load_config()
+    def __init__(self, cluster: Optional[str] = None):
+        """初始化客户端
+        
+        Args:
+            cluster: 集群名称，如果为 None 则使用默认集群
+        """
+        self._load_config(cluster)
         self.core_v1 = client.CoreV1Api()
         self.batch_v1 = client.BatchV1Api()
         self.apps_v1 = client.AppsV1Api()
         self.autoscaling_v1 = client.AutoscalingV1Api()
 
-    def _load_config(self):
-        """加载Kubernetes配置"""
+    def _load_config(self, cluster: Optional[str] = None):
+        """加载Kubernetes配置
+        
+        Args:
+            cluster: 集群名称，如果为 None 则使用默认集群
+        """
         try:
             if os.getenv('KUBERNETES_SERVICE_HOST'):
                 config.load_incluster_config()
             else:
-                config.load_kube_config()
+                # 支持多云集群配置
+                if cluster:
+                    from gpuctl.multicloud.config import get_cluster
+                    c = get_cluster(cluster)
+                    if c:
+                        config.load_kube_config(config_file=c.kubeconfig_path)
+                    else:
+                        raise RuntimeError(f"Cluster '{cluster}' not found")
+                else:
+                    # 检查是否配置了默认集群
+                    from gpuctl.multicloud.config import load_config, get_current_kubeconfig
+                    try:
+                        kubeconfig_path = get_current_kubeconfig()
+                        config.load_kube_config(config_file=kubeconfig_path)
+                    except Exception:
+                        # 回退到默认 kubeconfig
+                        config.load_kube_config()
         except Exception as e:
             raise RuntimeError(f"Failed to load Kubernetes config: {e}")
 

@@ -9,6 +9,14 @@ from gpuctl.constants import Labels, Kind, DEFAULT_NAMESPACE, NS_LABEL_SELECTOR
 class JobClient(KubernetesClient):
     """任务管理客户端"""
 
+    def __init__(self, cluster: Optional[str] = None):
+        """初始化任务客户端
+        
+        Args:
+            cluster: 集群名称，如果为 None 则使用默认集群
+        """
+        super().__init__(cluster=cluster)
+
     def _validate_namespace_quota(self, namespace: str) -> bool:
         """验证namespace是否已配置quota"""
         if namespace == "default":

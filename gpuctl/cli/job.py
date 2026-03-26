@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 from gpuctl.parser.base_parser import BaseParser, ParserError
 from gpuctl.kind.training_kind import TrainingKind
 from gpuctl.kind.inference_kind import InferenceKind
@@ -12,6 +13,13 @@ from gpuctl.constants import (
     Priority, DEFAULT_PRIORITY,
     svc_name, get_detailed_status,
 )
+
+
+def _get_cluster_from_yaml(parsed_obj) -> Optional[str]:
+    """从解析的 YAML 对象中获取 cluster 字段"""
+    if hasattr(parsed_obj, 'resources') and hasattr(parsed_obj.resources, 'cluster'):
+        return parsed_obj.resources.cluster
+    return None
 
 
 def _format_event_age(timestamp_str: str) -> str:
@@ -84,6 +92,10 @@ def create_job_command(args):
             
             # Parse YAML file
             parsed_obj = BaseParser.parse_yaml_file(file_path)
+            
+            # 获取 cluster 参数（从 YAML 或默认）
+            cluster_name = _get_cluster_from_yaml(parsed_obj)
+            
             file_result = {
                 "file": file_path,
                 "kind": parsed_obj.kind,
@@ -184,7 +196,7 @@ def create_job_command(args):
                 job_name = getattr(parsed_obj.job, 'name', None)
                 if job_name:
                     try:
-                        existing_jobs = JobClient().list_jobs(final_namespace, labels={}, include_pods=False)
+                        existing_jobs = JobClient(cluster=cluster_name).list_jobs(final_namespace, labels={}, include_pods=False)
                         for ej in existing_jobs:
                             if ej['name'] == job_name:
                                 ej_kind = ej.get('labels', {}).get(Labels.JOB_TYPE, 'unknown')
@@ -536,7 +548,7 @@ def apply_job_command(args):
             if parsed_obj.kind == Kind.TRAINING:
                 from gpuctl.kind.training_kind import TrainingKind
                 handler = TrainingKind()
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 
                 job_name = add_prefix(parsed_obj.job.name, Kind.TRAINING)
                 existing = job_client.get_job(job_name, args.namespace)
@@ -564,7 +576,7 @@ def apply_job_command(args):
             elif parsed_obj.kind == Kind.INFERENCE:
                 from gpuctl.kind.inference_kind import InferenceKind
                 handler = InferenceKind()
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 
                 job_name = add_prefix(parsed_obj.job.name, Kind.INFERENCE)
                 existing = job_client.get_job(job_name, args.namespace)
@@ -592,7 +604,7 @@ def apply_job_command(args):
             elif parsed_obj.kind == Kind.NOTEBOOK:
                 from gpuctl.kind.notebook_kind import NotebookKind
                 handler = NotebookKind()
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 
                 job_name = add_prefix(parsed_obj.job.name, Kind.NOTEBOOK)
                 existing = job_client.get_job(job_name, args.namespace)
@@ -620,7 +632,7 @@ def apply_job_command(args):
             elif parsed_obj.kind == Kind.COMPUTE:
                 from gpuctl.kind.compute_kind import ComputeKind
                 handler = ComputeKind()
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 
                 job_name = add_prefix(parsed_obj.job.name, Kind.COMPUTE)
                 existing = job_client.get_job(job_name, args.namespace)
@@ -728,7 +740,7 @@ def apply_job_command(args):
 def get_jobs_command(args):
     """Get jobs list command"""
     try:
-        client = JobClient()
+        client = JobClient(cluster=cluster_name)
         
         # Build label filter criteria (exclude job-type for now to get all pods)
         labels = {}
@@ -904,7 +916,7 @@ def delete_job_command(args):
     """Delete job command"""
     try:
         import json
-        client = JobClient()
+        client = JobClient(cluster=cluster_name)
         resource_type = None
         resource_name = None
         original_resource_name = None
@@ -1147,7 +1159,7 @@ def logs_job_command(args):
             """Try to use the provided name as a direct Pod name"""
             try:
                 from gpuctl.client.job_client import JobClient
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 
                 # Get all pods in the namespace with the exact name
                 try:
@@ -1179,7 +1191,7 @@ def logs_job_command(args):
             """Try to get pod in the specified namespace using label"""
             try:
                 from gpuctl.client.job_client import JobClient
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 
                 # Get all pods in the namespace with the matching label
                 pods = job_client.list_pods(ns, labels={"app": base_job_name})
@@ -1220,7 +1232,7 @@ def logs_job_command(args):
             # 3. If not found, get all gpuctl-managed namespaces and try each one
             try:
                 from gpuctl.client.job_client import JobClient
-                job_client = JobClient()
+                job_client = JobClient(cluster=cluster_name)
                 gpuctl_namespaces = job_client._get_all_gpuctl_namespaces()
                 
                 for ns in gpuctl_namespaces:
@@ -1351,7 +1363,7 @@ def describe_job_command(args):
     
     try:
         from gpuctl.client.job_client import JobClient
-        client = JobClient()
+        client = JobClient(cluster=cluster_name)
         job = None
         
         # Check if there are multiple jobs with the same name in different namespaces

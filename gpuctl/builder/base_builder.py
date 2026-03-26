@@ -1,6 +1,60 @@
-from kubernetes import client
-from typing import Dict, Any, List
+import os
+from typing import Dict, Any, List, Optional
+
+from kubernetes import client, config
 from gpuctl.api.common import ResourceRequest, StorageConfig
+
+
+def get_kubeconfig_for_cluster(cluster: Optional[str] = None) -> str:
+    """获取指定集群或默认集群的 kubeconfig 路径
+    
+    Args:
+        cluster: 集群名称，如果为 None 则使用默认集群
+        
+    Returns:
+        str: kubeconfig 文件路径
+        
+    Raises:
+        ValueError: 集群不存在
+        FileNotFoundError: 没有配置且没有默认 kubeconfig
+    """
+    if cluster:
+        # 使用指定集群
+        from gpuctl.multicloud.config import get_cluster
+        c = get_cluster(cluster)
+        if not c:
+            raise ValueError(f"Cluster '{cluster}' not found. Run 'gpuctl cluster list' to see available clusters.")
+        return c.kubeconfig_path
+    
+    # 使用默认集群
+    from gpuctl.multicloud.config import load_config
+    registry = load_config()
+    if registry.default_cluster:
+        return get_kubeconfig_for_cluster(registry.default_cluster)
+    
+    # 回退到环境变量或默认路径
+    kubeconfig = os.environ.get('KUBECONFIG')
+    if kubeconfig:
+        return kubeconfig
+    
+    default_path = os.path.expanduser("~/.kube/config")
+    if os.path.exists(default_path):
+        return default_path
+    
+    raise FileNotFoundError(
+        "No cluster configured and no default kubeconfig found. "
+        "Please run 'gpuctl cluster add' or set KUBECONFIG environment variable."
+    )
+
+
+def load_kubernetes_config(cluster: Optional[str] = None) -> None:
+    """加载 Kubernetes 配置
+    
+    Args:
+        cluster: 集群名称，如果为 None 则使用默认集群
+    """
+    kubeconfig_path = get_kubeconfig_for_cluster(cluster)
+    config.load_kube_config(config_file=kubeconfig_path)
 
 
 class BaseBuilder:
