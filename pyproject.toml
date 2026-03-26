@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "gpuctl"
-version = "1.0.0"
+version = "0.9.0"
 description = "AI Computing Power Scheduling Platform"
 authors = [
     {name = "g8s-host", email = "g8shost@163.com"}
