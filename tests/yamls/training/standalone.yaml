@@ -1,0 +1,21 @@
+kind: Training
+version: v0.1
+job:
+  name: gpt2-finetune
+  namespace: alice
+  priority: medium
+
+environment:
+  notebook: alice-notebook
+  image: "pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel"
+  conda: "myenv"
+  command: "torchrun --nproc_per_node=8 /home/jovyan/train.py"
+
+distributed:
+  mode: standalone
+
+resources:
+  gpu: 8
+  gpuType: a100-40g
+  cpu: 40
+  memory: 320Gi

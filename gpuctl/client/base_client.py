@@ -42,6 +42,32 @@ class KubernetesClient:
             else:
                 raise RuntimeError(f"Failed to check namespace {namespace}: {e}")
 
+    def read_config_map(self, name: str, namespace: str) -> Optional[object]:
+        """Read a ConfigMap, returns None if not found"""
+        try:
+            return self.core_v1.read_namespaced_config_map(name=name, namespace=namespace)
+        except ApiException as e:
+            if e.status == 404:
+                return None
+            raise RuntimeError(f"Failed to read ConfigMap {namespace}/{name}: {e}")
+
+    def create_or_patch_config_map(self, name: str, namespace: str, data: dict) -> str:
+        """Create ConfigMap if absent, patch (replace data) if exists. Returns 'created' or 'updated'."""
+        from kubernetes import client as k8s_client
+        body = k8s_client.V1ConfigMap(
+            api_version="v1",
+            kind="ConfigMap",
+            metadata=k8s_client.V1ObjectMeta(name=name, namespace=namespace),
+            data=data,
+        )
+        existing = self.read_config_map(name, namespace)
+        if existing is None:
+            self.core_v1.create_namespaced_config_map(namespace=namespace, body=body)
+            return "created"
+        else:
+            self.core_v1.patch_namespaced_config_map(name=name, namespace=namespace, body=body)
+            return "updated"
+
     def handle_api_exception(self, e: ApiException, operation: str) -> None:
         """处理API异常"""
         if e.status == 401:

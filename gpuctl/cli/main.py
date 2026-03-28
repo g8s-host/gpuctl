@@ -5,6 +5,7 @@ from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_comm
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, describe_node_command
 from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command, get_namespaces_command, describe_namespace_command, delete_namespace_command
+from gpuctl.cli.init import init_command
 from gpuctl.client.priority_client import PriorityClient
 from gpuctl.parser.base_parser import BaseParser
 
@@ -12,6 +13,13 @@ from gpuctl.parser.base_parser import BaseParser
 def main():
     parser = argparse.ArgumentParser(description='GPU Control CLI')
     subparsers = parser.add_subparsers(dest='command', help='Command to execute')
+
+    # init command
+    init_parser = subparsers.add_parser('init', help='Initialize platform storage configuration')
+    init_parser.add_argument('--nfs-server', required=True, dest='nfs_server',
+                             help='NFS server IP or hostname')
+    init_parser.add_argument('--nfs-path', required=True, dest='nfs_path',
+                             help='NFS export root path (e.g. /exports)')
 
     # create command
     create_parser = subparsers.add_parser('create', help='Create a job from YAML')
@@ -183,7 +191,9 @@ def main():
         return 1
 
     try:
-        if args.command == 'create':
+        if args.command == 'init':
+            return init_command(args)
+        elif args.command == 'create':
             return create_job_command(args)
         elif args.command == 'create-quota':
             return create_quota_command(args)

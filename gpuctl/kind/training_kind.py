@@ -1,5 +1,9 @@
+from kubernetes import client as k8s_client
+from kubernetes.client.rest import ApiException
 from gpuctl.builder.training_builder import TrainingBuilder
+from gpuctl.builder.base_builder import BaseBuilder
 from gpuctl.client.job_client import JobClient
+from gpuctl.client.base_client import KubernetesClient
 from gpuctl.api.training import TrainingJob
 from typing import Dict, Any
 
@@ -10,13 +14,24 @@ class TrainingKind:
     def __init__(self):
         self.builder = TrainingBuilder()
         self.client = JobClient()
+        self._k8s = KubernetesClient()
 
     def create_training_job(self, training_job: TrainingJob,
                             namespace: str = "default") -> Dict[str, Any]:
-        """Create training job"""
+        """Create training job (+ HeadlessService for distributed mode)"""
         k8s_job = self.builder.build_job(training_job, namespace)
-
         result = self.client.create_job(k8s_job, namespace)
+
+        distributed = getattr(training_job, "distributed", None)
+        if distributed and distributed.mode == "distributed" and distributed.workers > 1:
+            svc = BaseBuilder.build_headless_service(
+                training_job.job.name, namespace, distributed.master_port
+            )
+            try:
+                self._k8s.core_v1.create_namespaced_service(namespace=namespace, body=svc)
+            except ApiException as e:
+                if e.status != 409:
+                    raise
 
         return {
             "job_id": result["name"],
@@ -34,13 +49,24 @@ class TrainingKind:
                             namespace: str = "default") -> Dict[str, Any]:
         """Update training job (delete and recreate)"""
         job_name = f"{training_job.job.name}"
-        
+
         try:
             self.client.delete_job(job_name, namespace)
         except Exception:
             pass
-        
+        self._delete_headless_service(job_name, namespace)
+
         return self.create_training_job(training_job, namespace)
+
+    def _delete_headless_service(self, job_name: str, namespace: str) -> None:
+        """Delete headless service for a distributed job (404 → silent)."""
+        try:
+            self._k8s.core_v1.delete_namespaced_service(
+                name=f"{job_name}-headless", namespace=namespace
+            )
+        except ApiException as e:
+            if e.status != 404:
+                raise
 
     def get_training_job_status(self, job_name: str,
                                 namespace: str = "default") -> Dict[str, Any]:
