@@ -1,0 +1,30 @@
+kind: Training
+version: v0.1
+job:
+  name: llm-pretrain
+  namespace: alice
+  priority: high
+
+environment:
+  notebook: alice-notebook
+  image: "pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel"
+  conda: "myenv"
+  command:
+    - bash
+    - -c
+    - |
+      torchrun \
+        --nnodes=$WORLD_SIZE --node_rank=$RANK \
+        --nproc_per_node=$GPUCTL_NPROC_PER_NODE \
+        --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
+        /home/jovyan/pretrain.py
+
+distributed:
+  mode: distributed
+  workers: 4
+
+resources:
+  gpu: 4
+  gpuType: a100-40g
+  cpu: 40
+  memory: 320Gi

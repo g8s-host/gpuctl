@@ -80,7 +80,8 @@ class NotebookBuilder(BaseBuilder):
             annotations=pod_annotations,
             restart_policy="Always",
             workdirs=workdirs,
-            priority_class_name=priority_class_name
+            priority_class_name=priority_class_name,
+            namespace=namespace,
         )
 
         service_name = svc_name(notebook_job.job.name)
