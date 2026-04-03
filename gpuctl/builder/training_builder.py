@@ -25,14 +25,12 @@ class TrainingBuilder(BaseBuilder):
             else:
                 k8s_config.load_kube_config()
             apps_v1 = k8s_client.AppsV1Api()
-            all_ns = k8s_client.CoreV1Api().list_namespace()
-            for ns in all_ns.items:
-                ns_name = ns.metadata.name
-                try:
-                    apps_v1.read_namespaced_stateful_set(notebook_name, ns_name)
-                    return ns_name
-                except Exception:
-                    continue
+            # Use list across all namespaces with field selector instead of iterating
+            result = apps_v1.list_stateful_set_for_all_namespaces(
+                field_selector=f"metadata.name={notebook_name}"
+            )
+            if result.items:
+                return result.items[0].metadata.namespace
         except Exception:
             pass
         return default_namespace
@@ -56,15 +54,13 @@ class TrainingBuilder(BaseBuilder):
         merged_env = list(env_config.env)
         merged_env.extend(conda_env_vars)
 
-        # Build a temporary env config view with patched command/args/env
-        class _PatchedEnv:
-            image = env_config.image
-            image_pull_secret = env_config.image_pull_secret
-            command = conda_command
-            args = conda_args
-            env = merged_env
-
-        container = cls.build_container_spec(_PatchedEnv(), training_job.resources, workdirs)
+        # Build a patched env config with updated command/args/env
+        patched_env = env_config.model_copy(update={
+            "command": conda_command,
+            "args": conda_args,
+            "env": merged_env,
+        })
+        container = cls.build_container_spec(patched_env, training_job.resources, workdirs)
 
         pod_spec_extras = {}
         if training_job.environment.image_pull_secret:
