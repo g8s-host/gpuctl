@@ -26,6 +26,7 @@ def main():
     create_parser.add_argument('-f', '--file', required=True, nargs='+', help='YAML file path(s)')
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+    create_parser.add_argument('--cluster', default=None, help='Target cluster name')
     create_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
@@ -47,6 +48,7 @@ def main():
         action="store_true",
         help="Show pod-level information instead of deployment/statefulset level"
     )
+    jobs_parser.add_argument('--cluster', default=None, help='Target cluster name')
     jobs_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # get pools
@@ -82,6 +84,7 @@ def main():
     apply_parser.add_argument('-f', '--file', required=True, nargs='+', help='YAML file path(s)')
     apply_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+    apply_parser.add_argument('--cluster', default=None, help='Target cluster name')
     apply_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # delete command
@@ -92,6 +95,7 @@ def main():
     delete_parser.add_argument('-f', '--file', nargs='+', help='YAML file path(s) (alternative to specifying resource type)')
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
+    delete_parser.add_argument('--cluster', default=None, help='Target cluster name')
     delete_parser.add_argument('--force', action='store_true', help='Force delete resource')
     delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
     
@@ -100,6 +104,7 @@ def main():
     job_delete_parser.add_argument('job_name', help='Job name to delete')
     job_delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                   help='Kubernetes namespace')
+    job_delete_parser.add_argument('--cluster', default=None, help='Target cluster name')
     job_delete_parser.add_argument('--force', action='store_true', help='Force delete job')
     job_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
@@ -138,6 +143,7 @@ def main():
                              help='Kubernetes namespace')
     logs_parser.add_argument('-f', '--follow', action='store_true',
                              help='Follow log output')
+    logs_parser.add_argument('--cluster', default=None, help='Target cluster name')
     logs_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # label command
@@ -158,6 +164,7 @@ def main():
     job_describe_parser = describe_subparsers.add_parser('job', help='Describe job details')
     job_describe_parser.add_argument('job_id', help='Job ID')
     job_describe_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
+    job_describe_parser.add_argument('--cluster', default=None, help='Target cluster name')
     job_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe pool

@@ -93,8 +93,8 @@ def create_job_command(args):
             # Parse YAML file
             parsed_obj = BaseParser.parse_yaml_file(file_path)
             
-            # 获取 cluster 参数（从 YAML 或默认）
-            cluster_name = _get_cluster_from_yaml(parsed_obj)
+            # 获取 cluster 参数（CLI override 优先，否则从 YAML）
+            cluster_name = getattr(args, 'cluster', None) or _get_cluster_from_yaml(parsed_obj)
             
             file_result = {
                 "file": file_path,
@@ -506,12 +506,16 @@ def apply_job_command(args):
                 print(f"\n📝 Applying file: {file_path}")
             
             parsed_obj = BaseParser.parse_yaml_file(file_path)
+
+            # 获取 cluster 参数（CLI override 优先，否则从 YAML）
+            cluster_name = getattr(args, 'cluster', None) or _get_cluster_from_yaml(parsed_obj)
+
             file_result = {
                 "file": file_path,
                 "kind": parsed_obj.kind,
                 "results": []
             }
-            
+
             # Determine the final namespace: use YAML-specified first, then CLI arg, then default
             yaml_namespace = getattr(parsed_obj, 'job', None) and getattr(parsed_obj.job, 'namespace', None)
             final_namespace = yaml_namespace or args.namespace
@@ -740,6 +744,7 @@ def apply_job_command(args):
 def get_jobs_command(args):
     """Get jobs list command"""
     try:
+        cluster_name = getattr(args, 'cluster', None)
         client = JobClient(cluster=cluster_name)
         
         # Build label filter criteria (exclude job-type for now to get all pods)
@@ -916,6 +921,7 @@ def delete_job_command(args):
     """Delete job command"""
     try:
         import json
+        cluster_name = getattr(args, 'cluster', None)
         client = JobClient(cluster=cluster_name)
         resource_type = None
         resource_name = None
@@ -1124,6 +1130,7 @@ def delete_job_command(args):
 def logs_job_command(args):
     """Get job logs command"""
     try:
+        cluster_name = getattr(args, 'cluster', None)
         # Get the actual pod name from deployment/replicaset
         job_name = args.job_name
         namespace = args.namespace
@@ -1343,6 +1350,8 @@ def logs_job_command(args):
 
 def describe_job_command(args):
     """Describe job details command"""
+    cluster_name = getattr(args, 'cluster', None)
+
     # Calculate AGE helper function, defined at the beginning for both JSON and text output
     def calculate_age(created_at_str):
         from datetime import datetime, timezone
@@ -1360,7 +1369,7 @@ def describe_job_command(args):
             return f"{int(seconds/3600)}h"
         else:
             return f"{int(seconds/86400)}d"
-    
+
     try:
         from gpuctl.client.job_client import JobClient
         client = JobClient(cluster=cluster_name)
