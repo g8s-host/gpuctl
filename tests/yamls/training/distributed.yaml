@@ -20,7 +20,7 @@ environment:
         /home/jovyan/pretrain.py
 
 distributed:
-  mode: distributed
+  mode: multi-node
   workers: 4
 
 resources:

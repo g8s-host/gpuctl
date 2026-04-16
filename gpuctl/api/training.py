@@ -4,8 +4,8 @@ from typing import Optional, Literal
 
 
 class DistributedConfig(BaseModel):
-    mode: Literal["standalone", "distributed"] = Field(default="standalone", description="训练模式")
-    workers: int = Field(default=1, ge=1, description="Worker 节点数（仅 distributed 模式有意义）")
+    mode: Literal["standalone", "multi-node"] = Field(default="standalone", description="训练模式")
+    workers: int = Field(default=1, ge=1, description="Worker 节点数（仅 multi-node 模式有意义）")
     master_port: int = Field(default=29500, description="DDP 通信端口")
 
     model_config = {

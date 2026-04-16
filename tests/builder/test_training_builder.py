@@ -118,7 +118,7 @@ class TestDistributedMode:
     @patch.object(TrainingBuilder, "_resolve_nfs_namespace", return_value="alice")
     def test_distributed_produces_indexed_job(self, _rns, _nfs):
         job = TrainingBuilder.build_job(
-            _make_training_job(mode="distributed", workers=4), "alice"
+            _make_training_job(mode="multi-node", workers=4), "alice"
         )
         assert job.spec.completion_mode == "Indexed"
         assert job.spec.completions == 4
@@ -128,7 +128,7 @@ class TestDistributedMode:
     @patch.object(TrainingBuilder, "_resolve_nfs_namespace", return_value="alice")
     def test_distributed_injects_ddp_env_vars(self, _rns, _nfs):
         job = TrainingBuilder.build_job(
-            _make_training_job(mode="distributed", workers=4), "alice"
+            _make_training_job(mode="multi-node", workers=4), "alice"
         )
         container = job.spec.template.spec.containers[0]
         env_names = {e.name for e in container.env}
@@ -150,7 +150,7 @@ class TestDistributedMode:
     def test_distributed_workers_1_behaves_like_standalone(self, _rns, _nfs):
         """workers=1 should not create Indexed Job"""
         job = TrainingBuilder.build_job(
-            _make_training_job(mode="distributed", workers=1), "alice"
+            _make_training_job(mode="multi-node", workers=1), "alice"
         )
         assert job.spec.completion_mode != "Indexed" if job.spec.completion_mode else True
 
@@ -158,7 +158,7 @@ class TestDistributedMode:
     @patch.object(TrainingBuilder, "_resolve_nfs_namespace", return_value="alice")
     def test_distributed_pod_labels_include_job_name(self, _rns, _nfs):
         job = TrainingBuilder.build_job(
-            _make_training_job(mode="distributed", workers=4), "alice"
+            _make_training_job(mode="multi-node", workers=4), "alice"
         )
         pod_labels = job.spec.template.metadata.labels
         assert pod_labels.get("job-name") == "test-job"

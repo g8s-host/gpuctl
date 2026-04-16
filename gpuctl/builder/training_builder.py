@@ -107,7 +107,7 @@ class TrainingBuilder(BaseBuilder):
         distributed = getattr(training_job, "distributed", None)
         is_distributed = (
             distributed is not None
-            and distributed.mode == "distributed"
+            and distributed.mode == "multi-node"
             and distributed.workers > 1
         )
 
