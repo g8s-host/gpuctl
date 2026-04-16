@@ -120,6 +120,7 @@ class TrainingBuilder(BaseBuilder):
         }
         if is_distributed:
             pod_labels["job-name"] = training_job.job.name
+            pod_spec_extras['subdomain'] = training_job.job.name + "-headless"
 
         # 构建 annotations，包含 description
         pod_annotations = {}
@@ -163,7 +164,8 @@ class TrainingBuilder(BaseBuilder):
                 ),
             ]
             existing_env = list(container.env) if container.env else []
-            container.env = existing_env + ddp_env
+            existing_names = {e.name for e in existing_env}
+            container.env = existing_env + [e for e in ddp_env if e.name not in existing_names]
 
             job_spec = client.V1JobSpec(
                 completion_mode="Indexed",

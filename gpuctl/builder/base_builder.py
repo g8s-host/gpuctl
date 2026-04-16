@@ -221,6 +221,8 @@ class BaseBuilder:
                 spec.node_selector = pod_spec_extras['node_selector']
             if 'affinity' in pod_spec_extras:
                 spec.affinity = pod_spec_extras['affinity']
+            if 'subdomain' in pod_spec_extras:
+                spec.subdomain = pod_spec_extras['subdomain']
 
         all_volumes = []
         if workdirs:
