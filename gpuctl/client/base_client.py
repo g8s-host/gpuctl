@@ -1,7 +1,8 @@
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-import os
 from typing import Optional
+
+from gpuctl.kube_config import load_k8s_config
 
 
 class KubernetesClient:
@@ -17,10 +18,7 @@ class KubernetesClient:
     def _load_config(self):
         """加载Kubernetes配置"""
         try:
-            if os.getenv('KUBERNETES_SERVICE_HOST'):
-                config.load_incluster_config()
-            else:
-                config.load_kube_config()
+            load_k8s_config(config)
         except Exception as e:
             raise RuntimeError(f"Failed to load Kubernetes config: {e}")
 

@@ -346,12 +346,16 @@ def test_get_jobs_with_namespace(mock_job_client):
     assert result == 0
 
 
+@patch('gpuctl.client.pool_client.PoolClient')
 @patch('gpuctl.cli.job.JobClient')
-def test_get_jobs_with_pool(mock_job_client):
+def test_get_jobs_with_pool(mock_job_client, mock_pool_client):
     """测试用例: 按资源池过滤作业"""
     mock_instance = MagicMock()
     mock_instance.list_jobs.return_value = []
     mock_job_client.return_value = mock_instance
+    mock_pool = MagicMock()
+    mock_pool.get_pool.return_value = {"nodes": []}
+    mock_pool_client.return_value = mock_pool
     
     args = Namespace(namespace=None, pool="test-pool", kind=None, pods=False, json=False)
     result = get_jobs_command(args)
