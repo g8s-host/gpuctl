@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Any, Union
 from enum import Enum
 
@@ -55,8 +55,17 @@ class ServiceConfig(BaseModel):
 
 
 class EnvironmentConfig(BaseModel):
+    notebook: Optional[str] = Field(default=None, description="引用 Notebook 名称，用于确定 NFS home 路径")
     image: str
+    conda: Optional[str] = Field(default=None, description="conda 环境名，未指定时直接执行 command")
     image_pull_secret: Optional[str] = Field(default=None, alias="imagePullSecret")
-    command: List[str] = Field(default_factory=list)
+    command: Union[str, List[str]] = Field(default_factory=list)
     args: List[str] = Field(default_factory=list)
     env: List[Dict[str, str]] = Field(default_factory=list)
+
+    @field_validator("command", mode="before")
+    @classmethod
+    def normalize_command(cls, v):
+        if isinstance(v, str):
+            return ["bash", "-c", v]
+        return v

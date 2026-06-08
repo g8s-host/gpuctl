@@ -174,6 +174,7 @@ class QuotaClient(KubernetesClient):
 
     def _ensure_namespace_exists(self, namespace_name: str) -> None:
         """Ensure namespace exists, create if not"""
+        created = False
         try:
             self.core_v1.read_namespace(namespace_name)
         except ApiException as e:
@@ -191,8 +192,67 @@ class QuotaClient(KubernetesClient):
                     )
                 )
                 self.core_v1.create_namespace(body=namespace)
+                created = True
             else:
                 raise
+        if created:
+            self._create_nfs_home(namespace_name)
+
+    def _create_nfs_home(self, namespace_name: str) -> None:
+        """Create NFS home directory for namespace via a temporary K8s Job.
+
+        Uses a busybox Job in kube-system to run 'mkdir -p' on the NFS share.
+        Silently skips if NFS is not configured or the Job already exists.
+        """
+        from gpuctl.builder.base_builder import BaseBuilder
+        nfs_config = BaseBuilder.read_nfs_config()
+        if not nfs_config:
+            return
+
+        nfs_server, nfs_path = nfs_config
+        job_name = f"nfs-init-{namespace_name}"
+        home_subdir = f"/nfs/home/{namespace_name}"
+
+        from kubernetes.client import (
+            V1Job, V1JobSpec, V1PodTemplateSpec, V1PodSpec,
+            V1Container, V1VolumeMount, V1Volume, V1NFSVolumeSource, V1ObjectMeta
+        )
+        init_job = V1Job(
+            api_version="batch/v1",
+            kind="Job",
+            metadata=V1ObjectMeta(name=job_name, namespace="kube-system"),
+            spec=V1JobSpec(
+                ttl_seconds_after_finished=60,
+                template=V1PodTemplateSpec(
+                    spec=V1PodSpec(
+                        restart_policy="Never",
+                        containers=[V1Container(
+                            name="mkdir",
+                            image="busybox",
+                            command=["mkdir", "-p", home_subdir],
+                            volume_mounts=[V1VolumeMount(
+                                name="nfs-root",
+                                mount_path="/nfs",
+                            )],
+                        )],
+                        volumes=[V1Volume(
+                            name="nfs-root",
+                            nfs=V1NFSVolumeSource(
+                                server=nfs_server,
+                                path=nfs_path,
+                            ),
+                        )],
+                    )
+                ),
+            ),
+        )
+        try:
+            self.batch_v1.create_namespaced_job(namespace="kube-system", body=init_job)
+        except ApiException as e:
+            if e.status == 409:
+                # Job already exists — directory likely already created, skip
+                return
+            raise
 
     def _create_default_namespace_quota(self, quota_name: str, cpu: str = None,
                                          memory: str = None, gpu: str = None) -> Dict[str, Any]:

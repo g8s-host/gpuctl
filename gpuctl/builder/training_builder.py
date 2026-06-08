@@ -2,17 +2,66 @@ from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.training import TrainingJob
 from gpuctl.constants import Labels, Kind, DEFAULT_POOL
+from gpuctl.kube_config import load_k8s_config
 
 
 class TrainingBuilder(BaseBuilder):
     """Training job builder"""
 
     @classmethod
+    def _resolve_nfs_namespace(cls, training_job: TrainingJob, default_namespace: str) -> str:
+        """Resolve the namespace used for NFS home path.
+
+        If environment.notebook is set, look up the Notebook's namespace via K8s.
+        Falls back to the job's own namespace if notebook not found or not set.
+        """
+        notebook_name = training_job.environment.notebook if training_job.environment else None
+        if not notebook_name:
+            return default_namespace
+        try:
+            from kubernetes import client as k8s_client, config as k8s_config
+            load_k8s_config(k8s_config)
+            apps_v1 = k8s_client.AppsV1Api()
+            all_ns = k8s_client.CoreV1Api().list_namespace()
+            for ns in all_ns.items:
+                ns_name = ns.metadata.name
+                try:
+                    apps_v1.read_namespaced_stateful_set(notebook_name, ns_name)
+                    return ns_name
+                except Exception:
+                    continue
+        except Exception:
+            pass
+        return default_namespace
+
+    @classmethod
     def build_job(cls, training_job: TrainingJob, namespace: str = "default") -> client.V1Job:
         """Build K8s Job resource"""
         workdirs = training_job.storage.workdirs if hasattr(training_job.storage, 'workdirs') else []
-        
-        container = cls.build_container_spec(training_job.environment, training_job.resources, workdirs)
+
+        # Resolve NFS namespace (may differ from job namespace if notebook is referenced)
+        nfs_namespace = cls._resolve_nfs_namespace(training_job, namespace)
+
+        # Apply conda entrypoint wrapper if conda env is specified
+        env_config = training_job.environment
+        original_command = list(env_config.command) if env_config.command else []
+        conda_command, conda_args, conda_env_vars = cls.build_conda_entrypoint(
+            original_command, env_config.conda
+        )
+
+        # Merge conda extra env vars into environment env list
+        merged_env = list(env_config.env)
+        merged_env.extend(conda_env_vars)
+
+        # Build a temporary env config view with patched command/args/env
+        class _PatchedEnv:
+            image = env_config.image
+            image_pull_secret = env_config.image_pull_secret
+            command = conda_command
+            args = conda_args
+            env = merged_env
+
+        container = cls.build_container_spec(_PatchedEnv(), training_job.resources, workdirs)
 
         pod_spec_extras = {}
         if training_job.environment.image_pull_secret:
@@ -55,13 +104,23 @@ class TrainingBuilder(BaseBuilder):
         priority_config = PriorityConfig.PRIORITY_CLASSES.get(training_job.job.priority)
         priority_class_name = priority_config["name"] if priority_config else None
 
-        # 构建 labels
+        # 分布式配置
+        distributed = getattr(training_job, "distributed", None)
+        is_distributed = (
+            distributed is not None
+            and distributed.mode == "distributed"
+            and distributed.workers > 1
+        )
+
+        # 构建 labels（distributed 模式需要 job-name 供 HeadlessService selector 使用）
         pod_labels = {
             Labels.JOB_TYPE: Kind.TRAINING,
             Labels.PRIORITY: training_job.job.priority,
             Labels.POOL: training_job.resources.pool or DEFAULT_POOL,
-            Labels.NAMESPACE: namespace
+            Labels.NAMESPACE: namespace,
         }
+        if is_distributed:
+            pod_labels["job-name"] = training_job.job.name
 
         # 构建 annotations，包含 description
         pod_annotations = {}
@@ -74,14 +133,53 @@ class TrainingBuilder(BaseBuilder):
             labels=pod_labels,
             annotations=pod_annotations,
             workdirs=workdirs,
-            priority_class_name=priority_class_name
+            priority_class_name=priority_class_name,
+            namespace=nfs_namespace,
         )
 
-        job_spec = client.V1JobSpec(
-            template=template,
-            backoff_limit=3,
-            ttl_seconds_after_finished=86400
-        )
+        if is_distributed:
+            workers = distributed.workers
+            master_port = distributed.master_port
+            job_name = training_job.job.name
+            # Inject DDP environment variables into the container
+            ddp_env = [
+                client.V1EnvVar(
+                    name="MASTER_ADDR",
+                    value=f"{job_name}-0.{job_name}-headless.{namespace}.svc.cluster.local",
+                ),
+                client.V1EnvVar(name="MASTER_PORT", value=str(master_port)),
+                client.V1EnvVar(name="WORLD_SIZE", value=str(workers)),
+                client.V1EnvVar(
+                    name="RANK",
+                    value_from=client.V1EnvVarSource(
+                        field_ref=client.V1ObjectFieldSelector(
+                            field_path="metadata.annotations['batch.kubernetes.io/job-completion-index']"
+                        )
+                    ),
+                ),
+                client.V1EnvVar(name="LOCAL_RANK", value="0"),
+                client.V1EnvVar(
+                    name="GPUCTL_NPROC_PER_NODE",
+                    value=str(training_job.resources.gpu or 1),
+                ),
+            ]
+            existing_env = list(container.env) if container.env else []
+            container.env = existing_env + ddp_env
+
+            job_spec = client.V1JobSpec(
+                completion_mode="Indexed",
+                completions=workers,
+                parallelism=workers,
+                template=template,
+                backoff_limit=3,
+                ttl_seconds_after_finished=86400,
+            )
+        else:
+            job_spec = client.V1JobSpec(
+                template=template,
+                backoff_limit=3,
+                ttl_seconds_after_finished=86400,
+            )
 
         # 构建 metadata labels
         metadata_labels = {
