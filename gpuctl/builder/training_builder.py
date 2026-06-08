@@ -2,6 +2,7 @@ from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.training import TrainingJob
 from gpuctl.constants import Labels, Kind, DEFAULT_POOL
+from gpuctl.kube_config import load_k8s_config
 
 
 class TrainingBuilder(BaseBuilder):
@@ -19,11 +20,7 @@ class TrainingBuilder(BaseBuilder):
             return default_namespace
         try:
             from kubernetes import client as k8s_client, config as k8s_config
-            import os
-            if os.getenv("KUBERNETES_SERVICE_HOST"):
-                k8s_config.load_incluster_config()
-            else:
-                k8s_config.load_kube_config()
+            load_k8s_config(k8s_config)
             apps_v1 = k8s_client.AppsV1Api()
             all_ns = k8s_client.CoreV1Api().list_namespace()
             for ns in all_ns.items:

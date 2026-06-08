@@ -2,6 +2,7 @@ from kubernetes import client
 from kubernetes.client.rest import ApiException
 from typing import Dict, Any, List, Optional, Tuple
 from gpuctl.api.common import ResourceRequest, StorageConfig
+from gpuctl.kube_config import load_k8s_config
 
 _NFS_CONFIGMAP_NAME = "gpuctl-config"
 _NFS_CONFIGMAP_NS = "kube-system"
@@ -19,11 +20,7 @@ class BaseBuilder:
         """
         try:
             from kubernetes import client as k8s_client, config as k8s_config
-            import os
-            if os.getenv("KUBERNETES_SERVICE_HOST"):
-                k8s_config.load_incluster_config()
-            else:
-                k8s_config.load_kube_config()
+            load_k8s_config(k8s_config)
             core_v1 = k8s_client.CoreV1Api()
             cm = core_v1.read_namespaced_config_map(
                 name=_NFS_CONFIGMAP_NAME, namespace=_NFS_CONFIGMAP_NS
