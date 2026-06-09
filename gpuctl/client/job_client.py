@@ -371,7 +371,16 @@ class JobClient(KubernetesClient):
             except ApiException as e:
                 if e.status != 404:
                     self.handle_api_exception(e, f"delete service {name}")
-            
+
+            # 5. 尝试删除多节点训练的 Headless Service（{name}-headless）
+            headless_name = f"{name}-headless"
+            try:
+                self.core_v1.delete_namespaced_service(headless_name, namespace, body=delete_options)
+                self._wait_for_resource_deletion(lambda n: self._is_service_exists(n, namespace), headless_name, "Service")
+            except ApiException as e:
+                if e.status != 404:
+                    self.handle_api_exception(e, f"delete service {headless_name}")
+
             return deleted
         except ApiException as e:
             if e.status == 404:

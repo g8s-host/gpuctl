@@ -2,7 +2,6 @@ from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.training import TrainingJob
 from gpuctl.constants import Labels, Kind, DEFAULT_POOL
-from gpuctl.kube_config import load_k8s_config
 
 
 class TrainingBuilder(BaseBuilder):
@@ -20,16 +19,18 @@ class TrainingBuilder(BaseBuilder):
             return default_namespace
         try:
             from kubernetes import client as k8s_client, config as k8s_config
-            load_k8s_config(k8s_config)
+            import os
+            if os.getenv("KUBERNETES_SERVICE_HOST"):
+                k8s_config.load_incluster_config()
+            else:
+                k8s_config.load_kube_config()
             apps_v1 = k8s_client.AppsV1Api()
-            all_ns = k8s_client.CoreV1Api().list_namespace()
-            for ns in all_ns.items:
-                ns_name = ns.metadata.name
-                try:
-                    apps_v1.read_namespaced_stateful_set(notebook_name, ns_name)
-                    return ns_name
-                except Exception:
-                    continue
+            # Use list across all namespaces with field selector instead of iterating
+            result = apps_v1.list_stateful_set_for_all_namespaces(
+                field_selector=f"metadata.name={notebook_name}"
+            )
+            if result.items:
+                return result.items[0].metadata.namespace
         except Exception:
             pass
         return default_namespace
@@ -53,15 +54,13 @@ class TrainingBuilder(BaseBuilder):
         merged_env = list(env_config.env)
         merged_env.extend(conda_env_vars)
 
-        # Build a temporary env config view with patched command/args/env
-        class _PatchedEnv:
-            image = env_config.image
-            image_pull_secret = env_config.image_pull_secret
-            command = conda_command
-            args = conda_args
-            env = merged_env
-
-        container = cls.build_container_spec(_PatchedEnv(), training_job.resources, workdirs)
+        # Build a patched env config with updated command/args/env
+        patched_env = env_config.model_copy(update={
+            "command": conda_command,
+            "args": conda_args,
+            "env": merged_env,
+        })
+        container = cls.build_container_spec(patched_env, training_job.resources, workdirs)
 
         pod_spec_extras = {}
         if training_job.environment.image_pull_secret:
@@ -108,7 +107,7 @@ class TrainingBuilder(BaseBuilder):
         distributed = getattr(training_job, "distributed", None)
         is_distributed = (
             distributed is not None
-            and distributed.mode == "distributed"
+            and distributed.mode == "multi-node"
             and distributed.workers > 1
         )
 
@@ -121,6 +120,7 @@ class TrainingBuilder(BaseBuilder):
         }
         if is_distributed:
             pod_labels["job-name"] = training_job.job.name
+            pod_spec_extras['subdomain'] = training_job.job.name + "-headless"
 
         # 构建 annotations，包含 description
         pod_annotations = {}
@@ -164,7 +164,8 @@ class TrainingBuilder(BaseBuilder):
                 ),
             ]
             existing_env = list(container.env) if container.env else []
-            container.env = existing_env + ddp_env
+            existing_names = {e.name for e in existing_env}
+            container.env = existing_env + [e for e in ddp_env if e.name not in existing_names]
 
             job_spec = client.V1JobSpec(
                 completion_mode="Indexed",

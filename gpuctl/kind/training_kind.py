@@ -23,7 +23,7 @@ class TrainingKind:
         result = self.client.create_job(k8s_job, namespace)
 
         distributed = getattr(training_job, "distributed", None)
-        if distributed and distributed.mode == "distributed" and distributed.workers > 1:
+        if distributed and distributed.mode == "multi-node" and distributed.workers > 1:
             svc = BaseBuilder.build_headless_service(
                 training_job.job.name, namespace, distributed.master_port
             )
