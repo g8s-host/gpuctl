@@ -27,6 +27,7 @@ class ResourceRequest(BaseModel):
     cpu: Union[int, str] = Field(..., description="CPU需求，如 8, '8' 或 '8000m'")
     memory: str = Field(..., description="内存需求，如 '32Gi'")
     gpu_share: Optional[str] = Field(default=None, description="GPU共享配置", alias="gpuShare")
+    cluster: Optional[str] = Field(default=None, description="目标集群名称（如 dev/prod）")
 
     model_config = {
         "populate_by_name": True

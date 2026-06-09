@@ -5,6 +5,14 @@ from gpuctl.cli.job import create_job_command, get_jobs_command, delete_job_comm
 from gpuctl.cli.pool import get_pools_command, create_pool_command, delete_pool_command, describe_pool_command
 from gpuctl.cli.node import get_nodes_command, get_labels_command, label_node_command, describe_node_command
 from gpuctl.cli.quota import create_quota_command, get_quotas_command, describe_quota_command, delete_quota_command, get_namespaces_command, describe_namespace_command, delete_namespace_command
+from gpuctl.cli.cluster_commands import (
+    cluster_add_command,
+    cluster_list_command,
+    cluster_use_command,
+    cluster_current_command,
+    cluster_remove_command,
+    cluster_get_command,
+)
 from gpuctl.cli.init import init_command
 from gpuctl.cli.config import config_command
 from gpuctl.client.priority_client import PriorityClient
@@ -41,6 +49,7 @@ def main():
     create_parser.add_argument('-f', '--file', required=True, nargs='+', help='YAML file path(s)')
     create_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+    create_parser.add_argument('--cluster', default=None, help='Target cluster name')
     create_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
 
@@ -62,6 +71,7 @@ def main():
         action="store_true",
         help="Show pod-level information instead of deployment/statefulset level"
     )
+    jobs_parser.add_argument('--cluster', default=None, help='Target cluster name')
     jobs_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # get pools
@@ -97,6 +107,7 @@ def main():
     apply_parser.add_argument('-f', '--file', required=True, nargs='+', help='YAML file path(s)')
     apply_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                help='Kubernetes namespace')
+    apply_parser.add_argument('--cluster', default=None, help='Target cluster name')
     apply_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # delete command
@@ -107,6 +118,7 @@ def main():
     delete_parser.add_argument('-f', '--file', nargs='+', help='YAML file path(s) (alternative to specifying resource type)')
     delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                               help='Kubernetes namespace')
+    delete_parser.add_argument('--cluster', default=None, help='Target cluster name')
     delete_parser.add_argument('--force', action='store_true', help='Force delete resource')
     delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
     
@@ -115,6 +127,7 @@ def main():
     job_delete_parser.add_argument('job_name', help='Job name to delete')
     job_delete_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE,
                                   help='Kubernetes namespace')
+    job_delete_parser.add_argument('--cluster', default=None, help='Target cluster name')
     job_delete_parser.add_argument('--force', action='store_true', help='Force delete job')
     job_delete_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
@@ -153,6 +166,7 @@ def main():
                              help='Kubernetes namespace')
     logs_parser.add_argument('-f', '--follow', action='store_true',
                              help='Follow log output')
+    logs_parser.add_argument('--cluster', default=None, help='Target cluster name')
     logs_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # label command
@@ -173,6 +187,7 @@ def main():
     job_describe_parser = describe_subparsers.add_parser('job', help='Describe job details')
     job_describe_parser.add_argument('job_id', help='Job ID')
     job_describe_parser.add_argument('-n', '--namespace', default=DEFAULT_NAMESPACE, help='Kubernetes namespace')
+    job_describe_parser.add_argument('--cluster', default=None, help='Target cluster name')
     job_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
 
     # describe pool
@@ -198,6 +213,37 @@ def main():
     namespace_describe_parser = describe_subparsers.add_parser('namespace', help='Describe namespace details')
     namespace_describe_parser.add_argument('namespace_name', help='Namespace name')
     namespace_describe_parser.add_argument('--json', action='store_true', help='Output in JSON format')
+
+    # cluster command
+    cluster_parser = subparsers.add_parser('cluster', help='Manage Kubernetes clusters')
+    cluster_subparsers = cluster_parser.add_subparsers(dest='cluster_command', help='Cluster command')
+
+    # cluster add
+    cluster_add_parser = cluster_subparsers.add_parser('add', help='Add a cluster')
+    cluster_add_parser.add_argument('--name', required=True, help='Cluster name (e.g., dev, prod)')
+    cluster_add_parser.add_argument('--provider', required=True, choices=['ack', 'tke', 'cce'],
+                                    help='Cloud provider (ack/tke/cce)')
+    cluster_add_parser.add_argument('--region', help='Region (e.g., cn-hangzhou)')
+    cluster_add_parser.add_argument('--kubeconfig', required=True, help='Path to kubeconfig file')
+
+    # cluster list
+    cluster_list_parser = cluster_subparsers.add_parser('list', help='List all clusters')
+
+    # cluster use
+    cluster_use_parser = cluster_subparsers.add_parser('use', help='Set default cluster')
+    cluster_use_parser.add_argument('name', help='Cluster name')
+
+    # cluster current
+    cluster_current_parser = cluster_subparsers.add_parser('current', help='Show current default cluster')
+
+    # cluster remove
+    cluster_remove_parser = cluster_subparsers.add_parser('remove', help='Remove a cluster')
+    cluster_remove_parser.add_argument('name', help='Cluster name')
+    cluster_remove_parser.add_argument('--force', action='store_true', help='Skip confirmation')
+
+    # cluster get
+    cluster_get_parser = cluster_subparsers.add_parser('get', help='Get cluster details')
+    cluster_get_parser.add_argument('name', help='Cluster name')
 
     args = parser.parse_args()
 
@@ -288,6 +334,22 @@ def main():
                 return describe_namespace_command(args)
             else:
                 print(f"Unknown resource type: {args.resource}")
+                return 1
+        elif args.command == 'cluster':
+            if args.cluster_command == 'add':
+                return cluster_add_command(args)
+            elif args.cluster_command == 'list':
+                return cluster_list_command(args)
+            elif args.cluster_command == 'use':
+                return cluster_use_command(args)
+            elif args.cluster_command == 'current':
+                return cluster_current_command(args)
+            elif args.cluster_command == 'remove':
+                return cluster_remove_command(args)
+            elif args.cluster_command == 'get':
+                return cluster_get_command(args)
+            else:
+                print(f"Unknown cluster command: {args.cluster_command}")
                 return 1
         else:
             print(f"Unknown command: {args.command}")
