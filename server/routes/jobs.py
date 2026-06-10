@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import logging
 import asyncio
 import json
+import threading
 
 from gpuctl.parser.base_parser import BaseParser, ParserError
 from gpuctl.kind.training_kind import TrainingKind
@@ -584,39 +585,58 @@ async def get_job_logs(
 
 @router.websocket("/{jobId}/logs/ws")
 async def websocket_job_logs(websocket: WebSocket, jobId: str):
-    """WebSocket实时日志"""
+    """WebSocket 实时日志 —— 真流式 follow，不丢行、不重复。
+
+    底层用 LogClient.stream_job_logs（K8s read_namespaced_pod_log(follow=True)）。
+    它是同步阻塞生成器，故放后台线程跑，经 asyncio.Queue 交回事件循环推送，
+    避免阻塞事件循环。消息格式保持 {"type": "log", "data": <line>} 不变（向后兼容）。
+
+    （旧实现是「每 2s 取 tail=5、固定发最后 2 条」的模拟轮询：空闲时重复刷屏、
+      繁忙时丢行，已替换。）
+    """
     await websocket.accept()
 
+    connection_info = {"websocket": websocket, "jobId": jobId}
+    active_connections.append(connection_info)
+
+    loop = asyncio.get_running_loop()
+    queue: asyncio.Queue = asyncio.Queue(maxsize=2000)
+    stop = threading.Event()
+
+    def _push(item):
+        try:
+            queue.put_nowait(item)
+        except asyncio.QueueFull:
+            pass
+
+    def _producer():
+        try:
+            for line in LogClient().stream_job_logs(jobId):
+                if stop.is_set():
+                    break
+                loop.call_soon_threadsafe(_push, line)
+        except Exception as exc:  # noqa: BLE001
+            loop.call_soon_threadsafe(_push, f"[stream error] {exc}")
+        finally:
+            loop.call_soon_threadsafe(_push, None)  # 哨兵：流结束
+
+    threading.Thread(target=_producer, daemon=True).start()
+
     try:
-        client = LogClient()
-
-        # 将连接添加到活动连接列表
-        connection_info = {"websocket": websocket, "jobId": jobId}
-        active_connections.append(connection_info)
-
-        # 发送历史日志
-        logs = client.get_job_logs(jobId, tail=100)
-        for log in logs:
-            await websocket.send_text(json.dumps({"type": "log", "data": log}))
-
-        # 实时推送新日志（简化实现）
         while True:
-            await asyncio.sleep(2)  # 每2秒检查新日志
-
-            # 这里应该实现真正的日志流式传输
-            # 当前是模拟实现
-            new_logs = client.get_job_logs(jobId, tail=5)  # 获取最新5条
-            for log in new_logs[-2:]:  # 只发送最新的2条避免重复
-                await websocket.send_text(json.dumps({"type": "log", "data": log}))
-
+            line = await queue.get()
+            if line is None:
+                break
+            await websocket.send_text(json.dumps({"type": "log", "data": line}))
     except WebSocketDisconnect:
-        # 连接断开时移除
-        active_connections.remove(connection_info)
+        pass
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
-        try:
-            await websocket.close()
-        except:
-            pass
+    finally:
+        stop.set()
         if connection_info in active_connections:
             active_connections.remove(connection_info)
+        try:
+            await websocket.close()
+        except Exception:
+            pass
