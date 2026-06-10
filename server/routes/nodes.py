@@ -44,9 +44,9 @@ async def get_nodes(
             node_info = {
                 "nodeName": node["name"],
                 "status": node["status"],
-                "gpuTotal": node["gpu_total"],
-                "gpuUsed": node["gpu_used"],
-                "gpuFree": node["gpu_free"],
+                "gpuTotal": node.get("resources", {}).get("gpu_total", 0),
+                "gpuUsed": node.get("resources", {}).get("gpu_used", 0),
+                "gpuFree": node.get("resources", {}).get("gpu_free", 0),
                 "boundPools": [pool_name],
                 "cpu": "unknown",
                 "memory": "unknown",
@@ -82,7 +82,7 @@ async def get_nodes_gpu_detail(
         
         gpu_detail_list = []
         for node in nodes:
-            gpu_count = node["gpu_total"]
+            gpu_count = node.get("resources", {}).get("gpu_total", 0)
             gpus = []
             for i in range(gpu_count):
                 gpus.append({
@@ -124,7 +124,7 @@ async def get_node_detail(nodeName: str):
             raise HTTPException(status_code=404, detail="Node not found")
         
         gpu_detail = []
-        gpu_count = node["gpu_total"]
+        gpu_count = node.get("resources", {}).get("gpu_total", 0)
         for i in range(gpu_count):
             gpu_detail.append({
                 "gpuId": f"gpu-{i}",
@@ -153,8 +153,8 @@ async def get_node_detail(nodeName: str):
                 "memoryTotal": "0",
                 "memoryUsed": "0",
                 "gpuTotal": gpu_count,
-                "gpuUsed": node["gpu_used"],
-                "gpuFree": node["gpu_free"]
+                "gpuUsed": node.get("resources", {}).get("gpu_used", 0),
+                "gpuFree": node.get("resources", {}).get("gpu_free", 0)
             },
             labels=labels,
             boundPools=bound_pools,
