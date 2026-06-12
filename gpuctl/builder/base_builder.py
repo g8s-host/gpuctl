@@ -256,17 +256,23 @@ class BaseBuilder:
 
     @staticmethod
     def build_telemetry_sidecar(pod_labels: Dict[str, str] = None) -> Optional[client.V1Container]:
-        """P0a 遥测 sidecar(shell 版,feature-flag 控制,默认关闭)。
+        """遥测 sidecar(feature-flag 控制,默认关闭)。
 
         作为 native sidecar(initContainer + restartPolicy=Always)注入,主容器退出时
         随之终止,不破坏 Job 完成语义。仅靠 NVIDIA_VISIBLE_DEVICES 读【设备级】GPU 利用率,
         不申请 nvidia.com/gpu、不需要 privileged(见 docs/sidecar-agent-design.md §3 实测)。
 
+        两种 agent 形态(GPUCTL_TELEMETRY_MODE):
+          binary(默认):rw-telemetry-agent Go 二进制(探针框架,见 telemetry-agent/),
+                         小镜像、可扩展(jupyter/metrics 等探针后续加)。用镜像 ENTRYPOINT。
+          shell:纯 bash + /dev/tcp 兜底版(无需自建镜像,跑在 cuda base 上),仅 GPU 设备级。
+
         开关与配置(全部经 gpuctl 进程的环境变量):
           GPUCTL_TELEMETRY_ENDPOINT   设置即开启,如 http://runwhere-ai.runwhere-apps:8000/api/v1/telemetry
+          GPUCTL_TELEMETRY_MODE       binary(默认)/ shell
           GPUCTL_TELEMETRY_INTERVAL   采样间隔秒,默认 5
           GPUCTL_TELEMETRY_NVIDIA_VISIBLE  默认 "all"(runw 设备级);生产可换本任务 GPU UUID
-          GPUCTL_TELEMETRY_IMAGE      默认 nvidia/cuda:12.2.2-base-ubuntu22.04(自带 glibc,运行期注入 nvidia-smi)
+          GPUCTL_TELEMETRY_IMAGE      默认随 mode:binary→rw-telemetry-agent:dev,shell→nvidia/cuda 基础镜像
           GPUCTL_TELEMETRY_RUNTIME_CLASS  默认 "nvidia"(注入卡所需)
         """
         endpoint = os.getenv("GPUCTL_TELEMETRY_ENDPOINT")
@@ -281,18 +287,23 @@ class BaseBuilder:
         port = str(u.port or (443 if u.scheme == "https" else 80))
         path = u.path or "/"
 
+        mode = os.getenv("GPUCTL_TELEMETRY_MODE", "binary").strip().lower()
         interval = os.getenv("GPUCTL_TELEMETRY_INTERVAL", "5")
         visible = os.getenv("GPUCTL_TELEMETRY_NVIDIA_VISIBLE", "all")
-        image = os.getenv("GPUCTL_TELEMETRY_IMAGE", "nvidia/cuda:12.2.2-base-ubuntu22.04")
+        default_image = ("nvidia/cuda:12.2.2-base-ubuntu22.04" if mode == "shell"
+                         else "rw-telemetry-agent:dev")
+        image = os.getenv("GPUCTL_TELEMETRY_IMAGE", default_image)
         job_type = (pod_labels or {}).get(Labels.JOB_TYPE, "unknown")
 
         def _field(p: str) -> client.V1EnvVarSource:
             return client.V1EnvVarSource(
                 field_ref=client.V1ObjectFieldSelector(field_path=p))
 
+        # 两种模式共用:Go agent 读 RW_TELEMETRY_ENDPOINT;shell 读 RW_T_HOST/PORT/PATH。
         env = [
             client.V1EnvVar(name="NVIDIA_VISIBLE_DEVICES", value=visible),
             client.V1EnvVar(name="NVIDIA_DRIVER_CAPABILITIES", value="utility"),
+            client.V1EnvVar(name="RW_TELEMETRY_ENDPOINT", value=endpoint),
             client.V1EnvVar(name="RW_T_HOST", value=host),
             client.V1EnvVar(name="RW_T_PORT", value=port),
             client.V1EnvVar(name="RW_T_PATH", value=path),
@@ -303,7 +314,7 @@ class BaseBuilder:
         ]
 
         # 纯 bash + /dev/tcp 上报,零依赖(cuda base 无 curl);nvidia-smi 由 runtime 注入
-        script = r'''set -u
+        shell_script = r'''set -u
 H="$RW_T_HOST"; P="$RW_T_PORT"; UPATH="$RW_T_PATH"; IV="${RW_T_INTERVAL:-5}"
 echo "[rw-telemetry] $RW_POD_NAMESPACE/$RW_POD_NAME type=$RW_JOB_TYPE -> $H:$P$UPATH every ${IV}s"
 post() {
@@ -327,18 +338,21 @@ done
 
         # 注意:不在构造器里传 restart_policy —— 老版本 k8s client 不识别该参数会报错。
         # native sidecar 的 restart_policy 由注入处按 client 能力设置(见 build_pod_template_spec)。
-        return client.V1Container(
+        kwargs = dict(
             name="rw-telemetry",
             image=image,
             image_pull_policy="IfNotPresent",
             env=env,
-            command=["bash", "-lc"],
-            args=[script],
             resources=client.V1ResourceRequirements(
                 requests={"cpu": "10m", "memory": "32Mi"},
                 limits={"cpu": "200m", "memory": "128Mi"},
             ),
         )
+        if mode == "shell":
+            # 用 cuda base + bash 脚本;binary 模式则交给镜像 ENTRYPOINT。
+            kwargs["command"] = ["bash", "-lc"]
+            kwargs["args"] = [shell_script]
+        return client.V1Container(**kwargs)
 
     @staticmethod
     def build_pod_template_spec(container: client.V1Container,
