@@ -4,6 +4,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 from gpuctl.api.common import ResourceRequest, StorageConfig
+from gpuctl.constants import Labels
 
 _NFS_CONFIGMAP_NAME = "gpuctl-config"
 _NFS_CONFIGMAP_NS = "kube-system"
@@ -254,6 +255,92 @@ class BaseBuilder:
         return container
 
     @staticmethod
+    def build_telemetry_sidecar(pod_labels: Dict[str, str] = None) -> Optional[client.V1Container]:
+        """P0a 遥测 sidecar(shell 版,feature-flag 控制,默认关闭)。
+
+        作为 native sidecar(initContainer + restartPolicy=Always)注入,主容器退出时
+        随之终止,不破坏 Job 完成语义。仅靠 NVIDIA_VISIBLE_DEVICES 读【设备级】GPU 利用率,
+        不申请 nvidia.com/gpu、不需要 privileged(见 docs/sidecar-agent-design.md §3 实测)。
+
+        开关与配置(全部经 gpuctl 进程的环境变量):
+          GPUCTL_TELEMETRY_ENDPOINT   设置即开启,如 http://runwhere-ai.runwhere-apps:8000/api/v1/telemetry
+          GPUCTL_TELEMETRY_INTERVAL   采样间隔秒,默认 5
+          GPUCTL_TELEMETRY_NVIDIA_VISIBLE  默认 "all"(runw 设备级);生产可换本任务 GPU UUID
+          GPUCTL_TELEMETRY_IMAGE      默认 nvidia/cuda:12.2.2-base-ubuntu22.04(自带 glibc,运行期注入 nvidia-smi)
+          GPUCTL_TELEMETRY_RUNTIME_CLASS  默认 "nvidia"(注入卡所需)
+        """
+        endpoint = os.getenv("GPUCTL_TELEMETRY_ENDPOINT")
+        if not endpoint:
+            return None  # 默认关闭
+
+        from urllib.parse import urlsplit
+        u = urlsplit(endpoint)
+        host = u.hostname or ""
+        if not host:
+            return None
+        port = str(u.port or (443 if u.scheme == "https" else 80))
+        path = u.path or "/"
+
+        interval = os.getenv("GPUCTL_TELEMETRY_INTERVAL", "5")
+        visible = os.getenv("GPUCTL_TELEMETRY_NVIDIA_VISIBLE", "all")
+        image = os.getenv("GPUCTL_TELEMETRY_IMAGE", "nvidia/cuda:12.2.2-base-ubuntu22.04")
+        job_type = (pod_labels or {}).get(Labels.JOB_TYPE, "unknown")
+
+        def _field(p: str) -> client.V1EnvVarSource:
+            return client.V1EnvVarSource(
+                field_ref=client.V1ObjectFieldSelector(field_path=p))
+
+        env = [
+            client.V1EnvVar(name="NVIDIA_VISIBLE_DEVICES", value=visible),
+            client.V1EnvVar(name="NVIDIA_DRIVER_CAPABILITIES", value="utility"),
+            client.V1EnvVar(name="RW_T_HOST", value=host),
+            client.V1EnvVar(name="RW_T_PORT", value=port),
+            client.V1EnvVar(name="RW_T_PATH", value=path),
+            client.V1EnvVar(name="RW_T_INTERVAL", value=str(interval)),
+            client.V1EnvVar(name="RW_JOB_TYPE", value=job_type),
+            client.V1EnvVar(name="RW_POD_NAME", value_from=_field("metadata.name")),
+            client.V1EnvVar(name="RW_POD_NAMESPACE", value_from=_field("metadata.namespace")),
+        ]
+
+        # 纯 bash + /dev/tcp 上报,零依赖(cuda base 无 curl);nvidia-smi 由 runtime 注入
+        script = r'''set -u
+H="$RW_T_HOST"; P="$RW_T_PORT"; UPATH="$RW_T_PATH"; IV="${RW_T_INTERVAL:-5}"
+echo "[rw-telemetry] $RW_POD_NAMESPACE/$RW_POD_NAME type=$RW_JOB_TYPE -> $H:$P$UPATH every ${IV}s"
+post() {
+  exec 3<>"/dev/tcp/$H/$P" 2>/dev/null || { echo "[rw-telemetry] connect $H:$P fail"; return 1; }
+  printf 'POST %s HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s' \
+    "$UPATH" "$H" "${#1}" "$1" >&3
+  head -c 64 <&3 >/dev/null 2>&1
+  exec 3>&- 3<&- 2>/dev/null
+}
+while true; do
+  L=$(nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
+  I=$(echo "$L" | awk -F, '{gsub(/ /,"");print $1}')
+  U=$(echo "$L" | awk -F, '{gsub(/ /,"");print $2}')
+  MU=$(echo "$L" | awk -F, '{gsub(/ /,"");print $3}')
+  MT=$(echo "$L" | awk -F, '{gsub(/ /,"");print $4}')
+  B="{\"namespace\":\"$RW_POD_NAMESPACE\",\"pod\":\"$RW_POD_NAME\",\"job_type\":\"$RW_JOB_TYPE\",\"gpu_index\":${I:-0},\"gpu_util\":${U:-0},\"mem_used\":${MU:-0},\"mem_total\":${MT:-0}}"
+  post "$B" || true
+  sleep "$IV"
+done
+'''
+
+        # 注意:不在构造器里传 restart_policy —— 老版本 k8s client 不识别该参数会报错。
+        # native sidecar 的 restart_policy 由注入处按 client 能力设置(见 build_pod_template_spec)。
+        return client.V1Container(
+            name="rw-telemetry",
+            image=image,
+            image_pull_policy="IfNotPresent",
+            env=env,
+            command=["bash", "-lc"],
+            args=[script],
+            resources=client.V1ResourceRequirements(
+                requests={"cpu": "10m", "memory": "32Mi"},
+                limits={"cpu": "200m", "memory": "128Mi"},
+            ),
+        )
+
+    @staticmethod
     def build_pod_template_spec(container: client.V1Container,
                                 pod_spec_extras: Dict[str, Any] = None,
                                 labels: Dict[str, str] = None,
@@ -299,5 +386,25 @@ class BaseBuilder:
             spec.priority_class_name = priority_class_name
 
         pod_labels = labels or {"app": "gpuctl-job"}
+
+        # P0a:遥测 sidecar(feature-flag,默认关闭)。设 GPUCTL_TELEMETRY_ENDPOINT 才注入。
+        sidecar = BaseBuilder.build_telemetry_sidecar(pod_labels)
+        if sidecar is not None:
+            import inspect
+            supports_native = "restart_policy" in inspect.signature(
+                client.V1Container.__init__).parameters
+            if supports_native:
+                # native sidecar:initContainer + restartPolicy=Always。主容器退出即随之
+                # 终止,不破坏 Job 完成语义(k8s 1.28+ / client v28+)。
+                sidecar.restart_policy = "Always"
+                spec.init_containers = (list(spec.init_containers) if spec.init_containers else []) + [sidecar]
+            else:
+                # 老 client 无 native sidecar:退回普通 sidecar。对 Deployment/StatefulSet 安全;
+                # 对 Job 会阻止其完成(死循环常驻)—— 该路径仅作兜底,生产应升级 client。
+                spec.containers = list(spec.containers) + [sidecar]
+            rc = os.getenv("GPUCTL_TELEMETRY_RUNTIME_CLASS", "nvidia")
+            if rc:
+                spec.runtime_class_name = rc
+
         metadata = client.V1ObjectMeta(labels=pod_labels, annotations=annotations)
         return client.V1PodTemplateSpec(metadata=metadata, spec=spec)
