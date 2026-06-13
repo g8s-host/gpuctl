@@ -16,6 +16,21 @@ class NotebookBuilder(BaseBuilder):
 
         container.ports = [client.V1ContainerPort(container_port=8888)]
 
+        # 注入 jupyter base_url，使 notebook 可被 console 反向代理(/nb/<ns>/<name>/)。
+        # jupyter docker stacks 镜像会把 NOTEBOOK_ARGS 追加到 jupyter 启动命令,
+        # 故无需覆盖 image entrypoint。base_url 前缀须与 console notebook_proxy 一致。
+        _base_url = f"/nb/{namespace}/{notebook_job.job.name}/"
+        _nb_args = (f"--ServerApp.base_url={_base_url} "
+                    f"--ServerApp.allow_remote_access=True "
+                    f"--ServerApp.trust_xheaders=True")
+        _env = list(container.env) if container.env else []
+        _existing = next((e for e in _env if e.name == "NOTEBOOK_ARGS"), None)
+        if _existing is not None:
+            _existing.value = (f"{_existing.value} {_nb_args}" if _existing.value else _nb_args)
+        else:
+            _env.append(client.V1EnvVar(name="NOTEBOOK_ARGS", value=_nb_args))
+        container.env = _env
+
         pod_spec_extras = {}
         if notebook_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
