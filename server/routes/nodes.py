@@ -40,13 +40,16 @@ async def get_nodes(
             
             labels = node.get("labels", {})
             pool_name = labels.get(Labels.POOL, "default")
-            
+
+            # GPU 计数在 _build_node_info 里嵌在 node["resources"] 子字典,
+            # 顶层硬取会 KeyError(无 GPU/旧形状节点)。统一从 resources 取 + 兜底 0。
+            res = node.get("resources", {})
             node_info = {
                 "nodeName": node["name"],
                 "status": node["status"],
-                "gpuTotal": node["gpu_total"],
-                "gpuUsed": node["gpu_used"],
-                "gpuFree": node["gpu_free"],
+                "gpuTotal": res.get("gpu_total", 0),
+                "gpuUsed": res.get("gpu_used", 0),
+                "gpuFree": res.get("gpu_free", 0),
                 "boundPools": [pool_name],
                 "cpu": "unknown",
                 "memory": "unknown",
@@ -82,12 +85,13 @@ async def get_nodes_gpu_detail(
         
         gpu_detail_list = []
         for node in nodes:
-            gpu_count = node["gpu_total"]
+            gpu_count = node.get("resources", {}).get("gpu_total", 0)
+            gpu_types = node.get("gpu_types") or []
             gpus = []
             for i in range(gpu_count):
                 gpus.append({
                     "gpuId": f"gpu-{i}",
-                    "type": node["gpu_types"][0] if node["gpu_types"] else "unknown",
+                    "type": gpu_types[0] if gpu_types else "unknown",
                     "status": "free",
                     "utilization": 0.0,
                     "memoryUsage": "0Gi/0Gi"
@@ -123,12 +127,14 @@ async def get_node_detail(nodeName: str):
         if not node:
             raise HTTPException(status_code=404, detail="Node not found")
         
+        res = node.get("resources", {})
         gpu_detail = []
-        gpu_count = node["gpu_total"]
+        gpu_count = res.get("gpu_total", 0)
+        gpu_types = node.get("gpu_types") or []
         for i in range(gpu_count):
             gpu_detail.append({
                 "gpuId": f"gpu-{i}",
-                "type": node["gpu_types"][0] if node["gpu_types"] else "unknown",
+                "type": gpu_types[0] if gpu_types else "unknown",
                 "status": "free",
                 "utilization": 0.0,
                 "memoryUsage": "0Gi/0Gi"
@@ -153,8 +159,8 @@ async def get_node_detail(nodeName: str):
                 "memoryTotal": "0",
                 "memoryUsed": "0",
                 "gpuTotal": gpu_count,
-                "gpuUsed": node["gpu_used"],
-                "gpuFree": node["gpu_free"]
+                "gpuUsed": res.get("gpu_used", 0),
+                "gpuFree": res.get("gpu_free", 0)
             },
             labels=labels,
             boundPools=bound_pools,
