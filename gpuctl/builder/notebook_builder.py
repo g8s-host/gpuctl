@@ -1,3 +1,5 @@
+import os
+
 from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.notebook import NotebookJob
@@ -15,6 +17,26 @@ class NotebookBuilder(BaseBuilder):
         container = cls.build_container_spec(notebook_job.environment, notebook_job.resources, workdirs)
 
         container.ports = [client.V1ContainerPort(container_port=8888)]
+
+        # 可选:注入 jupyter base_url,使 notebook 可被 console 反向代理。
+        # 默认【关闭】—— gpuctl 单独使用(CLI/直连 NodePort)时不改 notebook 行为。
+        # 仅当部署方(如 runwhere-ai console)设置了 GPUCTL_NOTEBOOK_BASE_URL_PREFIX
+        # (如 "/nb",须与 console notebook_proxy 路由前缀一致)才注入,生成
+        # base_url=<prefix>/<ns>/<name>/。jupyter docker stacks 镜像会把 NOTEBOOK_ARGS
+        # 追加到启动命令,无需覆盖 entrypoint。
+        _prefix = os.getenv("GPUCTL_NOTEBOOK_BASE_URL_PREFIX", "").strip().rstrip("/")
+        if _prefix:
+            _base_url = f"{_prefix}/{namespace}/{notebook_job.job.name}/"
+            _nb_args = (f"--ServerApp.base_url={_base_url} "
+                        f"--ServerApp.allow_remote_access=True "
+                        f"--ServerApp.trust_xheaders=True")
+            _env = list(container.env) if container.env else []
+            _existing = next((e for e in _env if e.name == "NOTEBOOK_ARGS"), None)
+            if _existing is not None:
+                _existing.value = (f"{_existing.value} {_nb_args}" if _existing.value else _nb_args)
+            else:
+                _env.append(client.V1EnvVar(name="NOTEBOOK_ARGS", value=_nb_args))
+            container.env = _env
 
         pod_spec_extras = {}
         if notebook_job.environment.image_pull_secret:

@@ -52,6 +52,16 @@ Issues = "https://github.com/g8s-host/gpuctl/issues"
 [project.scripts]
 gpuctl = "gpuctl.cli.main:main"
 
+# poetry-core 默认只打包与项目同名的 `gpuctl/`,会漏掉平级的 `server/`
+# (FastAPI /api/v1/* 路由包,runwhere-ai 以 `import server` 挂载它)。
+# 显式声明这两个顶层包,使 `pip install gpuctl`(含 git 安装)能 import server,
+# 否则下游钉死 git 提交安装后挂不上 API 路由。
+[tool.poetry]
+packages = [
+    { include = "gpuctl" },
+    { include = "server" },
+]
+
 [tool.black]
 line-length = 120
 target-version = ['py38']

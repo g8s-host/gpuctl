@@ -3,7 +3,7 @@ from .quota_client import QuotaClient
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 from typing import List, Dict, Any, Optional
-from gpuctl.constants import Labels, Kind, DEFAULT_NAMESPACE, NS_LABEL_SELECTOR
+from gpuctl.constants import Labels, Kind, DEFAULT_NAMESPACE, NS_LABEL_SELECTOR, svc_name
 
 
 class JobClient(KubernetesClient):
@@ -364,13 +364,16 @@ class JobClient(KubernetesClient):
                     self.handle_api_exception(e, f"delete statefulset {name}")
             
             # 4. 尝试删除相关Service（无论前面是否成功删除，都尝试删除Service）
+            #    Service 名是 svc-{name}（见 constants.svc_name，与各 builder 创建时一致）。
+            #    历史 bug：这里曾用 name 而非 svc_name(name)，导致 NodePort Service 删不掉成孤儿。
+            service_name = svc_name(name)
             try:
-                self.core_v1.delete_namespaced_service(name, namespace, body=delete_options)
+                self.core_v1.delete_namespaced_service(service_name, namespace, body=delete_options)
                 # 等待Service删除完成
-                self._wait_for_resource_deletion(lambda n: self._is_service_exists(n, namespace), name, "Service")
+                self._wait_for_resource_deletion(lambda n: self._is_service_exists(n, namespace), service_name, "Service")
             except ApiException as e:
                 if e.status != 404:
-                    self.handle_api_exception(e, f"delete service {name}")
+                    self.handle_api_exception(e, f"delete service {service_name}")
 
             # 5. 尝试删除多节点训练的 Headless Service（{name}-headless）
             headless_name = f"{name}-headless"
