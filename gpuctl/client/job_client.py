@@ -131,10 +131,11 @@ class JobClient(KubernetesClient):
         try:
             all_jobs = []
 
-            # 如果没有指定labels，添加默认过滤器，只返回gpuctl创建的资源
-            # 所有gpuctl创建的资源都会带有runwhere.ai/job-type标签
-            if not labels and not include_pods:
-                # 当include_pods=True时，不要使用gpuctl_filter，因为Pod资源可能没有runwhere.ai/job-type标签
+            # 如果没有指定labels，添加默认过滤器，只返回gpuctl创建的资源。
+            # 所有gpuctl创建的资源(含各 builder 的 Pod 模板)都带 runwhere.ai/job-type
+            # 标签,因此 include_pods=True 时同样要过滤——否则命名空间里用户自己部署的
+            # 工作负载(如手动 kubectl apply 的 app)会被误当成任务列出来。
+            if not labels:
                 use_gpuctl_filter = True
             else:
                 use_gpuctl_filter = False
