@@ -5,6 +5,10 @@ from .base_builder import BaseBuilder
 from gpuctl.api.notebook import NotebookJob
 from gpuctl.constants import Labels, Kind, DEFAULT_POOL, svc_name
 
+# jupyter 容器固定监听 8888;Service 与 console notebook_proxy 都必须对齐此端口
+# (否则 Service 把流量导向不存在的端口 → ClusterIP/NodePort/反代全 502)。
+_NOTEBOOK_PORT = 8888
+
 
 class NotebookBuilder(BaseBuilder):
     """Notebook job builder"""
@@ -16,7 +20,7 @@ class NotebookBuilder(BaseBuilder):
         
         container = cls.build_container_spec(notebook_job.environment, notebook_job.resources, workdirs)
 
-        container.ports = [client.V1ContainerPort(container_port=8888)]
+        container.ports = [client.V1ContainerPort(container_port=_NOTEBOOK_PORT)]
 
         # 可选:注入 jupyter base_url,使 notebook 可被 console 反向代理。
         # 默认【关闭】—— gpuctl 单独使用(CLI/直连 NodePort)时不改 notebook 行为。
@@ -146,11 +150,13 @@ class NotebookBuilder(BaseBuilder):
     def build_service(cls, notebook_job: NotebookJob, namespace: str = "default") -> client.V1Service:
         """Build K8s Service resource"""
         app_label = f"{notebook_job.job.name}"
+        # notebook 固定走 jupyter 的 8888(容器端口),不能用 service.port(默认 8000)——
+        # 否则 Service 把流量导向容器不存在的端口,ClusterIP/NodePort/console 反代全 502。
         service_spec = client.V1ServiceSpec(
             selector={"app": app_label},
             ports=[client.V1ServicePort(
-                port=notebook_job.service.port,
-                target_port=notebook_job.service.port
+                port=_NOTEBOOK_PORT,
+                target_port=_NOTEBOOK_PORT
             )],
             type="NodePort"
         )
