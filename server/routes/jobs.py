@@ -249,16 +249,11 @@ async def get_jobs(
                             break
 
             pod_name = job["name"]
-            simplified_name = pod_name
-            parts = simplified_name.split('-')
-            if len(parts) >= 3:
-                third_part = parts[2] if len(parts) >= 3 else ''
-                if third_part.isalnum() and len(third_part) >= 5:
-                    final_name = '-'.join(parts[:2])
-                else:
-                    final_name = simplified_name
-            else:
-                final_name = simplified_name
+            # NAME = 真实作业名(YAML job.name),从 pod 标签读:inference/notebook/compute
+            # 是 app=<name>,training(K8s Job)是 job-name=<name>——与 CLI `gpuctl get jobs`
+            # 的 _get_job_name 一致。不再按 '-' 切 pod 名:对单段名(sttest)和含连字符的名
+            # (pping-lang)都会切错。无标签才回退完整 pod 名。
+            final_name = labels.get(Labels.APP) or labels.get(Labels.JOB_NAME) or pod_name
 
             node_name = job.get("spec", {}).get("node_name") or "N/A"
             pod_ip = status_dict.get("pod_ip") or "N/A"
