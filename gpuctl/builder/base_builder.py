@@ -254,6 +254,25 @@ class BaseBuilder:
         return container
 
     @staticmethod
+    def _container_requests_gpu(container: client.V1Container) -> bool:
+        """容器是否申请了 nvidia.com/gpu(>0)。"""
+        res = getattr(container, "resources", None)
+        if not res:
+            return False
+        for bucket in (getattr(res, "limits", None), getattr(res, "requests", None)):
+            if not bucket:
+                continue
+            v = bucket.get("nvidia.com/gpu")
+            if v in (None, ""):
+                continue
+            try:
+                if int(str(v)) > 0:
+                    return True
+            except (ValueError, TypeError):
+                return True
+        return False
+
+    @staticmethod
     def build_pod_template_spec(container: client.V1Container,
                                 pod_spec_extras: Dict[str, Any] = None,
                                 labels: Dict[str, str] = None,
@@ -297,6 +316,15 @@ class BaseBuilder:
         # 添加优先级类
         if priority_class_name:
             spec.priority_class_name = priority_class_name
+
+        # GPU 工作负载必须用 nvidia 运行时类才能真正注入设备/驱动库;否则容器内
+        # 无 /dev/nvidia*、无 nvidia-smi,CUDA 不可用(部分集群 nvidia 是 RuntimeClass
+        # 而非默认 runtime)。仅在申请了 GPU 且未设过 runtime_class 时设置;
+        # env GPUCTL_GPU_RUNTIME_CLASS 可覆盖,设为空字符串可禁用(默认 runtime 已是 nvidia 的集群)。
+        if spec.runtime_class_name is None and BaseBuilder._container_requests_gpu(container):
+            gpu_rc = os.getenv("GPUCTL_GPU_RUNTIME_CLASS", "nvidia")
+            if gpu_rc:
+                spec.runtime_class_name = gpu_rc
 
         pod_labels = labels or {"app": "gpuctl-job"}
         metadata = client.V1ObjectMeta(labels=pod_labels, annotations=annotations)
