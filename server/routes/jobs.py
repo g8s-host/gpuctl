@@ -346,6 +346,29 @@ def _job_detail_compute_status(job_info: dict) -> str:
     return "Pending"
 
 
+def _job_detail_status_with_pods(job_info: dict, job_name: str, namespace: str,
+                                 resource_type: str) -> str:
+    """详情页状态:控制器(Job/Deployment/StatefulSet)的 status.active 把【Pending 的
+    Pod】也计入,会把"调度中"误显成 Running。这里对控制器类型改看真实 Pod 相,优先
+    暴露非 Running 的相(调度中/拉镜像失败/OOM 等),与任务列表保持一致。
+    """
+    base = _job_detail_compute_status(job_info)
+    if resource_type not in ("Job", "Deployment", "StatefulSet"):
+        return base  # Pod 等已是真实相
+    try:
+        pods = [p for p in JobClient().list_pods(namespace)
+                if (p.get("name") or "").startswith(f"{job_name}-")]
+        if not pods:
+            return base
+        statuses = [_job_detail_compute_status(p) for p in pods]
+        for s in statuses:               # 任一非 Running/Succeeded → 暴露该相
+            if s not in ("Running", "Succeeded"):
+                return s
+        return statuses[0]
+    except Exception:
+        return base
+
+
 def _compute_resource_type(job_info: dict, job_type: str) -> str:
     """根据 status 字段推断 Kubernetes 资源类型 (delegates to constants module)"""
     return infer_resource_type(job_info.get("status", {}), job_type)
@@ -356,13 +379,21 @@ def _fetch_events(job_name: str, namespace: str, resource_type: str) -> list:
     try:
         from gpuctl.client.base_client import KubernetesClient
         k8s = KubernetesClient()
-        evs = k8s.core_v1.list_namespaced_event(
-            namespace=namespace,
-            field_selector=f"involvedObject.name={job_name},involvedObject.kind={resource_type}",
-            limit=10
-        )
+        # 关键:调度/拉镜像/OOM 等事件挂在 Pod 上,而不在工作负载对象(Job/Deployment/
+        # StatefulSet)上。只按 involvedObject.name=<workload>,kind=<resource_type> 过滤
+        # 会漏掉它们——Pending 任务的 FailedScheduling 就永远看不到(用户因此"不知道
+        # 卡在哪")。改为列命名空间事件,保留 involvedObject 名等于工作负载名、或以
+        # "<workload>-" 开头(即其 Pod / ReplicaSet)的事件。
+        evs = k8s.core_v1.list_namespaced_event(namespace=namespace, limit=200)
+        prefix = f"{job_name}-"
+        related = [
+            ev for ev in evs.items
+            if ev.involved_object and ev.involved_object.name
+            and (ev.involved_object.name == job_name
+                 or ev.involved_object.name.startswith(prefix))
+        ]
         sorted_evs = sorted(
-            evs.items,
+            related,
             key=lambda e: e.last_timestamp or e.first_timestamp or e.event_time or '',
             reverse=True
         )[:10]
@@ -531,7 +562,7 @@ async def get_job_detail(
             namespace=actual_ns,
             kind=job_type,
             resource_type=resource_type,
-            status=_job_detail_compute_status(job_info),
+            status=_job_detail_status_with_pods(job_info, job_name, actual_ns, resource_type),
             age=_job_detail_calculate_age(job_info.get("creation_timestamp")),
             started=job_info.get("start_time"),
             completed=job_info.get("completion_time"),
