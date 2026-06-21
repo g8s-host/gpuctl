@@ -214,27 +214,45 @@ class LogClient(KubernetesClient):
                             return
                         target_pod = pods[0].metadata.name
 
-                # 使用Kubernetes API获取流式日志
-                try:
-                    # 使用stream方法获取日志
-                    logs = self.core_v1.read_namespaced_pod_log(
-                        name=target_pod,
-                        namespace=ns,
-                        follow=True,
-                        timestamps=True,
-                        _preload_content=False
-                    )
-                    
-                    for line in logs:
-                        if line:
-                            yield line.decode('utf-8').strip()
-                    logs.close()
-                    return
-                except ApiException as e:
-                    if e.status == 404:
+                # 容器可能仍在初始化(PodInitializing / ContainerCreating)——此时 follow
+                # 日志会返回 400 "container ... is waiting to start"。轮询重试直到容器启动,
+                # 而不是把"还没起来"当错误抛给用户(否则前端一连上就报 Bad Request)。
+                waited = 0
+                while True:
+                    try:
+                        logs = self.core_v1.read_namespaced_pod_log(
+                            name=target_pod,
+                            namespace=ns,
+                            follow=True,
+                            timestamps=True,
+                            _preload_content=False
+                        )
+
+                        for line in logs:
+                            if line:
+                                yield line.decode('utf-8').strip()
+                        logs.close()
                         return
-                    yield f"Error streaming logs: {e}"
-                    return
+                    except ApiException as e:
+                        if e.status == 404:
+                            return
+                        body = f"{getattr(e, 'body', '') or ''} {e}"
+                        starting = e.status == 400 and any(
+                            k in body for k in (
+                                "waiting to start", "ContainerCreating",
+                                "PodInitializing", "not available"))
+                        if starting:
+                            # 每 ~16s 提示一次(也让生产线程借机检查 stop/断连)
+                            if waited % 8 == 0:
+                                yield f"⏳ 容器初始化中,等待启动…(已等 {waited * 2}s)"
+                            waited += 1
+                            if waited > 150:        # ~5 分钟仍未起来,放弃(避免无限等待)
+                                yield "容器超过 5 分钟仍未启动,暂停拉取日志(请查看任务事件)。"
+                                return
+                            time.sleep(2)
+                            continue
+                        yield f"Error streaming logs: {e}"
+                        return
             except Exception as e:
                 yield f"Error streaming logs: {e}"
                 return
