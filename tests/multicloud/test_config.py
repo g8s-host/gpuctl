@@ -4,6 +4,7 @@ import os
 import tempfile
 import pytest
 from datetime import datetime
+from pathlib import Path
 from gpuctl.multicloud import config
 from gpuctl.multicloud.config import (
     load_config,
@@ -25,7 +26,9 @@ class TestConfigOperations:
         """每个测试前创建临时配置文件路径"""
         self.temp_dir = tempfile.mkdtemp()
         self.original_config_path = config.CONFIG_PATH
-        config.CONFIG_PATH = os.path.join(self.temp_dir, "clusters.yaml")
+        # CONFIG_PATH 是 Path(生产代码用 .exists()/.parent/.name),patch 也必须给 Path,
+        # 不能用 os.path.join 的 str(否则 load_config 里 CONFIG_PATH.exists() 报 AttributeError)。
+        config.CONFIG_PATH = Path(self.temp_dir) / "clusters.yaml"
     
     def teardown_method(self):
         """每个测试后恢复原始配置路径"""
