@@ -39,11 +39,33 @@ logger = logging.getLogger(__name__)
 active_connections = []
 
 
+# 进程内只需确保一次:首个任务创建前建好所需 PriorityClass(与 CLI create 路径一致,
+# 见 gpuctl/cli/job.py)。新集群从未跑过 CLI 时,UI/API 建的任务会因缺 PriorityClass
+# 报 "pods ... is forbidden: no PriorityClass named gpuctl-medium" 而调度不出。
+_priority_classes_ensured = False
+
+
+def _ensure_priority_classes_once():
+    """幂等地确保 gpuctl 优先级类存在;失败不阻断建任务(仅告警),下次再试。"""
+    global _priority_classes_ensured
+    if _priority_classes_ensured:
+        return
+    try:
+        from gpuctl.client.priority_client import PriorityClient
+        PriorityClient().ensure_priority_classes()
+        _priority_classes_ensured = True
+        logger.info("PriorityClasses ensured (gpuctl-high/medium/low)")
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"ensure_priority_classes failed (任务可能因缺 PriorityClass 调度不出): {e}")
+
+
 @router.post("", response_model=JobResponse, status_code=201)
 async def create_job(request: JobCreateRequest):
     """创建任务"""
     logger.debug(f"开始创建任务，请求内容: {request.yamlContent[:100]}...")
     try:
+        # 确保优先级类存在(否则带 priority 的任务 Pod 会被 forbidden)
+        _ensure_priority_classes_once()
         # 解析YAML
         logger.debug("正在解析YAML配置")
         parsed_obj = BaseParser.parse_yaml(request.yamlContent)
@@ -89,6 +111,7 @@ async def create_job(request: JobCreateRequest):
 @router.post("/batch", response_model=BatchCreateResponse, status_code=201)
 async def create_jobs_batch(request: BatchCreateRequest):
     """批量创建任务"""
+    _ensure_priority_classes_once()
     success = []
     failed = []
 
