@@ -51,13 +51,17 @@ def test_get_nodes(mock_get_instance, client):
 def test_get_node_detail(mock_get_instance, client):
     """测试获取节点详情API"""
     mock_instance = MagicMock()
+    # 结构须与 _build_node_info 一致:GPU 计数在 resources 子字典,gpu_types 在顶层。
+    # (route 从 node["resources"]["gpu_total"] 取;扁平结构取不到 → gpuTotal=0)
     mock_instance.get_node.return_value = {
         "name": "node-1",
-        "gpu_total": 4,
-        "gpu_used": 2,
-        "gpu_free": 2,
-        "gpu_types": ["A100"],
         "status": "ready",
+        "resources": {
+            "gpu_total": 4,
+            "gpu_used": 2,
+            "gpu_free": 2,
+        },
+        "gpu_types": ["A100"],
         "labels": {"runwhere.ai/pool": "test-pool"},
         "addresses": ["192.168.1.100"]
     }
