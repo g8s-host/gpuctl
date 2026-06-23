@@ -197,8 +197,24 @@ def test_delete_job_force(mock_job_client):
         "status": "terminating",
         "message": "任务删除指令已下发"
     }
-    # 验证force参数被正确传递
-    mock_instance.delete_job.assert_called_once_with("test-job", force=True)
+    # 验证force参数被正确传递（namespace 不指定时默认 default）
+    mock_instance.delete_job.assert_called_once_with("test-job", namespace="default", force=True)
+
+
+@patch('server.routes.jobs.JobClient')
+def test_delete_job_passes_namespace(mock_job_client):
+    """删除路由应把 ?namespace= 透传给 client.delete_job（#3：此前被忽略，导致非 default 命名空间删除 404）"""
+    mock_instance = MagicMock()
+    mock_instance.delete_job.return_value = True
+    mock_job_client.return_value = mock_instance
+
+    response = client.delete(
+        "/api/v1/jobs/test-job?namespace=team-a&force=true",
+        headers={"Authorization": "Bearer test-token"}
+    )
+
+    assert response.status_code == 200
+    mock_instance.delete_job.assert_called_once_with("test-job", namespace="team-a", force=True)
 
 
 
