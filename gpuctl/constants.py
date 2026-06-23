@@ -76,19 +76,20 @@ class Labels:
     JOB_TYPE   = "runwhere.ai/job-type"
     PRIORITY   = "runwhere.ai/priority"
     POOL       = "runwhere.ai/pool"
+    # Single source of truth for the runwhere.ai/namespace key: it marks gpuctl-created
+    # Namespaces (value "true") AND tags ResourceQuotas with their owning ns (value = name).
     NAMESPACE  = "runwhere.ai/namespace"
     GPU_TYPE       = "runwhere.ai/gpuType"
     GPU_TYPE_KEBAB = "runwhere.ai/gpu-type"
     PORT       = "runwhere.ai/port"
     DESCRIPTION = "runwhere.ai/description"
     QUOTA      = "runwhere.ai/quota"
-    NS_MARKER  = "runwhere.ai/namespace"
 
     APP        = "app"
     JOB_NAME   = "job-name"
 
 
-NS_LABEL_SELECTOR = f"{Labels.NS_MARKER}=true"
+NS_LABEL_SELECTOR = f"{Labels.NAMESPACE}=true"
 
 
 # ── Service naming ───────────────────────────────────────────────────────────

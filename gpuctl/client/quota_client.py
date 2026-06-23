@@ -254,6 +254,85 @@ class QuotaClient(KubernetesClient):
                 return
             raise
 
+    def _delete_nfs_home(self, namespace_name: str) -> None:
+        """Remove the namespace's NFS home directory via a temporary K8s Job.
+
+        Symmetric counterpart of _create_nfs_home: runs 'rm -rf' on the NFS share in
+        a busybox Job in kube-system. Silently skips if NFS is not configured or the
+        cleanup Job already exists.
+        """
+        from gpuctl.builder.base_builder import BaseBuilder
+        nfs_config = BaseBuilder.read_nfs_config()
+        if not nfs_config:
+            return
+
+        nfs_server, nfs_path = nfs_config
+        job_name = f"nfs-cleanup-{namespace_name}"
+        home_subdir = f"/nfs/home/{namespace_name}"
+
+        from kubernetes.client import (
+            V1Job, V1JobSpec, V1PodTemplateSpec, V1PodSpec,
+            V1Container, V1VolumeMount, V1Volume, V1NFSVolumeSource, V1ObjectMeta
+        )
+        cleanup_job = V1Job(
+            api_version="batch/v1",
+            kind="Job",
+            metadata=V1ObjectMeta(name=job_name, namespace="kube-system"),
+            spec=V1JobSpec(
+                ttl_seconds_after_finished=60,
+                template=V1PodTemplateSpec(
+                    spec=V1PodSpec(
+                        restart_policy="Never",
+                        containers=[V1Container(
+                            name="rmdir",
+                            image="busybox",
+                            command=["rm", "-rf", home_subdir],
+                            volume_mounts=[V1VolumeMount(
+                                name="nfs-root",
+                                mount_path="/nfs",
+                            )],
+                        )],
+                        volumes=[V1Volume(
+                            name="nfs-root",
+                            nfs=V1NFSVolumeSource(
+                                server=nfs_server,
+                                path=nfs_path,
+                            ),
+                        )],
+                    )
+                ),
+            ),
+        )
+        try:
+            self.batch_v1.create_namespaced_job(namespace="kube-system", body=cleanup_job)
+        except ApiException as e:
+            if e.status == 409:
+                # Cleanup Job already exists — skip
+                return
+            raise
+
+    def _teardown_namespace(self, namespace_name: str) -> None:
+        """Mirror of _ensure_namespace_exists: remove a gpuctl-created namespace and
+        its NFS home, so deleting a quota fully undoes what creating it did.
+
+        No-op for the reserved 'default' namespace and for any namespace not created
+        by gpuctl (missing the runwhere.ai/namespace marker) — those keep existing and only their
+        quota is removed by the caller.
+        """
+        if namespace_name == DEFAULT_NAMESPACE:
+            return
+        try:
+            ns = self.core_v1.read_namespace(namespace_name)
+        except ApiException as e:
+            if e.status == 404:
+                return
+            raise
+        labels = ns.metadata.labels or {}
+        if labels.get(Labels.NAMESPACE) != "true":
+            return
+        self._delete_nfs_home(namespace_name)
+        self.core_v1.delete_namespace(namespace_name)
+
     def _create_default_namespace_quota(self, quota_name: str, cpu: str = None,
                                          memory: str = None, gpu: str = None) -> Dict[str, Any]:
         """Create or update ResourceQuota in default namespace"""
@@ -432,6 +511,11 @@ class QuotaClient(KubernetesClient):
                     namespace
                 )
 
+            # Symmetric with create_quota (which auto-creates the namespace + NFS
+            # home via _ensure_namespace_exists): tear the gpuctl-created namespace
+            # back down. No-op for 'default' and namespaces not created by gpuctl.
+            self._teardown_namespace(namespace)
+
             return True
 
         except ApiException as e:
@@ -478,7 +562,7 @@ class QuotaClient(KubernetesClient):
                                 quota.metadata.name,
                                 ns_name
                             )
-                            self.core_v1.delete_namespace(ns_name)
+                            self._teardown_namespace(ns_name)
                             results["deleted"].append({
                                 "namespace": quota.metadata.labels.get(Labels.NAMESPACE),
                                 "original_namespace": ns_name

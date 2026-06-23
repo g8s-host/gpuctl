@@ -505,7 +505,7 @@ def describe_namespace_command(args):
         
         # Verify it's a namespace created by this CLI
         labels = namespace.metadata.labels or {}
-        if not labels.get(Labels.NS_MARKER) == "true":
+        if not labels.get(Labels.NAMESPACE) == "true":
             raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
         
         # Get quota information for this namespace
@@ -565,7 +565,7 @@ def delete_namespace_command(args):
         namespace = client.core_v1.read_namespace(args.namespace_name)
         labels = namespace.metadata.labels or {}
         
-        if not labels.get(Labels.NS_MARKER) == "true":
+        if not labels.get(Labels.NAMESPACE) == "true":
             raise ValueError(f"Namespace {args.namespace_name} was not created by this CLI")
         
         # Confirm deletion if not forced

@@ -90,7 +90,7 @@ async def delete_namespace(
             raise HTTPException(status_code=404, detail="Namespace not found")
 
         labels = ns.metadata.labels or {}
-        if not labels.get(Labels.NS_MARKER) == "true":
+        if not labels.get(Labels.NAMESPACE) == "true":
             raise HTTPException(
                 status_code=403,
                 detail=f"Namespace '{namespaceName}' was not created by gpuctl and cannot be deleted via this API"
