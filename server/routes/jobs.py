@@ -578,11 +578,15 @@ async def get_job_detail(
 
 
 @router.delete("/{jobId}", response_model=DeleteResponse)
-async def delete_job(jobId: str, force: bool = Query(False, description="是否强制删除")):
+async def delete_job(
+        jobId: str,
+        namespace: Optional[str] = Query(None, description="命名空间，不指定时默认 default"),
+        force: bool = Query(False, description="是否强制删除")
+):
     """删除任务"""
     try:
         client = JobClient()
-        success = client.delete_job(jobId, force=force)
+        success = client.delete_job(jobId, namespace=namespace or "default", force=force)
 
         if not success:
             raise HTTPException(status_code=404, detail="Job not found")
