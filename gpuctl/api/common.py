@@ -1,8 +1,20 @@
+import re
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Any, Union
 from enum import Enum
 
 from gpuctl.constants import Kind, Priority
+
+
+_DURATION_RE = re.compile(r"^([0-9]+)([smh]?)$")
+
+
+def parse_duration_seconds(value) -> int:
+    """把 '600' / '600s' / '10m' / '1h' 解析成秒；无单位按秒。非法格式抛 ValueError。"""
+    m = _DURATION_RE.match(str(value).strip())
+    if not m:
+        raise ValueError(f"无效的时长 {value!r}，请用如 '600'、'600s'、'10m'、'1h'")
+    return int(m.group(1)) * {"": 1, "s": 1, "m": 60, "h": 3600}[m.group(2)]
 
 
 class ResourceType(str, Enum):
@@ -51,7 +63,20 @@ class ServiceConfig(BaseModel):
     replicas: int = Field(default=1, ge=1)
     port: int = Field(default=8000, ge=1, le=65535)
     health_check: Optional[str] = Field(default=None, alias="healthCheck")
-    timeout: Optional[str] = Field(default=None)
+    # 服务从「启动」到「健康检查通过」允许的最长时间（如 '10m'、'600s'）。映射为 K8s startupProbe：
+    # 这段时间内即使 /health 还没通也不会被存活探针杀掉——适配「先下载/加载模型、暖数据再服务」的慢启动。
+    # 不设则默认 10m（见 inference_builder）。这是唯一暴露的探针旋钮；检查周期/单次超时/失败阈值等
+    # 都走 builder 的合理默认，不向用户暴露 K8s 细节。
+    startup_timeout: Optional[str] = Field(default=None, alias="startupTimeout")
+
+    model_config = {"populate_by_name": True}
+
+    @field_validator("startup_timeout")
+    @classmethod
+    def _check_startup_timeout(cls, v):
+        if v is not None:
+            parse_duration_seconds(v)  # 仅校验格式，非法即报错
+        return v
 
 
 class EnvironmentConfig(BaseModel):

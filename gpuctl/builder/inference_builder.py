@@ -1,6 +1,9 @@
+import math
+
 from kubernetes import client
 from .base_builder import BaseBuilder
 from gpuctl.api.inference import InferenceJob
+from gpuctl.api.common import parse_duration_seconds
 from gpuctl.constants import Labels, Kind, DEFAULT_POOL, svc_name
 
 
@@ -54,22 +57,24 @@ class InferenceBuilder(BaseBuilder):
 
         if inference_job.service.health_check:
             health_path = inference_job.service.health_check
-            container.liveness_probe = client.V1Probe(
-                http_get=client.V1HTTPGetAction(
-                    path=health_path,
-                    port=inference_job.service.port
-                ),
-                initial_delay_seconds=30,
-                period_seconds=10
-            )
-            container.readiness_probe = client.V1Probe(
-                http_get=client.V1HTTPGetAction(
-                    path=health_path,
-                    port=inference_job.service.port
-                ),
-                initial_delay_seconds=5,
-                period_seconds=10
-            )
+            svc_port = inference_job.service.port
+
+            def _probe(failure_threshold):
+                # 单次检查给 5s（K8s 默认 1s 太紧，重载下 /health 容易误判超时）；周期 10s。
+                return client.V1Probe(
+                    http_get=client.V1HTTPGetAction(path=health_path, port=svc_port),
+                    timeout_seconds=5,
+                    period_seconds=10,
+                    failure_threshold=failure_threshold,
+                )
+
+            # startupProbe：启动期间（下载/加载模型、暖数据…）挂起 liveness/readiness，慢启动也不会被杀。
+            # 宽限时长 = service.startupTimeout（默认 10m），失败阈值 = 宽限 / 周期。
+            grace_seconds = parse_duration_seconds(inference_job.service.startup_timeout or "10m")
+            container.startup_probe = _probe(max(1, math.ceil(grace_seconds / 10)))
+            # 启动通过后才生效：连续 3 次（≈30s）失败才重启 / 摘流量。
+            container.liveness_probe = _probe(3)
+            container.readiness_probe = _probe(3)
 
         app_label = f"{inference_job.job.name}"
         
