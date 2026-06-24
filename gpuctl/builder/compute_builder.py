@@ -52,24 +52,9 @@ class ComputeBuilder(BaseBuilder):
                 )
             )
 
-        if compute_job.service and compute_job.service.health_check:
-            health_path = compute_job.service.health_check
-            container.liveness_probe = client.V1Probe(
-                http_get=client.V1HTTPGetAction(
-                    path=health_path,
-                    port=compute_job.service.port
-                ),
-                initial_delay_seconds=30,
-                period_seconds=10
-            )
-            container.readiness_probe = client.V1Probe(
-                http_get=client.V1HTTPGetAction(
-                    path=health_path,
-                    port=compute_job.service.port
-                ),
-                initial_delay_seconds=5,
-                period_seconds=10
-            )
+        # 健康探针(startup + liveness + readiness)统一由 BaseBuilder 生成(支持 http 路径与 tcp)。
+        container.startup_probe, container.liveness_probe, container.readiness_probe = \
+            cls.build_health_probes(compute_job.service)
 
         app_label = f"{compute_job.job.name}"
         

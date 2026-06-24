@@ -1,9 +1,10 @@
+import math
 import os
 from typing import Dict, Any, List, Optional, Tuple
 
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-from gpuctl.api.common import ResourceRequest, StorageConfig
+from gpuctl.api.common import ResourceRequest, StorageConfig, parse_duration_seconds
 from gpuctl.constants import Labels
 
 _NFS_CONFIGMAP_NAME = "gpuctl-config"
@@ -211,6 +212,42 @@ class BaseBuilder:
                     )
                 ))
         return volumes
+
+    @staticmethod
+    def build_health_probes(service):
+        """三件套健康探针(startup / liveness / readiness),供任何带 healthCheck 的服务复用。
+
+        service.health_check 取值:
+          - '/path'          → httpGet 探针(GET 该路径,看 2xx/3xx)
+          - 'tcp' 或 'tcp:N'  → tcpSocket 探针(只看端口能否连上;给 redis 这类非 HTTP 服务)
+        startupProbe 宽限 = service.startupTimeout(默认 10m);这段时间内挂起 liveness/readiness,
+        慢启动不被杀。period / 单次 timeout / 失败阈值走合理默认,不向用户暴露 K8s 细节。
+        无 health_check 时返回 (None, None, None)。
+        """
+        if not service or not getattr(service, "health_check", None):
+            return None, None, None
+        hc = service.health_check
+        port = service.port
+        if hc == "tcp" or hc.startswith("tcp:"):
+            if ":" in hc:
+                try:
+                    port = int(hc.split(":", 1)[1])
+                except ValueError:
+                    pass
+            action = {"tcp_socket": client.V1TCPSocketAction(port=port)}
+        else:
+            action = {"http_get": client.V1HTTPGetAction(path=hc, port=port)}
+
+        def _probe(failure_threshold):
+            # 单次检查给 5s(K8s 默认 1s 太紧);周期 10s。
+            return client.V1Probe(
+                timeout_seconds=5, period_seconds=10,
+                failure_threshold=failure_threshold, **action,
+            )
+
+        grace = parse_duration_seconds(getattr(service, "startup_timeout", None) or "10m")
+        # startup 失败阈值 = 宽限 / 周期;liveness/readiness 连续 3 次(≈30s)失败才动作。
+        return _probe(max(1, math.ceil(grace / 10))), _probe(3), _probe(3)
 
     @staticmethod
     def build_container_spec(env_config, resources: ResourceRequest, workdirs: List[Dict[str, str]] = None) -> client.V1Container:
