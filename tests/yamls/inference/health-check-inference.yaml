@@ -20,7 +20,7 @@ service:
   replicas: 3
   port: 8000
   healthCheck: /api/health
-  timeout: 30s
+  startupTimeout: 10m   # 启动（含模型加载/下载）最多等 10 分钟，期间不被存活探针杀掉；不写默认 10m
 
 # 资源规格
 resources:

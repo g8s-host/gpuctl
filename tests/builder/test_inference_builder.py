@@ -149,3 +149,59 @@ class TestInferenceBuilder:
         # 验证 annotation 中不包含 description
         if service.metadata.annotations:
             assert "runwhere.ai/description" not in service.metadata.annotations
+
+
+class TestInferenceStartupProbe:
+    """startupProbe（慢启动宽限）+ 慷慨的存活/就绪探针默认值。"""
+
+    def _job(self, **service_kw):
+        return InferenceJob(
+            kind="inference",
+            version="v0.1",
+            job=JobMetadata(name="t", namespace="default", priority="medium"),
+            environment=EnvironmentConfig(image="vllm/vllm-openai:latest"),
+            resources=ResourceRequest(pool="default", cpu=2, memory="4Gi"),
+            service=ServiceConfig(port=8000, replicas=1, **service_kw),
+        )
+
+    def _container(self, job):
+        return InferenceBuilder.build_deployment(job).spec.template.spec.containers[0]
+
+    def test_default_grace_is_10min_startup_probe(self):
+        c = self._container(self._job(health_check="/health"))
+        assert c.startup_probe is not None
+        # 默认 10m ÷ 10s 周期 = 60 次
+        assert c.startup_probe.failure_threshold == 60
+        assert c.startup_probe.period_seconds == 10
+        assert c.startup_probe.timeout_seconds == 5
+        assert c.startup_probe.http_get.path == "/health"
+        assert c.startup_probe.http_get.port == 8000
+
+    def test_custom_startup_timeout(self):
+        c = self._container(self._job(health_check="/health", startup_timeout="5m"))
+        assert c.startup_probe.failure_threshold == 30   # 300 ÷ 10
+
+    def test_liveness_readiness_have_generous_defaults(self):
+        c = self._container(self._job(health_check="/health"))
+        for probe in (c.liveness_probe, c.readiness_probe):
+            assert probe is not None
+            assert probe.timeout_seconds == 5      # 不是 K8s 默认的 1s
+            assert probe.period_seconds == 10
+            assert probe.failure_threshold == 3
+
+    def test_no_health_check_means_no_probes(self):
+        c = self._container(self._job())           # 没有 health_check
+        assert c.startup_probe is None
+        assert c.liveness_probe is None
+        assert c.readiness_probe is None
+
+
+class TestParseDuration:
+    def test_parse_duration_seconds(self):
+        from gpuctl.api.common import parse_duration_seconds
+        assert parse_duration_seconds("600") == 600
+        assert parse_duration_seconds("600s") == 600
+        assert parse_duration_seconds("10m") == 600
+        assert parse_duration_seconds("1h") == 3600
+        with pytest.raises(ValueError):
+            parse_duration_seconds("ten-minutes")
