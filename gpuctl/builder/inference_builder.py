@@ -10,6 +10,29 @@ from gpuctl.constants import Labels, Kind, DEFAULT_POOL, svc_name
 class InferenceBuilder(BaseBuilder):
     """Inference job builder"""
 
+    # 国内可直达的 HF 镜像；直连 huggingface.co 在国内会超时（实测 pod 内 25s timeout）。
+    # 这是「区域相关」的默认：部署在墙外只需改这一处常量，或在 YAML 的 environment.env 里覆盖 HF_ENDPOINT。
+    DEFAULT_HF_ENDPOINT = "https://hf-mirror.com"
+    MODEL_CACHE_DIR = "/models"
+
+    @classmethod
+    def _apply_inference_defaults(cls, container) -> None:
+        """给推理容器注入 HF 镜像 + 模型缓存的默认 env / 挂载；用户已在 env 里设了同名变量就不覆盖。"""
+        existing = {e.name for e in (container.env or [])}
+        env = list(container.env or [])
+        for name, value in (
+            ("HF_ENDPOINT", cls.DEFAULT_HF_ENDPOINT),
+            ("HF_HOME", cls.MODEL_CACHE_DIR),
+            ("HUGGINGFACE_HUB_CACHE", cls.MODEL_CACHE_DIR),
+        ):
+            if name not in existing:
+                env.append(client.V1EnvVar(name=name, value=value))
+        container.env = env
+        mounts = list(container.volume_mounts or [])
+        if not any(m.mount_path == cls.MODEL_CACHE_DIR for m in mounts):
+            mounts.append(client.V1VolumeMount(name="model-cache", mount_path=cls.MODEL_CACHE_DIR))
+        container.volume_mounts = mounts
+
     @classmethod
     def build_deployment(cls, inference_job: InferenceJob, namespace: str = "default") -> client.V1Deployment:
         """Build K8s Deployment resource"""
@@ -18,6 +41,8 @@ class InferenceBuilder(BaseBuilder):
             workdirs = inference_job.storage.workdirs
         
         container = cls.build_container_spec(inference_job.environment, inference_job.resources, workdirs)
+        # 推理默认：HF 镜像（国内直连 huggingface.co 超时）+ 模型缓存目录（容器重启不重下）。
+        cls._apply_inference_defaults(container)
 
         pod_spec_extras = {}
         if inference_job.environment.image_pull_secret:
@@ -107,6 +132,10 @@ class InferenceBuilder(BaseBuilder):
             priority_class_name=priority_class_name,
             namespace=namespace,
         )
+        # 模型缓存卷（emptyDir：容器重启不重下；跨重调度 / 大模型后续可换 NFS/PVC 共享缓存）。
+        template.spec.volumes = list(template.spec.volumes or []) + [
+            client.V1Volume(name="model-cache", empty_dir=client.V1EmptyDirVolumeSource())
+        ]
 
         deployment_spec = client.V1DeploymentSpec(
             replicas=inference_job.service.replicas,
