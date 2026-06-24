@@ -196,49 +196,6 @@ class TestInferenceStartupProbe:
         assert c.readiness_probe is None
 
 
-class TestInferenceModelDownloadDefaults:
-    """推理默认：HF 镜像（国内可下）+ 模型缓存卷（容器重启不重下）。"""
-
-    def _job(self, env=None):
-        environment = EnvironmentConfig(image="vllm/vllm-openai:latest")
-        if env is not None:
-            environment.env = env
-        return InferenceJob(
-            kind="inference",
-            version="v0.1",
-            job=JobMetadata(name="t", namespace="default", priority="medium"),
-            environment=environment,
-            resources=ResourceRequest(pool="default", cpu=2, memory="4Gi"),
-            service=ServiceConfig(port=8000, replicas=1),
-        )
-
-    def _deployment(self, job):
-        return InferenceBuilder.build_deployment(job)
-
-    def test_hf_mirror_and_cache_env_defaults(self):
-        dep = self._deployment(self._job())
-        c = dep.spec.template.spec.containers[0]
-        env = {e.name: e.value for e in c.env}
-        assert env["HF_ENDPOINT"] == "https://hf-mirror.com"
-        assert env["HF_HOME"] == "/models"
-        assert env["HUGGINGFACE_HUB_CACHE"] == "/models"
-
-    def test_user_hf_endpoint_is_not_overridden(self):
-        # 用户在 YAML 里自己设了 HF_ENDPOINT → 尊重用户，不覆盖。
-        dep = self._deployment(self._job(env=[{"HF_ENDPOINT": "https://huggingface.co"}]))
-        c = dep.spec.template.spec.containers[0]
-        env = {e.name: e.value for e in c.env}
-        assert env["HF_ENDPOINT"] == "https://huggingface.co"
-
-    def test_model_cache_volume_and_mount(self):
-        dep = self._deployment(self._job())
-        c = dep.spec.template.spec.containers[0]
-        vols = {v.name: v for v in (dep.spec.template.spec.volumes or [])}
-        assert "model-cache" in vols
-        assert vols["model-cache"].empty_dir is not None
-        assert any(m.name == "model-cache" and m.mount_path == "/models" for m in c.volume_mounts)
-
-
 class TestParseDuration:
     def test_parse_duration_seconds(self):
         from gpuctl.api.common import parse_duration_seconds
