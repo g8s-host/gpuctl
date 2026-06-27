@@ -29,7 +29,7 @@ service:
 resources:
   pool: inference-pool   # Dedicated inference resource pool
   gpu: 1
-  gpu-type: A100-100G    # Optional
+  gpuType: A100-100G    # Optional
   cpu: 8
   memory: 32Gi
 
@@ -80,7 +80,7 @@ service:
 resources:
   pool: inference-pool
   gpu: 1
-  gpu-type: A100-100G
+  gpuType: A100-100G
   cpu: 8
   memory: 32Gi
 

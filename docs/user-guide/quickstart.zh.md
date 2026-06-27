@@ -44,6 +44,15 @@ gpuctl --help
 gpuctl get nodes
 ```
 
+!!! tip "运维：一次性开启持久化存储"
+    如果你是平台运维，注册一次 NFS 共享，之后**每个**任务都会自动获得持久化的 `/home/jovyan` 和共享只读的 `/datasets` —— 任何任务 YAML 中都无需写存储配置：
+
+    ```bash
+    gpuctl init --nfs-server <IP> --nfs-path /exports
+    ```
+
+    此步骤可选：不执行时任务依然能跑，只是没有自动挂载的 NFS 路径。详见[持久化存储](storage.md)。
+
 输出示例：
 
 ```
@@ -168,7 +177,8 @@ gpuctl logs simple-training -f
 
 ## 下一步
 
-- [训练任务](training.md) — 提交 LlamaFactory / DeepSpeed 分布式训练
+- [训练任务](training.md) — LlamaFactory / DeepSpeed、复用 conda 环境、多机多卡分布式训练
+- [持久化存储](storage.md) — 透明 NFS `/home/jovyan` + `/datasets`，任务 YAML 零配置
 - [推理服务](inference.md) — 部署 VLLM 推理 API 服务
 - [资源池管理](pool.md) — 创建和管理 GPU 资源池
 - [CLI 参考](../cli/index.md) — 完整命令文档

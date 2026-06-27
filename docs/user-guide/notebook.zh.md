@@ -1,6 +1,9 @@
 # Notebook 交互式开发
 
-Notebook 任务（`kind: notebook`）提供 JupyterLab 交互式开发环境，适合代码调试、数据探索和模型原型验证。底层对应 Kubernetes **StatefulSet + NodePort Service**，保证存储状态持久化。
+Notebook 任务（`kind: notebook`）提供 JupyterLab 交互式开发环境，适合代码调试、数据探索和模型原型验证。底层对应 Kubernetes **StatefulSet + NodePort Service**。
+
+!!! tip "`/home/jovyan` 自动持久化"
+    若运维已执行 `gpuctl init`，Notebook 的 `/home/jovyan` 会自动由按 namespace 隔离的 NFS 承载 —— 代码、数据、conda 环境重启不丢，并与你的训练任务共享，且**无需 `storage` 段**。下方的 `storage.workdirs` 示例是另一套独立、可选的 `hostPath` 机制。详见[持久化存储](storage.md)。
 
 ## YAML 完整字段
 
@@ -23,7 +26,7 @@ service:
 resources:
   pool: dev-pool    # 建议使用开发专用资源池
   gpu: 1
-  gpu-type: A10-24G # 可选，调试无需高端 GPU
+  gpuType: A10-24G # 可选，调试无需高端 GPU
   cpu: 8
   memory: 32Gi
 
@@ -65,7 +68,7 @@ service:
 resources:
   pool: dev-pool
   gpu: 1
-  gpu-type: A10-24G
+  gpuType: A10-24G
   cpu: 8
   memory: 32Gi
 
@@ -151,7 +154,7 @@ gpuctl delete job ai-dev-notebook
 ```
 
 !!! tip "代码持久化"
-    Notebook 环境通过 `storage.workdirs` 将宿主机目录挂载到容器内，删除 Notebook Pod 后，挂载目录中的代码和数据**不会丢失**，下次创建时重新挂载即可恢复工作状态。
+    推荐用自动的、由 NFS 承载的 `/home/jovyan` 来持久化工作（见[持久化存储](storage.md)）—— 它在 Pod 重启后依然存在、与训练任务共享，且零配置。上方的 `storage.workdirs` 挂载是可选的 `hostPath` 替代方案：删除 Notebook Pod 后这些宿主机目录里的数据**不会丢失**，但它们是节点本地的、不跨节点共享。
 
 !!! warning "StatefulSet 特性"
     Notebook 使用 StatefulSet 管理，Pod 名称为 `{name}-0`，如 `ai-dev-notebook-0`。查看日志时可以直接用任务名，平台会自动定位 Pod。

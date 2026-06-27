@@ -29,7 +29,7 @@ service:
 resources:
   pool: inference-pool   # 推理专属资源池
   gpu: 1
-  gpu-type: A100-100G    # 可选
+  gpuType: A100-100G    # 可选
   cpu: 8
   memory: 32Gi
 
@@ -80,7 +80,7 @@ service:
 resources:
   pool: inference-pool
   gpu: 1
-  gpu-type: A100-100G
+  gpuType: A100-100G
   cpu: 8
   memory: 32Gi
 
