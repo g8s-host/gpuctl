@@ -19,6 +19,9 @@ class InferenceJob(BaseModel):
     environment: EnvironmentConfig
     resources: ResourceRequest
     service: ServiceConfig = Field(default_factory=ServiceConfig)
+    # 多机/模型并行 serving 的开关在 resources.nodes(与 pool/gpu/cpu/memory 并列)。
+    # nodes>1:StatefulSet + Headless + head-only Service;此时 service.replicas 不生效
+    # (StatefulSet 副本数 = resources.nodes = 这一个逻辑副本)。
 
     model_config = {
         "populate_by_name": True

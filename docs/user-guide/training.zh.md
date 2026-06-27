@@ -24,14 +24,11 @@ environment:
     - name: KEY
       value: VALUE
 
-distributed:                 # 可选，默认 standalone（单机）
-  mode: standalone           # standalone | multi-node
-  workers: 1                 # Worker 数（仅 multi-node 有意义；多机需 > 1）
-  master_port: 29500         # DDP 通信端口（仅 multi-node，默认 29500）
-
 resources:
   pool: default              # 资源池，默认 default
-  gpu: 4                     # GPU 数量（multi-node 模式下为每个 Worker 的 GPU 数）
+  nodes: 1                   # 本任务节点数(默认 1)。>1 = 多机 DDP
+                             #   (Indexed Job + Headless Service + DDP env 注入)
+  gpu: 4                     # 每节点 GPU 数(总卡 = nodes × gpu)
   gpuType: A100-80G          # GPU 型号（可选）
   cpu: 32                    # CPU 核数
   memory: 128Gi              # 内存
@@ -154,26 +151,26 @@ resources:
 
 ## 多机多卡分布式训练 {#multi-node-distributed-training}
 
-对于需要跨**多台机器**的训练（如超大模型），设置 `distributed.mode: multi-node` 和 `workers` 数量。平台随即：
+对于需要跨**多台机器**的训练（如超大模型），设置 `resources.nodes: N`(和推理同一个字段 —— 跨任务类型一致)。平台随即：
 
-- 创建 **Indexed Job**，`completions = parallelism = workers`（每个带编号的 Worker 一个 Pod）。
+- 创建 **Indexed Job**，`completions = parallelism = nodes`（每个带编号的 Worker 一个 Pod）。
 - 创建 **Headless Service**（`<job-name>-headless`），让 Worker 之间通过稳定 DNS 互相发现。
 - **自动向每个 Worker 注入 DDP 通信环境变量**（这些你无需声明）：
 
-| 变量 | 含义 | 示例（4 workers × 2 GPU） |
+| 变量 | 含义 | 示例（nodes=4 × 2 GPU） |
 |------|------|---------------------------|
-| `MASTER_ADDR` | 0 号 Worker（主节点）的 DNS 名 | `llm-pretrain-0.llm-pretrain-headless.ml-team.svc.cluster.local` |
+| `MASTER_ADDR` | 0 号节点（主节点）的 DNS 名 | `llm-pretrain-0.llm-pretrain-headless.ml-team.svc.cluster.local` |
 | `MASTER_PORT` | DDP 通信端口 | `29500` |
-| `WORLD_SIZE` | Worker 总数 | `4` |
-| `RANK` | 当前 Worker 编号（0=主节点），取自 Pod 的 completion index | `0`、`1`、`2`、`3` |
-| `LOCAL_RANK` | Worker 内 GPU 编号 | `0` |
-| `GPUCTL_NPROC_PER_NODE` | 每 Worker GPU 数（= `resources.gpu`） | `2` |
+| `WORLD_SIZE` | 节点总数 | `4` |
+| `RANK` | 当前节点编号（0=主节点），取自 Pod 的 completion index | `0`、`1`、`2`、`3` |
+| `LOCAL_RANK` | 节点内 GPU 编号 | `0` |
+| `GPUCTL_NPROC_PER_NODE` | 每节点 GPU 数（= `resources.gpu`） | `2` |
 
 !!! warning "哪些不会自动配置"
     平台注入上述通信变量并创建网络资源 —— 但**不会**设置 `NCCL_SOCKET_IFNAME`、生成 DeepSpeed hostfile，也不会替你选择启动器。你的命令（如 `torchrun`）负责消费这些注入的变量。若你的网络需要，请通过 `environment.env` 自行设置 `NCCL_SOCKET_IFNAME` 等框架专属调优项。
 
-!!! note "`mode: multi-node` 需要 `workers > 1`"
-    当 `workers: 1`（或 `mode: standalone`）时，行为与单机任务完全一致 —— 不创建 Indexed Job，也不创建 Headless Service。总 GPU 数 = `workers × resources.gpu`。
+!!! note "`resources.nodes > 1` 即多机;总卡 = nodes × gpu"
+    `nodes: 1`（默认）即单机 —— 不创建 Indexed Job/Headless Service。`master_port` 默认 29500(需要可用可选的 `distributed.master_port` 覆盖)。旧 YAML 的 `distributed: {mode: multi-node, workers: N}` 仍兼容(已弃用),等价于 `nodes: N`。
 
 ```yaml title="llm-pretrain-distributed.yaml"
 kind: training
@@ -199,16 +196,13 @@ environment:
         --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
         /home/jovyan/pretrain.py
 
-distributed:
-  mode: multi-node
-  workers: 4
-
 resources:
-  gpu: 2            # 每个 Worker 的 GPU 数 → 4 × 2 = 共 8 卡
+  pool: training-pool
+  nodes: 4          # 4 节点;>1 启用多机 DDP
+  gpu: 2            # 每节点 GPU 数 → 4 × 2 = 共 8 卡
   gpuType: A100-80g
   cpu: 16
   memory: 128Gi
-  pool: training-pool
 ```
 
 ```bash

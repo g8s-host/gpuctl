@@ -51,7 +51,7 @@
       <img src="https://img.shields.io/badge/🔌-多机分布式-2962FF?style=flat-square" alt="distributed"><br><br>
       <b>内置分布式训练</b><br>
       Indexed Job + Headless Service<br><br>
-      <sub>设置 <code>mode: multi-node, workers: N</code> —— 平台自动注入 DDP 环境变量（MASTER_ADDR / RANK / WORLD_SIZE）</sub>
+      <sub>设置 <code>resources.nodes: N</code> —— 平台自动注入 DDP 环境变量（MASTER_ADDR / RANK / WORLD_SIZE）</sub>
     </td>
     <td align="center" width="25%">
       <img src="https://img.shields.io/badge/👁️-统一观测-FF6D00?style=flat-square" alt="observability"><br><br>
@@ -173,7 +173,7 @@ gpuctl logs qwen2-7b-sft -f
   </tr>
   <tr>
     <td><b>🧠 多机分布式训练</b></td>
-    <td><b>只需设置 <code>mode: multi-node, workers: N</code></b>，平台自动创建 Indexed Job + Headless Service，并注入 DDP 通信环境变量（MASTER_ADDR、MASTER_PORT、WORLD_SIZE、RANK、LOCAL_RANK）；所有 Worker 共享同一块 NFS <code>/home/jovyan</code> 写 checkpoint</td>
+    <td><b>只需设置 <code>resources.nodes: N</code></b>，平台自动创建 Indexed Job + Headless Service，并注入 DDP 通信环境变量（MASTER_ADDR、MASTER_PORT、WORLD_SIZE、RANK、LOCAL_RANK）；所有 Worker 共享同一块 NFS <code>/home/jovyan</code> 写 checkpoint</td>
     <td>手动创建 Indexed/JobSet + Headless Service，串联 MASTER_ADDR/RANK/WORLD_SIZE，准备共享存储，理解 GPU 通信和进程组概念</td>
   </tr>
   <tr>
@@ -228,9 +228,9 @@ gpuctl logs qwen2-7b-sft -f
 ### 📖 用户指南
 深入了解 gpuctl 的四大任务类型，掌握生产环境下的最佳实践
 
-- **[训练任务](docs/user-guide/training.md)** — 详解单机多卡、复用 Notebook 的 conda 环境、以及 `mode: multi-node` 多机多卡分布式训练（Indexed Job + Headless Service + DDP 环境变量自动注入），含 Checkpoint 保存与监控
+- **[训练任务](docs/user-guide/training.md)** — 详解单机多卡、复用 Notebook 的 conda 环境、以及 `resources.nodes` 多机多卡分布式训练（Indexed Job + Headless Service + DDP 环境变量自动注入），含 Checkpoint 保存与监控
 - **[持久化存储](docs/user-guide/storage.md)** — 透明 NFS 存储：运维一次 `gpuctl init`，每个任务自动挂载持久化 `/home/jovyan` 和共享只读 `/datasets`，任务 YAML 零存储配置
-- **[推理服务](docs/user-guide/inference.md)** — VLLM 推理服务的完整部署流程，包括自动扩缩容配置、服务暴露、多副本负载均衡，以及生产环境的性能调优建议
+- **[推理服务](docs/user-guide/inference.md)** — VLLM 推理服务的完整部署流程，包括服务暴露、多副本负载均衡、单机张量并行与多机模型并行 serving(`resources.nodes: N`),以及生产环境的性能调优建议
 - **[Notebook](docs/user-guide/notebook.md)** — JupyterLab 交互式开发环境的创建与管理，支持自定义镜像、持久化存储、GPU 共享等场景，适合模型调试和数据探索
 - **[资源池管理](docs/user-guide/pool.md)** — 将集群 GPU 节点划分为逻辑资源池，实现训练/推理/开发环境的资源隔离，避免多团队之间的资源争抢
 

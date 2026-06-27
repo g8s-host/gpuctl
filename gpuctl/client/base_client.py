@@ -67,6 +67,28 @@ class KubernetesClient:
             else:
                 raise RuntimeError(f"Failed to check namespace {namespace}: {e}")
 
+    def create_or_patch_config_map(self, name: str, namespace: str, data: dict) -> str:
+        """创建或更新 ConfigMap：存在则 patch(合并 data),不存在则 create。
+
+        用于 `gpuctl init`(写 kube-system/gpuctl-config 的 NFS 配置)等场景。
+
+        Returns:
+            "created"(新建) 或 "updated"(已存在 → patch)。
+        """
+        body = client.V1ConfigMap(
+            metadata=client.V1ObjectMeta(name=name, namespace=namespace),
+            data=data,
+        )
+        try:
+            self.core_v1.read_namespaced_config_map(name=name, namespace=namespace)
+        except ApiException as e:
+            if e.status == 404:
+                self.core_v1.create_namespaced_config_map(namespace=namespace, body=body)
+                return "created"
+            raise
+        self.core_v1.patch_namespaced_config_map(name=name, namespace=namespace, body=body)
+        return "updated"
+
     def handle_api_exception(self, e: ApiException, operation: str) -> None:
         """处理API异常"""
         if e.status == 401:

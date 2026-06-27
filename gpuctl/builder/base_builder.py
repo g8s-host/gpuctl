@@ -135,8 +135,13 @@ class BaseBuilder:
         return volumes, mounts
 
     @staticmethod
-    def build_headless_service(job_name: str, namespace: str, port: int = 29500) -> client.V1Service:
-        """Build a HeadlessService for distributed training worker discovery."""
+    def build_headless_service(job_name: str, namespace: str, port: int = 29500,
+                              publish_not_ready: bool = False) -> client.V1Service:
+        """Build a HeadlessService for worker discovery (distributed training & multi-node serving).
+
+        publish_not_ready=True 发布未就绪 Pod 的 DNS —— 多机 serving 必需:head 的 readiness 依赖
+        worker 入群、worker 又要先解析到 head 才能入群,不发布未就绪地址会死锁。训练默认 False。
+        """
         return client.V1Service(
             api_version="v1",
             kind="Service",
@@ -146,6 +151,7 @@ class BaseBuilder:
             ),
             spec=client.V1ServiceSpec(
                 cluster_ip="None",
+                publish_not_ready_addresses=publish_not_ready,
                 selector={"job-name": job_name},
                 ports=[client.V1ServicePort(port=port, name="ddp")],
             ),

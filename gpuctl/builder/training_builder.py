@@ -103,13 +103,10 @@ class TrainingBuilder(BaseBuilder):
         priority_config = PriorityConfig.PRIORITY_CLASSES.get(training_job.job.priority)
         priority_class_name = priority_config["name"] if priority_config else None
 
-        # 分布式配置
-        distributed = getattr(training_job, "distributed", None)
-        is_distributed = (
-            distributed is not None
-            and distributed.mode == "multi-node"
-            and distributed.workers > 1
-        )
+        # 分布式配置:节点数统一来自 resources.nodes(旧 distributed.workers 作兼容回退)
+        from gpuctl.api.training import resolve_training_nodes
+        nodes = resolve_training_nodes(training_job)
+        is_distributed = nodes > 1
 
         # 构建 labels（distributed 模式需要 job-name 供 HeadlessService selector 使用）
         pod_labels = {
@@ -138,8 +135,8 @@ class TrainingBuilder(BaseBuilder):
         )
 
         if is_distributed:
-            workers = distributed.workers
-            master_port = distributed.master_port
+            workers = nodes
+            master_port = training_job.distributed.master_port
             job_name = training_job.job.name
             # Inject DDP environment variables into the container
             ddp_env = [
