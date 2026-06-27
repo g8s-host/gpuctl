@@ -63,6 +63,57 @@ async def create_quota(request: JobCreateRequest):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.put("", response_model=Dict[str, Any])
+async def apply_quota(request: JobCreateRequest):
+    """应用资源配额(存在则更新、不存在则创建)——对应 CLI 的 `gpuctl quota apply`。
+
+    与 POST(create,重复报错)互补:这是 UI / REST 改配额的入口,幂等 upsert。
+    更新走 ResourceQuota 的 `/spec/hard` patch;命名空间不存在时(create 分支)会自动建好。
+    """
+    logger.debug(f"开始应用资源配额,请求内容: {request.yamlContent[:100]}...")
+    try:
+        parsed_obj = BaseParser.parse_yaml(request.yamlContent)
+
+        if parsed_obj.kind != "quota":
+            raise HTTPException(status_code=400, detail=f"Unsupported kind: {parsed_obj.kind}")
+
+        client = QuotaClient()
+        results = []
+
+        if parsed_obj.default:
+            results.append(client.apply_default_quota(
+                quota_name=parsed_obj.quota.name,
+                cpu=parsed_obj.default.get_cpu_str(),
+                memory=parsed_obj.default.memory,
+                gpu=parsed_obj.default.get_gpu_str(),
+            ))
+
+        for namespace_name, namespace_quota in parsed_obj.namespace.items():
+            if namespace_name == "default":
+                continue
+            results.append(client.apply_quota(
+                quota_name=parsed_obj.quota.name,
+                namespace_name=namespace_name,
+                cpu=namespace_quota.get_cpu_str(),
+                memory=namespace_quota.memory,
+                gpu=namespace_quota.get_gpu_str(),
+            ))
+
+        return {
+            "message": "配额应用成功",
+            "name": parsed_obj.quota.name,
+            "applied": results,
+        }
+
+    except ParserError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to apply quota: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 @router.get("", response_model=Dict[str, Any])
 async def get_quotas(namespace: Optional[str] = Query(None, description="命名空间过滤")):
     """获取资源配额列表"""

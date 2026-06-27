@@ -51,6 +51,48 @@ def test_create_quota(mock_quota_client_class, mock_parse_yaml):
     assert len(response.json()["created"]) == 1
 
 
+@patch('server.routes.quotas.BaseParser.parse_yaml')
+@patch('server.routes.quotas.QuotaClient')
+def test_apply_quota_upsert(mock_quota_client_class, mock_parse_yaml):
+    """测试 PUT /api/v1/quotas 应用配额(存在则更新、不存在则创建)"""
+    mock_parsed_obj = MagicMock()
+    mock_parsed_obj.kind = "quota"
+
+    mock_quota_obj = MagicMock()
+    mock_quota_obj.name = "team-a-quota"
+    mock_parsed_obj.quota = mock_quota_obj
+
+    mock_ns_quota = MagicMock()
+    mock_ns_quota.get_cpu_str = MagicMock(return_value="8")
+    mock_ns_quota.memory = "16Gi"
+    mock_ns_quota.get_gpu_str = MagicMock(return_value="2")
+    mock_parsed_obj.namespace = {"team-a": mock_ns_quota}
+    mock_parsed_obj.default = None
+    mock_parse_yaml.return_value = mock_parsed_obj
+
+    mock_client = MagicMock()
+    mock_client.apply_quota.return_value = {
+        'name': 'team-a-quota', 'namespace': 'team-a',
+        'cpu': '8', 'memory': '16Gi', 'gpu': '2', 'status': 'updated'
+    }
+    mock_quota_client_class.return_value = mock_client
+
+    response = client.put(
+        "/api/v1/quotas",
+        json={"yamlContent": "kind: quota\nversion: v0.1\nquota:\n  name: team-a-quota\nnamespace:\n  team-a:\n    cpu: 8\n    memory: 16Gi\n    gpu: 2"},
+        headers={"Authorization": "Bearer test-token"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "配额应用成功"
+    assert response.json()["name"] == "team-a-quota"
+    assert response.json()["applied"][0]["status"] == "updated"
+    mock_client.apply_quota.assert_called_once_with(
+        quota_name="team-a-quota", namespace_name="team-a",
+        cpu="8", memory="16Gi", gpu="2"
+    )
+
+
 @patch('server.routes.quotas.QuotaClient')
 def test_get_quotas(mock_quota_client_class):
     """测试获取资源配额列表API"""
