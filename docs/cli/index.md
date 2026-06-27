@@ -6,6 +6,8 @@ The gpuctl CLI mirrors `kubectl` but with semantics optimized for ML engineers.
 
 | Command | Description |
 |---------|-------------|
+| `init` | Register platform NFS storage (one-time operator setup) |
+| `config` | Manage gpuctl local configuration (kubeconfig) |
 | `create` | Create resources from YAML (jobs, resource pools, quotas) |
 | `apply` | Apply configuration (create or update — equivalent to delete + create) |
 | `get` | List resources |
@@ -13,6 +15,61 @@ The gpuctl CLI mirrors `kubectl` but with semantics optimized for ML engineers.
 | `delete` | Delete resources |
 | `logs` | View job logs |
 | `label` | Manage node labels |
+
+---
+
+## init
+
+Register the platform's NFS storage so that **every** job automatically gets a persistent `/home/jovyan` and a shared read-only `/datasets`. This is a one-time operator action; gpuctl only records the address of an existing NFS share (it does not set up the server). See [Persistent Storage](../user-guide/storage.md) for the full story.
+
+```bash
+gpuctl init --nfs-server <IP_OR_HOST> --nfs-path <EXPORT_ROOT>
+```
+
+| Option | Description | Required |
+|--------|-------------|----------|
+| `--nfs-server` | NFS server IP or hostname | Yes |
+| `--nfs-path` | NFS export root path (must start with `/`) | Yes |
+
+The configuration is written to the `kube-system/gpuctl-config` ConfigMap. It is idempotent — re-running updates the existing ConfigMap and takes effect immediately for newly created jobs (no restart).
+
+**Example:**
+
+```bash
+gpuctl init --nfs-server 192.168.1.100 --nfs-path /exports
+```
+
+```
+NFS storage initialized:
+  Server: 192.168.1.100
+  Path:   /exports
+  Config stored in: kube-system/gpuctl-config
+```
+
+---
+
+## config
+
+Manage gpuctl's local configuration (the kubeconfig path/context used by both gpuctl and runwhere-ai).
+
+```bash
+gpuctl config set-kubeconfig -f <path> [--context <name>]
+gpuctl config view
+gpuctl config unset-kubeconfig
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `set-kubeconfig -f <path> [--context <name>]` | Persist a kubeconfig path (and optional context) |
+| `view` | Show the current gpuctl config |
+| `unset-kubeconfig` | Clear the persisted kubeconfig path/context |
+
+**Examples:**
+
+```bash
+gpuctl config set-kubeconfig -f ~/.kube/config --context my-cluster
+gpuctl config view
+```
 
 ---
 
@@ -325,7 +382,7 @@ gpuctl delete pool training-pool
     When a job is deleted, the platform also deletes:
 
     - The primary K8s resource (Job / Deployment / StatefulSet)
-    - The associated NodePort Service (training jobs have no Service)
+    - The associated Service (NodePort for inference/notebook/compute; the Headless Service for `mode: multi-node` distributed training)
     - K8s controllers will automatically cascade-delete associated Pods
 
 ---

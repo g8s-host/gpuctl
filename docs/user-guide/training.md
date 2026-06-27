@@ -1,6 +1,6 @@
 # Training Jobs
 
-Training jobs (`kind: training`) are designed for AI model training scenarios. They map to a Kubernetes **Job** resource and terminate automatically when the run completes.
+Training jobs (`kind: training`) are designed for AI model training scenarios. They map to a Kubernetes **Job** resource and terminate automatically when the run completes. For `mode: multi-node` distributed jobs, they map to an **Indexed Job + Headless Service** (see [Multi-Node Distributed Training](#multi-node-distributed-training)).
 
 ## Full YAML Fields
 
@@ -15,32 +15,53 @@ job:
 
 environment:
   image: <image>            # Required
+  notebook: <notebook-name> # Optional, reuse a Notebook's /home/jovyan (NFS) + conda envs
+  conda: <env-name>         # Optional, conda env to activate before running command
   imagePullSecret: <secret> # Optional, for private registries
-  command: [...]            # Startup command
+  command: [...]            # Startup command (string or list, see note below)
   args: [...]               # Command arguments (optional)
   env:                      # Environment variables (optional)
     - name: KEY
       value: VALUE
 
+distributed:                # Optional, defaults to standalone (single-node)
+  mode: standalone          # standalone | multi-node
+  workers: 1                # Worker count (multi-node only; multi-node needs > 1)
+  master_port: 29500        # DDP rendezvous port (multi-node only, default 29500)
+
 resources:
   pool: default             # Resource pool, default: default
-  gpu: 4                    # Number of GPUs
-  gpu-type: A100-100G       # GPU model (optional)
+  gpu: 4                    # Number of GPUs (per worker in multi-node mode)
+  gpuType: A100-80G         # GPU model (optional)
   cpu: 32                   # CPU cores
   memory: 128Gi             # Memory
 
-storage:
+storage:                    # Optional & legacy — see note below. Most jobs omit this.
   workdirs:                 # Host directory mounts (hostPath)
-    - path: /datasets
-    - path: /models
-    - path: /output
+    - path: /scratch/cache
 ```
+
+!!! tip "Persistent storage is automatic — no `storage` section needed"
+    If the operator has run `gpuctl init`, every training job automatically mounts a persistent, per-namespace `/home/jovyan` (read-write) and a shared `/datasets` (read-only) over NFS. Write checkpoints to `/home/jovyan` and they survive job restarts and are visible to your other jobs. The `storage.workdirs` field above is a **separate, optional** `hostPath` mechanism — most jobs should omit it. See [Persistent Storage](storage.md) for details.
+
+!!! note "`command` accepts a string or a list"
+    A string is automatically wrapped as `bash -c`. These two forms are equivalent:
+
+    ```yaml
+    command: "torchrun --nproc_per_node=8 /home/jovyan/train.py"
+    ```
+    ```yaml
+    command:
+      - bash
+      - -c
+      - "torchrun --nproc_per_node=8 /home/jovyan/train.py"
+    ```
 
 ---
 
 ## Example 1: LlamaFactory LLM Fine-Tuning (Single-Node Multi-GPU)
 
-Fine-tune Qwen2-7B with SFT using LlamaFactory 0.8.0 + DeepSpeed 0.14.0.
+Fine-tune Qwen2-7B with SFT using LlamaFactory + DeepSpeed on a single node with 4 GPUs. Base models live in the shared read-only `/datasets`; outputs and checkpoints are written to the persistent `/home/jovyan` (auto-mounted over NFS — no `storage` section needed).
 
 ```yaml title="qwen2-7b-sft.yaml"
 kind: training
@@ -60,13 +81,13 @@ environment:
     - "--stage"
     - "sft"
     - "--model_name_or_path"
-    - "/models/qwen2-7b"
+    - "/datasets/models/qwen2-7b"
     - "--dataset"
     - "alpaca-qwen"
     - "--dataset_dir"
     - "/datasets"
     - "--output_dir"
-    - "/output/qwen2-sft"
+    - "/home/jovyan/output/qwen2-sft"
     - "--per_device_train_batch_size"
     - "8"
     - "--gradient_accumulation_steps"
@@ -80,90 +101,124 @@ environment:
   env:
     - name: NVIDIA_FLASH_ATTENTION
       value: "1"
-    - name: LLAMA_FACTORY_CACHE
-      value: "/cache/llama-factory"
 
 resources:
   pool: training-pool
   gpu: 4
-  gpu-type: A100-100G
+  gpuType: A100-80G
   cpu: 32
   memory: 128Gi
-
-storage:
-  workdirs:
-    - path: /datasets
-    - path: /models/qwen2-7b
-    - path: /cache/llama-factory
-    - path: /output/qwen2-sft
-    - path: /output/qwen2-sft/checkpoints
 ```
 
 ```bash
-gpuctl create -f qwen2-7b-sft.yaml
-gpuctl logs qwen2-7b-llamafactory-sft -f
+gpuctl create -f qwen2-7b-sft.yaml -n ml-team
+gpuctl logs qwen2-7b-llamafactory-sft -n ml-team -f
 ```
 
-!!! info "Automatic Platform Handling"
-    When you declare `gpu: 4`, the platform automatically handles NVLink network configuration, GPU device binding, and DeepSpeed environment variable injection — no need to write a K8s distributed Job manually.
+!!! info "What the platform handles for you"
+    - **GPU binding.** Declaring `gpu: 4` requests 4 GPUs and runs the pod with the `nvidia` RuntimeClass so CUDA/`nvidia-smi` work inside the container.
+    - **Persistent storage.** `/home/jovyan` and `/datasets` are mounted automatically (when NFS is initialized) — checkpoints under `/home/jovyan` survive restarts. See [Persistent Storage](storage.md).
+    - **Single-node scope.** This is still one pod. Frameworks like DeepSpeed/torchrun launch one process per GPU **inside** that pod. To scale across **multiple nodes**, use `mode: multi-node` ([below](#multi-node-distributed-training)).
 
 ---
 
-## Example 2: Full-Parameter Fine-Tuning (Multi-Node Multi-GPU, ZeRO-3)
+## Example 2: Reuse a Notebook Environment (conda)
 
-For full-parameter training of very large models like Qwen2-72B or Llama3-70B.
+If you already prepared a conda environment inside a Notebook, a training job can reuse the exact same `/home/jovyan` and conda env — no reinstalling dependencies. Set `environment.notebook` to resolve the NFS home from that Notebook's namespace, and `environment.conda` to the env name to activate.
 
-```yaml title="qwen2-72b-fullft.yaml"
+```yaml title="reuse-notebook.yaml"
 kind: training
 version: v0.1
 
 job:
-  name: qwen2-72b-fullft
-  priority: high
-  description: "Qwen2-72B full-parameter fine-tuning (ZeRO-3 + multi-node multi-GPU)"
+  name: gpt2-finetune
+  priority: medium
 
 environment:
-  image: registry.example.com/deepspeed-zero3:v1.2
-  command:
-    - "python"
-    - "full_ft_train.py"
-    - "--model_name_or_path"
-    - "/models/qwen2-72b"
-    - "--dataset"
-    - "/datasets/domain-large-10M"
-    - "--output_dir"
-    - "/output/qwen2-72b-domain"
-    - "--per_device_train_batch_size"
-    - "2"
-    - "--gradient_accumulation_steps"
-    - "8"
-    - "--learning_rate"
-    - "5e-6"
-    - "--num_train_epochs"
-    - "2"
-    - "--deepspeed"
-    - "zero3_config.json"
-    - "--bf16"
-    - "true"
-    - "--gradient_checkpointing"
-    - "true"
-  env:
-    - name: NCCL_SOCKET_IFNAME
-      value: "eth0"
+  notebook: alice-notebook      # reuse this Notebook's /home/jovyan (and its conda envs)
+  conda: myenv                  # activate conda env "myenv" before running command
+  image: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+  command: "python /home/jovyan/train.py"   # string form, auto-wrapped as bash -c
 
 resources:
   pool: training-pool
-  gpu: 8
-  gpu-type: A100-100G
-  cpu: 64
-  memory: 512Gi
-
-storage:
-  workdirs:
-    - path: /models/qwen2-72b
-    - path: /datasets/domain-large-10M
-    - path: /output/qwen2-72b-domain
+  gpu: 2
+  gpuType: A100-80G
+  cpu: 16
+  memory: 64Gi
 ```
+
+When `conda` is set, the platform wraps your command so it runs inside an activated conda environment (`conda activate myenv && exec <command>`). Omit `conda` and your command runs directly with no wrapping. Conda envs created in a Notebook live under `/home/jovyan/.conda/envs/`, so they are visible to the training job through the shared NFS home.
+
+---
+
+## Multi-Node Distributed Training
+
+For training that must span **multiple machines** (e.g. very large models), set `distributed.mode: multi-node` and the number of `workers`. The platform then:
+
+- Creates an **Indexed Job** with `completions = parallelism = workers` (one indexed worker pod each).
+- Creates a **Headless Service** (`<job-name>-headless`) so workers discover each other by stable DNS.
+- **Auto-injects DDP rendezvous environment variables** into every worker (you do not declare these):
+
+| Variable | Meaning | Example (4 workers × 2 GPU) |
+|----------|---------|-----------------------------|
+| `MASTER_ADDR` | DNS name of worker 0 (the master) | `llm-pretrain-0.llm-pretrain-headless.ml-team.svc.cluster.local` |
+| `MASTER_PORT` | DDP rendezvous port | `29500` |
+| `WORLD_SIZE` | Total number of workers | `4` |
+| `RANK` | This worker's index (0 = master), from the pod's completion index | `0`, `1`, `2`, `3` |
+| `LOCAL_RANK` | GPU index within the worker | `0` |
+| `GPUCTL_NPROC_PER_NODE` | GPUs per worker (= `resources.gpu`) | `2` |
+
+!!! warning "What is NOT auto-configured"
+    The platform injects the rendezvous variables above and creates the networking — it does **not** set `NCCL_SOCKET_IFNAME`, generate a DeepSpeed hostfile, or pick a launcher for you. Your command (e.g. `torchrun`) consumes the injected variables. Set framework-specific tunables like `NCCL_SOCKET_IFNAME` yourself via `environment.env` if your network needs them.
+
+!!! note "`mode: multi-node` requires `workers > 1`"
+    With `workers: 1` (or `mode: standalone`), behavior is identical to a single-node job — no Indexed Job and no Headless Service are created. Total GPUs = `workers × resources.gpu`.
+
+```yaml title="llm-pretrain-distributed.yaml"
+kind: training
+version: v0.1
+
+job:
+  name: llm-pretrain
+  namespace: ml-team
+  priority: high
+  description: "Multi-node pretraining (4 workers × 2 GPU = 8 GPU)"
+
+environment:
+  notebook: alice-notebook
+  conda: myenv
+  image: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+  command:
+    - bash
+    - -c
+    - |
+      torchrun \
+        --nnodes=$WORLD_SIZE --node_rank=$RANK \
+        --nproc_per_node=$GPUCTL_NPROC_PER_NODE \
+        --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
+        /home/jovyan/pretrain.py
+
+distributed:
+  mode: multi-node
+  workers: 4
+
+resources:
+  gpu: 2            # GPUs PER worker → 4 × 2 = 8 GPUs total
+  gpuType: A100-80g
+  cpu: 16
+  memory: 128Gi
+  pool: training-pool
+```
+
+```bash
+gpuctl create -f llm-pretrain-distributed.yaml
+gpuctl get jobs --kind training -n ml-team   # 4 worker pods: llm-pretrain-0 .. llm-pretrain-3
+gpuctl logs llm-pretrain -n ml-team -f
+```
+
+!!! tip "Checkpoints are shared automatically"
+    All workers mount the **same** `/home/jovyan` over NFS, so every worker can write/read checkpoints to the same path with no inter-node file syncing. Deleting the job removes the Indexed Job **and** its Headless Service — no orphaned resources.
 
 ---
 
@@ -205,4 +260,4 @@ gpuctl delete job qwen2-7b-llamafactory-sft --force
 ```
 
 !!! warning "Training Jobs Cannot Be Paused"
-    K8s Jobs do not support pause/resume semantics. To stop and resume training, implement checkpoint logic in your training script and mount the checkpoint directory via `storage.workdirs`.
+    K8s Jobs do not support pause/resume semantics. To stop and resume training, implement checkpoint logic in your training script and write checkpoints to the persistent `/home/jovyan` (auto-mounted over NFS) so they survive a restart. See [Persistent Storage](storage.md).

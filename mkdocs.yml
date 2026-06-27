@@ -66,6 +66,7 @@ plugins:
             Overview: 概览
             Quickstart: 快速开始
             Training Jobs: 训练任务
+            Persistent Storage: 持久化存储
             Inference Services: 推理服务
             Notebook: Notebook
             Compute Jobs: 计算任务
@@ -109,6 +110,7 @@ nav:
     - Overview: user-guide/index.md
     - Quickstart: user-guide/quickstart.md
     - Training Jobs: user-guide/training.md
+    - Persistent Storage: user-guide/storage.md
     - Inference Services: user-guide/inference.md
     - Notebook: user-guide/notebook.md
     - Compute Jobs: user-guide/compute.md

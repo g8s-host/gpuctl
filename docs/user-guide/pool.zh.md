@@ -34,9 +34,9 @@ pool:
 
 nodes:
   node-1:              # 节点主机名（与 kubectl get nodes 一致）
-    gpu-type: A100-100G
+    gpuType: A100-100G
   node-2:
-    gpu-type: A100-100G
+    gpuType: A100-100G
 ```
 
 ```bash
@@ -67,9 +67,9 @@ pool:
   description: "大模型训练专用（高端 GPU）"
 nodes:
   gpu-node-1:
-    gpu-type: A100-100G
+    gpuType: A100-100G
   gpu-node-2:
-    gpu-type: A100-100G
+    gpuType: A100-100G
 ```
 
 ```yaml title="inference-pool.yaml"
@@ -80,9 +80,9 @@ pool:
   description: "推理服务专用（中端 GPU）"
 nodes:
   gpu-node-3:
-    gpu-type: A10-24G
+    gpuType: A10-24G
   gpu-node-4:
-    gpu-type: A10-24G
+    gpuType: A10-24G
 ```
 
 ```yaml title="dev-pool.yaml"
@@ -93,7 +93,7 @@ pool:
   description: "Notebook 开发调试（低端 GPU）"
 nodes:
   gpu-node-5:
-    gpu-type: RTX4090-24G
+    gpuType: RTX4090-24G
 ```
 
 ```yaml title="compute-pool.yaml"
@@ -104,9 +104,9 @@ pool:
   description: "CPU 计算服务（无 GPU 节点）"
 nodes:
   cpu-node-1:
-    gpu-type: ""
+    gpuType: ""
   cpu-node-2:
-    gpu-type: ""
+    gpuType: ""
 ```
 
 ---

@@ -44,6 +44,15 @@ gpuctl --help
 gpuctl get nodes
 ```
 
+!!! tip "Operators: enable persistent storage once"
+    If you run the platform, register your NFS share a single time so that **every** job automatically gets a persistent `/home/jovyan` and a shared read-only `/datasets` — with no storage config in any job YAML:
+
+    ```bash
+    gpuctl init --nfs-server <IP> --nfs-path /exports
+    ```
+
+    This step is optional: without it, jobs still run, just without the auto-mounted NFS paths. See [Persistent Storage](storage.md).
+
 Example output:
 
 ```
@@ -168,7 +177,8 @@ gpuctl logs simple-training -f
 
 ## Next Steps
 
-- [Training Jobs](training.md) — Submit LlamaFactory / DeepSpeed distributed training
+- [Training Jobs](training.md) — LlamaFactory / DeepSpeed, conda env reuse, and multi-node distributed training
+- [Persistent Storage](storage.md) — transparent NFS `/home/jovyan` + `/datasets`, with zero config in job YAML
 - [Inference Services](inference.md) — Deploy a VLLM inference API service
 - [Resource Pool Management](pool.md) — Create and manage GPU resource pools
 - [CLI Reference](../cli/index.md) — Full command documentation

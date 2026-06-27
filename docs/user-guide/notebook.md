@@ -1,6 +1,9 @@
 # Notebook Interactive Development
 
-Notebook jobs (`kind: notebook`) provide a JupyterLab interactive development environment, ideal for code debugging, data exploration, and model prototyping. They map to a Kubernetes **StatefulSet + NodePort Service** to ensure storage state persistence.
+Notebook jobs (`kind: notebook`) provide a JupyterLab interactive development environment, ideal for code debugging, data exploration, and model prototyping. They map to a Kubernetes **StatefulSet + NodePort Service**.
+
+!!! tip "`/home/jovyan` persists automatically"
+    When the operator has run `gpuctl init`, the Notebook's `/home/jovyan` is automatically backed by per-namespace NFS — code, data, and conda envs survive restarts and are shared with your Training jobs, with **no `storage` section needed**. The `storage.workdirs` examples below are the separate, optional `hostPath` mechanism. See [Persistent Storage](storage.md).
 
 ## Full YAML Fields
 
@@ -23,7 +26,7 @@ service:
 resources:
   pool: dev-pool    # Recommended: use a dedicated dev resource pool
   gpu: 1
-  gpu-type: A10-24G # Optional — debugging doesn't need high-end GPUs
+  gpuType: A10-24G # Optional — debugging doesn't need high-end GPUs
   cpu: 8
   memory: 32Gi
 
@@ -65,7 +68,7 @@ service:
 resources:
   pool: dev-pool
   gpu: 1
-  gpu-type: A10-24G
+  gpuType: A10-24G
   cpu: 8
   memory: 32Gi
 
@@ -151,7 +154,7 @@ gpuctl delete job ai-dev-notebook
 ```
 
 !!! tip "Code Persistence"
-    The Notebook environment mounts host directories into the container via `storage.workdirs`. Deleting the Notebook Pod does **not** delete data in mounted directories — recreate the Notebook and remount to restore your work state.
+    The recommended way to persist work is the automatic NFS-backed `/home/jovyan` (see [Persistent Storage](storage.md)) — it survives Pod restarts and is shared with your Training jobs, with no config. The `storage.workdirs` mounts shown above are an optional `hostPath` alternative; deleting the Notebook Pod does **not** delete data in those host directories, but they are node-local and not shared across nodes.
 
 !!! warning "StatefulSet Behavior"
     Notebooks use a StatefulSet, so the Pod name is `{name}-0` (e.g. `ai-dev-notebook-0`). You can still use the job name directly with `gpuctl logs` — the platform locates the Pod automatically.

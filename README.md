@@ -48,10 +48,10 @@
       <sub>Logical isolation prevents resource contention, with quota management per team</sub>
     </td>
     <td align="center" width="25%">
-      <img src="https://img.shields.io/badge/🔌-Seamless_Integration-2962FF?style=flat-square" alt="integration"><br><br>
-      <b>AI Frameworks Ready-to-Use</b><br>
-      DeepSpeed / VLLM / LlamaFactory<br><br>
-      <sub>Auto-inject NCCL env vars and distributed training configuration</sub>
+      <img src="https://img.shields.io/badge/🔌-Multi--Node_Distributed-2962FF?style=flat-square" alt="distributed"><br><br>
+      <b>Distributed Training Built-In</b><br>
+      Indexed Job + Headless Service<br><br>
+      <sub>Set <code>mode: multi-node, workers: N</code> — platform auto-injects DDP env vars (MASTER_ADDR / RANK / WORLD_SIZE)</sub>
     </td>
     <td align="center" width="25%">
       <img src="https://img.shields.io/badge/👁️-Unified_Observability-FF6D00?style=flat-square" alt="observability"><br><br>
@@ -92,6 +92,17 @@
   </tr>
 </table>
 
+<!-- Row 3: Transparent Storage highlight -->
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/💾-Transparent_Persistent_Storage-1565C0?style=flat-square" alt="storage"><br><br>
+      <b>Zero-config NFS storage on every job</b><br>
+      <sub>Operator runs <code>gpuctl init</code> once → every job auto-mounts a persistent, per-user <code>/home/jovyan</code> (read-write) and a shared <code>/datasets</code> (read-only). No mount paths, no storage classes, no PVCs in user YAML. Files survive restarts and are shared across a user's Notebook and Training jobs.</sub>
+    </td>
+  </tr>
+</table>
+
 ---
 
 ## 🚀 Quick Start
@@ -99,6 +110,9 @@
 ```bash
 # 1. Install CLI
 pip install gpuctl
+
+# (operator, once) Enable transparent persistent storage for every job
+gpuctl init --nfs-server <IP> --nfs-path /exports
 
 # 2. Submit LLM fine-tuning task (4x A100)
 cat > training.yaml << 'EOF'
@@ -151,9 +165,9 @@ gpuctl logs qwen2-7b-sft -f
     <td>Remember Pod name (e.g. <code>training-job-7d9f4b8c5-x2mnp</code>), run <code>kubectl logs &lt;pod-name&gt; -f</code>, re-find after Pod restart</td>
   </tr>
   <tr>
-    <td><b>🧠 Multi-GPU Training</b></td>
-    <td><b>Just declare gpu count</b>, platform auto-injects NCCL_SOCKET_IFNAME, MASTER_ADDR, WORLD_SIZE env vars, auto-configures DeepSpeed</td>
-    <td>Manually configure NCCL env vars, DeepSpeed hostfile, PyTorch launch parameters, understand GPU communication and process groups</td>
+    <td><b>🧠 Multi-Node Distributed Training</b></td>
+    <td><b>Just set <code>mode: multi-node, workers: N</code></b>, platform creates an Indexed Job + Headless Service and auto-injects DDP rendezvous env vars (MASTER_ADDR, MASTER_PORT, WORLD_SIZE, RANK, LOCAL_RANK); all workers share one NFS <code>/home/jovyan</code> for checkpoints</td>
+    <td>Manually create an Indexed/JobSet + Headless Service, wire up MASTER_ADDR/RANK/WORLD_SIZE, provision shared storage, understand GPU communication and process groups</td>
   </tr>
   <tr>
     <td><b>🏊 Resource Pool Management</b></td>
@@ -203,7 +217,8 @@ Complete documentation is available in the **[docs/](docs/)** directory, or chec
 - [Installation Guide](docs/install.md) — Detailed installation steps
 
 **User Guides**
-- [Training Tasks](docs/user-guide/training.md) — LLM fine-tuning, single-node multi-GPU training
+- [Training Tasks](docs/user-guide/training.md) — LLM fine-tuning, conda env reuse, multi-node distributed training
+- [Persistent Storage](docs/user-guide/storage.md) — transparent NFS `/home/jovyan` + `/datasets`, zero config in job YAML
 - [Inference Services](docs/user-guide/inference.md) — VLLM inference deployment
 - [Notebooks](docs/user-guide/notebook.md) — JupyterLab interactive development
 - [Resource Pool Management](docs/user-guide/pool.md) — GPU resource pool configuration

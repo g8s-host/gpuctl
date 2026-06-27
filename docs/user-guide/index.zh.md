@@ -38,6 +38,14 @@
 
     [:octicons-arrow-right-24: Notebook 开发](notebook.md)
 
+-   :material-database:{ .lg .middle } **持久化存储**
+
+    ---
+
+    透明 NFS 存储：每个任务自动获得持久化的 `/home/jovyan` 和共享的 `/datasets`，YAML 零配置。
+
+    [:octicons-arrow-right-24: 持久化存储](storage.md)
+
 -   :material-cog:{ .lg .middle } **计算任务**
 
     ---
@@ -91,7 +99,7 @@ environment:
 resources:
   pool: default         # 资源池名称（默认 default）
   gpu: 0                # GPU 数量（0 表示纯 CPU 任务）
-  gpu-type: A100-100G   # GPU 型号（可选，不填由 K8s 调度）
+  gpuType: A100-80G     # GPU 型号（可选，不填由 K8s 调度）
   cpu: 4                # CPU 核数
   memory: 8Gi           # 内存大小
 
@@ -100,11 +108,13 @@ service:                # 仅 inference / notebook / compute 有效
   port: 8080            # 服务端口
   healthCheck: /health  # 健康检查路径（可选）
 
-storage:
-  workdirs:             # 宿主机目录挂载列表
-    - path: /data/models
-    - path: /output
+storage:                # 可选、旧式 hostPath 挂载 —— 大多数任务无需填写
+  workdirs:             # （持久化 /home/jovyan + /datasets 通过 NFS 自动挂载）
+    - path: /scratch/cache
 ```
+
+!!! tip "持久化存储是自动的"
+    持久化数据**无需** `storage` 段。运维执行 `gpuctl init` 后，每个任务都会自动挂载按 namespace 隔离的 `/home/jovyan`（读写）和共享的 `/datasets`（只读），均走 NFS。`storage.workdirs` 是另一套独立、可选的 `hostPath` 机制。详见[持久化存储](storage.md)。
 
 !!! tip "命名规则"
     `job.name` 字段直接作为 K8s 资源的 `metadata.name`，命名需符合 K8s 命名规范：只含小写字母、数字和连字符，长度不超过 63 个字符。

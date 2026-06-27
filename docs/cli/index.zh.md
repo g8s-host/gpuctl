@@ -6,6 +6,8 @@ gpuctl CLI 与 `kubectl` 对标，但语义更贴近算法工程师的使用习�
 
 | 命令 | 说明 |
 |------|------|
+| `init` | 注册平台 NFS 存储（运维一次性配置） |
+| `config` | 管理 gpuctl 本地配置（kubeconfig） |
 | `create` | 从 YAML 创建资源（任务、资源池、配额） |
 | `apply` | 应用配置（创建或更新，等价于先删后建） |
 | `get` | 查询资源列表 |
@@ -13,6 +15,61 @@ gpuctl CLI 与 `kubectl` 对标，但语义更贴近算法工程师的使用习�
 | `delete` | 删除资源 |
 | `logs` | 查看任务日志 |
 | `label` | 管理节点标签 |
+
+---
+
+## init
+
+注册平台 NFS 存储，使**每个**任务都自动获得持久化的 `/home/jovyan` 和共享只读的 `/datasets`。这是运维的一次性操作；gpuctl 只记录已有 NFS 共享的地址（不会搭建服务）。完整说明见[持久化存储](../user-guide/storage.md)。
+
+```bash
+gpuctl init --nfs-server <IP_OR_HOST> --nfs-path <EXPORT_ROOT>
+```
+
+| 选项 | 说明 | 是否必填 |
+|------|------|---------|
+| `--nfs-server` | NFS 服务器 IP 或主机名 | 是 |
+| `--nfs-path` | NFS 导出根路径（必须以 `/` 开头） | 是 |
+
+配置写入 `kube-system/gpuctl-config` ConfigMap。命令幂等 —— 重复执行会更新已有 ConfigMap，并对新创建的任务立即生效（无需重启）。
+
+**示例：**
+
+```bash
+gpuctl init --nfs-server 192.168.1.100 --nfs-path /exports
+```
+
+```
+NFS storage initialized:
+  Server: 192.168.1.100
+  Path:   /exports
+  Config stored in: kube-system/gpuctl-config
+```
+
+---
+
+## config
+
+管理 gpuctl 本地配置（gpuctl 与 runwhere-ai 共用的 kubeconfig 路径/上下文）。
+
+```bash
+gpuctl config set-kubeconfig -f <path> [--context <name>]
+gpuctl config view
+gpuctl config unset-kubeconfig
+```
+
+| 子命令 | 说明 |
+|--------|------|
+| `set-kubeconfig -f <path> [--context <name>]` | 持久化 kubeconfig 路径（及可选上下文） |
+| `view` | 显示当前 gpuctl 配置 |
+| `unset-kubeconfig` | 清除已持久化的 kubeconfig 路径/上下文 |
+
+**示例：**
+
+```bash
+gpuctl config set-kubeconfig -f ~/.kube/config --context my-cluster
+gpuctl config view
+```
 
 ---
 
@@ -325,7 +382,7 @@ gpuctl delete pool training-pool
     删除任务时，平台会同时删除：
     
     - K8s 主资源（Job / Deployment / StatefulSet）
-    - 关联的 NodePort Service（training 任务无 Service）
+    - 关联的 Service（inference/notebook/compute 的 NodePort；`mode: multi-node` 分布式训练的 Headless Service）
     - K8s 控制器会自动级联删除关联的 Pod
 
 ---

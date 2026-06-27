@@ -38,6 +38,14 @@ Welcome to gpuctl! This guide will help you master gpuctl's core features from s
 
     [:octicons-arrow-right-24: Notebook Development](notebook.md)
 
+-   :material-database:{ .lg .middle } **Persistent Storage**
+
+    ---
+
+    Transparent NFS storage: a persistent `/home/jovyan` and shared `/datasets` on every job, with zero config in your YAML.
+
+    [:octicons-arrow-right-24: Persistent Storage](storage.md)
+
 -   :material-cog:{ .lg .middle } **Compute Jobs**
 
     ---
@@ -91,7 +99,7 @@ environment:
 resources:
   pool: default         # Resource pool name (default: default)
   gpu: 0                # Number of GPUs (0 for CPU-only jobs)
-  gpu-type: A100-100G   # GPU model (optional, K8s schedules any GPU if omitted)
+  gpuType: A100-80G     # GPU model (optional, K8s schedules any GPU if omitted)
   cpu: 4                # CPU cores
   memory: 8Gi           # Memory size
 
@@ -100,11 +108,13 @@ service:                # Only applicable to inference / notebook / compute
   port: 8080            # Service port
   healthCheck: /health  # Health check path (optional)
 
-storage:
-  workdirs:             # Host directory mount list
-    - path: /data/models
-    - path: /output
+storage:                # Optional & legacy hostPath mounts — most jobs omit this
+  workdirs:             # (persistent /home/jovyan + /datasets are auto-mounted via NFS)
+    - path: /scratch/cache
 ```
+
+!!! tip "Persistent storage is automatic"
+    You do **not** need a `storage` section for persistent data. When the operator has run `gpuctl init`, every job auto-mounts a per-namespace `/home/jovyan` (read-write) and a shared `/datasets` (read-only) over NFS. The `storage.workdirs` field is a separate, optional `hostPath` mechanism. See [Persistent Storage](storage.md).
 
 !!! tip "Naming Rules"
     The `job.name` field is used directly as the Kubernetes resource `metadata.name`. Names must follow K8s naming conventions: lowercase letters, numbers, and hyphens only, max 63 characters.

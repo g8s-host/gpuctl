@@ -34,9 +34,9 @@ pool:
 
 nodes:
   node-1:              # Node hostname (matches kubectl get nodes output)
-    gpu-type: A100-100G
+    gpuType: A100-100G
   node-2:
-    gpu-type: A100-100G
+    gpuType: A100-100G
 ```
 
 ```bash
@@ -67,9 +67,9 @@ pool:
   description: "Large model training (high-end GPUs)"
 nodes:
   gpu-node-1:
-    gpu-type: A100-100G
+    gpuType: A100-100G
   gpu-node-2:
-    gpu-type: A100-100G
+    gpuType: A100-100G
 ```
 
 ```yaml title="inference-pool.yaml"
@@ -80,9 +80,9 @@ pool:
   description: "Inference services (mid-range GPUs)"
 nodes:
   gpu-node-3:
-    gpu-type: A10-24G
+    gpuType: A10-24G
   gpu-node-4:
-    gpu-type: A10-24G
+    gpuType: A10-24G
 ```
 
 ```yaml title="dev-pool.yaml"
@@ -93,7 +93,7 @@ pool:
   description: "Notebook development and debugging (low-end GPUs)"
 nodes:
   gpu-node-5:
-    gpu-type: RTX4090-24G
+    gpuType: RTX4090-24G
 ```
 
 ```yaml title="compute-pool.yaml"
@@ -104,9 +104,9 @@ pool:
   description: "CPU compute services (no GPU nodes)"
 nodes:
   cpu-node-1:
-    gpu-type: ""
+    gpuType: ""
   cpu-node-2:
-    gpu-type: ""
+    gpuType: ""
 ```
 
 ---
