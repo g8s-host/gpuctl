@@ -61,25 +61,45 @@ async def get_pool_detail(poolName: str):
 
 @router.post("", status_code=201)
 async def create_pool(request: PoolCreateRequest):
-    """创建资源池"""
+    """创建资源池。
+
+    资源池在 gpuctl 里就是「打了 runwhere.ai/pool=<name> 标签的一组节点」——没有节点的空池
+    无处持久化(list_pools 按节点标签聚合得来),故至少要绑定一个节点。
+
+    PoolClient.create_pool 期望 nodes 为 {node_name: {gpuType}} 字典(与 YAML/CLI apply 路径
+    一致),这里把请求里的 nodes(列表)+ gpuType(按下标对齐的列表)归一成该字典再下传。
+    """
+    if not request.nodes:
+        raise HTTPException(status_code=400, detail="至少需要绑定一个节点（资源池由节点标签构成，空池无法持久化）")
+
+    gpu_types = request.gpuType or []
+    nodes_config = {}
+    for i, node_name in enumerate(request.nodes):
+        cfg = {}
+        gpu_type = gpu_types[i] if i < len(gpu_types) else None
+        if gpu_type:
+            cfg["gpuType"] = gpu_type
+        nodes_config[node_name] = cfg
+
     try:
         client = PoolClient.get_instance()
-        pool_config = {
+        client.create_pool({
             "name": request.name,
             "description": request.description,
-            "nodes": request.nodes,
-            "gpu_type": request.gpuType,
-            "quota": request.quota
-        }
-        
-        result = client.create_pool(pool_config)
-        
+            "nodes": nodes_config,
+        })
+
         return {
             "name": request.name,
             "status": "created",
             "message": "资源池创建成功"
         }
 
+    except ValueError as e:
+        # 节点不存在等校验错误(create_pool → _validate_nodes_exist 抛 ValueError) → 400 透出原因
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to create pool: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -107,6 +127,9 @@ async def delete_pool(poolName: str):
             "message": "资源池删除成功"
         }
 
+    except ValueError as e:
+        # 池内仍有关联任务(delete_pool 抛 ValueError) → 409 透出原因(前端提示先删任务)
+        raise HTTPException(status_code=409, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
