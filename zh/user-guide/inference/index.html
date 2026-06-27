@@ -706,7 +706,46 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#distributed-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        分布式推理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="分布式推理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        单机多卡(最常见)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servingresourcesnodes-n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多机 serving(resources.nodes: N)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         更新推理服务
@@ -717,7 +756,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         查看推理服务日志
@@ -728,7 +767,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         删除推理服务
@@ -1153,7 +1192,46 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#distributed-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        分布式推理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="分布式推理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        单机多卡(最常见)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servingresourcesnodes-n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多机 serving(resources.nodes: N)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         更新推理服务
@@ -1164,7 +1242,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         查看推理服务日志
@@ -1175,7 +1253,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         删除推理服务
@@ -1206,7 +1284,7 @@
 
 
 <h1 id="_1">推理服务<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>推理任务（<code>kind: inference</code>）适用于长期运行的模型推理 API 服务，底层对应 Kubernetes <strong>Deployment + NodePort Service</strong>，支持多副本部署和自动扩缩容。</p>
+<p>推理任务（<code>kind: inference</code>）适用于长期运行的模型推理 API 服务,默认对应 Kubernetes <strong>Deployment + NodePort Service</strong>,支持多副本部署。当模型大到一台机器放不下时,设 <code>nodes: N</code>,任务改为对应 <strong>StatefulSet + Headless Service</strong>(见<a href="#distributed-inference">分布式推理</a>)。</p>
 <h2 id="yaml">YAML 完整字段<a class="headerlink" href="#yaml" title="Permanent link">&para;</a></h2>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1225,20 +1303,22 @@
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VALUE</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nt">service</span><span class="p">:</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">            </span><span class="c1"># 副本数（默认 1）</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">            </span><span class="c1"># 副本数（默认 1;数据并行的多份拷贝）</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span><span class="w">             </span><span class="c1"># 服务端口</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="nt">healthCheck</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/health</span><span class="w">   </span><span class="c1"># 健康检查路径（可选）</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="nt">resources</span><span class="p">:</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference-pool</span><span class="w">   </span><span class="c1"># 推理专属资源池</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span><span class="w">    </span><span class="c1"># 可选</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="nt">storage</span><span class="p">:</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/models</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">               </span><span class="c1"># 一个副本横跨几个节点(默认 1)。&gt;1 = 多机 serving</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">                         </span><span class="c1">#   (一个大模型跨节点切分)。见「分布式推理」。</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                 </span><span class="c1"># 每个 Pod 的 GPU 数(单机张量并行只需调大这个)</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span><span class="w">    </span><span class="c1"># 可选</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="nt">storage</span><span class="p">:</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/models</span>
 </span></code></pre></div>
 <hr />
 <h2 id="vllm">场景一：VLLM 高并发推理服务<a class="headerlink" href="#vllm" title="Permanent link">&para;</a></h2>
@@ -1334,24 +1414,143 @@
 </span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/models/qwen2-7b</span>
 </span></code></pre></div>
 <hr />
-<h2 id="_3">更新推理服务<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>使用 <code>apply</code> 命令更新服务配置（等价于先删后建）：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 修改 YAML（如调整副本数、环境变量等）后执行：</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>qwen2-ha-inference.yaml
+<h2 id="distributed-inference">分布式推理<a class="headerlink" href="#distributed-inference" title="Permanent link">&para;</a></h2>
+<p>「分布式推理」其实是三件不同的事 —— 按瓶颈在哪选:</p>
+<table>
+<thead>
+<tr>
+<th>形态</th>
+<th>声明</th>
+<th>落到什么资源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单机多卡</strong>(张量并行;模型一台放得下)</td>
+<td><code>resources.gpu: N</code> + 框架参数(如 vLLM <code>--tensor-parallel-size N</code>)</td>
+<td>Deployment,单 Pod N 卡</td>
+</tr>
+<tr>
+<td><strong>数据并行多副本</strong>(扩吞吐)</td>
+<td><code>service.replicas: N</code></td>
+<td>Deployment,N 个互相独立的 Pod</td>
+</tr>
+<tr>
+<td><strong>多机</strong>(一个模型跨节点切分)</td>
+<td><code>resources.nodes: N</code></td>
+<td>StatefulSet + Headless Service</td>
+</tr>
+</tbody>
+</table>
+<p><code>resources.nodes</code> 和 <code>service.replicas</code> 正交:<code>nodes</code> = 一个副本占几台机(模型并行),<code>replicas</code> = 几个副本(数据并行);总 pod = <code>replicas × nodes</code>。v1 支持 <code>nodes=1 × replicas=N</code> 和 <code>nodes=N × replicas=1</code>;罕见的 <strong><code>nodes&gt;1</code> 且 <code>replicas&gt;1</code> 会直接报错</strong>(那是 N 组×M 台 —— 多 StatefulSet / LeaderWorkerSet 的活,留作扩展)。</p>
+<h3 id="_3">单机多卡(最常见)<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>模型在一台机器的多卡上放得下,就<strong>不需要</strong> <code>nodes</code>。申请 GPU + 传框架的并行参数即可,单 Pod N 卡:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">                 </span><span class="c1"># 一个节点 4 卡</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nt">environment</span><span class="p">:</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;vllm&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;serve&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;/models/qwen2-72b&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--tensor-parallel-size&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;4&quot;</span><span class="p p-Indicator">]</span>
 </span></code></pre></div>
-<h2 id="_4">查看推理服务日志<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 查看最近 100 行日志</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference
+<h3 id="servingresourcesnodes-n">多机 serving(<code>resources.nodes: N</code>)<a class="headerlink" href="#servingresourcesnodes-n" title="Permanent link">&para;</a></h3>
+<p>当单个模型大到一台放不下、必须跨机器切分时,设 <code>resources.nodes: N</code>(跟 gpu/cpu/memory 并列)。平台随即:</p>
+<ul>
+<li>建 <strong>StatefulSet</strong>,<code>replicas = nodes</code>(一个逻辑副本 = N 个 Pod);</li>
+<li>建 <strong>Headless Service</strong>(<code>&lt;name&gt;-headless</code>,带 <code>publishNotReadyAddresses</code>),让 worker 在 head 就绪前就能解析到它;</li>
+<li>建一个<strong>只指向 head(pod <code>-0</code>)的 NodePort Service</strong> —— 只有 head 对外提供 API;</li>
+<li>注入引导环境变量;<strong>head/worker 的分工由你的命令决定</strong>(如 rank 0 起 Ray head,其余加入)—— 和训练里你自己写 <code>torchrun</code> 一样。</li>
+</ul>
+<div class="language-yaml highlight"><span class="filename">qwen-235b-multinode.yaml</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># 实时跟踪日志</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference<span class="w"> </span>-f
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nt">job</span><span class="p">:</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qwen-235b</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alice</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nt">environment</span><span class="p">:</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm/vllm-openai:latest</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="nt">command</span><span class="p">:</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bash</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-c</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">      </span><span class="no">if [ &quot;$RUNWHERE_NODE_RANK&quot; = &quot;0&quot; ]; then</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">        </span><span class="no">ray start --head --port=6379</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">        </span><span class="no">vllm serve /datasets/models/Qwen2-235B \</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">          </span><span class="no">--tensor-parallel-size 8 --pipeline-parallel-size 2 \</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">          </span><span class="no">--host 0.0.0.0 --port 8000</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">      </span><span class="no">else</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">        </span><span class="no"># worker 重试直到 head 的 Ray 可达,然后阻塞</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">        </span><span class="no">until ray start --address=&quot;$RUNWHERE_HEAD_ADDR:6379&quot; --block; do sleep 5; done</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">      </span><span class="no">fi</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference-pool</span>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">               </span><span class="c1"># 一个副本横跨 2 个节点(跟 gpu/cpu/memory 并列)</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span><span class="w">                 </span><span class="c1"># 每节点 8 卡 → 共 16(TP 8 × PP 2)</span>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256Gi</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="nt">service</span><span class="p">:</span>
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">            </span><span class="c1"># 一个逻辑副本(这 2 节点的整体);nodes&gt;1 时必须为 1</span>
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span><span class="w">             </span><span class="c1"># 只在 head 上暴露</span>
 </span></code></pre></div>
-<h2 id="_5">删除推理服务<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>llama3-8b-inference
+<p><strong>平台注入的环境变量</strong>(仅多机;你的命令来消费):</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RUNWHERE_NUM_NODES</code></td>
+<td>本副本的节点数</td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>RUNWHERE_NODE_RANK</code></td>
+<td>本 Pod 序号(<code>0</code>=head)</td>
+<td><code>0</code>、<code>1</code></td>
+</tr>
+<tr>
+<td><code>RUNWHERE_HEAD_ADDR</code></td>
+<td>head Pod 的稳定 DNS</td>
+<td><code>qwen-235b-0.qwen-235b-headless.alice.svc.cluster.local</code></td>
+</tr>
+<tr>
+<td><code>RUNWHERE_GPUS_PER_NODE</code></td>
+<td>每 Pod 卡数(= <code>resources.gpu</code>)</td>
+<td><code>8</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">多机 serving 要注意的几点</p>
+<ul>
+<li><strong>不设 HTTP 健康探针</strong>:只有 head 跑 API,给 worker 套 http liveness 会把它们反复杀掉;此模式下不做 readiness 门控。</li>
+<li><code>resources.nodes &gt; 1</code> 时 <strong><code>service.replicas</code> 必须为 1</strong>(StatefulSet 副本数就是 <code>nodes</code> = 一个 serving 实例)。两者同时 &gt;1 会<strong>直接报错</strong> —— 跑多个多机副本(N 组×M 台)是留作扩展的。</li>
+<li><code>RUNWHERE_NODE_RANK</code> 取自 <code>apps.kubernetes.io/pod-index</code> 标签,该标签由 StatefulSet 控制器在 <strong>Kubernetes 1.28+</strong> 注入。</li>
+<li>worker 要容忍 head 尚未起来 —— 重试加入(示例里用循环 <code>ray start</code> 直到成功)。</li>
+</ul>
+</div>
+<hr />
+<h2 id="_4">更新推理服务<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>使用 <code>apply</code> 命令更新服务配置（等价于先删后建）：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 修改 YAML（如调整副本数、环境变量等）后执行：</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>qwen2-ha-inference.yaml
+</span></code></pre></div>
+<h2 id="_5">查看推理服务日志<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 查看最近 100 行日志</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># 实时跟踪日志</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference<span class="w"> </span>-f
+</span></code></pre></div>
+<h2 id="_6">删除推理服务<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>llama3-8b-inference
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Service 会一并删除</p>
-<p>删除推理任务时，平台会同时删除对应的 K8s Deployment 和 NodePort Service，确保端口资源完全释放。</p>
+<p>删除推理任务时,平台会同时删除对应的 K8s 资源(Deployment;或 <code>nodes &gt; 1</code> 时的 StatefulSet + Headless Service)和 NodePort Service,确保端口资源完全释放。</p>
 </div>
 
 

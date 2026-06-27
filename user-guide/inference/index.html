@@ -706,6 +706,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#distributed-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distributed Inference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributed Inference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-node-multi-gpu-the-common-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-node multi-GPU (the common case)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-node-serving-resourcesnodes-n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-node serving (resources.nodes: N)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#updating-an-inference-service" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1153,6 +1192,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#distributed-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distributed Inference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributed Inference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-node-multi-gpu-the-common-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-node multi-GPU (the common case)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-node-serving-resourcesnodes-n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-node serving (resources.nodes: N)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#updating-an-inference-service" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1206,7 +1284,7 @@
 
 
 <h1 id="inference-services">Inference Services<a class="headerlink" href="#inference-services" title="Permanent link">&para;</a></h1>
-<p>Inference jobs (<code>kind: inference</code>) are designed for long-running model inference API services. They map to a Kubernetes <strong>Deployment + NodePort Service</strong>, with support for multi-replica deployment and auto-scaling.</p>
+<p>Inference jobs (<code>kind: inference</code>) are designed for long-running model inference API services. By default they map to a Kubernetes <strong>Deployment + NodePort Service</strong>, with support for multi-replica deployment. For a model too large for a single node, set <code>nodes: N</code> and the job maps to a <strong>StatefulSet + Headless Service</strong> instead (see <a href="#distributed-inference">Distributed Inference</a>).</p>
 <h2 id="full-yaml-fields">Full YAML Fields<a class="headerlink" href="#full-yaml-fields" title="Permanent link">&para;</a></h2>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1225,20 +1303,22 @@
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VALUE</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nt">service</span><span class="p">:</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">            </span><span class="c1"># Number of replicas (default: 1)</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">            </span><span class="c1"># Number of replicas (default: 1; data-parallel copies)</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span><span class="w">             </span><span class="c1"># Service port</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="nt">healthCheck</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/health</span><span class="w">   </span><span class="c1"># Health check path (optional)</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="nt">resources</span><span class="p">:</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference-pool</span><span class="w">   </span><span class="c1"># Dedicated inference resource pool</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span><span class="w">    </span><span class="c1"># Optional</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="nt">storage</span><span class="p">:</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/models</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">               </span><span class="c1"># Nodes ONE replica spans (default 1). &gt;1 = multi-node serving</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">                         </span><span class="c1">#   (model sharded across nodes). See &quot;Distributed Inference&quot;.</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                 </span><span class="c1"># GPUs per pod (tensor-parallel within a node = just raise this)</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span><span class="w">    </span><span class="c1"># Optional</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="nt">storage</span><span class="p">:</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/models</span>
 </span></code></pre></div>
 <hr />
 <h2 id="example-1-vllm-high-throughput-inference-service">Example 1: VLLM High-Throughput Inference Service<a class="headerlink" href="#example-1-vllm-high-throughput-inference-service" title="Permanent link">&para;</a></h2>
@@ -1334,24 +1414,143 @@
 </span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/models/qwen2-7b</span>
 </span></code></pre></div>
 <hr />
+<h2 id="distributed-inference">Distributed Inference<a class="headerlink" href="#distributed-inference" title="Permanent link">&para;</a></h2>
+<p>"Distributed inference" is three different things — pick by where the bottleneck is:</p>
+<table>
+<thead>
+<tr>
+<th>Flavor</th>
+<th>Declaration</th>
+<th>Maps to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single-node, multi-GPU</strong> (tensor parallel; model fits one node)</td>
+<td><code>resources.gpu: N</code> + framework flag (e.g. vLLM <code>--tensor-parallel-size N</code>)</td>
+<td>Deployment, one pod with N GPUs</td>
+</tr>
+<tr>
+<td><strong>Data-parallel replicas</strong> (more throughput)</td>
+<td><code>service.replicas: N</code></td>
+<td>Deployment, N independent pods</td>
+</tr>
+<tr>
+<td><strong>Multi-node</strong> (one model sharded across nodes)</td>
+<td><code>resources.nodes: N</code></td>
+<td>StatefulSet + Headless Service</td>
+</tr>
+</tbody>
+</table>
+<p><code>resources.nodes</code> and <code>service.replicas</code> are orthogonal: <code>nodes</code> = machines <strong>per</strong> replica (model-parallel), <code>replicas</code> = number of replicas (data-parallel); total pods = <code>replicas × nodes</code>. v1 supports <code>nodes=1 × replicas=N</code> and <code>nodes=N × replicas=1</code>; the rare combo <strong><code>nodes&gt;1</code> AND <code>replicas&gt;1</code> is rejected</strong> with a clear error (it would be N groups of M pods — N StatefulSets / LeaderWorkerSet territory, deferred).</p>
+<h3 id="single-node-multi-gpu-the-common-case">Single-node multi-GPU (the common case)<a class="headerlink" href="#single-node-multi-gpu-the-common-case" title="Permanent link">&para;</a></h3>
+<p>If the model fits on one machine's GPUs, you do <strong>not</strong> need <code>nodes</code>. Just request the GPUs and pass the framework's parallelism flag — one pod, N GPUs:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">                 </span><span class="c1"># 4 GPUs on one node</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nt">environment</span><span class="p">:</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;vllm&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;serve&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;/models/qwen2-72b&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--tensor-parallel-size&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;4&quot;</span><span class="p p-Indicator">]</span>
+</span></code></pre></div>
+<h3 id="multi-node-serving-resourcesnodes-n">Multi-node serving (<code>resources.nodes: N</code>)<a class="headerlink" href="#multi-node-serving-resourcesnodes-n" title="Permanent link">&para;</a></h3>
+<p>When a single model is too large for one node and must be sharded across machines, set <code>resources.nodes: N</code> (alongside <code>gpu</code>/<code>cpu</code>/<code>memory</code>). The platform then:</p>
+<ul>
+<li>creates a <strong>StatefulSet</strong> with <code>replicas = nodes</code> (one logical serving replica = N pods);</li>
+<li>creates a <strong>Headless Service</strong> (<code>&lt;name&gt;-headless</code>, with <code>publishNotReadyAddresses</code>) so workers can resolve the head before it is ready;</li>
+<li>exposes a <strong>NodePort Service that targets only the head</strong> (pod <code>-0</code>) — only the head serves the API;</li>
+<li>injects bootstrap env vars; <strong>your command does the head/worker split</strong> (e.g. start a Ray head on rank 0, join it on the others), exactly like you write <code>torchrun</code> yourself for training.</li>
+</ul>
+<div class="language-yaml highlight"><span class="filename">qwen-235b-multinode.yaml</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nt">job</span><span class="p">:</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qwen-235b</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alice</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nt">environment</span><span class="p">:</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm/vllm-openai:latest</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="nt">command</span><span class="p">:</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bash</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-c</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">      </span><span class="no">if [ &quot;$RUNWHERE_NODE_RANK&quot; = &quot;0&quot; ]; then</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">        </span><span class="no">ray start --head --port=6379</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">        </span><span class="no">vllm serve /datasets/models/Qwen2-235B \</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">          </span><span class="no">--tensor-parallel-size 8 --pipeline-parallel-size 2 \</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">          </span><span class="no">--host 0.0.0.0 --port 8000</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">      </span><span class="no">else</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">        </span><span class="no"># workers retry until the head&#39;s Ray is reachable, then block</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">        </span><span class="no">until ray start --address=&quot;$RUNWHERE_HEAD_ADDR:6379&quot; --block; do sleep 5; done</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">      </span><span class="no">fi</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inference-pool</span>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">               </span><span class="c1"># one replica spanning 2 nodes (alongside gpu/cpu/memory)</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span><span class="w">                 </span><span class="c1"># GPUs per node → total 16 (TP 8 × PP 2)</span>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256Gi</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="nt">service</span><span class="p">:</span>
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">            </span><span class="c1"># one logical replica (the 2-node group); must be 1 when nodes &gt; 1</span>
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span><span class="w">             </span><span class="c1"># exposed on the head only</span>
+</span></code></pre></div>
+<p><strong>Platform-injected env vars</strong> (multi-node only — your command consumes them):</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RUNWHERE_NUM_NODES</code></td>
+<td>Nodes in this replica</td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>RUNWHERE_NODE_RANK</code></td>
+<td>This pod's ordinal (<code>0</code> = head)</td>
+<td><code>0</code>, <code>1</code></td>
+</tr>
+<tr>
+<td><code>RUNWHERE_HEAD_ADDR</code></td>
+<td>Stable DNS of the head pod</td>
+<td><code>qwen-235b-0.qwen-235b-headless.alice.svc.cluster.local</code></td>
+</tr>
+<tr>
+<td><code>RUNWHERE_GPUS_PER_NODE</code></td>
+<td>GPUs per pod (= <code>resources.gpu</code>)</td>
+<td><code>8</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Things to know about multi-node serving</p>
+<ul>
+<li><strong>No HTTP health probes</strong> are set on multi-node pods (only the head serves the API; an HTTP liveness probe would kill the workers). Readiness gating isn't applied in this mode.</li>
+<li><strong><code>service.replicas</code> must be 1</strong> when <code>resources.nodes &gt; 1</code> (the StatefulSet's replica count <em>is</em> <code>nodes</code> = one serving instance). Setting both <code>&gt;1</code> is <strong>rejected</strong> with a clear error — running several multi-node replicas (N groups of M) is a deferred extension.</li>
+<li><code>RUNWHERE_NODE_RANK</code> is sourced from the <code>apps.kubernetes.io/pod-index</code> label, which the StatefulSet controller sets on <strong>Kubernetes 1.28+</strong>.</li>
+<li>Workers must tolerate the head not being up yet — retry the join (the example loops <code>ray start</code> until it succeeds).</li>
+</ul>
+</div>
+<hr />
 <h2 id="updating-an-inference-service">Updating an Inference Service<a class="headerlink" href="#updating-an-inference-service" title="Permanent link">&para;</a></h2>
 <p>Use <code>apply</code> to update service configuration (equivalent to delete + create):</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># After modifying the YAML (e.g. changing replica count or env vars):</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>qwen2-ha-inference.yaml
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># After modifying the YAML (e.g. changing replica count or env vars):</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>qwen2-ha-inference.yaml
 </span></code></pre></div>
 <h2 id="viewing-inference-logs">Viewing Inference Logs<a class="headerlink" href="#viewing-inference-logs" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># View last 100 lines of logs</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Stream logs in real time</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference<span class="w"> </span>-f
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># View last 100 lines of logs</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Stream logs in real time</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>llama3-8b-inference<span class="w"> </span>-f
 </span></code></pre></div>
 <h2 id="deleting-an-inference-service">Deleting an Inference Service<a class="headerlink" href="#deleting-an-inference-service" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>llama3-8b-inference
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>llama3-8b-inference
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Service Is Also Deleted</p>
-<p>When an inference job is deleted, the platform also deletes the associated K8s Deployment and NodePort Service, fully releasing the port resource.</p>
+<p>When an inference job is deleted, the platform also deletes the associated K8s resource (Deployment, or the StatefulSet + Headless Service for <code>nodes &gt; 1</code>) and the NodePort Service, fully releasing the port resource.</p>
 </div>
 
 

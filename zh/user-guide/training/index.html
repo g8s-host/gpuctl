@@ -1249,21 +1249,18 @@
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KEY</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VALUE</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="nt">distributed</span><span class="p">:</span><span class="w">                 </span><span class="c1"># 可选，默认 standalone（单机）</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standalone</span><span class="w">           </span><span class="c1"># standalone | multi-node</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                 </span><span class="c1"># Worker 数（仅 multi-node 有意义；多机需 &gt; 1）</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="nt">master_port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">29500</span><span class="w">         </span><span class="c1"># DDP 通信端口（仅 multi-node，默认 29500）</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="nt">resources</span><span class="p">:</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w">              </span><span class="c1"># 资源池，默认 default</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">                     </span><span class="c1"># GPU 数量（multi-node 模式下为每个 Worker 的 GPU 数）</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-80G</span><span class="w">          </span><span class="c1"># GPU 型号（可选）</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span><span class="w">                    </span><span class="c1"># CPU 核数</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128Gi</span><span class="w">              </span><span class="c1"># 内存</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="nt">storage</span><span class="p">:</span><span class="w">                     </span><span class="c1"># 可选，旧式机制 —— 见下方说明，大多数任务无需填写</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span><span class="w">                  </span><span class="c1"># 宿主机目录挂载（hostPath）</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/scratch/cache</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w">              </span><span class="c1"># 资源池，默认 default</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                   </span><span class="c1"># 本任务节点数(默认 1)。&gt;1 = 多机 DDP</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">                             </span><span class="c1">#   (Indexed Job + Headless Service + DDP env 注入)</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">                     </span><span class="c1"># 每节点 GPU 数(总卡 = nodes × gpu)</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-80G</span><span class="w">          </span><span class="c1"># GPU 型号（可选）</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span><span class="w">                    </span><span class="c1"># CPU 核数</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128Gi</span><span class="w">              </span><span class="c1"># 内存</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="nt">storage</span><span class="p">:</span><span class="w">                     </span><span class="c1"># 可选，旧式机制 —— 见下方说明，大多数任务无需填写</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span><span class="w">                  </span><span class="c1"># 宿主机目录挂载（hostPath）</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/scratch/cache</span>
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">持久化存储是自动的 —— 无需 <code>storage</code> 段</p>
@@ -1365,9 +1362,9 @@
 <p>设置了 <code>conda</code> 后，平台会把你的命令包装为在激活的 conda 环境中运行（<code>conda activate myenv &amp;&amp; exec &lt;命令&gt;</code>）。不设 <code>conda</code> 则直接执行命令，不做任何包装。Notebook 中创建的 conda 环境默认位于 <code>/home/jovyan/.conda/envs/</code>，因此通过共享的 NFS home 对训练任务可见。</p>
 <hr />
 <h2 id="multi-node-distributed-training">多机多卡分布式训练<a class="headerlink" href="#multi-node-distributed-training" title="Permanent link">&para;</a></h2>
-<p>对于需要跨<strong>多台机器</strong>的训练（如超大模型），设置 <code>distributed.mode: multi-node</code> 和 <code>workers</code> 数量。平台随即：</p>
+<p>对于需要跨<strong>多台机器</strong>的训练（如超大模型），设置 <code>resources.nodes: N</code>(和推理同一个字段 —— 跨任务类型一致)。平台随即：</p>
 <ul>
-<li>创建 <strong>Indexed Job</strong>，<code>completions = parallelism = workers</code>（每个带编号的 Worker 一个 Pod）。</li>
+<li>创建 <strong>Indexed Job</strong>，<code>completions = parallelism = nodes</code>（每个带编号的 Worker 一个 Pod）。</li>
 <li>创建 <strong>Headless Service</strong>（<code>&lt;job-name&gt;-headless</code>），让 Worker 之间通过稳定 DNS 互相发现。</li>
 <li><strong>自动向每个 Worker 注入 DDP 通信环境变量</strong>（这些你无需声明）：</li>
 </ul>
@@ -1376,13 +1373,13 @@
 <tr>
 <th>变量</th>
 <th>含义</th>
-<th>示例（4 workers × 2 GPU）</th>
+<th>示例（nodes=4 × 2 GPU）</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>MASTER_ADDR</code></td>
-<td>0 号 Worker（主节点）的 DNS 名</td>
+<td>0 号节点（主节点）的 DNS 名</td>
 <td><code>llm-pretrain-0.llm-pretrain-headless.ml-team.svc.cluster.local</code></td>
 </tr>
 <tr>
@@ -1392,22 +1389,22 @@
 </tr>
 <tr>
 <td><code>WORLD_SIZE</code></td>
-<td>Worker 总数</td>
+<td>节点总数</td>
 <td><code>4</code></td>
 </tr>
 <tr>
 <td><code>RANK</code></td>
-<td>当前 Worker 编号（0=主节点），取自 Pod 的 completion index</td>
+<td>当前节点编号（0=主节点），取自 Pod 的 completion index</td>
 <td><code>0</code>、<code>1</code>、<code>2</code>、<code>3</code></td>
 </tr>
 <tr>
 <td><code>LOCAL_RANK</code></td>
-<td>Worker 内 GPU 编号</td>
+<td>节点内 GPU 编号</td>
 <td><code>0</code></td>
 </tr>
 <tr>
 <td><code>GPUCTL_NPROC_PER_NODE</code></td>
-<td>每 Worker GPU 数（= <code>resources.gpu</code>）</td>
+<td>每节点 GPU 数（= <code>resources.gpu</code>）</td>
 <td><code>2</code></td>
 </tr>
 </tbody>
@@ -1417,8 +1414,8 @@
 <p>平台注入上述通信变量并创建网络资源 —— 但<strong>不会</strong>设置 <code>NCCL_SOCKET_IFNAME</code>、生成 DeepSpeed hostfile，也不会替你选择启动器。你的命令（如 <code>torchrun</code>）负责消费这些注入的变量。若你的网络需要，请通过 <code>environment.env</code> 自行设置 <code>NCCL_SOCKET_IFNAME</code> 等框架专属调优项。</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title"><code>mode: multi-node</code> 需要 <code>workers &gt; 1</code></p>
-<p>当 <code>workers: 1</code>（或 <code>mode: standalone</code>）时，行为与单机任务完全一致 —— 不创建 Indexed Job，也不创建 Headless Service。总 GPU 数 = <code>workers × resources.gpu</code>。</p>
+<p class="admonition-title"><code>resources.nodes &gt; 1</code> 即多机;总卡 = nodes × gpu</p>
+<p><code>nodes: 1</code>（默认）即单机 —— 不创建 Indexed Job/Headless Service。<code>master_port</code> 默认 29500(需要可用可选的 <code>distributed.master_port</code> 覆盖)。旧 YAML 的 <code>distributed: {mode: multi-node, workers: N}</code> 仍兼容(已弃用),等价于 <code>nodes: N</code>。</p>
 </div>
 <div class="language-yaml highlight"><span class="filename">llm-pretrain-distributed.yaml</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">training</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1443,16 +1440,13 @@
 </span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">        </span><span class="no">--master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \</span>
 </span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">        </span><span class="no">/home/jovyan/pretrain.py</span>
 </span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>
-</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="nt">distributed</span><span class="p">:</span>
-</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">multi-node</span>
-</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
-</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>
-</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="nt">resources</span><span class="p">:</span>
-</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">            </span><span class="c1"># 每个 Worker 的 GPU 数 → 4 × 2 = 共 8 卡</span>
-</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-80g</span>
-</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
-</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128Gi</span>
-</span><span id="__span-6-33"><a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">training-pool</span>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">training-pool</span>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">          </span><span class="c1"># 4 节点;&gt;1 启用多机 DDP</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">            </span><span class="c1"># 每节点 GPU 数 → 4 × 2 = 共 8 卡</span>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-80g</span>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128Gi</span>
 </span></code></pre></div>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>llm-pretrain-distributed.yaml
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--kind<span class="w"> </span>training<span class="w"> </span>-n<span class="w"> </span>ml-team<span class="w">   </span><span class="c1"># 4 个 Worker Pod：llm-pretrain-0 .. llm-pretrain-3</span>
