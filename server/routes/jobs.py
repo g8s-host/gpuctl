@@ -103,6 +103,9 @@ async def create_job(request: JobCreateRequest):
 
     except ParserError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as e:
+        # 用户输入类错误(如多机+多副本不支持、命名空间无配额)→ 400 + 明确信息,而非 500
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to create job: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

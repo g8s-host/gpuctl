@@ -34,6 +34,10 @@ class GPUType(str, Enum):
 
 class ResourceRequest(BaseModel):
     pool: Optional[str] = Field(default=None, description="资源池名称")
+    # 一个逻辑副本横跨的节点数。1(默认)= 单 Pod;>1 仅推理(inference)启用多机/模型并行
+    # serving(StatefulSet + Headless + head-only Service)。与 pool/gpu/cpu/memory 并列:
+    # resources 描述"一个节点的形状",nodes 描述"几个这样的节点"(总卡 = nodes × gpu)。
+    nodes: int = Field(default=1, ge=1, description="副本横跨的节点数;>1 启用多机推理")
     gpu: int = Field(default=0, ge=0, description="GPU数量", alias="accelerator_count")
     gpu_type: Optional[str] = Field(default=None, description="GPU类型", alias="gpuType")
     cpu: Union[int, str] = Field(..., description="CPU需求，如 8, '8' 或 '8000m'")

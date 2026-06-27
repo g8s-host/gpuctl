@@ -22,10 +22,10 @@ class TrainingKind:
         k8s_job = self.builder.build_job(training_job, namespace)
         result = self.client.create_job(k8s_job, namespace)
 
-        distributed = getattr(training_job, "distributed", None)
-        if distributed and distributed.mode == "multi-node" and distributed.workers > 1:
+        from gpuctl.api.training import resolve_training_nodes
+        if resolve_training_nodes(training_job) > 1:
             svc = BaseBuilder.build_headless_service(
-                training_job.job.name, namespace, distributed.master_port
+                training_job.job.name, namespace, training_job.distributed.master_port
             )
             try:
                 self._k8s.core_v1.create_namespaced_service(namespace=namespace, body=svc)

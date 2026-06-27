@@ -24,14 +24,11 @@ environment:
     - name: KEY
       value: VALUE
 
-distributed:                # Optional, defaults to standalone (single-node)
-  mode: standalone          # standalone | multi-node
-  workers: 1                # Worker count (multi-node only; multi-node needs > 1)
-  master_port: 29500        # DDP rendezvous port (multi-node only, default 29500)
-
 resources:
   pool: default             # Resource pool, default: default
-  gpu: 4                    # Number of GPUs (per worker in multi-node mode)
+  nodes: 1                  # Nodes for this job (default 1). >1 = multi-node DDP
+                            #   (Indexed Job + Headless Service + DDP env injection)
+  gpu: 4                    # Number of GPUs PER NODE (total = nodes × gpu)
   gpuType: A100-80G         # GPU model (optional)
   cpu: 32                   # CPU cores
   memory: 128Gi             # Memory
@@ -154,26 +151,26 @@ When `conda` is set, the platform wraps your command so it runs inside an activa
 
 ## Multi-Node Distributed Training
 
-For training that must span **multiple machines** (e.g. very large models), set `distributed.mode: multi-node` and the number of `workers`. The platform then:
+For training that must span **multiple machines** (e.g. very large models), set `resources.nodes: N` (the same field inference uses — consistent across kinds). The platform then:
 
-- Creates an **Indexed Job** with `completions = parallelism = workers` (one indexed worker pod each).
+- Creates an **Indexed Job** with `completions = parallelism = nodes` (one indexed worker pod each).
 - Creates a **Headless Service** (`<job-name>-headless`) so workers discover each other by stable DNS.
 - **Auto-injects DDP rendezvous environment variables** into every worker (you do not declare these):
 
-| Variable | Meaning | Example (4 workers × 2 GPU) |
+| Variable | Meaning | Example (nodes=4 × 2 GPU) |
 |----------|---------|-----------------------------|
-| `MASTER_ADDR` | DNS name of worker 0 (the master) | `llm-pretrain-0.llm-pretrain-headless.ml-team.svc.cluster.local` |
+| `MASTER_ADDR` | DNS name of node 0 (the master) | `llm-pretrain-0.llm-pretrain-headless.ml-team.svc.cluster.local` |
 | `MASTER_PORT` | DDP rendezvous port | `29500` |
-| `WORLD_SIZE` | Total number of workers | `4` |
-| `RANK` | This worker's index (0 = master), from the pod's completion index | `0`, `1`, `2`, `3` |
-| `LOCAL_RANK` | GPU index within the worker | `0` |
-| `GPUCTL_NPROC_PER_NODE` | GPUs per worker (= `resources.gpu`) | `2` |
+| `WORLD_SIZE` | Total number of nodes | `4` |
+| `RANK` | This node's index (0 = master), from the pod's completion index | `0`, `1`, `2`, `3` |
+| `LOCAL_RANK` | GPU index within the node | `0` |
+| `GPUCTL_NPROC_PER_NODE` | GPUs per node (= `resources.gpu`) | `2` |
 
 !!! warning "What is NOT auto-configured"
     The platform injects the rendezvous variables above and creates the networking — it does **not** set `NCCL_SOCKET_IFNAME`, generate a DeepSpeed hostfile, or pick a launcher for you. Your command (e.g. `torchrun`) consumes the injected variables. Set framework-specific tunables like `NCCL_SOCKET_IFNAME` yourself via `environment.env` if your network needs them.
 
-!!! note "`mode: multi-node` requires `workers > 1`"
-    With `workers: 1` (or `mode: standalone`), behavior is identical to a single-node job — no Indexed Job and no Headless Service are created. Total GPUs = `workers × resources.gpu`.
+!!! note "`resources.nodes > 1` enables multi-node; total GPUs = nodes × gpu"
+    With `nodes: 1` (default), it's a single-node job — no Indexed Job and no Headless Service. The `master_port` defaults to 29500 (override via the optional `distributed.master_port` if needed). Old YAMLs using `distributed: {mode: multi-node, workers: N}` are still accepted (deprecated) and treated as `nodes: N`.
 
 ```yaml title="llm-pretrain-distributed.yaml"
 kind: training
@@ -199,16 +196,13 @@ environment:
         --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
         /home/jovyan/pretrain.py
 
-distributed:
-  mode: multi-node
-  workers: 4
-
 resources:
-  gpu: 2            # GPUs PER worker → 4 × 2 = 8 GPUs total
+  pool: training-pool
+  nodes: 4          # 4 nodes; >1 enables multi-node DDP
+  gpu: 2            # GPUs PER NODE → 4 × 2 = 8 GPUs total
   gpuType: A100-80g
   cpu: 16
   memory: 128Gi
-  pool: training-pool
 ```
 
 ```bash

@@ -51,7 +51,7 @@
       <img src="https://img.shields.io/badge/🔌-Multi--Node_Distributed-2962FF?style=flat-square" alt="distributed"><br><br>
       <b>Distributed Training Built-In</b><br>
       Indexed Job + Headless Service<br><br>
-      <sub>Set <code>mode: multi-node, workers: N</code> — platform auto-injects DDP env vars (MASTER_ADDR / RANK / WORLD_SIZE)</sub>
+      <sub>Set <code>resources.nodes: N</code> — platform auto-injects DDP env vars (MASTER_ADDR / RANK / WORLD_SIZE)</sub>
     </td>
     <td align="center" width="25%">
       <img src="https://img.shields.io/badge/👁️-Unified_Observability-FF6D00?style=flat-square" alt="observability"><br><br>
@@ -166,7 +166,7 @@ gpuctl logs qwen2-7b-sft -f
   </tr>
   <tr>
     <td><b>🧠 Multi-Node Distributed Training</b></td>
-    <td><b>Just set <code>mode: multi-node, workers: N</code></b>, platform creates an Indexed Job + Headless Service and auto-injects DDP rendezvous env vars (MASTER_ADDR, MASTER_PORT, WORLD_SIZE, RANK, LOCAL_RANK); all workers share one NFS <code>/home/jovyan</code> for checkpoints</td>
+    <td><b>Just set <code>resources.nodes: N</code></b>, platform creates an Indexed Job + Headless Service and auto-injects DDP rendezvous env vars (MASTER_ADDR, MASTER_PORT, WORLD_SIZE, RANK, LOCAL_RANK); all workers share one NFS <code>/home/jovyan</code> for checkpoints</td>
     <td>Manually create an Indexed/JobSet + Headless Service, wire up MASTER_ADDR/RANK/WORLD_SIZE, provision shared storage, understand GPU communication and process groups</td>
   </tr>
   <tr>
@@ -219,7 +219,7 @@ Complete documentation is available in the **[docs/](docs/)** directory, or chec
 **User Guides**
 - [Training Tasks](docs/user-guide/training.md) — LLM fine-tuning, conda env reuse, multi-node distributed training
 - [Persistent Storage](docs/user-guide/storage.md) — transparent NFS `/home/jovyan` + `/datasets`, zero config in job YAML
-- [Inference Services](docs/user-guide/inference.md) — VLLM inference deployment
+- [Inference Services](docs/user-guide/inference.md) — VLLM inference deployment; single-node tensor-parallel and multi-node (`resources.nodes: N`) model-parallel serving
 - [Notebooks](docs/user-guide/notebook.md) — JupyterLab interactive development
 - [Resource Pool Management](docs/user-guide/pool.md) — GPU resource pool configuration
 
