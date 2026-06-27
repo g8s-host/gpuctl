@@ -397,8 +397,20 @@ class QuotaClient(KubernetesClient):
 
     def apply_default_quota(self, quota_name: str, cpu: str = None,
                             memory: str = None, gpu: str = None) -> Dict[str, Any]:
-        """Apply resource quota for default namespace (create or update)"""
-        return self._create_default_namespace_quota(quota_name, cpu, memory, gpu)
+        """Apply resource quota for default namespace (create or update).
+
+        Symmetric with ``apply_quota``: read the RQ by name, patch /spec/hard if it
+        exists, else create. (Delegating straight to ``_create_default_namespace_quota``
+        would hit its "only one quota per namespace" guard and raise on a self-update,
+        so true upsert must branch on existence first.)
+        """
+        try:
+            self.core_v1.read_namespaced_resource_quota(f"{quota_name}-default", "default")
+            return self.update_quota(quota_name, "default", cpu, memory, gpu)
+        except ApiException as e:
+            if e.status == 404:
+                return self._create_default_namespace_quota(quota_name, cpu, memory, gpu)
+            raise
 
     def list_quotas(self, quota_name: str = None) -> List[Dict[str, Any]]:
         """List all resource quotas"""
