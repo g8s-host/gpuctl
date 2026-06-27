@@ -690,6 +690,34 @@
   
   
     <li class="md-nav__item">
+      <a href="user-guide/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persistent Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="user-guide/inference/" class="md-nav__link">
         
   
@@ -1228,7 +1256,7 @@
   <tr>
     <td><b>😤 Complex GPU Environment Setup</b><br>Driver, CUDA, NCCL dependencies are fragile</td>
     <td>Every new environment requires manually installing GPU drivers, CUDA Toolkit, cuDNN, configuring NCCL multi-GPU env vars, and installing DeepSpeed/VLLM. Version conflicts are common; setup can take hours or days</td>
-    <td><b>Pre-installed images, env vars injected automatically</b><br>Official images with DeepSpeed, VLLM, LlamaFactory pre-installed. Platform injects NCCL_SOCKET_IFNAME, MASTER_ADDR, WORLD_SIZE automatically — no manual distributed training config needed</td>
+    <td><b>Pre-installed images, rendezvous env vars injected automatically</b><br>Use official images with DeepSpeed, VLLM, LlamaFactory pre-installed. For <code>mode: multi-node</code> jobs the platform injects DDP rendezvous env vars (MASTER_ADDR, MASTER_PORT, WORLD_SIZE, RANK, LOCAL_RANK) and creates the Headless Service — your launcher (e.g. torchrun) consumes them</td>
   </tr>
   <tr>
     <td><b>😫 Multi-team GPU Resource Contention</b><br>No resource isolation</td>
@@ -1236,9 +1264,9 @@
     <td><b>Resource pool isolation + quota management</b><br>Partition the cluster into training, inference, and dev pools for physical isolation. Per-namespace CPU/Memory/GPU quotas are enforced automatically, ensuring fair resource allocation across teams</td>
   </tr>
   <tr>
-    <td><b>😵 Complex Multi-GPU Training Configuration</b><br>NCCL and DeepSpeed params are verbose</td>
-    <td>Single-node multi-GPU training requires manually configuring NCCL env vars, DeepSpeed hostfile, and PyTorch launch args. Misconfiguration leads to training hangs or low efficiency</td>
-    <td><b>Declare GPU count, NCCL/DeepSpeed config injected automatically</b><br>Just set resources.gpu: 4 in YAML. The platform generates DeepSpeed config, injects NCCL env vars, and initializes process groups automatically</td>
+    <td><b>😵 Complex Multi-Node Distributed Setup</b><br>Indexed Job, Headless Service, and rendezvous wiring are verbose</td>
+    <td>Multi-node training requires hand-writing an Indexed/JobSet, a Headless Service for peer discovery, wiring MASTER_ADDR/RANK/WORLD_SIZE, and provisioning shared storage. Misconfiguration leads to training hangs</td>
+    <td><b>Declare workers, distributed plumbing created automatically</b><br>Set resources.gpu and <code>distributed: {mode: multi-node, workers: N}</code>. The platform creates the Indexed Job + Headless Service, injects DDP rendezvous env vars, and gives every worker the same NFS /home/jovyan for checkpoints</td>
   </tr>
   <tr>
     <td><b>😵‍💫 Tedious Job Status Inspection</b><br>Random Pod names are hard to remember</td>

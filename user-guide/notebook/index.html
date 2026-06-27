@@ -585,6 +585,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persistent Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../inference/" class="md-nav__link">
         
   
@@ -1156,7 +1184,11 @@
 
 
 <h1 id="notebook-interactive-development">Notebook Interactive Development<a class="headerlink" href="#notebook-interactive-development" title="Permanent link">&para;</a></h1>
-<p>Notebook jobs (<code>kind: notebook</code>) provide a JupyterLab interactive development environment, ideal for code debugging, data exploration, and model prototyping. They map to a Kubernetes <strong>StatefulSet + NodePort Service</strong> to ensure storage state persistence.</p>
+<p>Notebook jobs (<code>kind: notebook</code>) provide a JupyterLab interactive development environment, ideal for code debugging, data exploration, and model prototyping. They map to a Kubernetes <strong>StatefulSet + NodePort Service</strong>.</p>
+<div class="admonition tip">
+<p class="admonition-title"><code>/home/jovyan</code> persists automatically</p>
+<p>When the operator has run <code>gpuctl init</code>, the Notebook's <code>/home/jovyan</code> is automatically backed by per-namespace NFS — code, data, and conda envs survive restarts and are shared with your Training jobs, with <strong>no <code>storage</code> section needed</strong>. The <code>storage.workdirs</code> examples below are the separate, optional <code>hostPath</code> mechanism. See <a href="../storage/">Persistent Storage</a>.</p>
+</div>
 <h2 id="full-yaml-fields">Full YAML Fields<a class="headerlink" href="#full-yaml-fields" title="Permanent link">&para;</a></h2>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notebook</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1176,7 +1208,7 @@
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nt">resources</span><span class="p">:</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-pool</span><span class="w">    </span><span class="c1"># Recommended: use a dedicated dev resource pool</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span><span class="w"> </span><span class="c1"># Optional — debugging doesn&#39;t need high-end GPUs</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span><span class="w"> </span><span class="c1"># Optional — debugging doesn&#39;t need high-end GPUs</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
@@ -1213,7 +1245,7 @@
 </span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="nt">resources</span><span class="p">:</span>
 </span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-pool</span>
 </span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">  </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
 </span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 </span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
 </span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
@@ -1281,7 +1313,7 @@
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Code Persistence</p>
-<p>The Notebook environment mounts host directories into the container via <code>storage.workdirs</code>. Deleting the Notebook Pod does <strong>not</strong> delete data in mounted directories — recreate the Notebook and remount to restore your work state.</p>
+<p>The recommended way to persist work is the automatic NFS-backed <code>/home/jovyan</code> (see <a href="../storage/">Persistent Storage</a>) — it survives Pod restarts and is shared with your Training jobs, with no config. The <code>storage.workdirs</code> mounts shown above are an optional <code>hostPath</code> alternative; deleting the Notebook Pod does <strong>not</strong> delete data in those host directories, but they are node-local and not shared across nodes.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">StatefulSet Behavior</p>

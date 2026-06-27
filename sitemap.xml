@@ -148,6 +148,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/quota/"/>
     </url>
     <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/user-guide/storage/</loc>
+        <lastmod>2026-06-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/user-guide/storage/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/storage/"/>
+    </url>
+    <url>
         <loc>https://runwhere-ai.github.io/gpuctl/user-guide/training/</loc>
         <lastmod>2026-06-27</lastmod>
         <changefreq>daily</changefreq>
@@ -300,6 +307,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/quota/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/user-guide/quota/"/>
+    </url>
+    <url>
+        <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/storage/</loc>
+        <lastmod>2026-06-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://runwhere-ai.github.io/gpuctl/zh/user-guide/storage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://runwhere-ai.github.io/gpuctl/user-guide/storage/"/>
     </url>
     <url>
         <loc>https://runwhere-ai.github.io/gpuctl/zh/user-guide/training/</loc>

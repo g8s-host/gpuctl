@@ -12,19 +12,19 @@
         <meta name="author" content="GPU Control Team">
       
       
-        <link rel="canonical" href="https://runwhere-ai.github.io/gpuctl/user-guide/quickstart/">
+        <link rel="canonical" href="https://runwhere-ai.github.io/gpuctl/user-guide/storage/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../training/">
       
       
-        <link rel="next" href="../training/">
+        <link rel="next" href="../inference/">
       
       
         
           <link rel="alternate" href="./" hreflang="en">
         
-          <link rel="alternate" href="../../zh/user-guide/quickstart/" hreflang="zh">
+          <link rel="alternate" href="../../zh/user-guide/storage/" hreflang="zh">
         
       
       
@@ -33,7 +33,7 @@
     
     
       
-        <title>Quickstart - GPUCTL - AI GPU Scheduling Tool</title>
+        <title>Persistent Storage - GPUCTL - AI GPU Scheduling Tool</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#quickstart" class="md-skip">
+        <a href="#persistent-storage" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Quickstart
+              Persistent Storage
             
           </span>
         </div>
@@ -182,7 +182,7 @@
           </li>
         
           <li class="md-select__item">
-            <a href="../../zh/user-guide/quickstart/" hreflang="zh" class="md-select__link">
+            <a href="../../zh/user-guide/storage/" hreflang="zh" class="md-select__link">
               简体中文
             </a>
           </li>
@@ -526,37 +526,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Quickstart
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
         
   
   
@@ -572,103 +545,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-install-gpuctl" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: Install gpuctl
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-verify-cluster-connection" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: Verify Cluster Connection
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-submit-your-first-job" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: Submit Your First Job
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-submit-a-gpu-training-job-optional" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Submit a GPU Training Job (Optional)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-commands-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common Commands Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -706,10 +582,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../storage/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persistent Storage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -725,6 +628,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-operator-registers-the-nfs-share-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Operator registers the NFS share (once)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-users-get-persistent-storage-automatically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Users get persistent storage automatically
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-home-provisioning-on-quota-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User home provisioning on quota apply
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backward-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backward compatibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storageworkdirs-vs-transparent-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        storage.workdirs vs transparent NFS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1131,10 +1131,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#how-it-works-at-a-glance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        How it works at a glance
       
     </span>
   </a>
@@ -1142,10 +1142,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-install-gpuctl" class="md-nav__link">
+  <a href="#step-1-operator-registers-the-nfs-share-once" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Install gpuctl
+        Step 1: Operator registers the NFS share (once)
       
     </span>
   </a>
@@ -1153,10 +1153,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-2-verify-cluster-connection" class="md-nav__link">
+  <a href="#step-2-users-get-persistent-storage-automatically" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: Verify Cluster Connection
+        Step 2: Users get persistent storage automatically
       
     </span>
   </a>
@@ -1164,10 +1164,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-3-submit-your-first-job" class="md-nav__link">
+  <a href="#user-home-provisioning-on-quota-apply" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: Submit Your First Job
+        User home provisioning on quota apply
       
     </span>
   </a>
@@ -1175,10 +1175,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-4-submit-a-gpu-training-job-optional" class="md-nav__link">
+  <a href="#backward-compatibility" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: Submit a GPU Training Job (Optional)
+        Backward compatibility
       
     </span>
   </a>
@@ -1186,10 +1186,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#common-commands-reference" class="md-nav__link">
+  <a href="#storageworkdirs-vs-transparent-nfs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Common Commands Reference
+        storage.workdirs vs transparent NFS
       
     </span>
   </a>
@@ -1197,10 +1197,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        See also
       
     </span>
   </a>
@@ -1227,175 +1227,206 @@
   
 
 
-<h1 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h1>
-<p>Get gpuctl installed and submit your first job to a Kubernetes cluster in under 5 minutes.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Python 3.8+</li>
-<li>Access to a Kubernetes cluster (<code>kubectl</code> configured with a valid kubeconfig)</li>
-<li>At least one available node in the cluster</li>
-</ul>
-<h2 id="step-1-install-gpuctl">Step 1: Install gpuctl<a class="headerlink" href="#step-1-install-gpuctl" title="Permanent link">&para;</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">From Source (Recommended)</label><label for="__tabbed_1_2">Binary Install</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/g8s-host/gpuctl.git
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>gpuctl
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Linux x86_64</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>wget<span class="w"> </span>https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-linux-amd64<span class="w"> </span>-O<span class="w"> </span>gpuctl
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>chmod<span class="w"> </span>+x<span class="w"> </span>gpuctl
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>sudo<span class="w"> </span>mv<span class="w"> </span>gpuctl<span class="w"> </span>/usr/local/bin/
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># macOS x86_64</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>curl<span class="w"> </span>-L<span class="w"> </span>https://github.com/g8s-host/gpuctl/releases/latest/download/gpuctl-macos-amd64<span class="w"> </span>-o<span class="w"> </span>gpuctl
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>chmod<span class="w"> </span>+x<span class="w"> </span>gpuctl
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>sudo<span class="w"> </span>mv<span class="w"> </span>gpuctl<span class="w"> </span>/usr/local/bin/
-</span></code></pre></div>
-</div>
-</div>
-</div>
-<p>Verify the installation:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>gpuctl<span class="w"> </span>--help
-</span></code></pre></div>
-<h2 id="step-2-verify-cluster-connection">Step 2: Verify Cluster Connection<a class="headerlink" href="#step-2-verify-cluster-connection" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
-</span></code></pre></div>
+<h1 id="persistent-storage">Persistent Storage<a class="headerlink" href="#persistent-storage" title="Permanent link">&para;</a></h1>
+<p>gpuctl provides <strong>transparent persistent storage</strong> backed by NFS. Once an operator registers an NFS share once, <strong>every</strong> job a user submits automatically gets a persistent home directory and a shared read-only datasets directory — with <strong>zero storage configuration in the job YAML</strong>.</p>
 <div class="admonition tip">
-<p class="admonition-title">Operators: enable persistent storage once</p>
-<p>If you run the platform, register your NFS share a single time so that <strong>every</strong> job automatically gets a persistent <code>/home/jovyan</code> and a shared read-only <code>/datasets</code> — with no storage config in any job YAML:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>gpuctl<span class="w"> </span>init<span class="w"> </span>--nfs-server<span class="w"> </span>&lt;IP&gt;<span class="w"> </span>--nfs-path<span class="w"> </span>/exports
-</span></code></pre></div>
-<p>This step is optional: without it, jobs still run, just without the auto-mounted NFS paths. See <a href="../storage/">Persistent Storage</a>.</p>
+<p class="admonition-title">Design goal</p>
+<p>Engineers should focus on training code, not storage. The amount of storage-related config in a user's job YAML is <strong>0 lines</strong>: no mount paths, no storage classes, no PVCs. Files written to <code>/home/jovyan</code> survive job restarts and are shared across all of a user's jobs.</p>
 </div>
-<p>Example output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>NODE NAME     STATUS   GPU TOTAL  GPU USED  GPU FREE  GPU TYPE    IP              POOL
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>node-1        Ready    8          0         8         A100-80G    192.168.1.101   default
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>node-2        Ready    4          0         4         A10-24G     192.168.1.102   default
+<hr />
+<h2 id="how-it-works-at-a-glance">How it works at a glance<a class="headerlink" href="#how-it-works-at-a-glance" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                gpuctl init  (operator, once)
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                      │
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                      ▼
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>        ConfigMap kube-system/gpuctl-config
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>            nfs.server: &lt;IP&gt;
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>            nfs.path:   /exports
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                      │
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        every job (training / inference / notebook / compute)
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                      │  reads the ConfigMap at build time
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                      ▼
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>   ┌──────────────────────────────────────────────────┐
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>   │ Pod                                                │
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>   │   /home/jovyan  ←─ nfs:&lt;server&gt;:/exports/home/&lt;ns&gt; │  read-write, per namespace
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>   │   /datasets     ←─ nfs:&lt;server&gt;:/exports/datasets  │  read-only, shared
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>   └──────────────────────────────────────────────────┘
 </span></code></pre></div>
-<h2 id="step-3-submit-your-first-job">Step 3: Submit Your First Job<a class="headerlink" href="#step-3-submit-your-first-job" title="Permanent link">&para;</a></h2>
-<p>The following example uses the <code>nginx</code> image (no GPU required) to quickly verify the platform is working:</p>
-<p><strong>1. Create a YAML file</strong></p>
-<div class="language-yaml highlight"><span class="filename">hello-gpuctl.yaml</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">compute</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nt">job</span><span class="p">:</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-gpuctl</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">priority</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medium</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My first gpuctl job</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="nt">environment</span><span class="p">:</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:latest</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="nt">service</span><span class="p">:</span>
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
-</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>
-</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="nt">resources</span><span class="p">:</span>
-</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512Mi</span>
+<ul>
+<li>The user's namespace <strong>is</strong> the user identity. Each namespace gets its own isolated <code>home/&lt;namespace&gt;</code> directory.</li>
+<li>Mounts are injected by the platform for all job kinds — nothing to declare in YAML.</li>
+<li>If NFS is not configured, jobs still run normally without these mounts (see <a href="#backward-compatibility">Backward compatibility</a>).</li>
+</ul>
+<hr />
+<h2 id="step-1-operator-registers-the-nfs-share-once">Step 1: Operator registers the NFS share (once)<a class="headerlink" href="#step-1-operator-registers-the-nfs-share-once" title="Permanent link">&para;</a></h2>
+<p>NFS storage is registered with a single command. gpuctl does <strong>not</strong> set up the NFS server itself — it only records where the existing share lives.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpuctl<span class="w"> </span>init<span class="w"> </span>--nfs-server<span class="w"> </span>&lt;IP_OR_HOST&gt;<span class="w"> </span>--nfs-path<span class="w"> </span>&lt;EXPORT_ROOT&gt;
 </span></code></pre></div>
-<p><strong>2. Submit the job</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>hello-gpuctl.yaml
-</span></code></pre></div>
-<p>Output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Job created successfully: hello-gpuctl
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Namespace: default
-</span></code></pre></div>
-<p><strong>3. Check job status</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span>
-</span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>JOB ID                              NAME          NAMESPACE  KIND     STATUS    READY  NODE    IP           AGE
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>hello-gpuctl-7d9c8b-xk2lp           hello-gpuctl  default    compute  Running   1/1    node-1  10.42.0.5    2m
-</span></code></pre></div>
-<p><strong>4. Inspect the job</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>hello-gpuctl
-</span></code></pre></div>
-<p><strong>5. View logs</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>hello-gpuctl
-</span></code></pre></div>
-<p><strong>6. Delete the job</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>hello-gpuctl
-</span></code></pre></div>
-<h2 id="step-4-submit-a-gpu-training-job-optional">Step 4: Submit a GPU Training Job (Optional)<a class="headerlink" href="#step-4-submit-a-gpu-training-job-optional" title="Permanent link">&para;</a></h2>
-<p>If your cluster has GPU nodes, try submitting a simple training job:</p>
-<div class="language-yaml highlight"><span class="filename">simple-training.yaml</span><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">training</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nt">job</span><span class="p">:</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-training</span>
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">  </span><span class="nt">priority</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medium</span>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="nt">environment</span><span class="p">:</span>
-</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime</span>
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">  </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;python&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;import</span><span class="nv"> </span><span class="s">torch;</span><span class="nv"> </span><span class="s">print(f&#39;GPU</span><span class="nv"> </span><span class="s">available:</span><span class="nv"> </span><span class="s">{torch.cuda.is_available()}&#39;);</span><span class="nv"> </span><span class="s">print(f&#39;GPU</span><span class="nv"> </span><span class="s">count:</span><span class="nv"> </span><span class="s">{torch.cuda.device_count()}&#39;)&quot;</span><span class="p p-Indicator">]</span>
-</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
-</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="nt">resources</span><span class="p">:</span>
-</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
-</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16Gi</span>
-</span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>simple-training.yaml
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>simple-training<span class="w"> </span>-f
-</span></code></pre></div>
-<h2 id="common-commands-reference">Common Commands Reference<a class="headerlink" href="#common-commands-reference" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Scenario</th>
-<th>Command</th>
+<th>Option</th>
+<th>Required</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Submit a job</td>
-<td><code>gpuctl create -f job.yaml</code></td>
+<td><code>--nfs-server</code></td>
+<td>Yes</td>
+<td>NFS server IP or hostname</td>
 </tr>
 <tr>
-<td>List all jobs</td>
-<td><code>gpuctl get jobs</code></td>
-</tr>
-<tr>
-<td>Filter by job type</td>
-<td><code>gpuctl get jobs --kind training</code></td>
-</tr>
-<tr>
-<td>Stream logs</td>
-<td><code>gpuctl logs &lt;job-name&gt; -f</code></td>
-</tr>
-<tr>
-<td>Job details</td>
-<td><code>gpuctl describe job &lt;job-name&gt;</code></td>
-</tr>
-<tr>
-<td>Delete a job</td>
-<td><code>gpuctl delete job &lt;job-name&gt;</code></td>
-</tr>
-<tr>
-<td>List resource pools</td>
-<td><code>gpuctl get pools</code></td>
-</tr>
-<tr>
-<td>List nodes</td>
-<td><code>gpuctl get nodes</code></td>
+<td><code>--nfs-path</code></td>
+<td>Yes</td>
+<td>NFS export root path (must start with <code>/</code>)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>gpuctl<span class="w"> </span>init<span class="w"> </span>--nfs-server<span class="w"> </span><span class="m">192</span>.168.1.100<span class="w"> </span>--nfs-path<span class="w"> </span>/exports
+</span></code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>NFS storage initialized:
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  Server: 192.168.1.100
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  Path:   /exports
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  Config stored in: kube-system/gpuctl-config
+</span></code></pre></div>
+<p>The configuration is stored in the <code>kube-system/gpuctl-config</code> ConfigMap.</p>
+<div class="admonition info">
+<p class="admonition-title">Idempotent and live</p>
+<p>Running <code>gpuctl init</code> again updates the existing ConfigMap (patch). The new value takes effect immediately for <strong>newly created</strong> jobs — no service restart required. Already-running jobs are unaffected.</p>
+</div>
+<hr />
+<h2 id="step-2-users-get-persistent-storage-automatically">Step 2: Users get persistent storage automatically<a class="headerlink" href="#step-2-users-get-persistent-storage-automatically" title="Permanent link">&para;</a></h2>
+<p>Once NFS is registered, the platform mounts two paths into every job's container — with no YAML changes:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Backing</th>
+<th>Access</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/home/jovyan</code></td>
+<td><code>nfs:&lt;server&gt;:&lt;path&gt;/home/&lt;namespace&gt;</code></td>
+<td><strong>read-write</strong></td>
+<td>Per namespace (per user)</td>
+</tr>
+<tr>
+<td><code>/datasets</code></td>
+<td><code>nfs:&lt;server&gt;:&lt;path&gt;/datasets</code></td>
+<td><strong>read-only</strong></td>
+<td>Shared by all users</td>
+</tr>
+</tbody>
+</table>
+<p>What this means in practice:</p>
 <ul>
-<li><a href="../training/">Training Jobs</a> — LlamaFactory / DeepSpeed, conda env reuse, and multi-node distributed training</li>
-<li><a href="../storage/">Persistent Storage</a> — transparent NFS <code>/home/jovyan</code> + <code>/datasets</code>, with zero config in job YAML</li>
-<li><a href="../inference/">Inference Services</a> — Deploy a VLLM inference API service</li>
-<li><a href="../pool/">Resource Pool Management</a> — Create and manage GPU resource pools</li>
-<li><a href="../../cli/">CLI Reference</a> — Full command documentation</li>
+<li><strong>Survives restarts.</strong> Anything written to <code>/home/jovyan</code> is still there after a job ends or is recreated.</li>
+<li><strong>Shared across a user's jobs.</strong> A Training job and a Notebook in the same namespace see the exact same <code>/home/jovyan</code> — no copying or syncing. A Notebook can prepare code/data/conda envs, and a Training job reads them directly. See <a href="../training/#example-2-reuse-a-notebook-environment-conda">Training jobs → conda env reuse</a>.</li>
+<li><strong>Isolated per user.</strong> <code>alice</code>'s <code>/home/jovyan</code> and <code>bob</code>'s <code>/home/jovyan</code> are different directories (<code>home/alice</code> vs <code>home/bob</code>) and never overlap.</li>
+<li><strong>Datasets are read-only.</strong> <code>/datasets</code> is content managed by the operator and mounted read-only everywhere.</li>
+</ul>
+<p>A minimal job that gets persistent storage automatically — note there is no <code>storage</code> section at all:</p>
+<div class="language-yaml highlight"><span class="filename">notebook.yaml</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notebook</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nt">job</span><span class="p">:</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alice-dev</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="nt">environment</span><span class="p">:</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jupyter/scipy-notebook:latest</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="nt">service</span><span class="p">:</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8888</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-pool</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Submit into the user&#39;s namespace</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>notebook.yaml<span class="w"> </span>-n<span class="w"> </span>alice
+</span></code></pre></div>
+<p>Files written under <code>/home/jovyan</code> by this Notebook persist and are visible to any other job <code>alice</code> submits.</p>
+<hr />
+<h2 id="user-home-provisioning-on-quota-apply">User home provisioning on quota apply<a class="headerlink" href="#user-home-provisioning-on-quota-apply" title="Permanent link">&para;</a></h2>
+<p>When an operator allocates quota for a new user, that user's storage directory is created at the same time — no separate step.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>quota.yaml
+</span></code></pre></div>
+<p>When <code>apply</code> creates a new namespace, gpuctl runs a short-lived <code>busybox</code> Job in <code>kube-system</code> that <code>mkdir -p</code>s the user's <code>home/&lt;namespace&gt;</code> directory on the NFS share. By the time the user submits their first job, <code>/home/jovyan</code> is ready and writable.</p>
+<ul>
+<li><strong>Idempotent.</strong> Re-applying a quota for an existing user does not touch existing files.</li>
+<li><strong>Symmetric cleanup.</strong> Deleting a namespace (<code>gpuctl delete ns &lt;name&gt;</code>) runs a matching <code>busybox</code> Job that removes the user's home directory, so no orphaned data is left behind.</li>
+<li><strong>No-op without NFS.</strong> If NFS is not registered, quota creation skips the provisioning step and works exactly as before.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Deleting a namespace deletes the user's files</p>
+<p>Because cleanup runs <code>rm -rf</code> on <code>home/&lt;namespace&gt;</code>, deleting a namespace permanently removes that user's persistent data. Make sure it is backed up first if you need to keep it.</p>
+</div>
+<hr />
+<h2 id="backward-compatibility">Backward compatibility<a class="headerlink" href="#backward-compatibility" title="Permanent link">&para;</a></h2>
+<p>Transparent storage is purely additive — it never breaks existing jobs:</p>
+<ul>
+<li><strong>NFS not registered:</strong> jobs of every kind still submit and run; no NFS volumes are mounted; no error.</li>
+<li><strong>Old YAML with no <code>storage</code> section:</strong> unchanged behavior, plus automatic NFS mounts if NFS is registered.</li>
+<li><strong>Old YAML with <code>storage.workdirs</code>:</strong> the <code>hostPath</code> workdirs keep mounting; NFS mounts are added on top (if registered). See the next section for the difference.</li>
+</ul>
+<hr />
+<h2 id="storageworkdirs-vs-transparent-nfs"><code>storage.workdirs</code> vs transparent NFS<a class="headerlink" href="#storageworkdirs-vs-transparent-nfs" title="Permanent link">&para;</a></h2>
+<p>These are two <strong>separate</strong> mechanisms. For most users, transparent NFS is all you need and <code>storage.workdirs</code> can be omitted entirely.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Transparent NFS (<code>/home/jovyan</code>, <code>/datasets</code>)</th>
+<th><code>storage.workdirs</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declared in YAML?</td>
+<td>No — fully automatic</td>
+<td>Yes — you list each path</td>
+</tr>
+<tr>
+<td>Backing volume</td>
+<td>NFS (network, shared, persistent)</td>
+<td><code>hostPath</code> (the node's local disk)</td>
+</tr>
+<tr>
+<td>Survives reschedule to another node?</td>
+<td>Yes</td>
+<td>No — <code>hostPath</code> is node-local</td>
+</tr>
+<tr>
+<td>Multi-node distributed sharing?</td>
+<td>Yes — all workers see the same files</td>
+<td>No</td>
+</tr>
+<tr>
+<td>When to use</td>
+<td>Default for persistent user data and shared datasets</td>
+<td>Advanced cases needing a specific node-local path</td>
+</tr>
+</tbody>
+</table>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># storage.workdirs is OPTIONAL and only for hostPath mounts.</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># Most jobs should omit this section and rely on transparent NFS.</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nt">storage</span><span class="p">:</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">workdirs</span><span class="p">:</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/scratch/local-cache</span>
+</span></code></pre></div>
+<hr />
+<h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../cli/#init"><code>gpuctl init</code> in the CLI reference</a></li>
+<li><a href="../training/">Training jobs</a> — uses <code>/home/jovyan</code> for checkpoints, including multi-node distributed training where all workers share one home</li>
+<li><a href="../quota/">Quotas &amp; Namespaces</a> — namespace creation triggers home provisioning</li>
 </ul>
 
 
@@ -1434,7 +1465,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
+          <a href="../training/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Training Jobs">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1444,20 +1475,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Overview
+                Training Jobs
               </div>
             </div>
           </a>
         
         
           
-          <a href="../training/" class="md-footer__link md-footer__link--next" aria-label="Next: Training Jobs">
+          <a href="../inference/" class="md-footer__link md-footer__link--next" aria-label="Next: Inference Services">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Training Jobs
+                Inference Services
               </div>
             </div>
             <div class="md-footer__button md-icon">

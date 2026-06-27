@@ -585,6 +585,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persistent Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../inference/" class="md-nav__link">
         
   
@@ -1315,9 +1343,9 @@
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">nodes</span><span class="p">:</span>
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">node-1</span><span class="p">:</span><span class="w">              </span><span class="c1"># Node hostname (matches kubectl get nodes output)</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nt">node-2</span><span class="p">:</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
 </span></code></pre></div>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-pool.yaml
 </span></code></pre></div>
@@ -1337,9 +1365,9 @@
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Large</span><span class="nv"> </span><span class="s">model</span><span class="nv"> </span><span class="s">training</span><span class="nv"> </span><span class="s">(high-end</span><span class="nv"> </span><span class="s">GPUs)&quot;</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nt">nodes</span><span class="p">:</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">gpu-node-1</span><span class="p">:</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nt">gpu-node-2</span><span class="p">:</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A100-100G</span>
 </span></code></pre></div>
 <div class="language-yaml highlight"><span class="filename">inference-pool.yaml</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pool</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1348,9 +1376,9 @@
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Inference</span><span class="nv"> </span><span class="s">services</span><span class="nv"> </span><span class="s">(mid-range</span><span class="nv"> </span><span class="s">GPUs)&quot;</span>
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nt">nodes</span><span class="p">:</span>
 </span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">gpu-node-3</span><span class="p">:</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="nt">gpu-node-4</span><span class="p">:</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
 </span></code></pre></div>
 <div class="language-yaml highlight"><span class="filename">dev-pool.yaml</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pool</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1359,7 +1387,7 @@
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Notebook</span><span class="nv"> </span><span class="s">development</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">debugging</span><span class="nv"> </span><span class="s">(low-end</span><span class="nv"> </span><span class="s">GPUs)&quot;</span>
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nt">nodes</span><span class="p">:</span>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">gpu-node-5</span><span class="p">:</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RTX4090-24G</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RTX4090-24G</span>
 </span></code></pre></div>
 <div class="language-yaml highlight"><span class="filename">compute-pool.yaml</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pool</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1368,9 +1396,9 @@
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CPU</span><span class="nv"> </span><span class="s">compute</span><span class="nv"> </span><span class="s">services</span><span class="nv"> </span><span class="s">(no</span><span class="nv"> </span><span class="s">GPU</span><span class="nv"> </span><span class="s">nodes)&quot;</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="nt">nodes</span><span class="p">:</span>
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">cpu-node-1</span><span class="p">:</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="nt">cpu-node-2</span><span class="p">:</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 </span></code></pre></div>
 <hr />
 <h2 id="querying-resource-pools">Querying Resource Pools<a class="headerlink" href="#querying-resource-pools" title="Permanent link">&para;</a></h2>

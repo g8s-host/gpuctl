@@ -582,6 +582,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../user-guide/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persistent Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../user-guide/inference/" class="md-nav__link">
         
   
@@ -973,6 +1001,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        init
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        config
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1355,6 +1405,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        init
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        config
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1696,6 +1768,14 @@
 </thead>
 <tbody>
 <tr>
+<td><code>init</code></td>
+<td>Register platform NFS storage (one-time operator setup)</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>Manage gpuctl local configuration (kubeconfig)</td>
+</tr>
+<tr>
 <td><code>create</code></td>
 <td>Create resources from YAML (jobs, resource pools, quotas)</td>
 </tr>
@@ -1726,9 +1806,77 @@
 </tbody>
 </table>
 <hr />
+<h2 id="init">init<a class="headerlink" href="#init" title="Permanent link">&para;</a></h2>
+<p>Register the platform's NFS storage so that <strong>every</strong> job automatically gets a persistent <code>/home/jovyan</code> and a shared read-only <code>/datasets</code>. This is a one-time operator action; gpuctl only records the address of an existing NFS share (it does not set up the server). See <a href="../user-guide/storage/">Persistent Storage</a> for the full story.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gpuctl<span class="w"> </span>init<span class="w"> </span>--nfs-server<span class="w"> </span>&lt;IP_OR_HOST&gt;<span class="w"> </span>--nfs-path<span class="w"> </span>&lt;EXPORT_ROOT&gt;
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--nfs-server</code></td>
+<td>NFS server IP or hostname</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>--nfs-path</code></td>
+<td>NFS export root path (must start with <code>/</code>)</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>The configuration is written to the <code>kube-system/gpuctl-config</code> ConfigMap. It is idempotent — re-running updates the existing ConfigMap and takes effect immediately for newly created jobs (no restart).</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpuctl<span class="w"> </span>init<span class="w"> </span>--nfs-server<span class="w"> </span><span class="m">192</span>.168.1.100<span class="w"> </span>--nfs-path<span class="w"> </span>/exports
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>NFS storage initialized:
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  Server: 192.168.1.100
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  Path:   /exports
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  Config stored in: kube-system/gpuctl-config
+</span></code></pre></div>
+<hr />
+<h2 id="config">config<a class="headerlink" href="#config" title="Permanent link">&para;</a></h2>
+<p>Manage gpuctl's local configuration (the kubeconfig path/context used by both gpuctl and runwhere-ai).</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>gpuctl<span class="w"> </span>config<span class="w"> </span>set-kubeconfig<span class="w"> </span>-f<span class="w"> </span>&lt;path&gt;<span class="w"> </span><span class="o">[</span>--context<span class="w"> </span>&lt;name&gt;<span class="o">]</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>gpuctl<span class="w"> </span>config<span class="w"> </span>view
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>gpuctl<span class="w"> </span>config<span class="w"> </span>unset-kubeconfig
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Subcommand</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>set-kubeconfig -f &lt;path&gt; [--context &lt;name&gt;]</code></td>
+<td>Persist a kubeconfig path (and optional context)</td>
+</tr>
+<tr>
+<td><code>view</code></td>
+<td>Show the current gpuctl config</td>
+</tr>
+<tr>
+<td><code>unset-kubeconfig</code></td>
+<td>Clear the persisted kubeconfig path/context</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>gpuctl<span class="w"> </span>config<span class="w"> </span>set-kubeconfig<span class="w"> </span>-f<span class="w"> </span>~/.kube/config<span class="w"> </span>--context<span class="w"> </span>my-cluster
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>gpuctl<span class="w"> </span>config<span class="w"> </span>view
+</span></code></pre></div>
+<hr />
 <h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
 <p>Create resources from a YAML file.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <table>
 <thead>
@@ -1757,22 +1905,22 @@
 </tbody>
 </table>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Submit a single job</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Submit multiple jobs at once</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>task1.yaml<span class="w"> </span>-f<span class="w"> </span>task2.yaml
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Specify a namespace</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># JSON output</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>--json
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Submit a single job</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Submit multiple jobs at once</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>task1.yaml<span class="w"> </span>-f<span class="w"> </span>task2.yaml
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Specify a namespace</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># JSON output</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>--json
 </span></code></pre></div>
 <hr />
 <h2 id="apply">apply<a class="headerlink" href="#apply" title="Permanent link">&para;</a></h2>
 <p>Apply resource configuration (deletes the existing resource, then creates a new one).</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <table>
 <thead>
@@ -1801,17 +1949,17 @@
 </tbody>
 </table>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Update a job configuration</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Update with a specific namespace</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Update a job configuration</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Update with a specific namespace</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>gpuctl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
 </span></code></pre></div>
 <hr />
 <h2 id="get">get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h2>
 <p>List resources. Supports multiple resource types and filter options.</p>
 <h3 id="get-jobs">get jobs<a class="headerlink" href="#get-jobs" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--pool<span class="w"> </span>&lt;pool&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--kind<span class="w"> </span>&lt;kind&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--pods<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--pool<span class="w"> </span>&lt;pool&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--kind<span class="w"> </span>&lt;kind&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--pods<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <table>
 <thead>
@@ -1891,20 +2039,20 @@
 </tbody>
 </table>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--pool<span class="w"> </span>training-pool
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--kind<span class="w"> </span>training
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--pods
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--pool<span class="w"> </span>training-pool
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--kind<span class="w"> </span>training
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>--pods
 </span></code></pre></div>
 <h3 id="get-pools">get pools<a class="headerlink" href="#get-pools" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
 </span></code></pre></div>
 <h3 id="get-nodes">get nodes<a class="headerlink" href="#get-nodes" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span><span class="o">[</span>--pool<span class="w"> </span>&lt;pool&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--gpu-type<span class="w"> </span>&lt;type&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span><span class="o">[</span>--pool<span class="w"> </span>&lt;pool&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--gpu-type<span class="w"> </span>&lt;type&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <table>
 <thead>
@@ -1925,36 +2073,36 @@
 </tbody>
 </table>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--pool<span class="w"> </span>training-pool
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--gpu-type<span class="w"> </span>A100-100G
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--pool<span class="w"> </span>training-pool
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--gpu-type<span class="w"> </span>A100-100G
 </span></code></pre></div>
 <h3 id="get-labels">get labels<a class="headerlink" href="#get-labels" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span><span class="o">[</span>&lt;node_name&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--key<span class="w"> </span>&lt;key&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span><span class="o">[</span>&lt;node_name&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--key<span class="w"> </span>&lt;key&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># View all labels on a node</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span>node-1
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># View a specific label</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span>node-1<span class="w"> </span>--key<span class="o">=</span>runwhere.ai/gpu-type
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># View all labels on a node</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span>node-1
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># View a specific label</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>labels<span class="w"> </span>node-1<span class="w"> </span>--key<span class="o">=</span>runwhere.ai/gpu-type
 </span></code></pre></div>
 <h3 id="get-quotas">get quotas<a class="headerlink" href="#get-quotas" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span><span class="o">[</span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span><span class="o">[</span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span>team-alice
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>quotas<span class="w"> </span>team-alice
 </span></code></pre></div>
 <h3 id="get-ns-namespaces">get ns / namespaces<a class="headerlink" href="#get-ns-namespaces" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>ns<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>namespaces<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>ns<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>namespaces<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <hr />
 <h2 id="describe">describe<a class="headerlink" href="#describe" title="Permanent link">&para;</a></h2>
 <p>View detailed resource information.</p>
 <h3 id="describe-job">describe job<a class="headerlink" href="#describe-job" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Output includes:</strong></p>
 <ul>
@@ -1965,82 +2113,82 @@
 <li>Access Methods (inference / notebook / compute only): Pod IP and NodePort addresses</li>
 </ul>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training-job
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training-job
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice
 </span></code></pre></div>
 <h3 id="describe-pool">describe pool<a class="headerlink" href="#describe-pool" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>&lt;pool_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>&lt;pool_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>training-pool
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>training-pool
 </span></code></pre></div>
 <h3 id="describe-node">describe node<a class="headerlink" href="#describe-node" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>&lt;node_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>&lt;node_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>node-1
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>node<span class="w"> </span>node-1
 </span></code></pre></div>
 <h3 id="describe-quota-ns-namespace">describe quota / ns / namespace<a class="headerlink" href="#describe-quota-ns-namespace" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>namespace<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>namespace<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>team-alice
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>team-alice
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>quota<span class="w"> </span>team-alice
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>ns<span class="w"> </span>team-alice
 </span></code></pre></div>
 <hr />
 <h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
 <p>Delete resources.</p>
 <h3 id="delete-via-yaml-file">Delete via YAML file<a class="headerlink" href="#delete-via-yaml-file" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>&lt;file&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>training-job.yaml
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>pool.yaml
-</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>quota.yaml
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>training-job.yaml
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>pool.yaml
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>quota.yaml
 </span></code></pre></div>
 <h3 id="delete-job">delete job<a class="headerlink" href="#delete-job" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job
-</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice
-</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>--force
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training-job<span class="w"> </span>--force
 </span></code></pre></div>
 <h3 id="delete-quota">delete quota<a class="headerlink" href="#delete-quota" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>team-alice
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>quota<span class="w"> </span>team-alice
 </span></code></pre></div>
 <h3 id="delete-ns-namespace">delete ns / namespace<a class="headerlink" href="#delete-ns-namespace" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
-</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>&lt;namespace_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-alice
-</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-alice<span class="w"> </span>--force
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-alice
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>ns<span class="w"> </span>team-alice<span class="w"> </span>--force
 </span></code></pre></div>
 <h3 id="delete-pool">delete pool<a class="headerlink" href="#delete-pool" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>pool<span class="w"> </span>&lt;pool_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>pool<span class="w"> </span>&lt;pool_name&gt;<span class="w"> </span><span class="o">[</span>--force<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>pool<span class="w"> </span>training-pool
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>pool<span class="w"> </span>training-pool
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Delete Job Behavior</p>
 <p>When a job is deleted, the platform also deletes:</p>
 <ul>
 <li>The primary K8s resource (Job / Deployment / StatefulSet)</li>
-<li>The associated NodePort Service (training jobs have no Service)</li>
+<li>The associated Service (NodePort for inference/notebook/compute; the Headless Service for <code>mode: multi-node</code> distributed training)</li>
 <li>K8s controllers will automatically cascade-delete associated Pods</li>
 </ul>
 </div>
 <hr />
 <h2 id="logs">logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
 <p>Retrieve job logs.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>-f<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>&lt;job_name&gt;<span class="w"> </span><span class="o">[</span>-n<span class="w"> </span>&lt;namespace&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>-f<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <table>
 <thead>
@@ -2069,19 +2217,19 @@
 </tbody>
 </table>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># View recent logs (last 100 lines by default)</span>
-</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job
-</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>
-</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># Stream logs</span>
-</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job<span class="w"> </span>-f
-</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>
-</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="c1"># Specify namespace</span>
-</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice<span class="w"> </span>-f
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># View recent logs (last 100 lines by default)</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+</span><span id="__span-39-4"><a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="c1"># Stream logs</span>
+</span><span id="__span-39-5"><a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job<span class="w"> </span>-f
+</span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>
+</span><span id="__span-39-7"><a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="c1"># Specify namespace</span>
+</span><span id="__span-39-8"><a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training-job<span class="w"> </span>-n<span class="w"> </span>team-alice<span class="w"> </span>-f
 </span></code></pre></div>
 <hr />
 <h2 id="label">label<a class="headerlink" href="#label" title="Permanent link">&para;</a></h2>
 <p>Manage node labels.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>&lt;node_name&gt;<span class="w"> </span><span class="o">[</span>node_name...<span class="o">]</span><span class="w"> </span>&lt;label&gt;<span class="w"> </span><span class="o">[</span>--delete<span class="o">]</span><span class="w"> </span><span class="o">[</span>--overwrite<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>&lt;node_name&gt;<span class="w"> </span><span class="o">[</span>node_name...<span class="o">]</span><span class="w"> </span>&lt;label&gt;<span class="w"> </span><span class="o">[</span>--delete<span class="o">]</span><span class="w"> </span><span class="o">[</span>--overwrite<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Label Key Convention</p>
@@ -2114,20 +2262,20 @@
 </tbody>
 </table>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># Add a GPU model label to a single node</span>
-</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
-</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
-</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># Add label to multiple nodes</span>
-</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>node-2<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
-</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
-</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1"># Overwrite an existing label</span>
-</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A10-24G<span class="w"> </span>--overwrite
-</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
-</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="c1"># Delete a label</span>
-</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="w"> </span>--delete
-</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>
-</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="c1"># Assign a node to a resource pool</span>
-</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/pool<span class="o">=</span>training-pool
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># Add a GPU model label to a single node</span>
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>
+</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="c1"># Add label to multiple nodes</span>
+</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>node-2<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
+</span><span id="__span-41-6"><a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>
+</span><span id="__span-41-7"><a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="c1"># Overwrite an existing label</span>
+</span><span id="__span-41-8"><a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A10-24G<span class="w"> </span>--overwrite
+</span><span id="__span-41-9"><a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>
+</span><span id="__span-41-10"><a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a><span class="c1"># Delete a label</span>
+</span><span id="__span-41-11"><a id="__codelineno-41-11" name="__codelineno-41-11" href="#__codelineno-41-11"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/gpu-type<span class="w"> </span>--delete
+</span><span id="__span-41-12"><a id="__codelineno-41-12" name="__codelineno-41-12" href="#__codelineno-41-12"></a>
+</span><span id="__span-41-13"><a id="__codelineno-41-13" name="__codelineno-41-13" href="#__codelineno-41-13"></a><span class="c1"># Assign a node to a resource pool</span>
+</span><span id="__span-41-14"><a id="__codelineno-41-14" name="__codelineno-41-14" href="#__codelineno-41-14"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-1<span class="w"> </span>runwhere.ai/pool<span class="o">=</span>training-pool
 </span></code></pre></div>
 <hr />
 <h2 id="global-options">Global Options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>
@@ -2152,41 +2300,41 @@
 <hr />
 <h2 id="full-workflow-examples">Full Workflow Examples<a class="headerlink" href="#full-workflow-examples" title="Permanent link">&para;</a></h2>
 <h3 id="training-job-lifecycle">Training Job Lifecycle<a class="headerlink" href="#training-job-lifecycle" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="c1"># 1. Check available resources</span>
-</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
-</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
-</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>
-</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="c1"># 2. Submit a training job</span>
-</span><span id="__span-37-6"><a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
-</span><span id="__span-37-7"><a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>
-</span><span id="__span-37-8"><a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a><span class="c1"># 3. Monitor status</span>
-</span><span id="__span-37-9"><a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
-</span><span id="__span-37-10"><a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a>
-</span><span id="__span-37-11"><a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a><span class="c1"># 4. Stream logs</span>
-</span><span id="__span-37-12"><a id="__codelineno-37-12" name="__codelineno-37-12" href="#__codelineno-37-12"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice<span class="w"> </span>-f
-</span><span id="__span-37-13"><a id="__codelineno-37-13" name="__codelineno-37-13" href="#__codelineno-37-13"></a>
-</span><span id="__span-37-14"><a id="__codelineno-37-14" name="__codelineno-37-14" href="#__codelineno-37-14"></a><span class="c1"># 5. View job details</span>
-</span><span id="__span-37-15"><a id="__codelineno-37-15" name="__codelineno-37-15" href="#__codelineno-37-15"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice
-</span><span id="__span-37-16"><a id="__codelineno-37-16" name="__codelineno-37-16" href="#__codelineno-37-16"></a>
-</span><span id="__span-37-17"><a id="__codelineno-37-17" name="__codelineno-37-17" href="#__codelineno-37-17"></a><span class="c1"># 6. Clean up after completion</span>
-</span><span id="__span-37-18"><a id="__codelineno-37-18" name="__codelineno-37-18" href="#__codelineno-37-18"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># 1. Check available resources</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
+</span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>
+</span><span id="__span-42-5"><a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="c1"># 2. Submit a training job</span>
+</span><span id="__span-42-6"><a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-job.yaml<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-42-7"><a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>
+</span><span id="__span-42-8"><a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a><span class="c1"># 3. Monitor status</span>
+</span><span id="__span-42-9"><a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a>gpuctl<span class="w"> </span>get<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-42-10"><a id="__codelineno-42-10" name="__codelineno-42-10" href="#__codelineno-42-10"></a>
+</span><span id="__span-42-11"><a id="__codelineno-42-11" name="__codelineno-42-11" href="#__codelineno-42-11"></a><span class="c1"># 4. Stream logs</span>
+</span><span id="__span-42-12"><a id="__codelineno-42-12" name="__codelineno-42-12" href="#__codelineno-42-12"></a>gpuctl<span class="w"> </span>logs<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice<span class="w"> </span>-f
+</span><span id="__span-42-13"><a id="__codelineno-42-13" name="__codelineno-42-13" href="#__codelineno-42-13"></a>
+</span><span id="__span-42-14"><a id="__codelineno-42-14" name="__codelineno-42-14" href="#__codelineno-42-14"></a><span class="c1"># 5. View job details</span>
+</span><span id="__span-42-15"><a id="__codelineno-42-15" name="__codelineno-42-15" href="#__codelineno-42-15"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>job<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice
+</span><span id="__span-42-16"><a id="__codelineno-42-16" name="__codelineno-42-16" href="#__codelineno-42-16"></a>
+</span><span id="__span-42-17"><a id="__codelineno-42-17" name="__codelineno-42-17" href="#__codelineno-42-17"></a><span class="c1"># 6. Clean up after completion</span>
+</span><span id="__span-42-18"><a id="__codelineno-42-18" name="__codelineno-42-18" href="#__codelineno-42-18"></a>gpuctl<span class="w"> </span>delete<span class="w"> </span>job<span class="w"> </span>my-training<span class="w"> </span>-n<span class="w"> </span>team-alice
 </span></code></pre></div>
 <h3 id="node-and-resource-pool-management">Node and Resource Pool Management<a class="headerlink" href="#node-and-resource-pool-management" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="c1"># 1. List all nodes</span>
-</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
-</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
-</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="c1"># 2. Label a node with its GPU model</span>
-</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-5<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
-</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>
-</span><span id="__span-38-7"><a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a><span class="c1"># 3. Create a resource pool (binding nodes)</span>
-</span><span id="__span-38-8"><a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-pool.yaml
-</span><span id="__span-38-9"><a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>
-</span><span id="__span-38-10"><a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a><span class="c1"># 4. View resource pools</span>
-</span><span id="__span-38-11"><a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
-</span><span id="__span-38-12"><a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>training-pool
-</span><span id="__span-38-13"><a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a>
-</span><span id="__span-38-14"><a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a><span class="c1"># 5. View nodes in a pool</span>
-</span><span id="__span-38-15"><a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--pool<span class="w"> </span>training-pool
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># 1. List all nodes</span>
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="c1"># 2. Label a node with its GPU model</span>
+</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>gpuctl<span class="w"> </span>label<span class="w"> </span>node-5<span class="w"> </span>runwhere.ai/gpu-type<span class="o">=</span>A100-100G
+</span><span id="__span-43-6"><a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>
+</span><span id="__span-43-7"><a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="c1"># 3. Create a resource pool (binding nodes)</span>
+</span><span id="__span-43-8"><a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a>gpuctl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>training-pool.yaml
+</span><span id="__span-43-9"><a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a>
+</span><span id="__span-43-10"><a id="__codelineno-43-10" name="__codelineno-43-10" href="#__codelineno-43-10"></a><span class="c1"># 4. View resource pools</span>
+</span><span id="__span-43-11"><a id="__codelineno-43-11" name="__codelineno-43-11" href="#__codelineno-43-11"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>pools
+</span><span id="__span-43-12"><a id="__codelineno-43-12" name="__codelineno-43-12" href="#__codelineno-43-12"></a>gpuctl<span class="w"> </span>describe<span class="w"> </span>pool<span class="w"> </span>training-pool
+</span><span id="__span-43-13"><a id="__codelineno-43-13" name="__codelineno-43-13" href="#__codelineno-43-13"></a>
+</span><span id="__span-43-14"><a id="__codelineno-43-14" name="__codelineno-43-14" href="#__codelineno-43-14"></a><span class="c1"># 5. View nodes in a pool</span>
+</span><span id="__span-43-15"><a id="__codelineno-43-15" name="__codelineno-43-15" href="#__codelineno-43-15"></a>gpuctl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>--pool<span class="w"> </span>training-pool
 </span></code></pre></div>
 
 

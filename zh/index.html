@@ -690,6 +690,34 @@
   
   
     <li class="md-nav__item">
+      <a href="user-guide/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="user-guide/inference/" class="md-nav__link">
         
   
@@ -1228,7 +1256,7 @@
   <tr>
     <td><b>😤 GPU 环境配置繁琐</b><br>驱动、CUDA、NCCL 依赖复杂</td>
     <td>每次新建环境都需要手动安装 GPU 驱动、CUDA Toolkit、cuDNN，配置 NCCL 多卡通信环境变量，安装 DeepSpeed、VLLM 等框架及其依赖。版本冲突频发，环境搭建耗时数小时甚至数天</td>
-    <td><b>镜像中预装，platform 自动注入环境变量</b><br>提供预装 DeepSpeed、VLLM、LlamaFactory 的官方镜像，平台自动注入 NCCL_SOCKET_IFNAME、MASTER_ADDR、WORLD_SIZE 等环境变量，无需手动配置分布式训练参数</td>
+    <td><b>镜像中预装，自动注入通信环境变量</b><br>提供预装 DeepSpeed、VLLM、LlamaFactory 的官方镜像。对 <code>mode: multi-node</code> 任务，平台自动注入 DDP 通信环境变量（MASTER_ADDR、MASTER_PORT、WORLD_SIZE、RANK、LOCAL_RANK）并创建 Headless Service —— 由你的启动器（如 torchrun）消费</td>
   </tr>
   <tr>
     <td><b>😫 多团队 GPU 资源争抢</b><br>缺乏资源隔离机制</td>
@@ -1236,9 +1264,9 @@
     <td><b>资源池隔离 + 配额管理</b><br>将集群划分为训练池、推理池、开发池等逻辑资源池，实现物理隔离。支持按 Namespace 设置 CPU/Memory/GPU 配额，超限自动拦截，确保各团队资源公平使用</td>
   </tr>
   <tr>
-    <td><b>😵 多 GPU 训练配置复杂</b><br>NCCL、DeepSpeed 参数繁琐</td>
-    <td>单机多卡训练需要手动配置 NCCL 环境变量、DeepSpeed hostfile、PyTorch 启动参数，理解进程组、通信后端、梯度同步等概念。配置错误导致训练卡死或效率低下，调试困难</td>
-    <td><b>声明 gpu 数量，自动注入 NCCL/DeepSpeed 配置</b><br>只需在 YAML 中声明 resources.gpu: 4，平台自动生成 DeepSpeed 配置文件，注入 NCCL 环境变量，完成进程组初始化，算法工程师无需关心底层分布式细节</td>
+    <td><b>😵 多机分布式配置复杂</b><br>Indexed Job、Headless Service、通信参数繁琐</td>
+    <td>多机训练需要手写 Indexed/JobSet、用于互相发现的 Headless Service，串联 MASTER_ADDR/RANK/WORLD_SIZE，还要准备共享存储。配置错误导致训练卡死，调试困难</td>
+    <td><b>声明 workers 数量，分布式管道自动搭建</b><br>设置 resources.gpu 和 <code>distributed: {mode: multi-node, workers: N}</code>，平台自动创建 Indexed Job + Headless Service，注入 DDP 通信环境变量，并让每个 Worker 共享同一块 NFS /home/jovyan 写 checkpoint</td>
   </tr>
   <tr>
     <td><b>😵‍💫 任务状态查看繁琐</b><br>Pod 名称随机难记</td>

@@ -585,6 +585,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../inference/" class="md-nav__link">
         
   
@@ -1156,7 +1184,11 @@
 
 
 <h1 id="notebook">Notebook 交互式开发<a class="headerlink" href="#notebook" title="Permanent link">&para;</a></h1>
-<p>Notebook 任务（<code>kind: notebook</code>）提供 JupyterLab 交互式开发环境，适合代码调试、数据探索和模型原型验证。底层对应 Kubernetes <strong>StatefulSet + NodePort Service</strong>，保证存储状态持久化。</p>
+<p>Notebook 任务（<code>kind: notebook</code>）提供 JupyterLab 交互式开发环境，适合代码调试、数据探索和模型原型验证。底层对应 Kubernetes <strong>StatefulSet + NodePort Service</strong>。</p>
+<div class="admonition tip">
+<p class="admonition-title"><code>/home/jovyan</code> 自动持久化</p>
+<p>若运维已执行 <code>gpuctl init</code>，Notebook 的 <code>/home/jovyan</code> 会自动由按 namespace 隔离的 NFS 承载 —— 代码、数据、conda 环境重启不丢，并与你的训练任务共享，且<strong>无需 <code>storage</code> 段</strong>。下方的 <code>storage.workdirs</code> 示例是另一套独立、可选的 <code>hostPath</code> 机制。详见<a href="../storage/">持久化存储</a>。</p>
+</div>
 <h2 id="yaml">YAML 完整字段<a class="headerlink" href="#yaml" title="Permanent link">&para;</a></h2>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notebook</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
@@ -1176,7 +1208,7 @@
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nt">resources</span><span class="p">:</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-pool</span><span class="w">    </span><span class="c1"># 建议使用开发专用资源池</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span><span class="w"> </span><span class="c1"># 可选，调试无需高端 GPU</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span><span class="w"> </span><span class="c1"># 可选，调试无需高端 GPU</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
@@ -1213,7 +1245,7 @@
 </span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="nt">resources</span><span class="p">:</span>
 </span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-pool</span>
 </span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">  </span><span class="nt">gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">  </span><span class="nt">gpu-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">  </span><span class="nt">gpuType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A10-24G</span>
 </span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 </span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32Gi</span>
 </span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
@@ -1281,7 +1313,7 @@
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">代码持久化</p>
-<p>Notebook 环境通过 <code>storage.workdirs</code> 将宿主机目录挂载到容器内，删除 Notebook Pod 后，挂载目录中的代码和数据<strong>不会丢失</strong>，下次创建时重新挂载即可恢复工作状态。</p>
+<p>推荐用自动的、由 NFS 承载的 <code>/home/jovyan</code> 来持久化工作（见<a href="../storage/">持久化存储</a>）—— 它在 Pod 重启后依然存在、与训练任务共享，且零配置。上方的 <code>storage.workdirs</code> 挂载是可选的 <code>hostPath</code> 替代方案：删除 Notebook Pod 后这些宿主机目录里的数据<strong>不会丢失</strong>，但它们是节点本地的、不跨节点共享。</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">StatefulSet 特性</p>
