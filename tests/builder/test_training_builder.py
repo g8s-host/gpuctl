@@ -164,6 +164,55 @@ class TestDistributedMode:
         assert pod_labels.get("job-name") == "test-job"
 
 
+class TestLightweightGpuV1:
+
+    @patch.object(BaseBuilder, "read_nfs_config", return_value=None)
+    @patch.object(TrainingBuilder, "_resolve_nfs_namespace", return_value="alice")
+    def test_default_gpu_request_uses_device_plugin(self, _rns, _nfs):
+        job = TrainingBuilder.build_job(_make_training_job(), "alice")
+        container = job.spec.template.spec.containers[0]
+        env_values = {e.name: e.value for e in (container.env or [])}
+
+        assert container.resources.requests["nvidia.com/gpu"] == "2"
+        assert container.resources.limits["nvidia.com/gpu"] == "2"
+        assert "NVIDIA_VISIBLE_DEVICES" not in env_values
+
+    @patch.object(BaseBuilder, "read_nfs_config", return_value=None)
+    @patch.object(TrainingBuilder, "_resolve_nfs_namespace", return_value="alice")
+    def test_explicit_gpu_ids_use_env_pinning_only(self, _rns, _nfs):
+        tj = _make_training_job()
+        tj.resources = ResourceRequest(
+            cpu=4,
+            memory="16Gi",
+            gpu=2,
+            gpu_ids=["GPU-a", "GPU-b"],
+            node="runw",
+        )
+
+        job = TrainingBuilder.build_job(tj, "alice")
+        container = job.spec.template.spec.containers[0]
+        env_values = {e.name: e.value for e in (container.env or [])}
+
+        assert "nvidia.com/gpu" not in container.resources.requests
+        assert "nvidia.com/gpu" not in container.resources.limits
+        assert env_values["NVIDIA_VISIBLE_DEVICES"] == "GPU-a,GPU-b"
+        assert job.spec.template.spec.runtime_class_name == "nvidia"
+        assert job.spec.template.spec.node_selector == {"kubernetes.io/hostname": "runw"}
+
+    @patch.object(BaseBuilder, "read_nfs_config", return_value=None)
+    @patch.object(TrainingBuilder, "_resolve_nfs_namespace", return_value="alice")
+    def test_queue_flag_only_suspends_and_labels_job(self, _rns, _nfs):
+        tj = _make_training_job()
+        tj.job.queue = True
+
+        job = TrainingBuilder.build_job(tj, "alice")
+
+        assert job.spec.suspend is True
+        assert job.metadata.labels["runwhere.ai/queued"] == "true"
+        assert job.metadata.labels["runwhere.ai/queue-state"] == "pending"
+        assert "runwhere.ai/assigned-gpus" not in job.metadata.labels
+
+
 class TestCondaEntrypoint:
 
     def test_no_conda_returns_original_command(self):
