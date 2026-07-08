@@ -222,3 +222,4 @@ fabric.properties
 
 # Trae IDE files
 .trae
+.gstack/
