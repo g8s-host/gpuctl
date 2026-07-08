@@ -62,14 +62,29 @@ class TrainingBuilder(BaseBuilder):
         })
         container = cls.build_container_spec(patched_env, training_job.resources, workdirs)
 
+        # env 钉卡：仅显式 gpuIds 走这条路。去掉 nvidia.com/gpu 请求，改
+        # NVIDIA_VISIBLE_DEVICES 直接圈 UUID/索引；默认 GPU 请求仍交给 device-plugin。
+        gpu_ids = getattr(training_job.resources, "gpu_ids", None)
+        if gpu_ids:
+            for bucket in (container.resources.requests, container.resources.limits):
+                if bucket:
+                    bucket.pop("nvidia.com/gpu", None)
+            container.env = list(container.env or []) + [
+                client.V1EnvVar(name="NVIDIA_VISIBLE_DEVICES", value=",".join(str(g) for g in gpu_ids)),
+                client.V1EnvVar(name="NVIDIA_DRIVER_CAPABILITIES", value="compute,utility"),
+            ]
+
         pod_spec_extras = {}
         if training_job.environment.image_pull_secret:
             pod_spec_extras['image_pull_secrets'] = [
                 client.V1LocalObjectReference(name=training_job.environment.image_pull_secret)
             ]
 
-        # 处理资源池选择
-        if training_job.resources.pool and training_job.resources.pool != DEFAULT_POOL:
+        # 处理资源池选择（env 钉卡时改为按节点钉，绕开 pool 亲和性）
+        if gpu_ids:
+            if getattr(training_job.resources, "node", None):
+                pod_spec_extras['node_selector'] = {"kubernetes.io/hostname": training_job.resources.node}
+        elif training_job.resources.pool and training_job.resources.pool != DEFAULT_POOL:
             # 对于非默认池，使用 node_selector
             node_selector = {}
             node_selector[Labels.POOL] = training_job.resources.pool
@@ -134,6 +149,10 @@ class TrainingBuilder(BaseBuilder):
             namespace=nfs_namespace,
         )
 
+        # env 钉卡：强制 nvidia runtime（容器不再请求 nvidia.com/gpu，自动判定不会设它，故显式设）
+        if gpu_ids:
+            template.spec.runtime_class_name = "nvidia"
+
         if is_distributed:
             workers = nodes
             master_port = training_job.distributed.master_port
@@ -191,6 +210,22 @@ class TrainingBuilder(BaseBuilder):
         metadata_annotations = {}
         if training_job.job.description:
             metadata_annotations[Labels.DESCRIPTION] = training_job.job.description
+
+        # 提交就睡（queue=true）：以 suspend 创建 + 打队列标签；v1 由 console 展示后人工放行。
+        # priority/pool 标签已在 metadata_labels 里（runwhere.ai/priority、runwhere.ai/pool），
+        # 此处只补队列专属的几个；submitted-at 走注解（label 值不允许冒号）。
+        if getattr(training_job.job, "queue", False):
+            from datetime import datetime, timezone
+            job_spec.suspend = True
+            metadata_labels.update({
+                "runwhere.ai/queued": "true",
+                "runwhere.ai/queue-state": "pending",
+                "runwhere.ai/gpu-request": str(training_job.resources.gpu or 0),
+                "runwhere.ai/owner": namespace,
+            })
+            metadata_annotations["runwhere.ai/submitted-at"] = (
+                datetime.now(timezone.utc).isoformat()
+            )
 
         metadata = client.V1ObjectMeta(
             name=f"{training_job.job.name}",

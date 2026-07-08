@@ -44,6 +44,10 @@ class ResourceRequest(BaseModel):
     memory: str = Field(..., description="内存需求，如 '32Gi'")
     gpu_share: Optional[str] = Field(default=None, description="GPU共享配置", alias="gpuShare")
     cluster: Optional[str] = Field(default=None, description="目标集群名称（如 dev/prod）")
+    # 指定卡号（env 钉卡）：仅在人工确认后显式传入。设了则用 NVIDIA_VISIBLE_DEVICES
+    # 直接圈定这些 UUID/索引，不请求 nvidia.com/gpu；默认路径仍交给 device-plugin。
+    gpu_ids: Optional[List[str]] = Field(default=None, alias="gpuIds", description="指定卡号或 UUID 列表")
+    node: Optional[str] = Field(default=None, description="env 钉卡绑定的节点（nodeSelector hostname）")
 
     model_config = {
         "populate_by_name": True
@@ -57,6 +61,9 @@ class JobMetadata(BaseModel):
     epochs: Optional[int] = Field(default=None, ge=1)
     batch_size: Optional[int] = Field(default=None, ge=1)
     namespace: Optional[str] = None
+    # 提交就睡：true 时以 spec.suspend=true 创建，并打 runwhere.ai/queued 队列标签。
+    # v1 只由 console 展示队列；确认 GPU 现实状态后人工放行。仅 Training(K8s Job) 支持。
+    queue: bool = Field(default=False, description="是否进队列（提交就睡）")
 
 
 class StorageConfig(BaseModel):

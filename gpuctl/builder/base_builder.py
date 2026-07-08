@@ -463,10 +463,8 @@ done
 
         pod_labels = labels or {"app": "gpuctl-job"}
 
-        # GPU 指标采集 sidecar:仅 GPU 任务(gpu>0)注入,读该卡利用率/显存上报 console。
-        # 上报端点由 console 启动时自动推导并写入 GPUCTL_TELEMETRY_ENDPOINT
-        # (见 runwhere-ai src/console/telemetry_autoconfig.py);纯 CLI 无 console 时
-        # 该 env 不设 → build_telemetry_sidecar 返回 None,不注入。
+        # GPU 指标采集 sidecar:仅在显式设置 GPUCTL_TELEMETRY_ENDPOINT 且任务请求 GPU 时注入。
+        # v1 默认不注入额外容器;该 env 不设 → build_telemetry_sidecar 返回 None。
         sidecar = (BaseBuilder.build_telemetry_sidecar(pod_labels)
                    if BaseBuilder._container_requests_gpu(container) else None)
         if sidecar is not None:
