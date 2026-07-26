@@ -16,6 +16,7 @@ from server.routes import (
     namespaces_router
 )
 from server.routes.clusters import router as clusters_router
+from server.errors import error_body
 
 # 配置日志
 import os
@@ -64,12 +65,12 @@ async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow()}
 
 
-# 错误处理
+# 错误处理(Agent-First PRD §4.8 统一格式:{"error": {"code","message","action"}})
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"error": exc.detail}
+        content=error_body(exc.status_code, exc.detail)
     )
 
 
@@ -78,7 +79,7 @@ async def general_exception_handler(request, exc):
     logger.error(f"Unhandled exception: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal server error"}
+        content=error_body(500, "Internal server error")
     )
 
 

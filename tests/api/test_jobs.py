@@ -249,9 +249,10 @@ def test_get_job_logs(mock_log_client):
 
 
 @patch('server.routes.jobs.LogClient')
-def test_get_job_logs_follow_returns_400_not_500(mock_log_client):
-    """回归测试：follow=True 时应返回 400，而非被 except Exception 吞掉后返回 500"""
+def test_get_job_logs_follow_streams_sse(mock_log_client):
+    """follow=True 现在走 SSE 真流式(Agent-First PRD §4.4)，不再是 400。"""
     mock_instance = MagicMock()
+    mock_instance.stream_job_logs.return_value = iter(["epoch 1, loss=0.5", "epoch 2, loss=0.3"])
     mock_log_client.return_value = mock_instance
 
     response = client.get(
@@ -259,8 +260,11 @@ def test_get_job_logs_follow_returns_400_not_500(mock_log_client):
         headers={"Authorization": "Bearer test-token"}
     )
 
-    assert response.status_code == 400
-    assert "WebSocket" in response.json().get("error", "")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert 'data: {"line": "epoch 1, loss=0.5"}' in response.text
+    assert 'data: {"line": "epoch 2, loss=0.3"}' in response.text
+    mock_instance.stream_job_logs.assert_called_once_with("test-job", pod_name=None)
 
 
 @patch('server.routes.jobs.BaseParser.parse_yaml')
