@@ -59,6 +59,28 @@ def _ensure_priority_classes_once():
         logger.warning(f"ensure_priority_classes failed (任务可能因缺 PriorityClass 调度不出): {e}")
 
 
+def _create_by_kind(parsed_obj, namespace: str) -> Dict[str, Any]:
+    """kind -> handler().create_x(parsed_obj, namespace=...)。
+
+    create_job 和 create_jobs_batch 此前各写一遍完全相同的 if/elif kind 分支
+    (2026-06 架构评审 P1-5:跨前端 dispatch 逻辑重复)。表建在函数体内(不是模块级
+    常量)是刻意的——现有测试用 `@patch('server.routes.jobs.TrainingKind')` 这类
+    补丁替换类引用，模块级常量在 import 时就把类绑死了，测试的补丁会失效；
+    函数体内的裸名字查找在**调用时**才解析，能看到补丁后的值。
+    """
+    handlers = {
+        Kind.TRAINING: (TrainingKind, "create_training_job"),
+        Kind.INFERENCE: (InferenceKind, "create_inference_service"),
+        Kind.NOTEBOOK: (NotebookKind, "create_notebook"),
+        Kind.COMPUTE: (ComputeKind, "create_compute_service"),
+    }
+    if parsed_obj.kind not in handlers:
+        raise ValueError(f"Unsupported job kind: {parsed_obj.kind}")
+    handler_cls, method_name = handlers[parsed_obj.kind]
+    handler = handler_cls()
+    return getattr(handler, method_name)(parsed_obj, namespace=namespace)
+
+
 @router.post("", response_model=JobResponse, status_code=201)
 async def create_job(request: JobCreateRequest):
     """创建任务"""
@@ -71,26 +93,7 @@ async def create_job(request: JobCreateRequest):
         parsed_obj = BaseParser.parse_yaml(request.yamlContent)
         logger.debug(f"YAML解析成功，任务类型: {parsed_obj.kind}")
 
-        # 根据任务类型处理
-        if parsed_obj.kind == Kind.TRAINING:
-            logger.debug("处理训练任务")
-            handler = TrainingKind()
-            result = handler.create_training_job(parsed_obj, namespace=DEFAULT_NAMESPACE)
-        elif parsed_obj.kind == Kind.INFERENCE:
-            logger.debug("处理推理服务任务")
-            handler = InferenceKind()
-            result = handler.create_inference_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
-        elif parsed_obj.kind == Kind.NOTEBOOK:
-            logger.debug("处理Notebook任务")
-            handler = NotebookKind()
-            result = handler.create_notebook(parsed_obj, namespace=DEFAULT_NAMESPACE)
-        elif parsed_obj.kind == Kind.COMPUTE:
-            logger.debug("处理计算任务")
-            handler = ComputeKind()
-            result = handler.create_compute_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
-        else:
-            logger.error(f"不支持的任务类型: {parsed_obj.kind}")
-            raise HTTPException(status_code=400, detail=f"Unsupported job kind: {parsed_obj.kind}")
+        result = _create_by_kind(parsed_obj, DEFAULT_NAMESPACE)
 
         return JobResponse(
             jobId=result["job_id"],
@@ -121,23 +124,7 @@ async def create_jobs_batch(request: BatchCreateRequest):
     for i, yaml_content in enumerate(request.yamlContents):
         try:
             parsed_obj = BaseParser.parse_yaml(yaml_content)
-
-            if parsed_obj.kind == Kind.TRAINING:
-                handler = TrainingKind()
-                result = handler.create_training_job(parsed_obj, namespace=DEFAULT_NAMESPACE)
-            elif parsed_obj.kind == Kind.INFERENCE:
-                handler = InferenceKind()
-                result = handler.create_inference_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
-            elif parsed_obj.kind == Kind.NOTEBOOK:
-                handler = NotebookKind()
-                result = handler.create_notebook(parsed_obj, namespace=DEFAULT_NAMESPACE)
-            elif parsed_obj.kind == Kind.COMPUTE:
-                handler = ComputeKind()
-                result = handler.create_compute_service(parsed_obj, namespace=DEFAULT_NAMESPACE)
-            else:
-                failed.append({"index": i, "error": f"Unsupported kind: {parsed_obj.kind}"})
-                continue
-
+            result = _create_by_kind(parsed_obj, DEFAULT_NAMESPACE)
             success.append({"jobId": result["job_id"], "name": result["name"]})
 
         except Exception as e:
