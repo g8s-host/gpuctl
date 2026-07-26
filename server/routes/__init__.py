@@ -4,6 +4,7 @@ from .nodes import router as nodes_router
 from .labels import router as labels_router, global_labels_router
 from .quotas import router as quotas_router
 from .namespaces import router as namespaces_router
+from .inferences import router as inferences_router
 
 __all__ = [
     "jobs_router",
@@ -12,5 +13,6 @@ __all__ = [
     "labels_router",
     "global_labels_router",
     "quotas_router",
-    "namespaces_router"
+    "namespaces_router",
+    "inferences_router"
 ]
