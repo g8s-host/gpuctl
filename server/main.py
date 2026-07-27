@@ -14,6 +14,7 @@ from server.routes import (
     global_labels_router,
     quotas_router,
     namespaces_router,
+    inferences_router,
     apikeys_router
 )
 from server.routes.clusters import router as clusters_router
@@ -61,6 +62,7 @@ app.include_router(quotas_router)
 app.include_router(namespaces_router)
 app.include_router(global_labels_router)
 app.include_router(clusters_router, prefix="/api/v1")
+app.include_router(inferences_router)
 app.include_router(apikeys_router)
 
 
