@@ -245,6 +245,24 @@ def main():
     cluster_get_parser = cluster_subparsers.add_parser('get', help='Get cluster details')
     cluster_get_parser.add_argument('name', help='Cluster name')
 
+    # apikey 命令
+    apikey_parser = subparsers.add_parser('apikey', help='Manage API keys (stored as K8s Secrets)')
+    apikey_subparsers = apikey_parser.add_subparsers(dest='apikey_command', help='API key command')
+
+    apikey_create_parser = apikey_subparsers.add_parser('create', help='Create an API key')
+    apikey_create_parser.add_argument('--name', required=True, help='Display name (e.g., claude-code-leon)')
+    apikey_create_parser.add_argument('--scopes', required=True,
+                                      help='Comma-separated scopes (e.g., jobs:read,jobs:write or admin)')
+    apikey_create_parser.add_argument('--bind-namespace', default='*',
+                                      help='Namespace this key is bound to (default: *)')
+    apikey_create_parser.add_argument('--expires-days', type=int, default=None,
+                                      help='Expiry in days (default: never)')
+
+    apikey_subparsers.add_parser('list', help='List API keys')
+
+    apikey_revoke_parser = apikey_subparsers.add_parser('revoke', help='Revoke an API key')
+    apikey_revoke_parser.add_argument('key_id', help='Key id (see `gpuctl apikey list`)')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -350,6 +368,19 @@ def main():
                 return cluster_get_command(args)
             else:
                 print(f"Unknown cluster command: {args.cluster_command}")
+                return 1
+        elif args.command == 'apikey':
+            from gpuctl.cli.apikey import (
+                create_apikey_command, list_apikeys_command, revoke_apikey_command
+            )
+            if args.apikey_command == 'create':
+                return create_apikey_command(args)
+            elif args.apikey_command == 'list':
+                return list_apikeys_command(args)
+            elif args.apikey_command == 'revoke':
+                return revoke_apikey_command(args)
+            else:
+                apikey_parser.print_help()
                 return 1
         else:
             print(f"Unknown command: {args.command}")
