@@ -13,9 +13,12 @@ from server.routes import (
     labels_router,
     global_labels_router,
     quotas_router,
-    namespaces_router
+    namespaces_router,
+    apikeys_router
 )
 from server.routes.clusters import router as clusters_router
+from server.routes.apikeys import set_store
+from server.auth import install_api_auth
 
 # 配置日志
 import os
@@ -33,14 +36,21 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# 中间件配置
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS：默认不开放跨域；需要时用 GPUCTL_CORS_ORIGINS=https://a.com,https://b.com 显式放行
+_cors_origins = [o.strip() for o in os.getenv("GPUCTL_CORS_ORIGINS", "").split(",") if o.strip()]
+if _cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins,
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# API Key 鉴权（GPUCTL_API_AUTH=apikey 时启用；独立 server 无浏览器会话，不设兜底）
+_auth_store = install_api_auth(app)
+if _auth_store is not None:
+    set_store(_auth_store)
 
 # 注册路由
 app.include_router(jobs_router)
@@ -51,6 +61,7 @@ app.include_router(quotas_router)
 app.include_router(namespaces_router)
 app.include_router(global_labels_router)
 app.include_router(clusters_router, prefix="/api/v1")
+app.include_router(apikeys_router)
 
 
 # 根路由
