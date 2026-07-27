@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import logging
@@ -597,21 +598,59 @@ async def delete_job(
 
 
 
-@router.get("/{jobId}/logs", response_model=LogResponse)
+async def _sse_log_stream(jobId: str, pod: Optional[str]):
+    """把 LogClient.stream_job_logs(同步阻塞生成器)桥接成 SSE(Agent-First PRD §4.4)。
+
+    与 websocket_job_logs 同一套"后台线程生产 + asyncio.Queue 交回事件循环"机制,
+    只是换一层薄的 SSE 格式化(``data: {"line": ...}\n\n``),不用 WebSocket 握手 ——
+    Agent 用普通 HTTP 流式 GET 就能读,门槛比 WS 低。
+    """
+    loop = asyncio.get_running_loop()
+    queue: asyncio.Queue = asyncio.Queue(maxsize=2000)
+    stop = threading.Event()
+
+    def _push(item):
+        try:
+            queue.put_nowait(item)
+        except asyncio.QueueFull:
+            pass
+
+    def _producer():
+        try:
+            for line in LogClient().stream_job_logs(jobId, pod_name=pod):
+                if stop.is_set():
+                    break
+                loop.call_soon_threadsafe(_push, line)
+        except Exception as exc:  # noqa: BLE001
+            loop.call_soon_threadsafe(_push, f"[stream error] {exc}")
+        finally:
+            loop.call_soon_threadsafe(_push, None)  # 哨兵：流结束
+
+    threading.Thread(target=_producer, daemon=True).start()
+
+    try:
+        while True:
+            line = await queue.get()
+            if line is None:
+                break
+            yield f"data: {json.dumps({'line': line})}\n\n"
+    finally:
+        stop.set()  # 客户端断连(生成器被 GeneratorExit)也要叫停后台线程
+
+
+@router.get("/{jobId}/logs", response_model=None)
 async def get_job_logs(
         jobId: str,
         follow: bool = False,
         tail: int = Query(100, ge=1),
         pod: Optional[str] = Query(None)
 ):
-    """获取任务日志"""
+    """获取任务日志；``follow=true`` 时改走 SSE(text/event-stream),不再返回 400。"""
+    if follow:
+        return StreamingResponse(_sse_log_stream(jobId, pod), media_type="text/event-stream")
+
     try:
         client = LogClient()
-
-        if follow:
-            # 对于follow请求，应该使用WebSocket
-            raise HTTPException(status_code=400, detail="Use WebSocket for follow mode")
-
         logs = client.get_job_logs(jobId, tail=tail, pod_name=pod)
 
         return LogResponse(
