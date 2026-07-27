@@ -104,7 +104,7 @@ def test_create_inference_value_error_is_400(mock_kind_cls, mock_node_port, clie
     r = client.post("/api/v1/inferences", json={"name": "n", "image": "i"})
 
     assert r.status_code == 400
-    assert "多机" in r.json()["error"]
+    assert "多机" in r.json()["error"]["message"]
 
 
 @patch("server.routes.inferences._node_port", return_value=None)
